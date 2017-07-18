@@ -5,4 +5,5 @@ package com.bry.adstudio;
  */
 
 public class Constants {
+
 }
