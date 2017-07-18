@@ -75,7 +75,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v){
         if(v == mRegisterLink){
-            Intent intent = new Intent(LoginActivity.this,CreateAccountActvity.class);
+            Intent intent = new Intent(LoginActivity.this,CreateAccountActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
