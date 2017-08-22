@@ -7,7 +7,11 @@ import android.widget.ImageView;
 import com.bry.adstudio.R;
 import com.bry.adstudio.models.Advert;
 import com.bumptech.glide.Glide;
+import com.mindorks.placeholderview.Animation;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
+import com.mindorks.placeholderview.Utils;
+import com.mindorks.placeholderview.annotations.Animate;
+import com.mindorks.placeholderview.annotations.Click;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.NonReusable;
 import com.mindorks.placeholderview.annotations.Resolve;
@@ -18,15 +22,17 @@ import com.mindorks.placeholderview.annotations.swipe.SwipeInState;
 import com.mindorks.placeholderview.annotations.swipe.SwipeOut;
 import com.mindorks.placeholderview.annotations.swipe.SwipeOutState;
 
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+
 /**
  * Created by bryon on 6/11/2017.
  */
 
-@NonReusable
-@Layout(R.layout.ad_card_view)
 
+@Layout(R.layout.ad_card_view)
 public class AdvertCard {
-    @View(R.id.adImageView) private ImageView adImageView;
+    @View(R.id.profileImageView)
+    private ImageView profileImageView;
 
     private Advert mAdvert;
     private Context mContext;
@@ -40,23 +46,32 @@ public class AdvertCard {
 
     @Resolve
     private void onResolved(){
-        Glide.with(mContext).load(mAdvert.getImageUrl()).into(adImageView);
+        Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
+                RoundedCornersTransformation.CornerType.TOP))
+                .into(profileImageView);
+
+    }
+
+    @Click(R.id.profileImageView)
+    private void onClick(){
+        Log.d("EVENT", "profileImageView click");
+//        mSwipeView.addView(this);
     }
 
     @SwipeOut
     private void onSwipedOut(){
         Log.d("EVENT", "onSwipedOut");
-        mSwipeView.addView(this);
-    }
-
-    @SwipeIn
-    private void onSwipeIn(){
-        Log.d("EVENT", "onSwipedIn");
+//        mSwipeView.addView(this);
     }
 
     @SwipeCancelState
     private void onSwipeCancelState(){
         Log.d("EVENT", "onSwipeCancelState");
+    }
+
+    @SwipeIn
+    private void onSwipeIn(){
+        Log.d("EVENT", "onSwipedIn");
     }
 
     @SwipeInState

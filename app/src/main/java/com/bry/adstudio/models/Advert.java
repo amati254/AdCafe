@@ -8,7 +8,6 @@ import com.google.gson.annotations.SerializedName;
  */
 
 public class Advert {
-
     @SerializedName("url")
     @Expose
     private String imageUrl;
