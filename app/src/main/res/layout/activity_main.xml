@@ -1,36 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="70dp"
         android:layout_gravity="bottom"
         android:gravity="center"
         android:orientation="horizontal">
-        <ImageButton
-            android:id="@+id/rejectBtn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/ic_action_reject"/>
-        <ImageButton
-            android:id="@+id/acceptBtn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="30dp"
-            android:background="@drawable/ic_action_star"/>
-        <ImageButton
-            android:id="@+id/undoBtn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="30dp"
-            android:background="@drawable/ic_action_name"/>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/settingsBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/ic_action_settings"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/settingsText"
+                android:layout_marginTop="40dp"
+                android:textSize="10dp"
+                android:layout_marginLeft="7dp"
+                android:text="Settings"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageButton
+                android:id="@+id/bookmarkBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginLeft="33dp"
+                android:background="@drawable/ic_action_bookmarksfol"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/bookmarkText"
+                android:layout_marginTop="40dp"
+                android:layout_marginLeft="33dp"
+                android:textSize="10dp"
+                android:text="Bookmarks"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageButton
+                android:id="@+id/undoBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginLeft="30dp"
+                android:background="@drawable/ic_action_previous"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/nextAdText"
+                android:layout_marginTop="40dp"
+                android:layout_marginLeft="38dp"
+                android:textSize="10dp"
+                android:text="Previous"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageButton
+                android:id="@+id/nextBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginLeft="30dp"
+                android:background="@drawable/ic_action_next"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/previousAdText"
+                android:layout_marginTop="40dp"
+                android:layout_marginLeft="43dp"
+                android:textSize="10dp"
+                android:text="Next"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
     </LinearLayout>
+
+
+    <com.mindorks.placeholderview.PlaceHolderView
+        android:id="@+id/adCounterView"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"/>
     <com.mindorks.placeholderview.SwipePlaceHolderView
         android:id="@+id/swipeView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"/>
+
 </FrameLayout>

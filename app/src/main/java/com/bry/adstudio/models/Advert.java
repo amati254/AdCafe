@@ -12,6 +12,20 @@ public class Advert {
     @Expose
     private String imageUrl;
 
+    private int numberOfAds = 0 ;
+
+    public int getNumberOfAds(){
+        return numberOfAds;
+    }
+
+    public void setNumberOfAds(int setnumberOfAds){
+        numberOfAds = setnumberOfAds;
+    }
+
+    public void removeAd(){
+        numberOfAds -=1;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }

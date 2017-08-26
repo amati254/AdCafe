@@ -1,19 +1,19 @@
-package com.bry.adstudio.ui;
+package com.bry.adstudio.adapters;
 
 import android.content.Context;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bry.adstudio.R;
+import com.bry.adstudio.Variables;
 import com.bry.adstudio.models.Advert;
+import com.bry.adstudio.ui.MainActivity;
 import com.bumptech.glide.Glide;
-import com.mindorks.placeholderview.Animation;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.mindorks.placeholderview.Utils;
-import com.mindorks.placeholderview.annotations.Animate;
 import com.mindorks.placeholderview.annotations.Click;
 import com.mindorks.placeholderview.annotations.Layout;
-import com.mindorks.placeholderview.annotations.NonReusable;
 import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
 import com.mindorks.placeholderview.annotations.swipe.SwipeCancelState;
@@ -34,15 +34,21 @@ public class AdvertCard {
     @View(R.id.profileImageView)
     private ImageView profileImageView;
 
+    @View(R.id.adCounter)
+    public TextView adCounter;
+
     private Advert mAdvert;
     private Context mContext;
     private SwipePlaceHolderView mSwipeView;
+    private Integer size = 0;
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView){
         mContext = context;
         mAdvert = advert;
         mSwipeView = swipeView;
+        size += 1;
     }
+
 
     @Resolve
     private void onResolved(){
@@ -50,6 +56,7 @@ public class AdvertCard {
                 RoundedCornersTransformation.CornerType.TOP))
                 .into(profileImageView);
 
+        String number = Integer.toString(mAdvert.getNumberOfAds());
     }
 
     @Click(R.id.profileImageView)
@@ -72,6 +79,7 @@ public class AdvertCard {
     @SwipeIn
     private void onSwipeIn(){
         Log.d("EVENT", "onSwipedIn");
+        Variables.removeAd();
     }
 
     @SwipeInState

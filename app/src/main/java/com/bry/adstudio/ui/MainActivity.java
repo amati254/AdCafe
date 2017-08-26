@@ -5,30 +5,25 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 
 import com.bry.adstudio.R;
+import com.bry.adstudio.Variables;
+import com.bry.adstudio.adapters.AdvertCard;
+import com.bry.adstudio.adapters.AdCounterBar;
 import com.bry.adstudio.models.Advert;
 import com.bry.adstudio.services.Utils;
-import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
+import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.SwipeDecor;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.Bind;
-import butterknife.ButterKnife;
-
 public class MainActivity extends AppCompatActivity{
     private SwipePlaceHolderView mSwipeView;
+    private PlaceHolderView mAdCounterView;
     private Context mContext;
-
     private static final String TAG = "MainActivity";
 
     @Override
@@ -36,13 +31,27 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        loadAdsFromJSONFile();
+        loadAdCounter();
+    }
+
+    private void loadAdCounter() {
+        mAdCounterView = (PlaceHolderView)findViewById(R.id.adCounterView);
+        mAdCounterView.addView(new AdCounterBar(this.getApplicationContext(),mAdCounterView));
+    }
+
+    public void removeAd(){
+        loadAdCounter();
+    }
+
+    private void loadAdsFromJSONFile(){
         mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
         mContext = getApplicationContext();
 
-        int bottomMargin = Utils.dpToPx(170);
+        int bottomMargin = Utils.dpToPx(110);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
         mSwipeView.getBuilder()
-                .setDisplayViewCount(3)
+                .setDisplayViewCount(4)
                 .setIsUndoEnabled(true)
                 .setHeightSwipeDistFactor(10)
                 .setWidthSwipeDistFactor(5)
@@ -51,34 +60,38 @@ public class MainActivity extends AppCompatActivity{
                         .setViewHeight(windowSize.y - bottomMargin)
                         .setViewGravity(Gravity.TOP)
                         .setPaddingTop(15)
-                        .setRelativeScale(0.01f));
-//                        .setSwipeInMsgLayoutId(R.layout.tinder_swipe_in_msg_view)
-//                        .setSwipeOutMsgLayoutId(R.layout.tinder_swipe_out_msg_view));
+                        .setRelativeScale(0.015f));
 
         if((Utils.loadProfiles(this.getApplicationContext()))!= null) {
-            for (Advert profile : Utils.loadProfiles(this.getApplicationContext())) {
-                mSwipeView.addView(new AdvertCard(mContext, profile, mSwipeView));
-                onclicks();
+            for (Advert ads : Utils.loadProfiles(this.getApplicationContext())) {
+                mSwipeView.addView(new AdvertCard(mContext,ads,mSwipeView));
+                addToNumberOfAds(ads.getNumberOfAds());
             }
+            onclicks();
         }else{
-            Toast.makeText(mContext, "Null pointer", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "No Ads are available", Toast.LENGTH_SHORT).show();
         }
-
-
     }
 
+    private void addToNumberOfAds(int number) {
+        Variables.numberOfAds = number;
+    }
+
+
     private void onclicks() {
-        findViewById(R.id.rejectBtn).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.settingsBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSwipeView.doSwipe(false);
+                Intent intent = new Intent(MainActivity.this,settings.class);
+                startActivity(intent);
             }
         });
 
-        findViewById(R.id.acceptBtn).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.bookmarkBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSwipeView.doSwipe(true);
+//                mSwipeView.doSwipe(true);
+                Toast.makeText(mContext,"Bookmarked.",Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -93,6 +106,14 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 mSwipeView.undoLastSwipe();
+            }
+        });
+
+        findViewById(R.id.nextBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeAd();
+                mSwipeView.doSwipe(true);
             }
         });
     }
