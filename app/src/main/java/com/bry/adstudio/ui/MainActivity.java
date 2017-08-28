@@ -38,17 +38,20 @@ public class MainActivity extends AppCompatActivity{
     private void loadAdCounter() {
         mAdCounterView = (PlaceHolderView)findViewById(R.id.adCounterView);
         mAdCounterView.addView(new AdCounterBar(this.getApplicationContext(),mAdCounterView));
-    }
+        while(Variables.hasNumberOfAdsChanged){
+            mAdCounterView.removeAllViews();
+            mAdCounterView.addView(new AdCounterBar(this.getApplicationContext(),mAdCounterView));
+            Variables.setHasNumberOfAdsChangedFalse();
+        }
 
-    public void removeAd(){
-        loadAdCounter();
+
     }
 
     private void loadAdsFromJSONFile(){
         mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
         mContext = getApplicationContext();
 
-        int bottomMargin = Utils.dpToPx(110);
+        int bottomMargin = Utils.dpToPx(90);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
         mSwipeView.getBuilder()
                 .setDisplayViewCount(4)
@@ -112,7 +115,6 @@ public class MainActivity extends AppCompatActivity{
         findViewById(R.id.nextBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                removeAd();
                 mSwipeView.doSwipe(true);
             }
         });

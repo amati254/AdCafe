@@ -12,4 +12,7 @@
     <color name="grey">#DCDCDC</color>
     <color name="darkslategrey">#2F4F4F</color>
     <color name="lightyellow">#FFFFE0</color>
+    <color name="red">#fb0000</color>
+    <color name="blue">#0000FF</color>
+    <color name="yellow">#FFFF00</color>
 </resources>

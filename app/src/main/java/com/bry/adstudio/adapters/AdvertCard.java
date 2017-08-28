@@ -1,10 +1,13 @@
 package com.bry.adstudio.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bry.adstudio.Constants;
 import com.bry.adstudio.R;
 import com.bry.adstudio.Variables;
 import com.bry.adstudio.models.Advert;
@@ -40,13 +43,12 @@ public class AdvertCard {
     private Advert mAdvert;
     private Context mContext;
     private SwipePlaceHolderView mSwipeView;
-    private Integer size = 0;
+    private Integer adTotal = 0;
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView){
         mContext = context;
         mAdvert = advert;
         mSwipeView = swipeView;
-        size += 1;
     }
 
 
@@ -80,6 +82,16 @@ public class AdvertCard {
     private void onSwipeIn(){
         Log.d("EVENT", "onSwipedIn");
         Variables.removeAd();
+        Variables.adAdToTotal();
+        sendBroadcast();
+    }
+
+    private void sendBroadcast() {
+        Log.d("AdvertCard - ","Sending message");
+        Intent intent = new Intent(Constants.AD_COUNTER_BROADCAST);
+//        Integer numberOfAds = Variables.numberOfAds;
+        intent.putExtra(Constants.AD_TOTAL,Integer.toString(Variables.adTotal));
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     @SwipeInState
