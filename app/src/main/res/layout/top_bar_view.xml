@@ -13,30 +13,34 @@
         android:layout_width="match_parent"
         android:layout_height="50dp">
 
-        <ProgressBar
-            android:id="@+id/barTimer"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_margin="10dp"
-            android:gravity="center"
-            android:layout_centerInParent="true"
-            android:indeterminate="false"
-            android:max="46"
-            android:progress="45"
-            android:progressDrawable="@drawable/timer_layout" >
-
-        </ProgressBar>
-        <TextView
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:id="@+id/time"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="11sp"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="0dp"
-            android:text="7"
-            android:gravity="center"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent">
+
+            <ProgressBar
+                android:id="@+id/progressBarTimer"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_centerInParent="true"
+                android:indeterminate="false"
+                android:max="45"
+                android:rotation="-90"
+                android:progress="45"
+                android:progressDrawable="@drawable/timer_layout" />
+
+            <TextView
+                android:id="@+id/textViewTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="7"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="12sp" />
+
+        </RelativeLayout>
+
+
 
         <TextView
             android:layout_width="wrap_content"
@@ -47,9 +51,6 @@
             android:gravity="center"
             android:background="@drawable/circle_design_file"
             android:layout_height="wrap_content" />
-        
-        
-
 
     </LinearLayout>
 
