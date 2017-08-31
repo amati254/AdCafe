@@ -49,6 +49,7 @@ public class AdvertCard {
     private Integer adTotal = 0;
     private static final String START_TIMER= "startTimer";
     private static final String AD_TO_TOTAL= "adToTotal";
+    private static boolean clickable;
 
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView){
@@ -65,13 +66,15 @@ public class AdvertCard {
                 .into(profileImageView);
         sendBroadcast(START_TIMER);
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiver,new IntentFilter(Constants.AD_COUNTER_BROADCAST));
-
+        clickable=false;
     }
 
     @Click(R.id.profileImageView)
     private void onClick(){
         Log.d("EVENT", "profileImageView click");
-//        mSwipeView.addView(this);
+        if(clickable == true){
+            mSwipeView.addView(this);
+        }
     }
 
     @SwipeOut
@@ -92,8 +95,8 @@ public class AdvertCard {
     private void onSwipeIn(){
         Log.d("EVENT----", "onSwipedIn");
         Variables.removeAd();
-        Variables.adAdToTotal();
         sendBroadcast(AD_TO_TOTAL);
+        Variables.adAdToTotal();
         sendBroadcast(START_TIMER);
 
     }
@@ -111,9 +114,11 @@ public class AdvertCard {
             Log.d("AdvertCard - ","Sending message to start timer");
             intent.putExtra(Constants.ADVERT_CARD_BROADCAST,Constants.AD_TIMER_BROADCAST);
             mSwipeView.lockViews();
+            clickable = false;
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         }
     }
+
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -124,6 +129,7 @@ public class AdvertCard {
             if (ExtraMessage == Constants.TIMER_HAS_ENDED) {
                Log.d("ADVERT_CARD--","message from adCounterBar that timer has ended.");
                 mSwipeView.unlockViews();
+                clickable = true;
                 sendBroadcast(AD_TO_TOTAL);
             }
         }

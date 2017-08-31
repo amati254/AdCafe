@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Toast;
 
 
+import com.bry.adstudio.Bookmarks;
 import com.bry.adstudio.Constants;
 import com.bry.adstudio.R;
 import com.bry.adstudio.Variables;
@@ -94,11 +95,18 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
+        findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(mContext,"Bookmarked.",Toast.LENGTH_SHORT).show();
+            }
+        });
+
         findViewById(R.id.bookmarkBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                mSwipeView.doSwipe(true);
-                Toast.makeText(mContext,"Bookmarked.",Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, Bookmarks.class);
+                startActivity(intent);
             }
         });
 

@@ -15,7 +15,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="46dp"
         app:cardCornerRadius="4dp"
         app:cardPreventCornerOverlap="false"
         app:cardElevation="7dp">

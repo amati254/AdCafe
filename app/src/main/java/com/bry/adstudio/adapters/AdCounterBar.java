@@ -9,12 +9,17 @@ import android.os.CountDownTimer;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.animation.RotateAnimation;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bry.adstudio.Bookmarks;
 import com.bry.adstudio.Constants;
 import com.bry.adstudio.R;
 import com.bry.adstudio.Variables;
+import com.bry.adstudio.ui.MainActivity;
 import com.mindorks.placeholderview.Animation;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.annotations.Layout;
@@ -48,6 +53,7 @@ public class AdCounterBar {
         mCountDownTimer.start();
     }
 
+
     @LongClick(R.id.adCounter)
     private void onLongClick(){
 
@@ -70,7 +76,6 @@ public class AdCounterBar {
 
         }
     };
-
 
 
        private CountDownTimer mCountDownTimer = new CountDownTimer(7*1000,1) {
