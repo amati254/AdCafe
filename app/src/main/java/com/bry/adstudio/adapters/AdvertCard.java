@@ -1,7 +1,10 @@
 package com.bry.adstudio.adapters;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.ImageView;
@@ -44,6 +47,9 @@ public class AdvertCard {
     private Context mContext;
     private SwipePlaceHolderView mSwipeView;
     private Integer adTotal = 0;
+    private static final String START_TIMER= "startTimer";
+    private static final String AD_TO_TOTAL= "adToTotal";
+
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView){
         mContext = context;
@@ -57,8 +63,9 @@ public class AdvertCard {
         Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
                 RoundedCornersTransformation.CornerType.TOP))
                 .into(profileImageView);
+        sendBroadcast(START_TIMER);
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiver,new IntentFilter(Constants.AD_COUNTER_BROADCAST));
 
-        String number = Integer.toString(mAdvert.getNumberOfAds());
     }
 
     @Click(R.id.profileImageView)
@@ -69,8 +76,11 @@ public class AdvertCard {
 
     @SwipeOut
     private void onSwipedOut(){
-        Log.d("EVENT", "onSwipedOut");
-//        mSwipeView.addView(this);
+        Log.d("EVENT----", "onSwipedOut");
+        Variables.removeAd();
+        Variables.adAdToTotal();
+        sendBroadcast(AD_TO_TOTAL);
+        sendBroadcast(START_TIMER);
     }
 
     @SwipeCancelState
@@ -80,19 +90,44 @@ public class AdvertCard {
 
     @SwipeIn
     private void onSwipeIn(){
-        Log.d("EVENT", "onSwipedIn");
+        Log.d("EVENT----", "onSwipedIn");
         Variables.removeAd();
         Variables.adAdToTotal();
-        sendBroadcast();
+        sendBroadcast(AD_TO_TOTAL);
+        sendBroadcast(START_TIMER);
+
     }
 
-    private void sendBroadcast() {
-        Log.d("AdvertCard - ","Sending message");
-        Intent intent = new Intent(Constants.AD_COUNTER_BROADCAST);
-//        Integer numberOfAds = Variables.numberOfAds;
-        intent.putExtra(Constants.AD_TOTAL,Integer.toString(Variables.adTotal));
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+    private void sendBroadcast(String message ) {
+        Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST);
+
+        if(message == AD_TO_TOTAL){
+            Log.d("AdvertCard - ","Sending message to add to total");
+            intent.putExtra(Constants.ADVERT_CARD_BROADCAST,Constants.AD_COUNTER_BROADCAST);
+            intent.putExtra(Constants.AD_TOTAL,Integer.toString(Variables.adTotal));
+
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        }else if(message == START_TIMER){
+            Log.d("AdvertCard - ","Sending message to start timer");
+            intent.putExtra(Constants.ADVERT_CARD_BROADCAST,Constants.AD_TIMER_BROADCAST);
+            mSwipeView.lockViews();
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        }
     }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("AD_COUNTER_BAR - ","Broadcast has been received.");
+            String ExtraMessage = intent.getStringExtra(Constants.AD_COUNTER_BROADCAST);
+
+            if (ExtraMessage == Constants.TIMER_HAS_ENDED) {
+               Log.d("ADVERT_CARD--","message from adCounterBar that timer has ended.");
+                mSwipeView.unlockViews();
+                sendBroadcast(AD_TO_TOTAL);
+            }
+        }
+    };
 
     @SwipeInState
     private void onSwipeInState(){

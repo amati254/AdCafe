@@ -18,9 +18,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.MainActivity" />
+        <activity android:name=".ui.MainActivity" android:screenOrientation="portrait"/>
         <activity android:name=".ui.CreateAccountActivity" />
-        <activity android:name=".ui.settings"></activity>
+        <activity android:name=".ui.settings"/>
     </application>
 
 </manifest>

@@ -34,7 +34,8 @@ public class AdCounterBar {
 
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
-    private CountDownTimer mCountDownTimer;
+//    private CountDownTimer mCountDownTimer;
+    public static final String TIMER_HAS_ENDED = "TIMER_HAS_ENDED";
 
     public AdCounterBar(Context context, PlaceHolderView PlaceHolderView){
         mContext = context;
@@ -42,9 +43,9 @@ public class AdCounterBar {
     }
     @Resolve
     private void onResolved() {
-        adCounter.setText(Integer.toString(0));
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiver,new IntentFilter(Constants.AD_COUNTER_BROADCAST));
-
+        adCounter.setText(Integer.toString(Variables.adTotal));
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiver,new IntentFilter(Constants.ADVERT_CARD_BROADCAST));
+        mCountDownTimer.start();
     }
 
     @LongClick(R.id.adCounter)
@@ -55,17 +56,24 @@ public class AdCounterBar {
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-           String message = "Broadcast has been received.";
-            String adTotal = intent.getStringExtra(Constants.AD_TOTAL);
-            adCounter.setText(adTotal);
-            startTimer();
-            Log.d("AD_COUNTER_BAR - ",message);
+            Log.d("AD_COUNTER_BAR - ","Broadcast has been received.");
+            String ExtraMessage = intent.getStringExtra(Constants.ADVERT_CARD_BROADCAST);
+
+            if (ExtraMessage == Constants.AD_COUNTER_BROADCAST) {
+                String adTotal = intent.getStringExtra(Constants.AD_TOTAL);
+                adCounter.setText(adTotal);
+            }else if(ExtraMessage == Constants.AD_TIMER_BROADCAST){
+                mCountDownTimer.start();
+            }else if(ExtraMessage == Constants.STOP_TIMER){
+                mCountDownTimer.cancel();
+            }
 
         }
     };
 
-    private void startTimer(){
-        mCountDownTimer = new CountDownTimer(7*1000,100) {
+
+
+       private CountDownTimer mCountDownTimer = new CountDownTimer(7*1000,1) {
             @Override
             public void onTick(long millisUntilFinished) {
                 long timeLeftInSeconds = millisUntilFinished/1000;
@@ -76,8 +84,18 @@ public class AdCounterBar {
             @Override
             public void onFinish() {
                 Log.d("Timer --- ","Timer has finnished");
+                sendBroadcast(TIMER_HAS_ENDED);
                 progressBarTimer.setProgress(7*1000);
             }
-        }.start();
+        };
+
+    private void sendBroadcast(String message){
+        if(message == TIMER_HAS_ENDED){
+            Log.d("AD_COUNTER_BAR---","sending message that timer has ended.");
+            Intent intent = new Intent(Constants.AD_COUNTER_BROADCAST);
+            intent.putExtra(Constants.AD_COUNTER_BROADCAST,Constants.TIMER_HAS_ENDED);
+
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        }
     }
 }

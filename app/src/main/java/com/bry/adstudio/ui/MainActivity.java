@@ -3,13 +3,16 @@ package com.bry.adstudio.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Toast;
 
 
+import com.bry.adstudio.Constants;
 import com.bry.adstudio.R;
 import com.bry.adstudio.Variables;
 import com.bry.adstudio.adapters.AdvertCard;
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity{
 
 
     }
+
 
     private void loadAdsFromJSONFile(){
         mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
@@ -118,6 +122,28 @@ public class MainActivity extends AppCompatActivity{
                 mSwipeView.doSwipe(true);
             }
         });
+    }
+
+    private void sendBroadcast(String message){
+        if(message == Constants.STOP_TIMER){
+            Log.d("MAIN_ACTIVITY","Sending broadcast to stop timer.");
+            Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST);
+            intent.putExtra(Constants.AD_COUNTER_BROADCAST,Constants.STOP_TIMER);
+
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        }
+    }
+
+    @Override
+    protected void onDestroy(){
+        sendBroadcast(Constants.STOP_TIMER);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onStop(){
+        sendBroadcast(Constants.STOP_TIMER);
+        super.onStop();
     }
 
 }
