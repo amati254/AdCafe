@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,12 +37,10 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 
 @Layout(R.layout.ad_card_view)
-public class AdvertCard {
-    @View(R.id.profileImageView)
-    private ImageView profileImageView;
-
-    @View(R.id.adCounter)
-    public TextView adCounter;
+public class AdvertCard{
+    @View(R.id.profileImageView) private ImageView profileImageView;
+    @View(R.id.reportBtn) private ImageButton reportButton;
+    @View(R.id.bookmark2Btn) private ImageButton bookmarkButton;
 
     private Advert mAdvert;
     private Context mContext;
@@ -67,15 +66,18 @@ public class AdvertCard {
         sendBroadcast(START_TIMER);
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiver,new IntentFilter(Constants.AD_COUNTER_BROADCAST));
         clickable=false;
+
     }
 
     @Click(R.id.profileImageView)
     private void onClick(){
         Log.d("EVENT", "profileImageView click");
         if(clickable == true){
-            mSwipeView.addView(this);
+            mSwipeView.enableTouchSwipe();
+//            mSwipeView.addView(this);
         }
     }
+
 
     @SwipeOut
     private void onSwipedOut(){

@@ -1,7 +1,10 @@
 package com.bry.adstudio.ui;
 
+import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -34,9 +37,30 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(Constants.AD_COUNTER_BROADCAST));
 
+        setUpSwipeView();
         loadAdsFromJSONFile();
         loadAdCounter();
+    }
+
+    private void setUpSwipeView() {
+        mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
+        mContext = getApplicationContext();
+
+        int bottomMargin = Utils.dpToPx(90);
+        Point windowSize = Utils.getDisplaySize(getWindowManager());
+        mSwipeView.getBuilder()
+                .setDisplayViewCount(4)
+                .setIsUndoEnabled(false)
+                .setHeightSwipeDistFactor(10)
+                .setWidthSwipeDistFactor(5)
+                .setSwipeDecor(new SwipeDecor()
+                        .setViewWidth(windowSize.x)
+                        .setViewHeight(windowSize.y - bottomMargin)
+                        .setViewGravity(Gravity.TOP)
+                        .setPaddingTop(15)
+                        .setRelativeScale(0.015f));
     }
 
     private void loadAdCounter() {
@@ -51,24 +75,8 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-
     private void loadAdsFromJSONFile(){
-        mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
-        mContext = getApplicationContext();
 
-        int bottomMargin = Utils.dpToPx(90);
-        Point windowSize = Utils.getDisplaySize(getWindowManager());
-        mSwipeView.getBuilder()
-                .setDisplayViewCount(4)
-                .setIsUndoEnabled(true)
-                .setHeightSwipeDistFactor(10)
-                .setWidthSwipeDistFactor(5)
-                .setSwipeDecor(new SwipeDecor()
-                        .setViewWidth(windowSize.x)
-                        .setViewHeight(windowSize.y - bottomMargin)
-                        .setViewGravity(Gravity.TOP)
-                        .setPaddingTop(15)
-                        .setRelativeScale(0.015f));
 
         if((Utils.loadProfiles(this.getApplicationContext()))!= null) {
             for (Advert ads : Utils.loadProfiles(this.getApplicationContext())) {
@@ -84,7 +92,6 @@ public class MainActivity extends AppCompatActivity{
     private void addToNumberOfAds(int number) {
         Variables.numberOfAds = number;
     }
-
 
     private void onclicks() {
         findViewById(R.id.settingsBtn).setOnClickListener(new View.OnClickListener() {
@@ -117,10 +124,11 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        findViewById(R.id.undoBtn).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.dashboard).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSwipeView.undoLastSwipe();
+                Intent intent = new Intent(MainActivity.this, Dashboard.class);
+                startActivity(intent);
             }
         });
 
@@ -130,16 +138,17 @@ public class MainActivity extends AppCompatActivity{
                 mSwipeView.doSwipe(true);
             }
         });
-    }
 
-    private void sendBroadcast(String message){
-        if(message == Constants.STOP_TIMER){
-            Log.d("MAIN_ACTIVITY","Sending broadcast to stop timer.");
-            Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST);
-            intent.putExtra(Constants.AD_COUNTER_BROADCAST,Constants.STOP_TIMER);
+        findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getFragmentManager();
+                ReportDialogFragment reportDialogFragment = new ReportDialogFragment();
+                reportDialogFragment.show(fm,"Report dialog fragment.");
+                reportDialogFragment.setfragcontext(mContext);
+            }
+        });
 
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        }
     }
 
     @Override
@@ -152,6 +161,24 @@ public class MainActivity extends AppCompatActivity{
     protected void onStop(){
         sendBroadcast(Constants.STOP_TIMER);
         super.onStop();
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("COUNTER_BAR_TO_MAIN- ","Broadcast has been received.");
+            onclicks();
+        }
+    };
+
+    private void sendBroadcast(String message){
+        if(message == Constants.STOP_TIMER){
+            Log.d("MAIN_ACTIVITY","Sending broadcast to stop timer.");
+            Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST);
+            intent.putExtra(Constants.AD_COUNTER_BROADCAST,Constants.STOP_TIMER);
+
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        }
     }
 
 }

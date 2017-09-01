@@ -19,15 +19,15 @@
 
             <ImageButton
                 android:id="@+id/settingsBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
                 android:background="@drawable/ic_action_settings"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:id="@+id/settingsText"
                 android:layout_marginTop="40dp"
-                android:textSize="10dp"
-                android:layout_marginLeft="7dp"
+                android:textSize="8dp"
+                android:layout_marginLeft="8dp"
                 android:text="Settings"
                 android:layout_height="wrap_content" />
         </RelativeLayout>
@@ -37,16 +37,16 @@
             android:layout_height="wrap_content">
             <ImageButton
                 android:id="@+id/bookmarkBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
                 android:layout_marginLeft="33dp"
                 android:background="@drawable/ic_action_bookmarksfol"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:id="@+id/bookmarkText"
                 android:layout_marginTop="40dp"
-                android:layout_marginLeft="33dp"
-                android:textSize="10dp"
+                android:layout_marginLeft="37dp"
+                android:textSize="8dp"
                 android:text="Bookmarks"
                 android:layout_height="wrap_content" />
         </RelativeLayout>
@@ -55,18 +55,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
             <ImageButton
-                android:id="@+id/undoBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:id="@+id/dashboard"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
                 android:layout_marginLeft="30dp"
-                android:background="@drawable/ic_action_previous"/>
+                android:background="@drawable/ic_action_dashboard"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:id="@+id/nextAdText"
                 android:layout_marginTop="40dp"
-                android:layout_marginLeft="38dp"
-                android:textSize="10dp"
-                android:text="Previous"
+                android:layout_marginLeft="35dp"
+                android:textSize="8dp"
+                android:text="Dashboard"
                 android:layout_height="wrap_content" />
         </RelativeLayout>
 
@@ -75,8 +75,8 @@
             android:layout_height="wrap_content">
             <ImageButton
                 android:id="@+id/nextBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="45dp"
+                android:layout_height="47dp"
                 android:layout_marginLeft="30dp"
                 android:background="@drawable/ic_action_next"/>
             <TextView
@@ -84,7 +84,7 @@
                 android:id="@+id/previousAdText"
                 android:layout_marginTop="40dp"
                 android:layout_marginLeft="43dp"
-                android:textSize="10dp"
+                android:textSize="8dp"
                 android:text="Next"
                 android:layout_height="wrap_content" />
         </RelativeLayout>
