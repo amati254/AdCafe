@@ -88,10 +88,11 @@ public class AdCounterBar {
 
             @Override
             public void onFinish() {
+                progressBarTimer.setProgress(7*1000);
                 Log.d("Timer --- ","Timer has finnished");
                 sendBroadcast(TIMER_HAS_ENDED);
                 textViewTime.setText(Integer.toString(7));
-                progressBarTimer.setProgress(7*1000);
+
             }
         };
 

@@ -21,6 +21,7 @@ import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.mindorks.placeholderview.Utils;
 import com.mindorks.placeholderview.annotations.Click;
 import com.mindorks.placeholderview.annotations.Layout;
+import com.mindorks.placeholderview.annotations.LongClick;
 import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
 import com.mindorks.placeholderview.annotations.swipe.SwipeCancelState;
@@ -100,7 +101,6 @@ public class AdvertCard{
         sendBroadcast(AD_TO_TOTAL);
         Variables.adAdToTotal();
         sendBroadcast(START_TIMER);
-        bookmarkButton.callOnClick();
     }
 
     private void sendBroadcast(String message ) {

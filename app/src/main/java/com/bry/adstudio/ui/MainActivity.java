@@ -63,6 +63,8 @@ public class MainActivity extends AppCompatActivity{
                 .setSwipeDecor(new SwipeDecor()
                         .setViewWidth(windowSize.x)
                         .setViewHeight(windowSize.y - bottomMargin)
+                        .setSwipeRotationAngle(0)
+                        .setSwipeAnimTime(200)
                         .setViewGravity(Gravity.TOP)
                         .setPaddingTop(15)
                         .setRelativeScale(relativeScale));
@@ -137,12 +139,14 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-//        findViewById(R.id.nextBtn).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                mSwipeView.doSwipe(true);
-//            }
-//        });
+        findViewById(R.id.profileImageView).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                findViewById(R.id.bookmark2Btn).callOnClick();
+                return false;
+            }
+        });
+
 
         findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
             @Override
