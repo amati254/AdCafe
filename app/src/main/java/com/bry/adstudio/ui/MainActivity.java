@@ -9,6 +9,7 @@ import android.graphics.Point;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -21,6 +22,7 @@ import com.bry.adstudio.R;
 import com.bry.adstudio.Variables;
 import com.bry.adstudio.adapters.AdvertCard;
 import com.bry.adstudio.adapters.AdCounterBar;
+import com.bry.adstudio.fragments.ReportDialogFragment;
 import com.bry.adstudio.models.Advert;
 import com.bry.adstudio.services.Utils;
 import com.mindorks.placeholderview.PlaceHolderView;
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity{
         setUpSwipeView();
         loadAdsFromJSONFile();
         loadAdCounter();
+        hideNavBars();
     }
 
     private void setUpSwipeView() {
@@ -50,6 +53,8 @@ public class MainActivity extends AppCompatActivity{
 
         int bottomMargin = Utils.dpToPx(90);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
+        float relativeScale = density();
+
         mSwipeView.getBuilder()
                 .setDisplayViewCount(4)
                 .setIsUndoEnabled(false)
@@ -60,7 +65,7 @@ public class MainActivity extends AppCompatActivity{
                         .setViewHeight(windowSize.y - bottomMargin)
                         .setViewGravity(Gravity.TOP)
                         .setPaddingTop(15)
-                        .setRelativeScale(0.015f));
+                        .setRelativeScale(relativeScale));
     }
 
     private void loadAdCounter() {
@@ -132,12 +137,12 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        findViewById(R.id.nextBtn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSwipeView.doSwipe(true);
-            }
-        });
+//        findViewById(R.id.nextBtn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mSwipeView.doSwipe(true);
+//            }
+//        });
 
         findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,6 +184,33 @@ public class MainActivity extends AppCompatActivity{
 
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
+    }
+
+    private void hideNavBars() {
+//        View decorView = getWindow().getDecorView();
+//        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+//        decorView.setSystemUiVisibility(uiOptions);
+    }
+
+    public float density(){
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        int density = metrics.densityDpi;
+        float relativeScale;
+
+        if (density >= 560) {
+            Log.d("DENSITY---","HIGH... Density is " + String.valueOf(density));
+            relativeScale = 0.005f;
+        }else if(density >= 360){
+            Log.d("DENSITY---","MEDIUM... Density is " + String.valueOf(density));
+            relativeScale = 0.01f;
+        }else if(density >= 160){
+            Log.d("DENSITY---","LOW... Density is " + String.valueOf(density));
+            relativeScale = 0.015f;
+        }else{
+            relativeScale = 0.02f;
+        }
+        return relativeScale;
     }
 
 }

@@ -100,7 +100,7 @@ public class AdvertCard{
         sendBroadcast(AD_TO_TOTAL);
         Variables.adAdToTotal();
         sendBroadcast(START_TIMER);
-
+        bookmarkButton.callOnClick();
     }
 
     private void sendBroadcast(String message ) {

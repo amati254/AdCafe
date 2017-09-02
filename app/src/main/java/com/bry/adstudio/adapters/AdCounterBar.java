@@ -90,6 +90,7 @@ public class AdCounterBar {
             public void onFinish() {
                 Log.d("Timer --- ","Timer has finnished");
                 sendBroadcast(TIMER_HAS_ENDED);
+                textViewTime.setText(Integer.toString(7));
                 progressBarTimer.setProgress(7*1000);
             }
         };

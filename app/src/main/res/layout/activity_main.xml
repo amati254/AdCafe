@@ -28,7 +28,7 @@
                 android:layout_marginTop="40dp"
                 android:textSize="8dp"
                 android:layout_marginLeft="8dp"
-                android:text="Settings"
+                android:text="Settings."
                 android:layout_height="wrap_content" />
         </RelativeLayout>
 
@@ -39,7 +39,7 @@
                 android:id="@+id/bookmarkBtn"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
-                android:layout_marginLeft="33dp"
+                android:layout_marginLeft="34dp"
                 android:background="@drawable/ic_action_bookmarksfol"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -47,7 +47,7 @@
                 android:layout_marginTop="40dp"
                 android:layout_marginLeft="37dp"
                 android:textSize="8dp"
-                android:text="Bookmarks"
+                android:text="Bookmarks."
                 android:layout_height="wrap_content" />
         </RelativeLayout>
 
@@ -58,7 +58,7 @@
                 android:id="@+id/dashboard"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
-                android:layout_marginLeft="30dp"
+                android:layout_marginLeft="31dp"
                 android:background="@drawable/ic_action_dashboard"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -66,7 +66,7 @@
                 android:layout_marginTop="40dp"
                 android:layout_marginLeft="35dp"
                 android:textSize="8dp"
-                android:text="Dashboard"
+                android:text="Dashboard."
                 android:layout_height="wrap_content" />
         </RelativeLayout>
 
@@ -74,18 +74,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
             <ImageButton
-                android:id="@+id/nextBtn"
+                android:id="@+id/shareBtn"
                 android:layout_width="45dp"
-                android:layout_height="47dp"
+                android:layout_height="45dp"
                 android:layout_marginLeft="30dp"
-                android:background="@drawable/ic_action_next"/>
+                android:background="@drawable/ic_action_share"/>
             <TextView
                 android:layout_width="wrap_content"
-                android:id="@+id/previousAdText"
+                android:id="@+id/shareText"
                 android:layout_marginTop="40dp"
-                android:layout_marginLeft="43dp"
+                android:layout_marginLeft="40dp"
                 android:textSize="8dp"
-                android:text="Next"
+                android:text="Share."
                 android:layout_height="wrap_content" />
         </RelativeLayout>
     </LinearLayout>

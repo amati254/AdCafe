@@ -1,4 +1,4 @@
-package com.bry.adstudio.ui;
+package com.bry.adstudio.fragments;
 
 import android.app.DialogFragment;
 import android.content.Context;
