@@ -1,4 +1,4 @@
-package com.bry.adstudio.ui;
+package com.bry.adcafe.ui;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -12,8 +12,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bry.adstudio.R;
-import com.bry.adstudio.models.User;
+import com.bry.adcafe.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;

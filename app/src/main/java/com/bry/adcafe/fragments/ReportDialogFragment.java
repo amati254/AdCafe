@@ -1,12 +1,8 @@
-package com.bry.adstudio.fragments;
+package com.bry.adcafe.fragments;
 
 import android.app.DialogFragment;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +12,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.bry.adstudio.Constants;
-import com.bry.adstudio.R;
+import com.bry.adcafe.R;
 
 public class ReportDialogFragment extends DialogFragment {
     private Context mContext;

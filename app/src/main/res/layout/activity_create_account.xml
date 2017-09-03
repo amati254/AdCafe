@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.bry.adstudio.ui.CreateAccountActivity">
+    tools:context="com.bry.adcafe.ui.CreateAccountActivity">
 
     <LinearLayout
         android:orientation="vertical"

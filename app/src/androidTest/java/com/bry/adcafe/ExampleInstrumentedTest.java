@@ -1,4 +1,4 @@
-package com.bry.adstudio;
+package com.bry.adcafe;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

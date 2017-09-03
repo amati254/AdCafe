@@ -1,9 +1,9 @@
-package com.bry.adstudio.ui;
+package com.bry.adcafe.ui;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.bry.adstudio.R;
+import com.bry.adcafe.R;
 
 public class Dashboard extends AppCompatActivity {
 

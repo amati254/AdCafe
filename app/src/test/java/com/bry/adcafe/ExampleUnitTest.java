@@ -1,4 +1,4 @@
-package com.bry.adstudio;
+package com.bry.adcafe;
 
 import org.junit.Test;
 

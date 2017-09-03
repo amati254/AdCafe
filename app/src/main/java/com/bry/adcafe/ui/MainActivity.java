@@ -1,10 +1,11 @@
-package com.bry.adstudio.ui;
+package com.bry.adcafe.ui;
 
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -16,35 +17,46 @@ import android.view.View;
 import android.widget.Toast;
 
 
-import com.bry.adstudio.Bookmarks;
-import com.bry.adstudio.Constants;
-import com.bry.adstudio.R;
-import com.bry.adstudio.Variables;
-import com.bry.adstudio.adapters.AdvertCard;
-import com.bry.adstudio.adapters.AdCounterBar;
-import com.bry.adstudio.fragments.ReportDialogFragment;
-import com.bry.adstudio.models.Advert;
-import com.bry.adstudio.services.Utils;
+import com.bry.adcafe.Bookmarks;
+import com.bry.adcafe.Constants;
+import com.bry.adcafe.R;
+import com.bry.adcafe.Variables;
+import com.bry.adcafe.adapters.AdvertCard;
+import com.bry.adcafe.adapters.AdCounterBar;
+import com.bry.adcafe.fragments.ReportDialogFragment;
+import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.services.Utils;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.SwipeDecor;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
     private SwipePlaceHolderView mSwipeView;
     private PlaceHolderView mAdCounterView;
     private Context mContext;
     private static final String TAG = "MainActivity";
+    private int mNumberOfAdsSeen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,new IntentFilter(Constants.AD_COUNTER_BROADCAST));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
 
+        loadFromSharedPreferences();
         setUpSwipeView();
         loadAdsFromJSONFile();
         loadAdCounter();
         hideNavBars();
+    }
+
+    @Override
+    protected void onDestroy(){
+        sendBroadcast(Constants.STOP_TIMER);
+        addToSharedPreferences();
+        super.onDestroy();
     }
 
     private void setUpSwipeView() {
@@ -83,13 +95,14 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void loadAdsFromJSONFile(){
-
-
         if((Utils.loadProfiles(this.getApplicationContext()))!= null) {
-            for (Advert ads : Utils.loadProfiles(this.getApplicationContext())) {
-                mSwipeView.addView(new AdvertCard(mContext,ads,mSwipeView));
-                addToNumberOfAds(ads.getNumberOfAds());
+            List<Advert> adList = Utils.loadProfiles(this.getApplicationContext());
+            for(int i = 0 ; i < adList.size()-1 ; i++){
+                if(i >= Variables.adTotal){
+                    mSwipeView.addView(new AdvertCard(mContext,adList.get(i),mSwipeView));
+                }
             }
+            Variables.setNewNumberOfAds(adList.size()-Variables.adTotal);
             onclicks();
         }else{
             Toast.makeText(mContext, "No Ads are available", Toast.LENGTH_SHORT).show();
@@ -147,6 +160,14 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
+        findViewById(R.id.shareBtn).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Toast.makeText(mContext,"This will share the app.",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+
 
         findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -160,34 +181,18 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    @Override
-    protected void onDestroy(){
-        sendBroadcast(Constants.STOP_TIMER);
-        super.onDestroy();
-    }
 
-    @Override
-    protected void onStop(){
-        sendBroadcast(Constants.STOP_TIMER);
-        super.onStop();
-    }
-
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mMessageReceiverForAddingToSharedPreferences = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("COUNTER_BAR_TO_MAIN- ","Broadcast has been received.");
+            Log.d("COUNTER_BAR_TO_MAIN- ","Broadcast has been received to add to shared preferences.");
+            addToSharedPreferences();
             onclicks();
         }
     };
 
     private void sendBroadcast(String message){
-        if(message == Constants.STOP_TIMER){
-            Log.d("MAIN_ACTIVITY","Sending broadcast to stop timer.");
-            Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST);
-            intent.putExtra(Constants.AD_COUNTER_BROADCAST,Constants.STOP_TIMER);
 
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        }
     }
 
     private void hideNavBars() {
@@ -217,4 +222,19 @@ public class MainActivity extends AppCompatActivity{
         return relativeScale;
     }
 
+    private void addToSharedPreferences(){
+        SharedPreferences pref = getApplicationContext().getSharedPreferences(Constants.AD_TOTAL, MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        Variables.adAdToTotal();
+        editor.putInt("adTotals",Variables.adTotal);
+        Log.d("MAIN_ACTIVITY--","Adding adTotal to shared preferences - "+Integer.toString(Variables.adTotal));
+        editor.commit();
+    }
+
+    private void loadFromSharedPreferences(){
+        SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
+//        Variables.adTotal = prefs.getInt("adTotals",0);
+//        Variables.adTotal =0;
+        Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ Variables.adTotal);
+    }
 }

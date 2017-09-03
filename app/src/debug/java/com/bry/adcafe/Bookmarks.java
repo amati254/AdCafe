@@ -1,15 +1,13 @@
-package com.bry.adstudio.ui;
+package com.bry.adcafe;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.bry.adstudio.R;
-
-public class settings extends AppCompatActivity {
+public class Bookmarks extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(R.layout.activity_bookmarks);
     }
 }

@@ -1,4 +1,4 @@
-package com.bry.adstudio.models;
+package com.bry.adcafe.models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

@@ -1,4 +1,4 @@
-package com.bry.adstudio.services;
+package com.bry.adcafe.services;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.bry.adstudio.models.Advert;
+import com.bry.adcafe.models.Advert;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
