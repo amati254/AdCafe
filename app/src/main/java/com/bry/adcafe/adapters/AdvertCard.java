@@ -45,22 +45,36 @@ public class AdvertCard{
     private static final String START_TIMER= "startTimer";
     private static final String AD_TO_TOTAL= "adToTotal";
     private static boolean clickable;
+    private static String mLastOrNotLast;
 
-    public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView){
+    public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
         mContext = context;
         mAdvert = advert;
         mSwipeView = swipeView;
+        mLastOrNotLast = lastOrNotLast;
     }
 
 
     @Resolve
     private void onResolved(){
-        Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
-                RoundedCornersTransformation.CornerType.TOP))
-                .into(profileImageView);
-        sendBroadcast(START_TIMER);
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
-        clickable=false;
+        if(mLastOrNotLast == Constants.LAST){
+            Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
+            Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
+                    RoundedCornersTransformation.CornerType.TOP))
+                    .into(profileImageView);
+            mSwipeView.lockViews();
+            clickable=false;
+        }else{
+            Log.d("ADVERT_CARD--","LOADING NORMALLY.");
+            Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
+                    RoundedCornersTransformation.CornerType.TOP))
+                    .into(profileImageView);
+            sendBroadcast(START_TIMER);
+            LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
+            clickable=false;
+        }
+
+
 
     }
 
@@ -99,7 +113,7 @@ public class AdvertCard{
             intent.putExtra(Constants.AD_TOTAL,Integer.toString(Variables.adTotal));
 
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-        }else if(message == START_TIMER){
+        }else if(message == START_TIMER && mLastOrNotLast == Constants.NOT_LAST){
             Log.d("AdvertCard - ","Sending message to start timer");
             Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
             mSwipeView.lockViews();

@@ -43,7 +43,10 @@ public class AdCounterBar {
         adCounter.setText(Integer.toString(Variables.adTotal));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForAdCounter,new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_AD_COUNTER));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToStartTimer,new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
-        startTimer();
+        if(Variables.mIsLastOrNotLast==Constants.NOT_LAST){
+            startTimer();
+        }
+
     }
 
 

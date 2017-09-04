@@ -48,8 +48,14 @@ public class MainActivity extends AppCompatActivity{
         loadFromSharedPreferences();
         setUpSwipeView();
         loadAdsFromJSONFile();
-        loadAdCounter();
         hideNavBars();
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        mSwipeView.removeAllViews();
+        loadAdsFromJSONFile();
     }
 
     @Override
@@ -98,10 +104,15 @@ public class MainActivity extends AppCompatActivity{
         if((Utils.loadProfiles(this.getApplicationContext()))!= null) {
             List<Advert> adList = Utils.loadProfiles(this.getApplicationContext());
             for(int i = 0 ; i < adList.size()-1 ; i++){
-                if(i >= Variables.adTotal){
-                    mSwipeView.addView(new AdvertCard(mContext,adList.get(i),mSwipeView));
+                if(Variables.adTotal>=adList.size()){
+                    mSwipeView.addView(new AdvertCard(mContext,adList.get(adList.size()-1),mSwipeView,Constants.LAST));
+                    Variables.setIsLastOrNotLast(Constants.LAST);
+                    break;
+                } else if(i >= Variables.adTotal){
+                    mSwipeView.addView(new AdvertCard(mContext,adList.get(i),mSwipeView,Constants.NOT_LAST));
                 }
             }
+            loadAdCounter();
             Variables.setNewNumberOfAds(adList.size()-Variables.adTotal);
             onclicks();
         }else{
@@ -122,12 +133,14 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(mContext,"Bookmarked.",Toast.LENGTH_SHORT).show();
-            }
-        });
+        if(findViewById(R.id.bookmark2Btn)!= null){
+            findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(mContext,"Bookmarked.",Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         findViewById(R.id.bookmarkBtn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,12 +150,23 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        findViewById(R.id.profileImageView).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSwipeView.doSwipe(true);
-            }
-        });
+        if(findViewById(R.id.profileImageView)!= null){
+            findViewById(R.id.profileImageView).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mSwipeView.doSwipe(true);
+                }
+            });
+
+            findViewById(R.id.profileImageView).setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    findViewById(R.id.bookmark2Btn).callOnClick();
+                    return false;
+                }
+            });
+        }
+
 
         findViewById(R.id.dashboard).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,13 +176,6 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        findViewById(R.id.profileImageView).setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                findViewById(R.id.bookmark2Btn).callOnClick();
-                return false;
-            }
-        });
 
         findViewById(R.id.shareBtn).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -168,16 +185,17 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-
-        findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fm = getFragmentManager();
-                ReportDialogFragment reportDialogFragment = new ReportDialogFragment();
-                reportDialogFragment.show(fm,"Report dialog fragment.");
-                reportDialogFragment.setfragcontext(mContext);
-            }
-        });
+        if(findViewById(R.id.reportBtn)!=null){
+            findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FragmentManager fm = getFragmentManager();
+                    ReportDialogFragment reportDialogFragment = new ReportDialogFragment();
+                    reportDialogFragment.show(fm,"Report dialog fragment.");
+                    reportDialogFragment.setfragcontext(mContext);
+                }
+            });
+        }
 
     }
 
@@ -212,7 +230,7 @@ public class MainActivity extends AppCompatActivity{
             relativeScale = 0.005f;
         }else if(density >= 360){
             Log.d("DENSITY---","MEDIUM... Density is " + String.valueOf(density));
-            relativeScale = 0.01f;
+            relativeScale = 0.009f;
         }else if(density >= 160){
             Log.d("DENSITY---","LOW... Density is " + String.valueOf(density));
             relativeScale = 0.015f;
@@ -233,7 +251,7 @@ public class MainActivity extends AppCompatActivity{
 
     private void loadFromSharedPreferences(){
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
-//        Variables.adTotal = prefs.getInt("adTotals",0);
+        Variables.adTotal = prefs.getInt("adTotals",0);
 //        Variables.adTotal =0;
         Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ Variables.adTotal);
     }

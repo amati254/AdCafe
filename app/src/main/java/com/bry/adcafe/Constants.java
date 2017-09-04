@@ -14,5 +14,8 @@ public class Constants {
     public static String STOP_TIMER = "STOP_TIMER";
     public static String ADVERT_CARD_BROADCAST_TO_START_TIMER = "ADVERT_CARD_BROADCAST_TO_START_TIMER";
     public static String ADD_TO_SHARED_PREFERENCES = "ADD_TO_SHARED_PREFERENCES";
+    public static String LAST = "LAST";
+    public static String NOT_LAST = "NOT_LAST";
+
 
 }
