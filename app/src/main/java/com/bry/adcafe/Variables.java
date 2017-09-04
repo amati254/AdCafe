@@ -6,7 +6,6 @@ package com.bry.adcafe;
 
 public class Variables {
     public static int numberOfAds;
-    public static boolean hasNumberOfAdsChanged = false;
     public static Integer adTotal = 0;
     public static String mIsLastOrNotLast;
 
@@ -15,8 +14,15 @@ public class Variables {
     }
 
     public static void removeAd(){
-        setHasNumberOfAdsChangedTrue();
         numberOfAds-=1;
+    }
+
+    public static void  setAdTotal(int number){
+        adTotal = number;
+    }
+
+    public static  void clearAdTotal(){
+        adTotal = 0;
     }
 
     public static void adAdToTotal(){
@@ -27,13 +33,6 @@ public class Variables {
         mIsLastOrNotLast = isLastOrNotLast;
     }
 
-    public static void setHasNumberOfAdsChangedTrue() {
-        hasNumberOfAdsChanged = true;
-    }
-
-    public static void  setHasNumberOfAdsChangedFalse(){
-        hasNumberOfAdsChanged = false;
-    }
 
 
 

@@ -16,6 +16,7 @@ public class Constants {
     public static String ADD_TO_SHARED_PREFERENCES = "ADD_TO_SHARED_PREFERENCES";
     public static String LAST = "LAST";
     public static String NOT_LAST = "NOT_LAST";
+    public static String UNREGISTER_ALL_RECEIVERS = "UNREGISTER_ALL_RECEIVERS";
 
 
 }

@@ -43,6 +43,10 @@ public class AdCounterBar {
         adCounter.setText(Integer.toString(Variables.adTotal));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForAdCounter,new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_AD_COUNTER));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToStartTimer,new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
+
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
+
+
         if(Variables.mIsLastOrNotLast==Constants.NOT_LAST){
             startTimer();
         }
@@ -68,6 +72,15 @@ public class AdCounterBar {
         public void onReceive(Context context, Intent intent) {
             String adTotal = intent.getStringExtra(Constants.AD_TOTAL);
 //            adCounter.setText(adTotal);
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("AD_COUNTER_BAR--","Received broadcast to Unregister all receivers");
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToStartTimer);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAdCounter);
         }
     };
 
@@ -105,8 +118,7 @@ public class AdCounterBar {
         if(message == Constants.TIMER_HAS_ENDED && !hasTimerMessageBeenSent){
             Log.d("AD_COUNTER_BAR---","sending message that timer has ended.");
             Intent intent = new Intent(Constants.TIMER_HAS_ENDED);
-            intent.putExtra(Constants.TIMER_HAS_ENDED,Constants.TIMER_HAS_ENDED);
-
+//            intent.putExtra(Constants.TIMER_HAS_ENDED,Constants.TIMER_HAS_ENDED);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             hasTimerMessageBeenSent = true;
         }

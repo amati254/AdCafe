@@ -65,7 +65,7 @@ public class AdvertCard{
             mSwipeView.lockViews();
             clickable=false;
         }else{
-            Log.d("ADVERT_CARD--","LOADING NORMALLY.");
+            Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
             Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
                     RoundedCornersTransformation.CornerType.TOP))
                     .into(profileImageView);
@@ -73,7 +73,7 @@ public class AdvertCard{
             LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
             clickable=false;
         }
-
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
 
 
     }
@@ -92,8 +92,6 @@ public class AdvertCard{
     private void onSwipedOut(){
         Log.d("EVENT----", "onSwipedOut");
         Variables.removeAd();
-//        addToSharedPreferencesViaBroadcast();
-        sendBroadcast(AD_TO_TOTAL);
         sendBroadcast(START_TIMER);
     }
 
@@ -101,19 +99,11 @@ public class AdvertCard{
     private void onSwipeIn(){
         Log.d("EVENT----", "onSwipedIn");
         Variables.removeAd();
-//        addToSharedPreferencesViaBroadcast();
-        sendBroadcast(AD_TO_TOTAL);
         sendBroadcast(START_TIMER);
     }
 
     private void sendBroadcast(String message ) {
-        if(message == AD_TO_TOTAL){
-            Log.d("AdvertCard - ","Sending message to add to total");
-            Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_AD_COUNTER);
-            intent.putExtra(Constants.AD_TOTAL,Integer.toString(Variables.adTotal));
-
-            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-        }else if(message == START_TIMER && mLastOrNotLast == Constants.NOT_LAST){
+        if(message == START_TIMER && mLastOrNotLast == Constants.NOT_LAST){
             Log.d("AdvertCard - ","Sending message to start timer");
             Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
             mSwipeView.lockViews();
@@ -127,12 +117,19 @@ public class AdvertCard{
     private BroadcastReceiver mMessageReceiverForTimerHasEnded = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-               Log.d("ADVERT_CARD--","message from adCounterBar that timer has ended.");
+               Log.d("ADVERT_CARD--","message from adCounterBar that timer has ended has been received.");
                 if(mSwipeView.getChildCount() > 1){
                     mSwipeView.unlockViews();
                     clickable = true;
-                    sendBroadcast(AD_TO_TOTAL);
                 }
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasEnded);
         }
     };
 

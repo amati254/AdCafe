@@ -39,12 +39,13 @@ public class MainActivity extends AppCompatActivity{
     private static final String TAG = "MainActivity";
     private int mNumberOfAdsSeen;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
         loadFromSharedPreferences();
         setUpSwipeView();
         loadAdsFromJSONFile();
@@ -52,17 +53,41 @@ public class MainActivity extends AppCompatActivity{
     }
 
     @Override
+    protected void onStart(){
+        super.onStart();
+    }
+
+    @Override
     protected void onResume(){
         super.onResume();
-        mSwipeView.removeAllViews();
-        loadAdsFromJSONFile();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        addToSharedPreferences();
     }
 
     @Override
     protected void onDestroy(){
-        sendBroadcast(Constants.STOP_TIMER);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddingToSharedPreferences);
+        Log.d("MAIN_ACTIVITY--","Unregistering all receivers");
+        sendBroadcastToUnregisterAllReceivers();
+        mSwipeView.removeAllViews();
+        mAdCounterView.removeAllViews();
         addToSharedPreferences();
+        Variables.clearAdTotal();
         super.onDestroy();
+    }
+
+    private void sendBroadcastToUnregisterAllReceivers() {
+        Intent intent = new Intent(Constants.UNREGISTER_ALL_RECEIVERS);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     private void setUpSwipeView() {
@@ -91,16 +116,13 @@ public class MainActivity extends AppCompatActivity{
     private void loadAdCounter() {
         mAdCounterView = (PlaceHolderView)findViewById(R.id.adCounterView);
         mAdCounterView.addView(new AdCounterBar(this.getApplicationContext(),mAdCounterView));
-        while(Variables.hasNumberOfAdsChanged){
-            mAdCounterView.removeAllViews();
-            mAdCounterView.addView(new AdCounterBar(this.getApplicationContext(),mAdCounterView));
-            Variables.setHasNumberOfAdsChangedFalse();
-        }
-
 
     }
 
     private void loadAdsFromJSONFile(){
+        if(mSwipeView == null){
+            setUpSwipeView();
+        }
         if((Utils.loadProfiles(this.getApplicationContext()))!= null) {
             List<Advert> adList = Utils.loadProfiles(this.getApplicationContext());
             for(int i = 0 ; i < adList.size()-1 ; i++){
@@ -110,6 +132,7 @@ public class MainActivity extends AppCompatActivity{
                     break;
                 } else if(i >= Variables.adTotal){
                     mSwipeView.addView(new AdvertCard(mContext,adList.get(i),mSwipeView,Constants.NOT_LAST));
+                    Variables.setIsLastOrNotLast(Constants.NOT_LAST);
                 }
             }
             loadAdCounter();
@@ -204,55 +227,61 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("COUNTER_BAR_TO_MAIN- ","Broadcast has been received to add to shared preferences.");
+            Variables.adAdToTotal();
             addToSharedPreferences();
             onclicks();
         }
     };
 
-    private void sendBroadcast(String message){
-
-    }
 
     private void hideNavBars() {
-//        View decorView = getWindow().getDecorView();
-//        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-//        decorView.setSystemUiVisibility(uiOptions);
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        decorView.setSystemUiVisibility(uiOptions);
     }
 
     public float density(){
+        double constant = 0.000046875;
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int density = metrics.densityDpi;
-        float relativeScale;
+//        float relativeScale;
 
-        if (density >= 560) {
-            Log.d("DENSITY---","HIGH... Density is " + String.valueOf(density));
-            relativeScale = 0.005f;
-        }else if(density >= 360){
-            Log.d("DENSITY---","MEDIUM... Density is " + String.valueOf(density));
-            relativeScale = 0.009f;
-        }else if(density >= 160){
-            Log.d("DENSITY---","LOW... Density is " + String.valueOf(density));
-            relativeScale = 0.015f;
-        }else{
-            relativeScale = 0.02f;
-        }
+//        if (density >= 560) {
+//            Log.d("DENSITY---","HIGH... Density is " + String.valueOf(density));
+//            relativeScale = 0.005f;
+//        }else if(density >= 360){
+//            Log.d("DENSITY---","MEDIUM... Density is " + String.valueOf(density));
+//            relativeScale = 0.009f;
+//        }else if(density >= 360){
+//            Log.d("DENSITY---","LOW... Density is " + String.valueOf(density));
+//            relativeScale = 0.015f;
+//        }else{
+//            relativeScale = 0.02f;
+//        }
+        double doubleRelativeScale = density*constant;
+        float relativeScale = (float)doubleRelativeScale*1f;
         return relativeScale;
     }
 
     private void addToSharedPreferences(){
         SharedPreferences pref = getApplicationContext().getSharedPreferences(Constants.AD_TOTAL, MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-        Variables.adAdToTotal();
+        editor.clear();
         editor.putInt("adTotals",Variables.adTotal);
-        Log.d("MAIN_ACTIVITY--","Adding adTotal to shared preferences - "+Integer.toString(Variables.adTotal));
+        Log.d("MAIN_ACTIVITY--","Adding 1 to shared preferences adTotal is - "+Integer.toString(Variables.adTotal));
         editor.commit();
     }
 
     private void loadFromSharedPreferences(){
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
-        Variables.adTotal = prefs.getInt("adTotals",0);
-//        Variables.adTotal =0;
-        Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ Variables.adTotal);
+        int number = prefs.getInt("adTotals",0);
+        Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
+        Variables.setAdTotal(number);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.commit();
     }
+
+
 }
