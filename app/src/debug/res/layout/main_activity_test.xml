@@ -1,78 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:orientation="vertical"
-    android:layout_height="match_parent"
-    android:id="@+id/baseLayout">
+    android:layout_height="match_parent">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/topText"
+        android:layout_width="wrap_content"
+        android:text="Check your internet connectivity."
+        android:gravity="center"
+        android:visibility="visible"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp"
+        android:layout_marginRight="60dp"
         android:layout_marginTop="10dp"
-        android:textAlignment="center"
-        android:textSize="15dp"
-        android:padding="10dp"
-        android:text="Indicate what you find wrong with this ad." />
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp">
+        android:layout_gravity="top"
+        android:gravity="end"
+        android:layout_marginEnd="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp">
 
-        <RadioGroup
-            android:layout_width="match_parent"
-            android:padding="20dp"
-            android:id="@+id/reportRadioGroup"
-            android:orientation="vertical"
-            android:layout_height="wrap_content">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
 
-            <RadioButton
-                android:id="@+id/radioButtonAbusive"
+            <ProgressBar
+                android:id="@+id/progressBarTimer"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_centerInParent="true"
+                android:indeterminate="false"
+                android:max="45"
+                android:rotation="-90"
+                android:progress="45"
+                android:progressDrawable="@drawable/timer_layout" />
+
+            <TextView
+                android:id="@+id/textViewTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:text="Abusive    i.e contains vulgar or offensive language." />
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:text="7"
+                android:background="@drawable/circle_design_timer_file"
+                android:textColor="@color/primary_text"
+                android:textSize="12sp" />
 
-            <RadioButton
-                android:id="@+id/radioButtonExplicit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:text="Sexually Explicit    i.e contains sexually explicit images or language.." />
+        </RelativeLayout>
 
-            <RadioButton
-                android:id="@+id/radioButtonDiscriminative"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:text="Discriminative   i.e contains messages that discriminates various people." />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_marginLeft="10dp"
-                android:layout_height="wrap_content">
-                <Button
-                    android:layout_width="wrap_content"
-                    android:text="submit"
-                    android:textColor="@color/lightyellow"
-                    android:id="@+id/submitButton"
-                    android:layout_height="wrap_content" />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:text="Cancel"
-                    android:layout_marginLeft="100dp"
-                    android:textColor="@color/lightyellow"
-                    android:id="@+id/cancelButton"
-                    android:layout_height="wrap_content" />
-            </RelativeLayout>
 
-        </RadioGroup>
+        <TextView
+            android:layout_width="wrap_content"
+            android:id="@+id/adCounter"
+            android:textColor="@color/lightyellow"
+            android:textSize="11sp"
+            android:layout_margin="11dp"
+            android:gravity="center"
+            android:background="@drawable/circle_design_file"
+            android:layout_height="wrap_content" />
+
     </LinearLayout>
 
-
-
-</LinearLayout>
+</RelativeLayout>

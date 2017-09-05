@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.Toast;
 
 
-import com.bry.adcafe.Bookmarks;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
@@ -46,6 +45,7 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
+
         loadFromSharedPreferences();
         setUpSwipeView();
         loadAdsFromJSONFile();
@@ -141,10 +141,6 @@ public class MainActivity extends AppCompatActivity{
         }else{
             Toast.makeText(mContext, "No Ads are available", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void addToNumberOfAds(int number) {
-        Variables.numberOfAds = number;
     }
 
     private void onclicks() {

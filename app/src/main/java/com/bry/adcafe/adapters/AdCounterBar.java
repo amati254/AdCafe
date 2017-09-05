@@ -81,6 +81,8 @@ public class AdCounterBar {
             Log.d("AD_COUNTER_BAR--","Received broadcast to Unregister all receivers");
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToStartTimer);
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAdCounter);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
+
         }
     };
 
