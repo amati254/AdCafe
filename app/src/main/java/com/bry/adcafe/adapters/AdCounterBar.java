@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.services.ConnectionChecker;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.LongClick;
@@ -48,7 +49,7 @@ public class AdCounterBar {
 
 
         if(Variables.mIsLastOrNotLast==Constants.NOT_LAST){
-            startTimer();
+//            startTimer();
         }
 
     }
@@ -103,9 +104,9 @@ public class AdCounterBar {
                 public void onFinish() {
                     progressBarTimer.setProgress(7*1000);
                     Log.d("Timer --- ","Timer has finnished");
-                    sendBroadcast(Constants.TIMER_HAS_ENDED);
-                    addToSharedPreferencesViaBroadcast();
-                    hasTimerStarted = false;
+                        sendBroadcast(Constants.TIMER_HAS_ENDED);
+                        addToSharedPreferencesViaBroadcast();
+                        hasTimerStarted = false;
                     adCounter.setText(Integer.toString(Variables.adTotal+1));
                     textViewTime.setText(Integer.toString(7));
 

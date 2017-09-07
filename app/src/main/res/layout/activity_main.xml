@@ -10,8 +10,11 @@
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_gravity="bottom"
+        android:id="@+id/bottomNavButtons"
+        android:visibility="visible"
         android:gravity="center"
         android:orientation="horizontal">
+
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -90,6 +93,13 @@
         </RelativeLayout>
     </LinearLayout>
 
+    <!--<View-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="1dp"-->
+        <!--android:layout_gravity="bottom"-->
+        <!--android:layout_marginBottom="60dp"-->
+        <!--android:background="#C0C0C0" />-->
+
 
     <com.mindorks.placeholderview.PlaceHolderView
         android:id="@+id/adCounterView"
@@ -99,5 +109,22 @@
         android:id="@+id/swipeView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_height="match_parent">
+        <ProgressBar
+            android:id="@+id/pbHeaderProgress"
+            style="?android:attr/progressBarStyleLarge"
+            android:indeterminate="true"
+            android:visibility="gone"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:progressDrawable="@drawable/circular_progress_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </ProgressBar>
+    </RelativeLayout>
 
 </FrameLayout>

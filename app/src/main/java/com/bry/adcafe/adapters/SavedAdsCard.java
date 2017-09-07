@@ -1,5 +1,6 @@
 package com.bry.adcafe.adapters;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.widget.ImageView;
 
@@ -25,6 +26,8 @@ public class SavedAdsCard {
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
     private Advert mAdvert;
+    private ProgressDialog mAuthProgressDialog;
+
 
 
     public SavedAdsCard(Advert advert, Context context, PlaceHolderView placeHolderView) {
@@ -38,9 +41,4 @@ public class SavedAdsCard {
         Glide.with(mContext).load(mAdvert.getImageUrl()).into(imageView);
     }
 
-//    @LongClick(R.id.imageView)
-//    private void onLongClick(){
-//        mPlaceHolderView.removeView(this);
-//
-//    }
 }

@@ -29,6 +29,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Bind(R.id.LoginButton)  Button mLoginButton;
     @Bind(R.id.registerLink) TextView mRegisterLink;
 
+
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private ProgressDialog mAuthProgressDialog;
@@ -93,7 +94,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return;
         }
         if(password.equals("")){
-            mEmail.setText("Password cnnot be blank");
+            mEmail.setText("Password cannot be blank");
             return;
         }
         mAuthProgressDialog.show();
@@ -102,7 +103,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                       mAuthProgressDialog.dismiss();
-                        Log.d(TAG,"signInWithAmail:onComplate"+task.isSuccessful());
+                        Log.d(TAG,"signInWithEmail:onComplete"+task.isSuccessful());
                         if(!task.isSuccessful()){
                             Log.w(TAG,"SignInWithEmail",task.getException());
                             Toast.makeText(LoginActivity.this,"Authentication Failed",Toast.LENGTH_SHORT).show();
@@ -117,5 +118,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mAuthProgressDialog.setTitle("Loading...");
         mAuthProgressDialog.setMessage("Login you in...");
         mAuthProgressDialog.setCancelable(false);
+
     }
 }

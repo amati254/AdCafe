@@ -1,6 +1,7 @@
 package com.bry.adcafe.ui;
 
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 
@@ -22,13 +25,17 @@ import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.adapters.AdvertCard;
 import com.bry.adcafe.adapters.AdCounterBar;
+import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.fragments.ReportDialogFragment;
 import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.services.ConnectionChecker;
+import com.bry.adcafe.services.SavedAdsUtils;
 import com.bry.adcafe.services.Utils;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.SwipeDecor;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
@@ -38,34 +45,101 @@ public class MainActivity extends AppCompatActivity{
     private static final String TAG = "MainActivity";
     private int mNumberOfAdsSeen;
 
+    private List<Advert> mAdList;
+    private Runnable mViewRunnable;
+    private ProgressBar mProgressBar;
+    private LinearLayout mLinearLayout;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mContext = getApplicationContext();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
 
-        loadFromSharedPreferences();
+//        loadFromSharedPreferences();
+//        setUpSwipeView();
+//        loadAdsFromJSONFile();
+
+
+        mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
+        mLinearLayout = (LinearLayout) findViewById(R.id.bottomNavButtons);
         setUpSwipeView();
-        loadAdsFromJSONFile();
-        hideNavBars();
+        loadAdsFromThread();
     }
 
-    @Override
-    protected void onStart(){
-        super.onStart();
+    private void loadAdsFromThread(){
+        try{
+            startGetAds();
+        }catch (Exception e) {
+            Log.e("BACKGROUND_PROC", e.getMessage());
+        }
     }
 
-    @Override
-    protected void onResume(){
-        super.onResume();
+    private void startGetAds() {
+        mViewRunnable = new Runnable() {
+            @Override
+            public void run() {
+                getAds();
+            }
+        };
+        Thread thread =  new Thread(null, mViewRunnable, "Background");
+        thread.start();
+        mProgressBar.setVisibility(View.VISIBLE);
+        mLinearLayout.setVisibility(View.GONE);
+        sendBroadcastToStartTimer();
+
     }
 
-    @Override
-    protected void onPause(){
-        super.onPause();
+    private void sendBroadcastToStartTimer() {
+        Log.d("AdvertCard - ","Sending message to start timer");
+        Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
+        mSwipeView.lockViews();
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
+
+    private void getAds() {
+        try{
+             mAdList = new ArrayList<Advert>();
+            for(Advert ad: Utils.loadProfiles(this.getApplicationContext())){
+                 mAdList.add(ad);
+            }
+            Thread.sleep(1500);
+            Log.i("ARRAY", ""+  mAdList.size());
+        }catch (Exception e) {
+            Log.e("BACKGROUND_PROC", e.getMessage());
+        }
+        runOnUiThread(returnRes);
+    }
+
+    private Runnable returnRes = new Runnable() {
+        @Override
+        public void run() {
+            if(mAdList!=null && mAdList.size()>0){
+                for(int i = 0 ; i < mAdList.size() ; i++){
+                    if(Variables.adTotal>=mAdList.size()){
+                        mSwipeView.addView(new AdvertCard(mContext,mAdList.get(mAdList.size()-1),mSwipeView,Constants.LAST));
+                        Variables.setIsLastOrNotLast(Constants.LAST);
+                        break;
+                    } else {
+                        mSwipeView.addView(new AdvertCard(mContext,mAdList.get(i),mSwipeView,Constants.NOT_LAST));
+                        Variables.setIsLastOrNotLast(Constants.NOT_LAST);
+                    }
+                }
+            }
+
+            loadAdCounter();
+            Variables.setNewNumberOfAds(mAdList.size()-Variables.adTotal);
+            onclicks();
+            mProgressBar.setVisibility(View.GONE);
+            mLinearLayout.setVisibility(View.VISIBLE);
+        }
+    };
+
 
     @Override
     protected void onStop(){
@@ -78,8 +152,12 @@ public class MainActivity extends AppCompatActivity{
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddingToSharedPreferences);
         Log.d("MAIN_ACTIVITY--","Unregistering all receivers");
         sendBroadcastToUnregisterAllReceivers();
-        mSwipeView.removeAllViews();
-        mAdCounterView.removeAllViews();
+        if(mSwipeView!=null){
+            mSwipeView.removeAllViews();
+        }
+        if(mAdCounterView!=null){
+            mAdCounterView.removeAllViews();
+        }
         addToSharedPreferences();
         Variables.clearAdTotal();
         super.onDestroy();
@@ -92,7 +170,6 @@ public class MainActivity extends AppCompatActivity{
 
     private void setUpSwipeView() {
         mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
-        mContext = getApplicationContext();
 
         int bottomMargin = Utils.dpToPx(90);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
@@ -241,22 +318,23 @@ public class MainActivity extends AppCompatActivity{
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int density = metrics.densityDpi;
-//        float relativeScale;
+        float relativeScale;
 
-//        if (density >= 560) {
-//            Log.d("DENSITY---","HIGH... Density is " + String.valueOf(density));
-//            relativeScale = 0.005f;
-//        }else if(density >= 360){
-//            Log.d("DENSITY---","MEDIUM... Density is " + String.valueOf(density));
-//            relativeScale = 0.009f;
-//        }else if(density >= 360){
-//            Log.d("DENSITY---","LOW... Density is " + String.valueOf(density));
-//            relativeScale = 0.015f;
-//        }else{
-//            relativeScale = 0.02f;
-//        }
-        double doubleRelativeScale = density*constant;
-        float relativeScale = (float)doubleRelativeScale*1f;
+        if (density >= 560) {
+            Log.d("DENSITY---","HIGH... Density is " + String.valueOf(density));
+            relativeScale = 0.005f;
+        }else if(density >= 460){
+            Log.d("DENSITY---","MEDIUM-HIGH... Density is " + String.valueOf(density));
+            relativeScale = 0.009f;
+        }else if(density >= 360){
+            Log.d("DENSITY---","MEDIUM-LOW... Density is " + String.valueOf(density));
+            relativeScale = 0.013f;
+        }else if(density >= 260){
+            Log.d("DENSITY---","LOW... Density is " + String.valueOf(density));
+            relativeScale = 0.015f;
+        }else{
+            relativeScale = 0.02f;
+        }
         return relativeScale;
     }
 

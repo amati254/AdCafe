@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bry.adcafe">
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -11,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher2"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.bry.adcafe.ui.LoginActivity">
+        <activity android:name=".ui.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -19,11 +21,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.bry.adcafe.ui.MainActivity"
+            android:name=".ui.MainActivity"
             android:screenOrientation="portrait" />
-        <activity android:name="com.bry.adcafe.ui.CreateAccountActivity" />
-        <activity android:name="com.bry.adcafe.ui.settings" />
-        <activity android:name="com.bry.adcafe.ui.Dashboard"></activity>
+        <activity android:name=".ui.CreateAccountActivity" />
+        <activity android:name=".ui.settings" />
+        <activity android:name=".ui.Dashboard" />
+        <activity android:name=".ui.NoConnectionActivity"></activity>
     </application>
 
 </manifest>

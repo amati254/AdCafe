@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
@@ -13,6 +14,7 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.services.ConnectionChecker;
 import com.bumptech.glide.Glide;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.mindorks.placeholderview.Utils;
@@ -58,24 +60,32 @@ public class AdvertCard{
     @Resolve
     private void onResolved(){
         if(mLastOrNotLast == Constants.LAST){
-            Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
-            Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
-                    RoundedCornersTransformation.CornerType.TOP))
-                    .into(profileImageView);
-            mSwipeView.lockViews();
-            clickable=false;
+           loadOnlyLastAd();
         }else{
-            Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
-            Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
-                    RoundedCornersTransformation.CornerType.TOP))
-                    .into(profileImageView);
-            sendBroadcast(START_TIMER);
-            LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
-            clickable=false;
+            loadAllAds();
         }
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
 
 
+    }
+
+    private void loadAllAds(){
+        Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
+        Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
+                RoundedCornersTransformation.CornerType.TOP))
+                .into(profileImageView);
+        sendBroadcast(START_TIMER);
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
+        clickable=false;
+    }
+
+    private void loadOnlyLastAd(){
+        Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
+        Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
+                RoundedCornersTransformation.CornerType.TOP))
+                .into(profileImageView);
+        mSwipeView.lockViews();
+        clickable=false;
     }
 
     @Click(R.id.profileImageView)
