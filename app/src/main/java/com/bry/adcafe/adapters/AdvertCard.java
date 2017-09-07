@@ -144,7 +144,6 @@ public class AdvertCard{
     }
 
 
-
     @SwipeOut
     private void onSwipedOut(){
         Log.d("EVENT----", "onSwipedOut");
@@ -160,13 +159,14 @@ public class AdvertCard{
     }
 
     private void sendBroadcast(String message ) {
-        if(message == START_TIMER && mLastOrNotLast == Constants.NOT_LAST && hasAdLoaded){
+        if(message == START_TIMER && mLastOrNotLast == Constants.NOT_LAST){
             Log.d("AdvertCard - ","Sending message to start timer");
-            Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
             mSwipeView.lockViews();
             clickable = false;
-
-            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            if(hasAdLoaded){
+                Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            }
         }
     }
 
