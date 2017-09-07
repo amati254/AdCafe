@@ -4,11 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
@@ -16,6 +18,12 @@ import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.services.ConnectionChecker;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.mindorks.placeholderview.Utils;
 import com.mindorks.placeholderview.annotations.Click;
@@ -38,7 +46,10 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 public class AdvertCard{
     @View(R.id.profileImageView) private ImageView profileImageView;
 //    @View(R.id.reportBtn) private ImageButton reportButton;
-    @View(R.id.bookmark2Btn) private ImageButton bookmarkButton;
+//    @View(R.id.bookmark2Btn) private ImageButton bookmarkButton;
+
+    @View(R.id.errorImageView) private ImageView errorImageView;
+    @View(R.id.pbCardProgress) private ProgressBar mProgressBar;
 
     private Advert mAdvert;
     private Context mContext;
@@ -48,6 +59,7 @@ public class AdvertCard{
     private static final String AD_TO_TOTAL= "adToTotal";
     private static boolean clickable;
     private static String mLastOrNotLast;
+    private static boolean hasAdLoaded;
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
         mContext = context;
@@ -66,23 +78,58 @@ public class AdvertCard{
         }
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
 
-
     }
 
     private void loadAllAds(){
         Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
-        Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
+
+        mProgressBar.setVisibility(android.view.View.VISIBLE);
+        Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext,Utils.dpToPx(4),0,
                 RoundedCornersTransformation.CornerType.TOP))
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        errorImageView.setVisibility(android.view.View.VISIBLE);
+                        mProgressBar.setVisibility(android.view.View.GONE);
+                        hasAdLoaded = false;
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        mProgressBar.setVisibility(android.view.View.GONE);
+                        sendBroadcast(START_TIMER);
+                        hasAdLoaded = true;
+                        return false;
+                    }
+                })
                 .into(profileImageView);
-        sendBroadcast(START_TIMER);
+//        mProgressBar.setVisibility(android.view.View.GONE);
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
         clickable=false;
+
     }
 
     private void loadOnlyLastAd(){
         Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
         Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
                 RoundedCornersTransformation.CornerType.TOP))
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        errorImageView.setVisibility(android.view.View.VISIBLE);
+                        mProgressBar.setVisibility(android.view.View.GONE);
+                        hasAdLoaded = false;
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        mProgressBar.setVisibility(android.view.View.GONE);
+                        hasAdLoaded = true;
+                        return false;
+                    }
+                })
                 .into(profileImageView);
         mSwipeView.lockViews();
         clickable=false;
@@ -113,7 +160,7 @@ public class AdvertCard{
     }
 
     private void sendBroadcast(String message ) {
-        if(message == START_TIMER && mLastOrNotLast == Constants.NOT_LAST){
+        if(message == START_TIMER && mLastOrNotLast == Constants.NOT_LAST && hasAdLoaded){
             Log.d("AdvertCard - ","Sending message to start timer");
             Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
             mSwipeView.lockViews();

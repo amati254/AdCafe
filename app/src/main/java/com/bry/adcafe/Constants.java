@@ -17,6 +17,7 @@ public class Constants {
     public static String LAST = "LAST";
     public static String NOT_LAST = "NOT_LAST";
     public static String UNREGISTER_ALL_RECEIVERS = "UNREGISTER_ALL_RECEIVERS";
-
+    public static String CONNECTION_OFFLINE = "CONNECTION_OFFLINE";
+    public static String CONNECTION_ONLINE = "CONNECTION_ONLINE";
 
 }

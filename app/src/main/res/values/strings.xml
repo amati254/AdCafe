@@ -7,10 +7,13 @@
     <string name="dontHaveAccountQuestion">"Don't have an account? Sign up here!"</string>
     <string name="haveAccountQuestion">"Have an account already? Log in here!"</string>
     <string name="signUpText">"Sign up"</string>
-    <string name="signInText">"Log in"</string>
+    <string name="signInText">"Login"</string>
     <string name="passwordHintText">"Password"</string>
     <string name="confirmPasswordText">"Confirm Password"</string>
     <string name="emailText">"Email"</string>
     <string name="nameText">"Name"</string>
-    <string name="title_activity_login">Login</string>
+    <string name="title_activity_login">"Login"</string>
+    <string name="LogInNoConnection">"You may need internet connection to login."</string>
+    <string name="SignUpNoConnection">"You may need internet connection to sign up."</string>
+
 </resources>

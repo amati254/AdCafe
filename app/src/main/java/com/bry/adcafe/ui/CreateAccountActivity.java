@@ -1,8 +1,13 @@
 package com.bry.adcafe.ui;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +31,7 @@ import butterknife.ButterKnife;
 public class CreateAccountActivity extends AppCompatActivity implements View.OnClickListener{
     public static final String TAG = CreateAccountActivity.class.getSimpleName();
     private ProgressDialog mAuthProgressDialog;
+    private Context mContext;
 
     @Bind(R.id.createUserButton) Button mCreateUserButton;
     @Bind(R.id.nameEditText) EditText mNameEditText;
@@ -47,6 +53,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         mAuth = FirebaseAuth.getInstance();
         createAuthStateListener();
         createAuthProgressDialog();
+        mContext = this.getApplicationContext();
 
         mLoginTextView.setOnClickListener(this);
         mCreateUserButton.setOnClickListener(this);
@@ -78,19 +85,25 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         boolean validName = isValidName(name);
         if(!validEmail || !validName || !validPassword)return;
 
-        mAuthProgressDialog.show();
-        mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                mAuthProgressDialog.dismiss();
-                if(task.isSuccessful()){
-                    Log.d(TAG,"authentication successful");
-                    createFirebaseUserProfile(task.getResult().getUser());
-                } else {
-                    Toast.makeText(CreateAccountActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+        if(!isOnline(mContext)){
+            Snackbar.make(findViewById(R.id.SignUpCoordinatorLayout), R.string.SignUpNoConnection,
+                    Snackbar.LENGTH_LONG).show();
+        }else{
+            mAuthProgressDialog.show();
+            mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    mAuthProgressDialog.dismiss();
+                    if(task.isSuccessful()){
+                        Log.d(TAG,"authentication successful");
+                        createFirebaseUserProfile(task.getResult().getUser());
+                    }else {
+                        Toast.makeText(CreateAccountActivity.this, "Sign Up may have failed.", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
+            });
+        }
+
 
     }
 
@@ -171,5 +184,12 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
             return false;
         }
         return true;
+    }
+
+    public boolean isOnline(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        //should check null because in airplane mode it will be null
+        return (netInfo != null && netInfo.isConnected());
     }
 }

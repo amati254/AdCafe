@@ -1,8 +1,15 @@
 package com.bry.adcafe.ui;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,7 +19,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
+import com.bry.adcafe.services.ConnectionChecker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -33,6 +42,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private ProgressDialog mAuthProgressDialog;
+    private Context mContext;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,8 +52,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mAuth = FirebaseAuth.getInstance();
         mRegisterLink.setOnClickListener(this);
         mLoginButton.setOnClickListener(this);
-
+        mContext = this.getApplicationContext();
         createAuthProgressDialog();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
+
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -58,6 +71,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         };
     }
+
+    private BroadcastReceiver mMessageReceiverForConnectionOffline = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("CONNECTION_C-MAIN_A","Connection has been dropped");
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForConnectionOnline = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("CONNECTION_C-MAIN_A","Connection has come online");
+        }
+    };
 
     @Override
     public void onStart(){
@@ -97,21 +124,33 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mEmail.setText("Password cannot be blank");
             return;
         }
-        mAuthProgressDialog.show();
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                      mAuthProgressDialog.dismiss();
-                        Log.d(TAG,"signInWithEmail:onComplete"+task.isSuccessful());
-                        if(!task.isSuccessful()){
-                            Log.w(TAG,"SignInWithEmail",task.getException());
-                            Toast.makeText(LoginActivity.this,"Authentication Failed",Toast.LENGTH_SHORT).show();
+        if(!isOnline(mContext)){
+            Snackbar.make(findViewById(R.id.loginCoordinatorLayout), R.string.LogInNoConnection,
+                    Snackbar.LENGTH_LONG).show();
+        }else{
+            mAuthProgressDialog.show();
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            mAuthProgressDialog.dismiss();
+                            Log.d(TAG,"signInWithEmail:onComplete"+task.isSuccessful());
+                            if(!task.isSuccessful()){
+                                Log.w(TAG,"SignInWithEmail",task.getException());
+                                Toast.makeText(LoginActivity.this,"Login may have failed",Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
-    }
+                    });
+            }
+        }
 
+
+    public boolean isOnline(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        //should check null because in airplane mode it will be null
+        return (netInfo != null && netInfo.isConnected());
+    }
 
     private void createAuthProgressDialog() {
         mAuthProgressDialog = new ProgressDialog(this);

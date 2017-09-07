@@ -60,10 +60,8 @@ public class MainActivity extends AppCompatActivity{
         mContext = getApplicationContext();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
-
-//        loadFromSharedPreferences();
-//        setUpSwipeView();
-//        loadAdsFromJSONFile();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
 
 
         mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
@@ -91,15 +89,7 @@ public class MainActivity extends AppCompatActivity{
         thread.start();
         mProgressBar.setVisibility(View.VISIBLE);
         mLinearLayout.setVisibility(View.GONE);
-        sendBroadcastToStartTimer();
-
-    }
-
-    private void sendBroadcastToStartTimer() {
-        Log.d("AdvertCard - ","Sending message to start timer");
-        Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
-        mSwipeView.lockViews();
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        loadFromSharedPreferences();
     }
 
     private void getAds() {
@@ -303,6 +293,20 @@ public class MainActivity extends AppCompatActivity{
             Variables.adAdToTotal();
             addToSharedPreferences();
             onclicks();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForConnectionOffline = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("CONNECTION_C-MAIN_A","Connection has been dropped");
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForConnectionOnline = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("CONNECTION_C-MAIN_A","Connection has come online");
         }
     };
 
