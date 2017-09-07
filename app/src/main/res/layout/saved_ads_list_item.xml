@@ -13,11 +13,37 @@
         app:cardElevation="2dp">
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/SavedImageView"
             android:layout_width="match_parent"
             android:layout_height="400dp"
             android:scaleType="fitXY"
             android:src="@android:color/holo_orange_dark"/>
+
+        <ImageView
+            android:id="@+id/savedErrorImageView"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:background="@drawable/ic_action_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="50dp"/>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+            <ProgressBar
+                android:id="@+id/pbSavedCardProgress"
+                style="?android:attr/progressBarStyleSmall"
+                android:indeterminate="true"
+                android:visibility="gone"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:progressDrawable="@drawable/circular_progress_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+            </ProgressBar>
+        </RelativeLayout>
 
     </android.support.v7.widget.CardView>
 

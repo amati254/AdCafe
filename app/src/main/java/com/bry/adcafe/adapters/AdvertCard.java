@@ -47,7 +47,6 @@ public class AdvertCard{
     @View(R.id.profileImageView) private ImageView profileImageView;
 //    @View(R.id.reportBtn) private ImageButton reportButton;
 //    @View(R.id.bookmark2Btn) private ImageButton bookmarkButton;
-
     @View(R.id.errorImageView) private ImageView errorImageView;
     @View(R.id.pbCardProgress) private ProgressBar mProgressBar;
 

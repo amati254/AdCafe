@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -62,10 +63,11 @@ public class MainActivity extends AppCompatActivity{
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
-
+        ConnectionChecker.StartNetworkChecker(mContext);
 
         mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
         mLinearLayout = (LinearLayout) findViewById(R.id.bottomNavButtons);
+        loadFromSharedPreferences();
         setUpSwipeView();
         loadAdsFromThread();
     }
@@ -89,7 +91,6 @@ public class MainActivity extends AppCompatActivity{
         thread.start();
         mProgressBar.setVisibility(View.VISIBLE);
         mLinearLayout.setVisibility(View.GONE);
-        loadFromSharedPreferences();
     }
 
     private void getAds() {
@@ -140,6 +141,8 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onDestroy(){
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddingToSharedPreferences);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOffline);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOnline);
         Log.d("MAIN_ACTIVITY--","Unregistering all receivers");
         sendBroadcastToUnregisterAllReceivers();
         if(mSwipeView!=null){
@@ -161,7 +164,7 @@ public class MainActivity extends AppCompatActivity{
     private void setUpSwipeView() {
         mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
 
-        int bottomMargin = Utils.dpToPx(90);
+        int bottomMargin = Utils.dpToPx(100);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
         float relativeScale = density();
 
@@ -223,7 +226,8 @@ public class MainActivity extends AppCompatActivity{
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(mContext,"Bookmarked.",Toast.LENGTH_SHORT).show();
+                    Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.shared,
+                            Snackbar.LENGTH_SHORT).show();
                 }
             });
         }
@@ -300,6 +304,8 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("CONNECTION_C-MAIN_A","Connection has been dropped");
+            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.connectionDropped2,
+                    Snackbar.LENGTH_INDEFINITE).show();
         }
     };
 

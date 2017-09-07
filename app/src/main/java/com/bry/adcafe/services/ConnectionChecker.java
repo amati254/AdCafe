@@ -41,14 +41,14 @@ public class ConnectionChecker {
                         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     }
                 }
-            },3000);
+            },10000);
         }
     }
 
     private static boolean isNetworkConnected(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return (netInfo != null && netInfo.isConnected() && isInternetAvailable());
+        return (netInfo != null && netInfo.isConnected());
     }
 
     private static boolean isInternetAvailable() {

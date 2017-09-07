@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:id="@+id/mainCoordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey">
@@ -42,7 +44,7 @@
                 android:id="@+id/bookmarkBtn"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
-                android:layout_marginLeft="34dp"
+                android:layout_marginLeft="35dp"
                 android:background="@drawable/ic_action_bookmarksfol"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -50,7 +52,7 @@
                 android:layout_marginTop="40dp"
                 android:layout_marginLeft="37dp"
                 android:textSize="8dp"
-                android:text="Bookmarks."
+                android:text="Ad Archives."
                 android:layout_height="wrap_content" />
         </RelativeLayout>
 
@@ -127,4 +129,4 @@
         </ProgressBar>
     </RelativeLayout>
 
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

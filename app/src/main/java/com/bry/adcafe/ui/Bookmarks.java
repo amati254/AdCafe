@@ -1,8 +1,13 @@
 package com.bry.adcafe.ui;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,9 +18,11 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.services.ConnectionChecker;
 import com.bry.adcafe.services.SavedAdsUtils;
 import com.bry.adcafe.services.Utils;
 import com.mindorks.placeholderview.PlaceHolderView;
@@ -30,7 +37,6 @@ public class Bookmarks extends AppCompatActivity {
 
     private ArrayList<Advert> mSavedAds = null;
     private Runnable mViewRunnable;
-    private ProgressDialog mProgressDialog = null;
     private ProgressBar mProgressBar;
 
     @Override
@@ -38,8 +44,10 @@ public class Bookmarks extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
         loadPlaceHolderViews();
-//        loadBookmarkedAdsFromJSONFile();
+        ConnectionChecker.StartNetworkChecker(mContext);
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
 
         mSavedAds = new ArrayList<Advert>();
         loadAdsFromThread();
@@ -150,12 +158,20 @@ public class Bookmarks extends AppCompatActivity {
         }
     }
 
-//    private void createAuthProgressDialog() {
-//        mAuthProgressDialog = new ProgressDialog(this);
-//        mAuthProgressDialog.setTitle("Loading...");
-//        mAuthProgressDialog.setMessage("");
-//        mAuthProgressDialog.setCancelable(false);
-//    }
+    private BroadcastReceiver mMessageReceiverForConnectionOffline = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("CONNECTION_C-Bookmarks","Connection has been dropped");
+            Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.connectionDropped,
+                    Snackbar.LENGTH_INDEFINITE).show();
+        }
+    };
 
+    private BroadcastReceiver mMessageReceiverForConnectionOnline = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("CONNECTION_C-Bookmarks","Connection has come online");
+        }
+    };
 
 }

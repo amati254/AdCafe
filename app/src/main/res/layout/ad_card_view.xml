@@ -34,8 +34,8 @@
                 android:layout_height="wrap_content">
                 <ImageButton
                     android:id="@+id/reportBtn"
-                    android:layout_width="43dp"
-                    android:layout_height="43dp"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
                     android:layout_marginLeft="30dp"
                     android:background="@drawable/ic_action_flag"/>
                 <TextView
@@ -43,7 +43,7 @@
                     android:id="@+id/Report"
                     android:text="Report"
                     android:textSize="8dp"
-                    android:paddingTop="37dp"
+                    android:paddingTop="35dp"
                     android:paddingLeft="39dp"
                     android:layout_height="wrap_content" />
             </RelativeLayout>
@@ -54,17 +54,17 @@
                 android:layout_height="wrap_content">
                 <ImageButton
                     android:id="@+id/bookmark2Btn"
-                    android:layout_width="43dp"
-                    android:layout_height="43dp"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:layout_marginLeft="7dp"
-                    android:background="@drawable/ic_action_bookmark2"/>
+                    android:background="@drawable/ic_action_pin"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:id="@+id/Bookmark2Text"
-                    android:text="Bookmark"
+                    android:text="Pin"
                     android:textSize="8dp"
-                    android:paddingTop="37dp"
-                    android:paddingLeft="11.5dp"
+                    android:paddingTop="35dp"
+                    android:paddingLeft="20dp"
                     android:layout_height="wrap_content" />
             </RelativeLayout>
 
