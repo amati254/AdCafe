@@ -19,5 +19,7 @@
     <string name="connectionDropped2">"Your connection may have dropped.You can't move to the next ad without a stable connection to the Internet."</string>
     <string name="shared">"Shared."</string>
     <string name="connectionBack">"Your back online, you may now continue."</string>
+    <string name="Logout">"Logout"</string>
+    <string name="pinned">"Pinned"</string>
 
 </resources>

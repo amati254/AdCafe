@@ -23,17 +23,17 @@
             android:layout_height="wrap_content">
 
             <ImageButton
-                android:id="@+id/settingsBtn"
+                android:id="@+id/logoutBtn"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
-                android:background="@drawable/ic_action_settings"/>
+                android:background="@drawable/ic_action_exit"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:id="@+id/settingsText"
                 android:layout_marginTop="40dp"
                 android:textSize="8dp"
-                android:layout_marginLeft="8dp"
-                android:text="Settings."
+                android:layout_marginLeft="9dp"
+                android:text="Logout."
                 android:layout_height="wrap_content" />
         </RelativeLayout>
 
@@ -94,14 +94,6 @@
                 android:layout_height="wrap_content" />
         </RelativeLayout>
     </LinearLayout>
-
-    <!--<View-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="1dp"-->
-        <!--android:layout_gravity="bottom"-->
-        <!--android:layout_marginBottom="60dp"-->
-        <!--android:background="#C0C0C0" />-->
-
 
     <com.mindorks.placeholderview.PlaceHolderView
         android:id="@+id/adCounterView"

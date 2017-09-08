@@ -1,7 +1,6 @@
 package com.bry.adcafe.ui;
 
 import android.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,12 +28,11 @@ import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.adapters.AdvertCard;
 import com.bry.adcafe.adapters.AdCounterBar;
-import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.fragments.ReportDialogFragment;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.services.ConnectionChecker;
-import com.bry.adcafe.services.SavedAdsUtils;
 import com.bry.adcafe.services.Utils;
+import com.google.firebase.auth.FirebaseAuth;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.SwipeDecor;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
@@ -207,11 +205,10 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void onclicks() {
-        findViewById(R.id.settingsBtn).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.logoutBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,settings.class);
-                startActivity(intent);
+                logoutUser();
             }
         });
 
@@ -219,7 +216,7 @@ public class MainActivity extends AppCompatActivity{
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.shared,
+                    Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinned,
                             Snackbar.LENGTH_SHORT).show();
                 }
             });
@@ -280,6 +277,14 @@ public class MainActivity extends AppCompatActivity{
             });
         }
 
+    }
+
+    private void logoutUser() {
+        FirebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
 

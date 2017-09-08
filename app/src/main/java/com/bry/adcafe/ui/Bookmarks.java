@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -133,6 +134,8 @@ public class Bookmarks extends AppCompatActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
         mPlaceHolderView = (PlaceHolderView) findViewById(R.id.PlaceHolderView);
         mContext = getApplicationContext();
+
+        mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,2));
 
     }
 
