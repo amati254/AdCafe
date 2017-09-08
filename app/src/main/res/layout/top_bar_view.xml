@@ -7,9 +7,9 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_gravity="top"
-        android:gravity="end"
-        android:layout_marginEnd="10dp"
-        android:layout_marginRight="10dp"
+        android:gravity="start"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
         android:layout_width="match_parent"
         android:layout_height="50dp">
 
@@ -41,8 +41,6 @@
                 android:textSize="12sp" />
 
         </RelativeLayout>
-
-
 
         <TextView
             android:layout_width="wrap_content"
