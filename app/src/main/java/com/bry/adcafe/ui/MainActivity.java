@@ -36,6 +36,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.SwipeDecor;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +52,7 @@ public class MainActivity extends AppCompatActivity{
     private Runnable mViewRunnable;
     private ProgressBar mProgressBar;
     private LinearLayout mLinearLayout;
-
-
+    private AVLoadingIndicatorView mAvi;
 
 
     @Override
@@ -86,7 +86,8 @@ public class MainActivity extends AppCompatActivity{
         };
         Thread thread =  new Thread(null, mViewRunnable, "Background");
         thread.start();
-        mProgressBar.setVisibility(View.VISIBLE);
+//        mProgressBar.setVisibility(View.VISIBLE);
+        mAvi.setVisibility(View.VISIBLE);
         mLinearLayout.setVisibility(View.GONE);
     }
 
@@ -108,7 +109,7 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void run() {
             loadAdsFromJSONFile();
-            mProgressBar.setVisibility(View.GONE);
+            mAvi.setVisibility(View.GONE);
             mLinearLayout.setVisibility(View.VISIBLE);
         }
     };
@@ -145,8 +146,9 @@ public class MainActivity extends AppCompatActivity{
 
     private void setUpSwipeView() {
         mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
-        mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
+//        mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
         mLinearLayout = (LinearLayout) findViewById(R.id.bottomNavButtons);
+        mAvi = (AVLoadingIndicatorView) findViewById(R.id.mainActivityAvi);
 
         int bottomMargin = Utils.dpToPx(90);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
@@ -287,7 +289,6 @@ public class MainActivity extends AppCompatActivity{
         startActivity(intent);
         finish();
     }
-
 
     private BroadcastReceiver mMessageReceiverForAddingToSharedPreferences = new BroadcastReceiver() {
         @Override

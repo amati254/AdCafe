@@ -22,6 +22,7 @@ import com.mindorks.placeholderview.annotations.LongClick;
 import com.mindorks.placeholderview.annotations.NonReusable;
 import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import java.net.InetAddress;
 
@@ -34,7 +35,7 @@ import java.net.InetAddress;
 public class SavedAdsCard {
     @View(R.id.SavedImageView) private ImageView imageView;
     @View(R.id.savedErrorImageView) private ImageView errorImageView;
-    @View(R.id.pbSavedCardProgress) private ProgressBar mProgressBar;
+    @View(R.id.savedAdCardAvi) private AVLoadingIndicatorView mAvi;
 
 
 
@@ -54,24 +55,29 @@ public class SavedAdsCard {
 
     @Resolve
     private void onResolved() {
-        mProgressBar.setVisibility(android.view.View.VISIBLE);
+       loadImage();
+    }
+
+    private void loadImage(){
+        mAvi.setVisibility(android.view.View.VISIBLE);
         Glide.with(mContext).load(mAdvert.getImageUrl())
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                       mProgressBar.setVisibility(android.view.View.GONE);
+                        mAvi.setVisibility(android.view.View.GONE);
                         errorImageView.setVisibility(android.view.View.VISIBLE);
                         if(!isInternetAvailable()&& !hasMessageBeenSeen){
-                           Intent intent = new Intent(Constants.CONNECTION_OFFLINE);
+                            hasMessageBeenSeen = true;
+                            Intent intent = new Intent(Constants.CONNECTION_OFFLINE);
                             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-                            hasMessageBeenSeen = false;
                         }
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        mProgressBar.setVisibility(android.view.View.GONE);
+                        mAvi.setVisibility(android.view.View.GONE);
+                        errorImageView.setVisibility(android.view.View.GONE);
                         return false;
                     }
                 })

@@ -31,6 +31,7 @@ import com.mindorks.placeholderview.PlaceHolderView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.RunnableFuture;
+import com.wang.avi.AVLoadingIndicatorView;
 
 public class Bookmarks extends AppCompatActivity {
     private Context mContext;
@@ -39,6 +40,8 @@ public class Bookmarks extends AppCompatActivity {
     private ArrayList<Advert> mSavedAds = null;
     private Runnable mViewRunnable;
     private ProgressBar mProgressBar;
+    private AVLoadingIndicatorView mAvi;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +109,8 @@ public class Bookmarks extends AppCompatActivity {
         };
         Thread thread =  new Thread(null, mViewRunnable, "Background");
         thread.start();
-        mProgressBar.setVisibility(View.VISIBLE);
+//        mProgressBar.setVisibility(View.VISIBLE);
+        mAvi.setVisibility(View.VISIBLE);
     }
 
     private void getAds() {
@@ -133,8 +137,8 @@ public class Bookmarks extends AppCompatActivity {
     private void loadPlaceHolderViews() {
         mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
         mPlaceHolderView = (PlaceHolderView) findViewById(R.id.PlaceHolderView);
+        mAvi = (AVLoadingIndicatorView) findViewById(R.id.avi);
         mContext = getApplicationContext();
-
         mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,2));
 
     }
@@ -148,7 +152,9 @@ public class Bookmarks extends AppCompatActivity {
             for(int i = 0; i<mSavedAds.size();i++)
                 mPlaceHolderView.addView(new SavedAdsCard(mSavedAds.get(i),mContext,mPlaceHolderView));
         }
-        mProgressBar.setVisibility(View.GONE);
+//        mProgressBar.setVisibility(View.GONE);
+        mAvi.setVisibility(View.GONE);
+
     }
 
     private BroadcastReceiver mMessageReceiverForConnectionOffline = new BroadcastReceiver() {

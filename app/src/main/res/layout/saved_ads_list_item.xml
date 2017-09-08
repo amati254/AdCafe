@@ -26,24 +26,22 @@
             android:visibility="gone"
             android:background="@drawable/ic_action_error"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"/>
+            android:layout_height="wrap_content"/>
 
         <RelativeLayout
             android:layout_width="wrap_content"
             android:gravity="center"
             android:layout_gravity="center"
             android:layout_height="wrap_content">
-            <ProgressBar
-                android:id="@+id/pbSavedCardProgress"
-                style="?android:attr/progressBarStyleSmall"
-                android:indeterminate="true"
+
+            <com.wang.avi.AVLoadingIndicatorView
+                android:id="@+id/savedAdCardAvi"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                style="@style/AVLoadingIndicatorView.Small"
                 android:visibility="gone"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:progressDrawable="@drawable/circular_progress_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-            </ProgressBar>
+                app:indicatorName="LineScaleIndicator"
+                app:indicatorColor="@color/accent" />
         </RelativeLayout>
 
     </android.support.v7.widget.CardView>

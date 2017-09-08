@@ -34,6 +34,7 @@ import com.mindorks.placeholderview.annotations.swipe.SwipeIn;
 import com.mindorks.placeholderview.annotations.swipe.SwipeInState;
 import com.mindorks.placeholderview.annotations.swipe.SwipeOut;
 import com.mindorks.placeholderview.annotations.swipe.SwipeOutState;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
@@ -48,14 +49,14 @@ public class AdvertCard{
 //    @View(R.id.reportBtn) private ImageButton reportButton;
 //    @View(R.id.bookmark2Btn) private ImageButton bookmarkButton;
     @View(R.id.errorImageView) private ImageView errorImageView;
-    @View(R.id.pbCardProgress) private ProgressBar mProgressBar;
+//    @View(R.id.pbCardProgress) private ProgressBar mProgressBar;
+    @View(R.id.adCardAvi) private AVLoadingIndicatorView mAvi;
 
     private Advert mAdvert;
     private Context mContext;
     private SwipePlaceHolderView mSwipeView;
-    private Integer adTotal;
     private static final String START_TIMER= "startTimer";
-    private static final String AD_TO_TOTAL= "adToTotal";
+
     private static boolean clickable;
     private static String mLastOrNotLast;
     private static boolean hasAdLoaded;
@@ -83,14 +84,16 @@ public class AdvertCard{
     private void loadAllAds(){
         Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
 
-        mProgressBar.setVisibility(android.view.View.VISIBLE);
+//        mProgressBar.setVisibility(android.view.View.VISIBLE);
+        mAvi.setVisibility(android.view.View.VISIBLE);
         Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext,Utils.dpToPx(4),0,
                 RoundedCornersTransformation.CornerType.TOP))
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                         errorImageView.setVisibility(android.view.View.VISIBLE);
-                        mProgressBar.setVisibility(android.view.View.GONE);
+//                        mProgressBar.setVisibility(android.view.View.GONE);
+                        mAvi.setVisibility(android.view.View.GONE);
                         mSwipeView.lockViews();
                         clickable = false;
                         hasAdLoaded = false;
@@ -99,7 +102,7 @@ public class AdvertCard{
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        mProgressBar.setVisibility(android.view.View.GONE);
+                        mAvi.setVisibility(android.view.View.GONE);
                         errorImageView.setVisibility(android.view.View.GONE);
                         hasAdLoaded = true;
                         sendBroadcast(START_TIMER);
@@ -113,20 +116,23 @@ public class AdvertCard{
 
     private void loadOnlyLastAd(){
         Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
+        mAvi.setVisibility(android.view.View.VISIBLE);
         Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
                 RoundedCornersTransformation.CornerType.TOP))
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                         errorImageView.setVisibility(android.view.View.VISIBLE);
-                        mProgressBar.setVisibility(android.view.View.GONE);
+//                        mProgressBar.setVisibility(android.view.View.GONE);
+                        mAvi.setVisibility(android.view.View.GONE);
                         hasAdLoaded = false;
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        mProgressBar.setVisibility(android.view.View.GONE);
+//                        mProgressBar.setVisibility(android.view.View.GONE);
+                        mAvi.setVisibility(android.view.View.GONE);
                         errorImageView.setVisibility(android.view.View.GONE);
                         hasAdLoaded = true;
                         return false;
@@ -202,4 +208,5 @@ public class AdvertCard{
     private void onSwipeOutState(){
         Log.d("EVENT", "onSwipeOutState");
     }
+
 }

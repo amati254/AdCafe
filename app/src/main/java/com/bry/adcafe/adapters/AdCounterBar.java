@@ -121,7 +121,6 @@ public class AdCounterBar {
         if(message == Constants.TIMER_HAS_ENDED && !hasTimerMessageBeenSent){
             Log.d("AD_COUNTER_BAR---","sending message that timer has ended.");
             Intent intent = new Intent(Constants.TIMER_HAS_ENDED);
-//            intent.putExtra(Constants.TIMER_HAS_ENDED,Constants.TIMER_HAS_ENDED);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             hasTimerMessageBeenSent = true;
         }

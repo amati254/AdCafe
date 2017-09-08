@@ -94,16 +94,24 @@
             android:gravity="center"
             android:layout_gravity="center"
             android:layout_height="wrap_content">
-            <ProgressBar
-                android:id="@+id/pbCardProgress"
-                style="?android:attr/progressBarStyleSmall"
-                android:indeterminate="true"
-                android:visibility="gone"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:progressDrawable="@drawable/circular_progress_layout"
-                android:layout_width="40dp"
-                android:layout_height="40dp" >
-            </ProgressBar>
+            <!--<ProgressBar-->
+                <!--android:id="@+id/pbCardProgress"-->
+                <!--style="?android:attr/progressBarStyleSmall"-->
+                <!--android:indeterminate="true"-->
+                <!--android:visibility="gone"-->
+                <!--android:layout_marginRight="@dimen/activity_horizontal_margin"-->
+                <!--android:progressDrawable="@drawable/circular_progress_layout"-->
+                <!--android:layout_width="40dp"-->
+                <!--android:layout_height="40dp" />-->
+
+                <com.wang.avi.AVLoadingIndicatorView
+                    android:id="@+id/adCardAvi"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    style="@style/AVLoadingIndicatorView"
+                    android:visibility="gone"
+                    app:indicatorName="LineScaleIndicator"
+                    app:indicatorColor="@color/accent" />
         </RelativeLayout>
 
 
