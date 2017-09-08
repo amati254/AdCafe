@@ -21,5 +21,6 @@
     <string name="connectionBack">"Your back online, you may now continue."</string>
     <string name="Logout">"Logout"</string>
     <string name="pinned">"Pinned"</string>
+    <string name="learnSE">"Learn. Share. Earn."</string>
 
 </resources>

@@ -13,20 +13,21 @@
         android:roundIcon="@mipmap/ic_launcher2"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.LoginActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".ui.LoginActivity"/>
         <activity
             android:name=".ui.MainActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".ui.CreateAccountActivity" />
         <activity android:name=".ui.SettingsActivity" />
         <activity android:name=".ui.Dashboard" />
-        <activity android:name=".ui.NoConnectionActivity"></activity>
+        <activity android:name=".ui.NoConnectionActivity" />
+        <activity android:name=".ui.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

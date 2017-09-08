@@ -119,7 +119,7 @@ public class Bookmarks extends AppCompatActivity {
             for(Advert ad: SavedAdsUtils.loadSavedAdverts(this.getApplicationContext())){
                 mSavedAds.add(ad);
             }
-            Thread.sleep(1500);
+            Thread.sleep(300);
             Log.i("ARRAY", ""+ mSavedAds.size());
         }catch (Exception e) {
             Log.e("BACKGROUND_PROC", e.getMessage());

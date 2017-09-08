@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity{
             for(Advert ad: Utils.loadProfiles(this.getApplicationContext())){
                  mAdList.add(ad);
             }
-            Thread.sleep(1500);
+            Thread.sleep(1000);
             Log.i("ARRAY", ""+  mAdList.size());
         }catch (Exception e) {
             Log.e("BACKGROUND_PROC", e.getMessage());
