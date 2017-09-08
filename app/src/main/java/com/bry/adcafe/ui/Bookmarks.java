@@ -124,12 +124,7 @@ public class Bookmarks extends AppCompatActivity {
     private Runnable returnRes = new Runnable() {
         @Override
         public void run() {
-            if(mSavedAds!=null && mSavedAds.size()>0){
-                for(int i = 0; i<mSavedAds.size();i++)
-                    mPlaceHolderView.addView(new SavedAdsCard(mSavedAds.get(i),mContext,mPlaceHolderView));
-            }
-            mProgressBar.setVisibility(View.GONE);
-
+            loadBookmarkedAdsFromJSONFile();
         }
     };
 
@@ -146,16 +141,11 @@ public class Bookmarks extends AppCompatActivity {
         if(mPlaceHolderView == null){
             loadPlaceHolderViews();
         }
-        if((SavedAdsUtils.loadSavedAdverts(this.getApplicationContext()))!= null) {
-            List<Advert> savedAdList = SavedAdsUtils.loadSavedAdverts(this.getApplicationContext());
-            Log.d("BOOKMARKS_ACTIVITY","loading:"+savedAdList.size()+"ads");
-
-            for(int i = 0; i<savedAdList.size() ; i++){
-                mPlaceHolderView.addView(new SavedAdsCard(savedAdList.get(i),mContext,mPlaceHolderView));
-            }
-        }else{
-            Toast.makeText(mContext, "You have no saved ads.", Toast.LENGTH_SHORT).show();
+        if(mSavedAds!=null && mSavedAds.size()>0){
+            for(int i = 0; i<mSavedAds.size();i++)
+                mPlaceHolderView.addView(new SavedAdsCard(mSavedAds.get(i),mContext,mPlaceHolderView));
         }
+        mProgressBar.setVisibility(View.GONE);
     }
 
     private BroadcastReceiver mMessageReceiverForConnectionOffline = new BroadcastReceiver() {

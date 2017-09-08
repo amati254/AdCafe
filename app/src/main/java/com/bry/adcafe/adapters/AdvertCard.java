@@ -97,8 +97,8 @@ public class AdvertCard{
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                         mProgressBar.setVisibility(android.view.View.GONE);
-                        sendBroadcast(START_TIMER);
                         hasAdLoaded = true;
+                        sendBroadcast(START_TIMER);
                         return false;
                     }
                 })
@@ -137,8 +137,10 @@ public class AdvertCard{
     @Click(R.id.profileImageView)
     private void onClick(){
         Log.d("EVENT", "profileImageView click");
-        if(clickable){
-            mSwipeView.enableTouchSwipe();
+        if(hasAdLoaded) {
+            if (clickable) {
+                mSwipeView.enableTouchSwipe();
+            }
         }
     }
 
@@ -146,15 +148,19 @@ public class AdvertCard{
     @SwipeOut
     private void onSwipedOut(){
         Log.d("EVENT----", "onSwipedOut");
-        Variables.removeAd();
-        sendBroadcast(START_TIMER);
+        if(hasAdLoaded){
+            Variables.removeAd();
+            sendBroadcast(START_TIMER);
+        }
     }
 
     @SwipeIn
     private void onSwipeIn(){
         Log.d("EVENT----", "onSwipedIn");
-        Variables.removeAd();
-        sendBroadcast(START_TIMER);
+        if(hasAdLoaded){
+            Variables.removeAd();
+            sendBroadcast(START_TIMER);
+        }
     }
 
     private void sendBroadcast(String message ) {
@@ -162,10 +168,9 @@ public class AdvertCard{
             Log.d("AdvertCard - ","Sending message to start timer");
             mSwipeView.lockViews();
             clickable = false;
-            if(hasAdLoaded){
                 Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-            }
+
         }
     }
 

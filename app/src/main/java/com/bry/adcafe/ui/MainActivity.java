@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -60,16 +63,12 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         mContext = getApplicationContext();
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
         ConnectionChecker.StartNetworkChecker(mContext);
-
-        mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
-        mLinearLayout = (LinearLayout) findViewById(R.id.bottomNavButtons);
+        registerReceivers();
         loadFromSharedPreferences();
         setUpSwipeView();
         loadAdsFromThread();
+        StartNetworkChecker(mContext);
     }
 
     private void loadAdsFromThread(){
@@ -110,22 +109,7 @@ public class MainActivity extends AppCompatActivity{
     private Runnable returnRes = new Runnable() {
         @Override
         public void run() {
-            if(mAdList!=null && mAdList.size()>0){
-                for(int i = 0 ; i < mAdList.size() ; i++){
-                    if(Variables.adTotal>=mAdList.size()){
-                        mSwipeView.addView(new AdvertCard(mContext,mAdList.get(mAdList.size()-1),mSwipeView,Constants.LAST));
-                        Variables.setIsLastOrNotLast(Constants.LAST);
-                        break;
-                    } else {
-                        mSwipeView.addView(new AdvertCard(mContext,mAdList.get(i),mSwipeView,Constants.NOT_LAST));
-                        Variables.setIsLastOrNotLast(Constants.NOT_LAST);
-                    }
-                }
-            }
-
-            loadAdCounter();
-            Variables.setNewNumberOfAds(mAdList.size()-Variables.adTotal);
-            onclicks();
+            loadAdsFromJSONFile();
             mProgressBar.setVisibility(View.GONE);
             mLinearLayout.setVisibility(View.VISIBLE);
         }
@@ -163,8 +147,10 @@ public class MainActivity extends AppCompatActivity{
 
     private void setUpSwipeView() {
         mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
+        mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
+        mLinearLayout = (LinearLayout) findViewById(R.id.bottomNavButtons);
 
-        int bottomMargin = Utils.dpToPx(100);
+        int bottomMargin = Utils.dpToPx(90);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
         float relativeScale = density();
 
@@ -193,24 +179,31 @@ public class MainActivity extends AppCompatActivity{
         if(mSwipeView == null){
             setUpSwipeView();
         }
-        if((Utils.loadProfiles(this.getApplicationContext()))!= null) {
-            List<Advert> adList = Utils.loadProfiles(this.getApplicationContext());
-            for(int i = 0 ; i < adList.size()-1 ; i++){
-                if(Variables.adTotal>=adList.size()){
-                    mSwipeView.addView(new AdvertCard(mContext,adList.get(adList.size()-1),mSwipeView,Constants.LAST));
+        if(mAdList!=null && mAdList.size()>0){
+            for(int i = 0 ; i < mAdList.size() ; i++){
+                if(Variables.adTotal>=mAdList.size()){
+                    mSwipeView.addView(new AdvertCard(mContext,mAdList.get(mAdList.size()-1),mSwipeView,Constants.LAST));
                     Variables.setIsLastOrNotLast(Constants.LAST);
                     break;
-                } else if(i >= Variables.adTotal){
-                    mSwipeView.addView(new AdvertCard(mContext,adList.get(i),mSwipeView,Constants.NOT_LAST));
-                    Variables.setIsLastOrNotLast(Constants.NOT_LAST);
+                } else {
+                    if(i>=Variables.adTotal){
+                        mSwipeView.addView(new AdvertCard(mContext,mAdList.get(i),mSwipeView,Constants.NOT_LAST));
+                        Variables.setIsLastOrNotLast(Constants.NOT_LAST);
+                    }
                 }
             }
-            loadAdCounter();
-            Variables.setNewNumberOfAds(adList.size()-Variables.adTotal);
-            onclicks();
-        }else{
-            Toast.makeText(mContext, "No Ads are available", Toast.LENGTH_SHORT).show();
         }
+
+        loadAdCounter();
+        Variables.setNewNumberOfAds(mAdList.size()-Variables.adTotal);
+        onclicks();
+    }
+
+    private void registerReceivers(){
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
+
     }
 
     private void onclicks() {
@@ -367,5 +360,24 @@ public class MainActivity extends AppCompatActivity{
         editor.commit();
     }
 
+    public void StartNetworkChecker(final Context context){
+        Handler handler=new Handler();
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(!isNetworkConnected(context)){
+                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.connectionDropped2,
+                                Snackbar.LENGTH_INDEFINITE).show();
+                    }
+                }
+            },10000);
+    }
+
+    private boolean isNetworkConnected(Context context){
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return (netInfo != null && netInfo.isConnected());
+    }
 
 }
