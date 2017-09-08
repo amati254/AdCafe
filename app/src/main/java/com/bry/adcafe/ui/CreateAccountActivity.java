@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +25,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -39,6 +41,9 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     @Bind(R.id.passwordEditText) EditText mPasswordEditText;
     @Bind(R.id.confirmPasswordEditText) EditText mConfirmPasswordEditText;
     @Bind(R.id.loginTextView) TextView mLoginTextView;
+    @Bind(R.id.signUpRelative) RelativeLayout mRelative;
+    @Bind(R.id.SignUpAvi) AVLoadingIndicatorView mAvi;
+
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -89,15 +94,20 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
             Snackbar.make(findViewById(R.id.SignUpCoordinatorLayout), R.string.SignUpNoConnection,
                     Snackbar.LENGTH_LONG).show();
         }else{
-            mAuthProgressDialog.show();
+//            mAuthProgressDialog.show();
+            mAvi.setVisibility(View.VISIBLE);
+            mRelative.setVisibility(View.GONE);
             mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-                    mAuthProgressDialog.dismiss();
+//                    mAuthProgressDialog.dismiss();
                     if(task.isSuccessful()){
                         Log.d(TAG,"authentication successful");
                         createFirebaseUserProfile(task.getResult().getUser());
+                        mAvi.setVisibility(View.GONE);
                     }else {
+                        mRelative.setVisibility(View.VISIBLE);
+                        mAvi.setVisibility(View.GONE);
                         Toast.makeText(CreateAccountActivity.this, "Sign Up may have failed.", Toast.LENGTH_SHORT).show();
                     }
                 }

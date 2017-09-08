@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +28,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -37,6 +39,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Bind(R.id.passwordEditText) EditText mPassword;
     @Bind(R.id.LoginButton)  Button mLoginButton;
     @Bind(R.id.registerLink) TextView mRegisterLink;
+    @Bind(R.id.LoginAvi) AVLoadingIndicatorView mAvi;
+    @Bind(R.id.LoginRelative) RelativeLayout mRelative;
 
 
     private FirebaseAuth mAuth;
@@ -128,15 +132,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Snackbar.make(findViewById(R.id.loginCoordinatorLayout), R.string.LogInNoConnection,
                     Snackbar.LENGTH_LONG).show();
         }else{
-            mAuthProgressDialog.show();
+            mAvi.setVisibility(View.VISIBLE);
+            mRelative.setVisibility(View.GONE);
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
-                            mAuthProgressDialog.dismiss();
+                            mAvi.setVisibility(View.GONE);
                             Log.d(TAG,"signInWithEmail:onComplete"+task.isSuccessful());
                             if(!task.isSuccessful()){
                                 Log.w(TAG,"SignInWithEmail",task.getException());
+                                mRelative.setVisibility(View.VISIBLE);
                                 Toast.makeText(LoginActivity.this,"Login may have failed",Toast.LENGTH_SHORT).show();
                             }
                         }

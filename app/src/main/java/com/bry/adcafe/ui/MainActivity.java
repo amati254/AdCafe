@@ -87,8 +87,8 @@ public class MainActivity extends AppCompatActivity{
         Thread thread =  new Thread(null, mViewRunnable, "Background");
         thread.start();
 //        mProgressBar.setVisibility(View.VISIBLE);
-        mAvi.setVisibility(View.VISIBLE);
-        mLinearLayout.setVisibility(View.GONE);
+//        mAvi.setVisibility(View.VISIBLE);
+//        mLinearLayout.setVisibility(View.GONE);
     }
 
     private void getAds() {
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity{
             for(Advert ad: Utils.loadProfiles(this.getApplicationContext())){
                  mAdList.add(ad);
             }
-            Thread.sleep(1000);
+            Thread.sleep(10);
             Log.i("ARRAY", ""+  mAdList.size());
         }catch (Exception e) {
             Log.e("BACKGROUND_PROC", e.getMessage());
@@ -109,8 +109,8 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void run() {
             loadAdsFromJSONFile();
-            mAvi.setVisibility(View.GONE);
-            mLinearLayout.setVisibility(View.VISIBLE);
+//            mAvi.setVisibility(View.GONE);
+//            mLinearLayout.setVisibility(View.VISIBLE);
         }
     };
 
@@ -283,6 +283,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void logoutUser() {
+        clearFromSharedPreferences();
         FirebaseAuth.getInstance().signOut();
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -362,6 +363,13 @@ public class MainActivity extends AppCompatActivity{
         int number = prefs.getInt("adTotals",0);
         Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
         Variables.setAdTotal(number);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.commit();
+    }
+
+    private void clearFromSharedPreferences(){
+        SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.clear();
         editor.commit();
