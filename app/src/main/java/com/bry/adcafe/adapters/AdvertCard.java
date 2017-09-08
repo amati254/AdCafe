@@ -59,6 +59,8 @@ public class AdvertCard{
     private static boolean clickable;
     private static String mLastOrNotLast;
     private static boolean hasAdLoaded;
+    private boolean hasBeenSwiped = true;
+
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
         mContext = context;
@@ -66,7 +68,6 @@ public class AdvertCard{
         mSwipeView = swipeView;
         mLastOrNotLast = lastOrNotLast;
     }
-
 
     @Resolve
     private void onResolved(){
@@ -90,6 +91,8 @@ public class AdvertCard{
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                         errorImageView.setVisibility(android.view.View.VISIBLE);
                         mProgressBar.setVisibility(android.view.View.GONE);
+                        mSwipeView.lockViews();
+                        clickable = false;
                         hasAdLoaded = false;
                         return false;
                     }
@@ -97,16 +100,15 @@ public class AdvertCard{
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                         mProgressBar.setVisibility(android.view.View.GONE);
+                        errorImageView.setVisibility(android.view.View.GONE);
                         hasAdLoaded = true;
                         sendBroadcast(START_TIMER);
+                        clickable=false;
                         return false;
                     }
                 })
                 .into(profileImageView);
-//        mProgressBar.setVisibility(android.view.View.GONE);
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
-        clickable=false;
-
     }
 
     private void loadOnlyLastAd(){
@@ -125,6 +127,7 @@ public class AdvertCard{
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                         mProgressBar.setVisibility(android.view.View.GONE);
+                        errorImageView.setVisibility(android.view.View.GONE);
                         hasAdLoaded = true;
                         return false;
                     }
@@ -137,34 +140,30 @@ public class AdvertCard{
     @Click(R.id.profileImageView)
     private void onClick(){
         Log.d("EVENT", "profileImageView click");
-        if(hasAdLoaded) {
             if (clickable) {
                 mSwipeView.enableTouchSwipe();
+                hasBeenSwiped = true;
             }
-        }
     }
-
 
     @SwipeOut
     private void onSwipedOut(){
         Log.d("EVENT----", "onSwipedOut");
-        if(hasAdLoaded){
             Variables.removeAd();
+            hasBeenSwiped = true;
             sendBroadcast(START_TIMER);
-        }
     }
 
     @SwipeIn
     private void onSwipeIn(){
         Log.d("EVENT----", "onSwipedIn");
-        if(hasAdLoaded){
             Variables.removeAd();
+            hasBeenSwiped = true;
             sendBroadcast(START_TIMER);
-        }
     }
 
     private void sendBroadcast(String message ) {
-        if(message == START_TIMER && mLastOrNotLast == Constants.NOT_LAST){
+        if(message == START_TIMER && mLastOrNotLast == Constants.NOT_LAST && hasAdLoaded && hasBeenSwiped){
             Log.d("AdvertCard - ","Sending message to start timer");
             mSwipeView.lockViews();
             clickable = false;
@@ -174,7 +173,6 @@ public class AdvertCard{
         }
     }
 
-
     private BroadcastReceiver mMessageReceiverForTimerHasEnded = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -182,6 +180,7 @@ public class AdvertCard{
                 if(mSwipeView.getChildCount() > 1){
                     mSwipeView.unlockViews();
                     clickable = true;
+                    hasBeenSwiped = false;
                 }
         }
     };

@@ -42,6 +42,7 @@ public class SavedAdsCard {
     private PlaceHolderView mPlaceHolderView;
     private Advert mAdvert;
     private ProgressDialog mAuthProgressDialog;
+    private boolean hasMessageBeenSeen = false;
 
 
 
@@ -60,9 +61,10 @@ public class SavedAdsCard {
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                        mProgressBar.setVisibility(android.view.View.GONE);
                         errorImageView.setVisibility(android.view.View.VISIBLE);
-                        if(!isInternetAvailable()){
+                        if(!isInternetAvailable()&& !hasMessageBeenSeen){
                            Intent intent = new Intent(Constants.CONNECTION_OFFLINE);
                             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                            hasMessageBeenSeen = false;
                         }
                         return false;
                     }

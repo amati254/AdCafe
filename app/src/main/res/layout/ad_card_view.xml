@@ -74,16 +74,19 @@
             android:id="@+id/profileImageView"
             android:scaleType="fitXY"
             android:layout_width="match_parent"
+            android:layout_marginRight="0.5dp"
+            android:layout_marginLeft="0.5dp"
+            android:layout_marginTop="0.5dp"
             android:layout_height="match_parent"
-            android:layout_marginBottom="50dp"/>
+            android:layout_marginBottom="48dp"/>
 
         <ImageView
             android:id="@+id/errorImageView"
             android:layout_gravity="center"
             android:visibility="gone"
             android:background="@drawable/ic_action_error"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginBottom="50dp"/>
 
         <RelativeLayout
@@ -98,8 +101,8 @@
                 android:visibility="gone"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:progressDrawable="@drawable/circular_progress_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:layout_width="40dp"
+                android:layout_height="40dp" >
             </ProgressBar>
         </RelativeLayout>
 

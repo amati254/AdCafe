@@ -165,6 +165,7 @@ public class MainActivity extends AppCompatActivity{
                         .setViewGravity(Gravity.TOP)
                         .setPaddingTop(15)
                         .setRelativeScale(relativeScale));
+//        mSwipeView.s;
     }
 
     private void loadAdCounter() {

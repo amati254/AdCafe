@@ -15,7 +15,7 @@
 
         <ImageView
             android:id="@+id/SavedImageView"
-            android:layout_width="164dp"
+            android:layout_width="190dp"
             android:layout_height="164dp"
             android:scaleType="fitXY"
             android:src="@android:color/holo_orange_dark"/>
