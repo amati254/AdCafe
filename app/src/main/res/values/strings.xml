@@ -20,7 +20,8 @@
     <string name="shared">"Shared."</string>
     <string name="connectionBack">"Your back online, you may now continue."</string>
     <string name="Logout">"Logout"</string>
-    <string name="pinned">"Pinned"</string>
+    <string name="pinned">"Pinned."</string>
     <string name="learnSE">"Learn. Share. Earn."</string>
+    <string name="lastAd">"This may be the last ad we've got for you today."</string>
 
 </resources>

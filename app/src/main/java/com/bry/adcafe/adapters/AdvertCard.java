@@ -141,6 +141,7 @@ public class AdvertCard{
                 .into(profileImageView);
         mSwipeView.lockViews();
         clickable=false;
+        sendBroadcast(Constants.LAST);
     }
 
     @Click(R.id.profileImageView)
@@ -176,6 +177,9 @@ public class AdvertCard{
                 Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
 
+        }else if(message == Constants.LAST){
+            Intent intent = new Intent(Constants.LAST);
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         }
     }
 
@@ -187,6 +191,8 @@ public class AdvertCard{
                     mSwipeView.unlockViews();
                     clickable = true;
                     hasBeenSwiped = false;
+                }else if(mSwipeView.getChildCount()==1){
+                    sendBroadcast(Constants.LAST);
                 }
         }
     };

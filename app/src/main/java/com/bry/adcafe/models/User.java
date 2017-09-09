@@ -5,4 +5,5 @@ package com.bry.adcafe.models;
  */
 
 public class User {
+
 }

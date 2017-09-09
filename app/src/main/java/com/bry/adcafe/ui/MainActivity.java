@@ -87,8 +87,8 @@ public class MainActivity extends AppCompatActivity{
         Thread thread =  new Thread(null, mViewRunnable, "Background");
         thread.start();
 //        mProgressBar.setVisibility(View.VISIBLE);
-//        mAvi.setVisibility(View.VISIBLE);
-//        mLinearLayout.setVisibility(View.GONE);
+        mAvi.setVisibility(View.VISIBLE);
+        mLinearLayout.setVisibility(View.GONE);
     }
 
     private void getAds() {
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity{
             for(Advert ad: Utils.loadProfiles(this.getApplicationContext())){
                  mAdList.add(ad);
             }
-            Thread.sleep(10);
+            Thread.sleep(1000);
             Log.i("ARRAY", ""+  mAdList.size());
         }catch (Exception e) {
             Log.e("BACKGROUND_PROC", e.getMessage());
@@ -109,8 +109,8 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void run() {
             loadAdsFromJSONFile();
-//            mAvi.setVisibility(View.GONE);
-//            mLinearLayout.setVisibility(View.VISIBLE);
+            mAvi.setVisibility(View.GONE);
+            mLinearLayout.setVisibility(View.VISIBLE);
         }
     };
 
@@ -123,20 +123,20 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     protected void onDestroy(){
-        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddingToSharedPreferences);
-        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOffline);
-        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOnline);
-        Log.d("MAIN_ACTIVITY--","Unregistering all receivers");
-        sendBroadcastToUnregisterAllReceivers();
-        if(mSwipeView!=null){
-            mSwipeView.removeAllViews();
-        }
-        if(mAdCounterView!=null){
-            mAdCounterView.removeAllViews();
-        }
+        unregisterAllReceivers();
+        removeAllViews();
         addToSharedPreferences();
         Variables.clearAdTotal();
         super.onDestroy();
+    }
+
+    private void unregisterAllReceivers(){
+        Log.d("MAIN_ACTIVITY--","Unregistering all receivers");
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddingToSharedPreferences);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOffline);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOnline);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForLastAd);
+        sendBroadcastToUnregisterAllReceivers();
     }
 
     private void sendBroadcastToUnregisterAllReceivers() {
@@ -168,6 +168,15 @@ public class MainActivity extends AppCompatActivity{
                         .setPaddingTop(15)
                         .setRelativeScale(relativeScale));
 //        mSwipeView.s;
+    }
+
+    private void removeAllViews(){
+        if(mSwipeView!=null){
+            mSwipeView.removeAllViews();
+        }
+        if(mAdCounterView!=null){
+            mAdCounterView.removeAllViews();
+        }
     }
 
     private void loadAdCounter() {
@@ -204,7 +213,7 @@ public class MainActivity extends AppCompatActivity{
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
-
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLastAd,new IntentFilter(Constants.LAST));
     }
 
     private void onclicks() {
@@ -317,6 +326,13 @@ public class MainActivity extends AppCompatActivity{
         }
     };
 
+    private BroadcastReceiver mMessageReceiverForLastAd = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.lastAd,
+                    Snackbar.LENGTH_INDEFINITE).show();
+        }
+    };
 
     private void hideNavBars() {
         View decorView = getWindow().getDecorView();
