@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@android:id/progress">
+        <shape
+            android:innerRadiusRatio="3"
+            android:shape="ring"
+            android:thicknessRatio="24.0"
+            android:useLevel="true"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent">
+            <gradient
+                android:startColor="@color/violet"
+                android:endColor="@color/violet"
+                android:centerColor="@color/violet"
+                android:type="sweep" />
+        </shape>
+    </item>
+</layer-list>
