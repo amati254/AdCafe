@@ -26,6 +26,15 @@ import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.services.ConnectionChecker;
 import com.bry.adcafe.services.SavedAdsUtils;
 import com.bry.adcafe.services.Utils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.mindorks.placeholderview.PlaceHolderView;
 
 import java.util.ArrayList;
@@ -36,8 +45,12 @@ import com.wang.avi.AVLoadingIndicatorView;
 public class Bookmarks extends AppCompatActivity {
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
+    private ChildEventListener mChildEventListener;
+    private DatabaseReference mRef;
 
-    private ArrayList<Advert> mSavedAds = null;
+
+
+    private List<Advert> mSavedAds;
     private Runnable mViewRunnable;
     private ProgressBar mProgressBar;
     private AVLoadingIndicatorView mAvi;
@@ -53,7 +66,6 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
 
-        mSavedAds = new ArrayList<Advert>();
         loadAdsFromThread();
 
 //        loadFromAsynchTask();
@@ -115,11 +127,10 @@ public class Bookmarks extends AppCompatActivity {
 
     private void getAds() {
         try{
-            mSavedAds = new ArrayList<Advert>();
-            for(Advert ad: SavedAdsUtils.loadSavedAdverts(this.getApplicationContext())){
-                mSavedAds.add(ad);
-            }
-            Thread.sleep(300);
+            mSavedAds = new ArrayList<>();
+            loadAdsFromFirebase();
+
+            Thread.sleep(3000);
             Log.i("ARRAY", ""+ mSavedAds.size());
         }catch (Exception e) {
             Log.e("BACKGROUND_PROC", e.getMessage());
@@ -172,5 +183,29 @@ public class Bookmarks extends AppCompatActivity {
             Log.d("CONNECTION_C-Bookmarks","Connection has come online");
         }
     };
+
+    private void loadAdsFromFirebase(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
+        DatabaseReference mRef = query.getRef();
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snap: dataSnapshot.getChildren()){
+                    Advert advert = snap.getValue(Advert.class);
+                    advert.getImageUrl();
+                    mSavedAds.add(advert);
+                    Log.d("BOOKMARKS"," --Loaded ads from firebase.--"+advert.getImageUrl());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("UTILS","Failed to load ads from firebase.");
+            }
+        });
+    }
+
 
 }

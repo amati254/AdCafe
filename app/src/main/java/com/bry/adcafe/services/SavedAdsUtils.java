@@ -4,7 +4,16 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
+import com.bry.adcafe.Constants;
 import com.bry.adcafe.models.Advert;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -57,5 +66,36 @@ public class SavedAdsUtils {
             return null;
         }
         return json;
+    }
+
+    public static List<Advert> loadAdsFromFirebase(){
+        try{
+            final List<Advert> adList = new ArrayList<>();
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            String uid = user.getUid();
+            Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
+            DatabaseReference mRef = query.getRef();
+            mRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for(DataSnapshot snap: dataSnapshot.getChildren()){
+                        Advert advert = snap.getValue(Advert.class);
+                        advert.getImageUrl();
+                        adList.add(advert);
+                        Log.d("UTILS"," --Loaded ads from firebase.--"+advert.getImageUrl());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.d("UTILS","Failed to load ads from firebase.");
+                }
+            });
+
+            return adList;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 }

@@ -5,12 +5,23 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Build;
+import android.support.constraint.solver.widgets.Snapshot;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.bry.adcafe.Constants;
 import com.bry.adcafe.models.Advert;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -27,6 +38,7 @@ import java.util.List;
 
 public class Utils{
     private static final String TAG = "Utils";
+    private static ChildEventListener mChildEventListener;
 
 
     public static List<Advert> loadProfiles(Context context){
@@ -46,6 +58,7 @@ public class Utils{
             return null;
         }
     }
+
 
     private static String loadJSONFromAsset(Context context, String jsonFileName) {
         String json = null;
