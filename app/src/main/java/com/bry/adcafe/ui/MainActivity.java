@@ -136,6 +136,7 @@ public class MainActivity extends AppCompatActivity{
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOffline);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOnline);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForLastAd);
+
         sendBroadcastToUnregisterAllReceivers();
     }
 
@@ -214,7 +215,9 @@ public class MainActivity extends AppCompatActivity{
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLastAd,new IntentFilter(Constants.LAST));
+
     }
+
 
     private void onclicks() {
         findViewById(R.id.logoutBtn).setOnClickListener(new View.OnClickListener() {
@@ -228,8 +231,16 @@ public class MainActivity extends AppCompatActivity{
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinned,
-                            Snackbar.LENGTH_SHORT).show();
+                    if(isNetworkConnected(mContext)){
+                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
+                                Snackbar.LENGTH_SHORT).show();
+                        Intent intent = new Intent(Constants.PIN_AD);
+                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                    }else {
+                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.cannotPin,
+                                Snackbar.LENGTH_SHORT).show();
+                    }
+
                 }
             });
         }
@@ -333,6 +344,7 @@ public class MainActivity extends AppCompatActivity{
                     Snackbar.LENGTH_INDEFINITE).show();
         }
     };
+
 
     private void hideNavBars() {
         View decorView = getWindow().getDecorView();

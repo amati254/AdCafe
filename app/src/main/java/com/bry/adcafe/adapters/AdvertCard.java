@@ -24,6 +24,13 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.mindorks.placeholderview.Utils;
 import com.mindorks.placeholderview.annotations.Click;
@@ -61,6 +68,7 @@ public class AdvertCard{
     private static String mLastOrNotLast;
     private static boolean hasAdLoaded;
     private boolean hasBeenSwiped = true;
+    private boolean hasBeenPinned = false;
 
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
@@ -78,6 +86,8 @@ public class AdvertCard{
             loadAllAds();
         }
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToPinAd,new IntentFilter(Constants.PIN_AD));
+        hasBeenPinned = false;
 
     }
 
@@ -202,8 +212,34 @@ public class AdvertCard{
         public void onReceive(Context context, Intent intent) {
             Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasEnded);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToPinAd);
+
         }
     };
+
+    private BroadcastReceiver mMessageReceiverToPinAd = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("ADVERT_CARD--","Received broadcast to Pin ad.");
+            if(hasBeenPinned){
+                pinAd();
+                hasBeenPinned = true;
+            }
+        }
+    };
+
+    private void pinAd() {
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
+        DatabaseReference pushRef = adRef.push();
+        String pushId  = pushRef.getKey();
+        mAdvert.setPushId(pushId);
+        pushRef.setValue(mAdvert);
+
+    }
 
     @SwipeInState
     private void onSwipeInState(){

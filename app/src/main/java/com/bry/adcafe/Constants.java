@@ -18,6 +18,13 @@ public class Constants {
     public static String NOT_LAST = "NOT_LAST";
     public static String UNREGISTER_ALL_RECEIVERS = "UNREGISTER_ALL_RECEIVERS";
     public static String CONNECTION_OFFLINE = "CONNECTION_OFFLINE";
+    public static String PIN_AD = "PIN_AD";
     public static String CONNECTION_ONLINE = "CONNECTION_ONLINE";
+    public static String PINNING_FAILED = "PINNING_FAILED";
+    public static String PINNING_SUCCESS = "PINNING_SUCCESS";
+
+    public static String FIREBASE_CHILD_ADS = "savedAds";
+    public static String FIREBASE_CHILD_USERS = "users";
+    public static String PINNED_AD_LIST = "pinnedAdList";
 
 }
