@@ -68,7 +68,6 @@ public class AdvertCard{
     private static String mLastOrNotLast;
     private static boolean hasAdLoaded;
     private boolean hasBeenSwiped = true;
-    private boolean hasBeenPinned = false;
 
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
@@ -87,7 +86,7 @@ public class AdvertCard{
         }
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToPinAd,new IntentFilter(Constants.PIN_AD));
-        hasBeenPinned = false;
+        Variables.hasBeenPinned = false;
 
     }
 
@@ -221,9 +220,9 @@ public class AdvertCard{
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("ADVERT_CARD--","Received broadcast to Pin ad.");
-            if(hasBeenPinned){
+            if(!Variables.hasBeenPinned){
                 pinAd();
-                hasBeenPinned = true;
+                Variables.hasBeenPinned = true;
             }
         }
     };

@@ -27,6 +27,7 @@
     <string name="cannotPin">"You cannot pin this without an internet connection"</string>
     <string name="pinningSuccess">"Successfully pinned!"</string>
     <string name="pinningFailure">"Pinning may have failed."</string>
+    <string name="hasBeenPinned">"You already pinned this"</string>
 
 
 </resources>

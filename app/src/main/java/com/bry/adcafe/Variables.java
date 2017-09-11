@@ -8,6 +8,8 @@ public class Variables {
     public static int numberOfAds;
     public static Integer adTotal = 0;
     public static String mIsLastOrNotLast;
+    public static boolean hasBeenPinned;
+
 
     public static void setNewNumberOfAds(int number){
         numberOfAds = number;

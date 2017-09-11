@@ -33,6 +33,13 @@ import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.services.ConnectionChecker;
 import com.bry.adcafe.services.Utils;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.SwipeDecor;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
@@ -53,6 +60,7 @@ public class MainActivity extends AppCompatActivity{
     private ProgressBar mProgressBar;
     private LinearLayout mLinearLayout;
     private AVLoadingIndicatorView mAvi;
+    private int todayAdTotalFromFirebase = 0;
 
 
     @Override
@@ -63,7 +71,7 @@ public class MainActivity extends AppCompatActivity{
 
         ConnectionChecker.StartNetworkChecker(mContext);
         registerReceivers();
-        loadFromSharedPreferences();
+        loadTodayAdTotalsFromFirebase();
         setUpSwipeView();
         loadAdsFromThread();
         StartNetworkChecker(mContext);
@@ -118,7 +126,6 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onStop(){
         super.onStop();
-        addToSharedPreferences();
     }
 
     @Override
@@ -232,10 +239,15 @@ public class MainActivity extends AppCompatActivity{
                 @Override
                 public void onClick(View v) {
                     if(isNetworkConnected(mContext)){
-                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
-                                Snackbar.LENGTH_SHORT).show();
-                        Intent intent = new Intent(Constants.PIN_AD);
-                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                        if(!Variables.hasBeenPinned){
+                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
+                                    Snackbar.LENGTH_SHORT).show();
+                            Intent intent = new Intent(Constants.PIN_AD);
+                            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                        }else{
+                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
+                                    Snackbar.LENGTH_SHORT).show();
+                        }
                     }else {
                         Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.cannotPin,
                                 Snackbar.LENGTH_SHORT).show();
@@ -384,6 +396,7 @@ public class MainActivity extends AppCompatActivity{
         editor.putInt("adTotals",Variables.adTotal);
         Log.d("MAIN_ACTIVITY--","Adding 1 to shared preferences adTotal is - "+Integer.toString(Variables.adTotal));
         editor.commit();
+        adTodaysTotalsToFirebase();
     }
 
     private void loadFromSharedPreferences(){
@@ -421,6 +434,35 @@ public class MainActivity extends AppCompatActivity{
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return (netInfo != null && netInfo.isConnected());
+    }
+
+    private void adTodaysTotalsToFirebase(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+        adRef.setValue(Variables.adTotal);
+    }
+
+    private void loadTodayAdTotalsFromFirebase(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+
+        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+        DatabaseReference mRef = query.getRef();
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int number = dataSnapshot.getValue(int.class);
+                Variables.setAdTotal(number);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("UTILS","Failed to load ads from firebase.");
+                loadFromSharedPreferences();
+            }
+
+        });
     }
 
 }
