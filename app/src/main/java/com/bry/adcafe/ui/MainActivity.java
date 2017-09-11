@@ -45,7 +45,9 @@ import com.mindorks.placeholderview.SwipeDecor;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.wang.avi.AVLoadingIndicatorView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
@@ -54,13 +56,15 @@ public class MainActivity extends AppCompatActivity{
     private Context mContext;
     private static final String TAG = "MainActivity";
     private int mNumberOfAdsSeen;
+    private String mKey = "";
 
     private List<Advert> mAdList;
     private Runnable mViewRunnable;
     private ProgressBar mProgressBar;
     private LinearLayout mLinearLayout;
     private AVLoadingIndicatorView mAvi;
-    private int todayAdTotalFromFirebase = 0;
+    private String mTodaysDate;
+    private int mMonthTotal = 0;
 
 
     @Override
@@ -69,9 +73,12 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         mContext = getApplicationContext();
 
-        ConnectionChecker.StartNetworkChecker(mContext);
         registerReceivers();
-        loadTodayAdTotalsFromFirebase();
+
+//        loadTodayAdTotalsFromFirebase();
+//        loadMonthAdTotalsFromFirebase();
+        loadDateFromFirebase();
+
         setUpSwipeView();
         loadAdsFromThread();
         StartNetworkChecker(mContext);
@@ -101,11 +108,15 @@ public class MainActivity extends AppCompatActivity{
 
     private void getAds() {
         try{
-             mAdList = new ArrayList<Advert>();
+//            loadTodayAdTotalsFromFirebase();
+//            getMonthAdTotalFromFirebase();
+            loadFromSharedPreferences();
+
+             mAdList = new ArrayList<>();
             for(Advert ad: Utils.loadProfiles(this.getApplicationContext())){
                  mAdList.add(ad);
             }
-            Thread.sleep(1000);
+            Thread.sleep(3000);
             Log.i("ARRAY", ""+  mAdList.size());
         }catch (Exception e) {
             Log.e("BACKGROUND_PROC", e.getMessage());
@@ -197,14 +208,17 @@ public class MainActivity extends AppCompatActivity{
         if(mSwipeView == null){
             setUpSwipeView();
         }
+        if(mSwipeView.getChildCount()!=0){
+            mSwipeView.removeAllViews();
+        }
         if(mAdList!=null && mAdList.size()>0){
             for(int i = 0 ; i < mAdList.size() ; i++){
-                if(Variables.adTotal>=mAdList.size()){
+                if(Variables.getAdTotal(mKey)>=mAdList.size()){
                     mSwipeView.addView(new AdvertCard(mContext,mAdList.get(mAdList.size()-1),mSwipeView,Constants.LAST));
                     Variables.setIsLastOrNotLast(Constants.LAST);
                     break;
                 } else {
-                    if(i>=Variables.adTotal){
+                    if(i>=Variables.getAdTotal(mKey)){
                         mSwipeView.addView(new AdvertCard(mContext,mAdList.get(i),mSwipeView,Constants.NOT_LAST));
                         Variables.setIsLastOrNotLast(Constants.NOT_LAST);
                     }
@@ -213,7 +227,7 @@ public class MainActivity extends AppCompatActivity{
         }
 
         loadAdCounter();
-        Variables.setNewNumberOfAds(mAdList.size()-Variables.adTotal);
+        Variables.setNewNumberOfAds(mAdList.size()-Variables.getAdTotal(mKey));
         onclicks();
     }
 
@@ -327,8 +341,10 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("COUNTER_BAR_TO_MAIN- ","Broadcast has been received to add to shared preferences.");
-            Variables.adAdToTotal();
+            Variables.adAdToTotal(mKey);
+            Variables.adToMonthTotals(mKey);
             addToSharedPreferences();
+            adDayAndMonthTotalsToFirebase();
             onclicks();
         }
     };
@@ -393,20 +409,38 @@ public class MainActivity extends AppCompatActivity{
         SharedPreferences pref = getApplicationContext().getSharedPreferences(Constants.AD_TOTAL, MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.clear();
-        editor.putInt("adTotals",Variables.adTotal);
-        Log.d("MAIN_ACTIVITY--","Adding 1 to shared preferences adTotal is - "+Integer.toString(Variables.adTotal));
+        editor.putInt("adTotals",Variables.getAdTotal(mKey));
+        Log.d("MAIN_ACTIVITY--","Adding 1 to shared preferences adTotal is - "+Integer.toString(Variables.getAdTotal(mKey)));
         editor.commit();
-        adTodaysTotalsToFirebase();
+
+        SharedPreferences pref2 = getApplicationContext().getSharedPreferences(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH, MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = pref2.edit();
+        editor2.clear();
+        editor.putInt(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,Variables.getMonthAdTotals(mKey));
+        Log.d("MAIN_ACTIVITY--","Adding 1 to shared preferences Month ad totals is - "+Integer.toString(Variables.getMonthAdTotals(mKey)));
+        editor2.commit();
     }
+
+
 
     private void loadFromSharedPreferences(){
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
         int number = prefs.getInt("adTotals",0);
         Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
-        Variables.setAdTotal(number);
+        Variables.setAdTotal(number,mKey);
+
         SharedPreferences.Editor editor = prefs.edit();
         editor.clear();
         editor.commit();
+
+        SharedPreferences prefs2 = getSharedPreferences(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,MODE_PRIVATE);
+        int number2 = prefs2.getInt(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,0);
+        Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM MONTHLY SHARED PREFERENCES IS - "+ number2);
+        Variables.setMonthAdTotals(mKey,number);
+
+        SharedPreferences.Editor editor2 = prefs2.edit();
+        editor2.clear();
+        editor2.commit();
     }
 
     private void clearFromSharedPreferences(){
@@ -414,6 +448,11 @@ public class MainActivity extends AppCompatActivity{
         SharedPreferences.Editor editor = prefs.edit();
         editor.clear();
         editor.commit();
+
+        SharedPreferences prefs2 = getSharedPreferences(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = prefs2.edit();
+        editor2.clear();
+        editor2.commit();
     }
 
     public void StartNetworkChecker(final Context context){
@@ -430,18 +469,51 @@ public class MainActivity extends AppCompatActivity{
             },10000);
     }
 
+
+
     private boolean isNetworkConnected(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return (netInfo != null && netInfo.isConnected());
     }
 
-    private void adTodaysTotalsToFirebase(){
+    private void adDayAndMonthTotalsToFirebase(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
+
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
-        adRef.setValue(Variables.adTotal);
+        adRef.setValue(Variables.getAdTotal(mKey));
+
+        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
+        adRef2.setValue(Variables.getMonthAdTotals(mKey));
+//        getMonthAdTotalFromFirebase();
+//        adRef2.setValue(mMonthTotal);
     }
+
+    private void getMonthAdTotalFromFirebase() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+
+        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
+        DatabaseReference mRef = query.getRef();
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("MAIN ACTIVITY--","Loading Month AdTotals from firebase.");
+                int number = dataSnapshot.getValue(int.class);
+                mMonthTotal = number;
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("MAIN ACTIVITY--","Failed to load Month AdTotals from firebase.");
+
+            }
+        });
+
+    }
+
+
 
     private void loadTodayAdTotalsFromFirebase(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -452,17 +524,63 @@ public class MainActivity extends AppCompatActivity{
         mRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("MAIN_ACTIVITY--","Ad totals from today have been loaded from firebase.");
                 int number = dataSnapshot.getValue(int.class);
-                Variables.setAdTotal(number);
+                Variables.setAdTotal(number,mKey);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.d("UTILS","Failed to load ads from firebase.");
+                Log.d("MAIN_ACTIVITY--","Failed to load todays ad totals from firebase.");
                 loadFromSharedPreferences();
             }
 
         });
     }
+
+    private String getDate(){
+        long date = System.currentTimeMillis();
+        SimpleDateFormat sdfMonth = new SimpleDateFormat("MM");
+        String MonthString = sdfMonth.format(date);
+
+        SimpleDateFormat sdfDay = new SimpleDateFormat("dd");
+        String dayeString = sdfDay.format(date);
+
+        SimpleDateFormat sdfYear = new SimpleDateFormat("yyyy");
+        String yearString = sdfYear.format(date);
+
+        final Calendar c = Calendar.getInstance();
+        String yy = Integer.toString(c.get(Calendar.YEAR));
+        String mm = Integer.toString(c.get(Calendar.MONTH));
+        String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
+
+        String todaysDate = (dd+":"+mm+":"+yy);
+
+        return todaysDate;
+    }
+
+    private void loadDateFromFirebase(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+
+        Query query =  FirebaseDatabase.getInstance().getReference(Constants.DATE_IN_FIREBASE);
+        DatabaseReference mRef = query.getRef();
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+               String FirebaseDate = dataSnapshot.getValue(String.class);
+                mTodaysDate = FirebaseDate;
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                mTodaysDate = getDate();
+            }
+
+        });
+
+    }
+
+
 
 }

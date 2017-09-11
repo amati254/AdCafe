@@ -17,6 +17,7 @@ public class Dashboard extends AppCompatActivity {
     private TextView mTotalAdsSeenToday;
     private TextView mTotalAdsSeenAllTime;
     private ImageView mInfoImageView;
+    protected String mKey = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,6 @@ public class Dashboard extends AppCompatActivity {
     }
 
     private void setValues() {
-        mTotalAdsSeenToday.setText(Integer.toString(Variables.adTotal));
+        mTotalAdsSeenToday.setText(Integer.toString(Variables.getAdTotal(mKey)));
     }
 }

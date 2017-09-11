@@ -27,5 +27,7 @@ public class Constants {
     public static String FIREBASE_CHILD_USERS = "users";
     public static String PINNED_AD_LIST = "pinnedAdList";
     public static String TOTAL_NO_OF_ADS_SEEN_TODAY = "TodaysTotalAds";
+    public static String DATE_IN_FIREBASE = "DATE_IN_FIREBASE";
+    public static String TOTAL_NO_OF_ADS_SEEN_All_MONTH = "TOTAL_NO_OF_ADS_SEEN_All_MONTH";
 
 }

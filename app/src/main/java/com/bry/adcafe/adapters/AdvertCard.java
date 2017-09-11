@@ -87,40 +87,37 @@ public class AdvertCard{
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToPinAd,new IntentFilter(Constants.PIN_AD));
         Variables.hasBeenPinned = false;
-
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
     }
 
     private void loadAllAds(){
         Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
 
-//        mProgressBar.setVisibility(android.view.View.VISIBLE);
         mAvi.setVisibility(android.view.View.VISIBLE);
         Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext,Utils.dpToPx(4),0,
                 RoundedCornersTransformation.CornerType.TOP))
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        Log.d("ADVERT_CARD--","The image has failed to load due to network error."+e.getMessage());
                         errorImageView.setVisibility(android.view.View.VISIBLE);
-//                        mProgressBar.setVisibility(android.view.View.GONE);
                         mAvi.setVisibility(android.view.View.GONE);
-                        mSwipeView.lockViews();
-                        clickable = false;
-                        hasAdLoaded = false;
+//                        mSwipeView.unlockViews();
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                       Log.d("ADVERT_CARD--","The image has loaded successfully");
                         mAvi.setVisibility(android.view.View.GONE);
                         errorImageView.setVisibility(android.view.View.GONE);
-                        hasAdLoaded = true;
+
                         sendBroadcast(START_TIMER);
                         clickable=false;
                         return false;
                     }
                 })
                 .into(profileImageView);
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
     }
 
     private void loadOnlyLastAd(){
@@ -179,7 +176,7 @@ public class AdvertCard{
     }
 
     private void sendBroadcast(String message ) {
-        if(message == START_TIMER && mLastOrNotLast == Constants.NOT_LAST && hasAdLoaded && hasBeenSwiped){
+        if(message == START_TIMER && hasBeenSwiped){
             Log.d("AdvertCard - ","Sending message to start timer");
             mSwipeView.lockViews();
             clickable = false;

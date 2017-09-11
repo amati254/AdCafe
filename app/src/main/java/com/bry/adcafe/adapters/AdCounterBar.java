@@ -34,6 +34,7 @@ public class AdCounterBar {
     private PlaceHolderView mPlaceHolderView;
     private boolean hasTimerMessageBeenSent;
     private boolean hasTimerStarted;
+    protected String mKey = "";
 
     public AdCounterBar(Context context, PlaceHolderView PlaceHolderView){
         mContext = context;
@@ -41,7 +42,7 @@ public class AdCounterBar {
     }
     @Resolve
     private void onResolved() {
-        adCounter.setText(Integer.toString(Variables.adTotal));
+        adCounter.setText(Integer.toString(Variables.getAdTotal(mKey)));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForAdCounter,new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_AD_COUNTER));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToStartTimer,new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
 
@@ -107,7 +108,7 @@ public class AdCounterBar {
                         sendBroadcast(Constants.TIMER_HAS_ENDED);
                         addToSharedPreferencesViaBroadcast();
                         hasTimerStarted = false;
-                    adCounter.setText(Integer.toString(Variables.adTotal+1));
+                    adCounter.setText(Integer.toString(Variables.getAdTotal(mKey)+1));
                     textViewTime.setText(Integer.toString(7));
 
                 }
