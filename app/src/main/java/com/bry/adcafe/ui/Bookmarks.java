@@ -5,7 +5,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -60,15 +63,23 @@ public class Bookmarks extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
+        mContext = getApplicationContext();
+
         loadPlaceHolderViews();
         ConnectionChecker.StartNetworkChecker(mContext);
+        registerReceivers();
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
-
-        loadAdsFromThread();
-
+        if(isNetworkConnected(mContext)){
+            loadAdsFromThread();
+//            setOnClicks();
+        }else{
+            Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.connectionDropped,
+                    Snackbar.LENGTH_INDEFINITE).show();
+        }
 //        loadFromAsynchTask();
+    }
+
+    private void setOnClicks() {
     }
 
 //    private void loadFromAsynchTask() {
@@ -104,6 +115,29 @@ public class Bookmarks extends AppCompatActivity {
 //        }
 //    }
 
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        unregisterAllReceivers();
+    }
+
+    private void unregisterAllReceivers() {
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpinned);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOnline);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOffline);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForReceivingUnableToPinAd);
+    }
+
+    private void registerReceivers(){
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnpinned,new IntentFilter(Constants.REMOVE_PINNED_AD));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForReceivingUnableToPinAd,new IntentFilter(Constants.UNABLE_TO_REMOVE_PINNED_AD));
+
+    }
+
+
+
     private void loadAdsFromThread(){
         try{
             startGetAds();
@@ -137,6 +171,9 @@ public class Bookmarks extends AppCompatActivity {
         }
         runOnUiThread(returnRes);
     }
+
+
+
     private Runnable returnRes = new Runnable() {
         @Override
         public void run() {
@@ -144,35 +181,54 @@ public class Bookmarks extends AppCompatActivity {
         }
     };
 
-
     private void loadPlaceHolderViews() {
         mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
         mPlaceHolderView = (PlaceHolderView) findViewById(R.id.PlaceHolderView);
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.avi);
-        mContext = getApplicationContext();
         mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,2));
 
     }
-
 
     private void loadBookmarkedAdsFromJSONFile() {
         if(mPlaceHolderView == null){
             loadPlaceHolderViews();
         }
         if(mSavedAds!=null && mSavedAds.size()>0){
-            for(int i = 0; i<mSavedAds.size();i++)
-                mPlaceHolderView.addView(new SavedAdsCard(mSavedAds.get(i),mContext,mPlaceHolderView));
+            for(int i = 0; i<mSavedAds.size();i++){
+                mPlaceHolderView.addView(new SavedAdsCard(mSavedAds.get(i),mContext,mPlaceHolderView,mSavedAds.get(i).getPushId()));
+            }
         }
 //        mProgressBar.setVisibility(View.GONE);
         mAvi.setVisibility(View.GONE);
 
     }
 
+
+
+
     private BroadcastReceiver mMessageReceiverForConnectionOffline = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("CONNECTION_C-Bookmarks","Connection has been dropped");
             Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.connectionDropped,
+                    Snackbar.LENGTH_INDEFINITE).show();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForUnpinned = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BOOKMARKS--","Message received to show toast for unpin action");
+            Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.unpinned,
+                    Snackbar.LENGTH_INDEFINITE).show();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForReceivingUnableToPinAd = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BOOKMARKS--","Unable to unpin ad.");
+            Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.failedUnpinned,
                     Snackbar.LENGTH_INDEFINITE).show();
         }
     };
@@ -184,27 +240,50 @@ public class Bookmarks extends AppCompatActivity {
         }
     };
 
-    private void loadAdsFromFirebase(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-        Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
-        DatabaseReference mRef = query.getRef();
-        mRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot snap: dataSnapshot.getChildren()){
-                    Advert advert = snap.getValue(Advert.class);
-                    advert.getImageUrl();
-                    mSavedAds.add(advert);
-                    Log.d("BOOKMARKS"," --Loaded ads from firebase.--"+advert.getImageUrl());
-                }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d("UTILS","Failed to load ads from firebase.");
+
+
+//    public void StartNetworkChecker(final Context context){
+//        Handler handler=new Handler();
+//
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if(!isNetworkConnected(context)){
+//                    Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.connectionDropped2,
+//                            Snackbar.LENGTH_INDEFINITE).show();
+//                }
+//            }
+//        },10000);
+//    }
+
+    private void loadAdsFromFirebase(){
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    String uid = user.getUid();
+    Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
+    DatabaseReference mRef = query.getRef();
+    mRef.addValueEventListener(new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            for(DataSnapshot snap: dataSnapshot.getChildren()){
+                Advert advert = snap.getValue(Advert.class);
+                advert.setPushId(advert.getPushId());
+                mSavedAds.add(advert);
+                Log.d("BOOKMARKS"," --Loaded ads from firebase.--"+advert.getPushId());
             }
-        });
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d("UTILS","Failed to load ads from firebase.");
+        }
+    });
+}
+
+    private boolean isNetworkConnected(Context context){
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return (netInfo != null && netInfo.isConnected());
     }
 
 

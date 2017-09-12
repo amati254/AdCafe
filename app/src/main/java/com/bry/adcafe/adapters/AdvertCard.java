@@ -179,6 +179,7 @@ public class AdvertCard{
         if(message == START_TIMER && hasBeenSwiped){
             Log.d("AdvertCard - ","Sending message to start timer");
             mSwipeView.lockViews();
+            Variables.hasBeenPinned = false;
             clickable = false;
                 Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);

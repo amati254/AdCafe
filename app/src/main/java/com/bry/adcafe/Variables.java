@@ -7,10 +7,13 @@ package com.bry.adcafe;
 public class Variables {
     private static String mKey = "";
     public static int numberOfAds;
+
     private static Integer todaysAdTotal = 0;
+    private static int mMonthAdTotals = 0;
+
     public static String mIsLastOrNotLast;
     public static boolean hasBeenPinned;
-    private static int mMonthAdTotals = 0;
+
 
 
     public static void setNewNumberOfAds(int number){
@@ -26,6 +29,7 @@ public class Variables {
             todaysAdTotal = number;
         }
     }
+
 
     public static int getAdTotal(String key){
         if (key==mKey){
@@ -46,6 +50,7 @@ public class Variables {
         }
     }
 
+
     public static void setIsLastOrNotLast(String isLastOrNotLast){
         mIsLastOrNotLast = isLastOrNotLast;
     }
@@ -61,6 +66,7 @@ public class Variables {
             mMonthAdTotals+=1;
         }
     }
+
 
     public static int getMonthAdTotals(String key){
         if(key == mKey){

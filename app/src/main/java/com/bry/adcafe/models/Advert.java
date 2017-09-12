@@ -13,7 +13,7 @@ public class Advert {
     private String imageUrl;
 
     private int numberOfAds = 0 ;
-    public String pushId;
+    private String pushId;
 
     public Advert(String ImageUrl){
         this.imageUrl = ImageUrl;
@@ -27,6 +27,7 @@ public class Advert {
     public void setNumberOfAds(int setnumberOfAds){
         numberOfAds = setnumberOfAds;
     }
+
 
 
     public void removeAd(){

@@ -74,9 +74,6 @@ public class MainActivity extends AppCompatActivity{
         mContext = getApplicationContext();
 
         registerReceivers();
-
-//        loadTodayAdTotalsFromFirebase();
-//        loadMonthAdTotalsFromFirebase();
         loadDateFromFirebase();
 
         setUpSwipeView();
@@ -108,11 +105,7 @@ public class MainActivity extends AppCompatActivity{
 
     private void getAds() {
         try{
-//            loadTodayAdTotalsFromFirebase();
-//            getMonthAdTotalFromFirebase();
-            loadFromSharedPreferences();
-
-             mAdList = new ArrayList<>();
+            mAdList = new ArrayList<>();
             for(Advert ad: Utils.loadProfiles(this.getApplicationContext())){
                  mAdList.add(ad);
             }
@@ -132,6 +125,8 @@ public class MainActivity extends AppCompatActivity{
             mLinearLayout.setVisibility(View.VISIBLE);
         }
     };
+
+
 
 
     @Override
@@ -162,6 +157,9 @@ public class MainActivity extends AppCompatActivity{
         Intent intent = new Intent(Constants.UNREGISTER_ALL_RECEIVERS);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
+
+
+
 
     private void setUpSwipeView() {
         mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
@@ -231,6 +229,9 @@ public class MainActivity extends AppCompatActivity{
         onclicks();
     }
 
+
+
+
     private void registerReceivers(){
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
@@ -238,7 +239,6 @@ public class MainActivity extends AppCompatActivity{
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLastAd,new IntentFilter(Constants.LAST));
 
     }
-
 
     private void onclicks() {
         findViewById(R.id.logoutBtn).setOnClickListener(new View.OnClickListener() {
@@ -337,6 +337,8 @@ public class MainActivity extends AppCompatActivity{
         finish();
     }
 
+
+
     private BroadcastReceiver mMessageReceiverForAddingToSharedPreferences = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -372,6 +374,8 @@ public class MainActivity extends AppCompatActivity{
                     Snackbar.LENGTH_INDEFINITE).show();
         }
     };
+
+
 
 
     private void hideNavBars() {
@@ -423,25 +427,25 @@ public class MainActivity extends AppCompatActivity{
 
 
 
-    private void loadFromSharedPreferences(){
-        SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
-        int number = prefs.getInt("adTotals",0);
-        Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
-        Variables.setAdTotal(number,mKey);
-
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.clear();
-        editor.commit();
-
-        SharedPreferences prefs2 = getSharedPreferences(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,MODE_PRIVATE);
-        int number2 = prefs2.getInt(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,0);
-        Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM MONTHLY SHARED PREFERENCES IS - "+ number2);
-        Variables.setMonthAdTotals(mKey,number);
-
-        SharedPreferences.Editor editor2 = prefs2.edit();
-        editor2.clear();
-        editor2.commit();
-    }
+//    private void loadFromSharedPreferences(){
+//        SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
+//        int number = prefs.getInt("adTotals",0);
+//        Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
+//        Variables.setAdTotal(number,mKey);
+//
+//        SharedPreferences.Editor editor = prefs.edit();
+//        editor.clear();
+//        editor.commit();
+//
+//        SharedPreferences prefs2 = getSharedPreferences(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,MODE_PRIVATE);
+//        int number2 = prefs2.getInt(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,0);
+//        Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM MONTHLY SHARED PREFERENCES IS - "+ number2);
+//        Variables.setMonthAdTotals(mKey,number);
+//
+//        SharedPreferences.Editor editor2 = prefs2.edit();
+//        editor2.clear();
+//        editor2.commit();
+//    }
 
     private void clearFromSharedPreferences(){
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
@@ -486,8 +490,6 @@ public class MainActivity extends AppCompatActivity{
 
         DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
         adRef2.setValue(Variables.getMonthAdTotals(mKey));
-//        getMonthAdTotalFromFirebase();
-//        adRef2.setValue(mMonthTotal);
     }
 
     private void getMonthAdTotalFromFirebase() {
@@ -515,28 +517,28 @@ public class MainActivity extends AppCompatActivity{
 
 
 
-    private void loadTodayAdTotalsFromFirebase(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-
-        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
-        DatabaseReference mRef = query.getRef();
-        mRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("MAIN_ACTIVITY--","Ad totals from today have been loaded from firebase.");
-                int number = dataSnapshot.getValue(int.class);
-                Variables.setAdTotal(number,mKey);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d("MAIN_ACTIVITY--","Failed to load todays ad totals from firebase.");
-                loadFromSharedPreferences();
-            }
-
-        });
-    }
+//    private void loadTodayAdTotalsFromFirebase(){
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        String uid = user.getUid();
+//
+//        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+//        DatabaseReference mRef = query.getRef();
+//        mRef.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                Log.d("MAIN_ACTIVITY--","Ad totals from today have been loaded from firebase.");
+//                int number = dataSnapshot.getValue(int.class);
+//                Variables.setAdTotal(number,mKey);
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.d("MAIN_ACTIVITY--","Failed to load todays ad totals from firebase.");
+//                loadFromSharedPreferences();
+//            }
+//
+//        });
+//    }
 
     private String getDate(){
         long date = System.currentTimeMillis();
@@ -581,6 +583,17 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
+    private void resetSharedPreferences(){
+        SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.commit();
+    }
 
+
+
+    private void resetDayAdTotals(){
+        Variables.setAdTotal(0,mKey);
+    }
 
 }

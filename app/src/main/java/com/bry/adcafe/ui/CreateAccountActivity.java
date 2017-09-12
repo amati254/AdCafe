@@ -18,13 +18,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
+import com.bry.adcafe.Variables;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import butterknife.Bind;
@@ -34,6 +38,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     public static final String TAG = CreateAccountActivity.class.getSimpleName();
     private ProgressDialog mAuthProgressDialog;
     private Context mContext;
+    private String mKey = "";
 
     @Bind(R.id.createUserButton) Button mCreateUserButton;
     @Bind(R.id.nameEditText) EditText mNameEditText;
@@ -57,7 +62,6 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
 
         mAuth = FirebaseAuth.getInstance();
         createAuthStateListener();
-        createAuthProgressDialog();
         mContext = this.getApplicationContext();
 
         mLoginTextView.setOnClickListener(this);
@@ -94,17 +98,15 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
             Snackbar.make(findViewById(R.id.SignUpCoordinatorLayout), R.string.SignUpNoConnection,
                     Snackbar.LENGTH_LONG).show();
         }else{
-//            mAuthProgressDialog.show();
             mAvi.setVisibility(View.VISIBLE);
             mRelative.setVisibility(View.GONE);
             mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-//                    mAuthProgressDialog.dismiss();
                     if(task.isSuccessful()){
                         Log.d(TAG,"authentication successful");
                         createFirebaseUserProfile(task.getResult().getUser());
-                        mAvi.setVisibility(View.GONE);
+//                        mAvi.setVisibility(View.GONE);
                     }else {
                         mRelative.setVisibility(View.VISIBLE);
                         mAvi.setVisibility(View.GONE);
@@ -145,13 +147,6 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     }
 
 
-    private void createAuthProgressDialog() {
-        mAuthProgressDialog = new ProgressDialog(this);
-        mAuthProgressDialog.setTitle("Loading...");
-        mAuthProgressDialog.setMessage("Creating new user...");
-        mAuthProgressDialog.setCancelable(false);
-    }
-
     private void createAuthStateListener() {
         mAuthListener = new FirebaseAuth.AuthStateListener(){
 
@@ -159,13 +154,40 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth){
                 final FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(user != null){
-                    Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
+                    Variables.setMonthAdTotals(mKey,0);
+                    Variables.setAdTotal(0,mKey);
+                    setUpFirebaseNodes();
                 }
             }
         };
+    }
+
+    private void setUpFirebaseNodes() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+
+        //Creates nodes for totals seen today and sets them to 0;
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+        adRef.setValue(Variables.getAdTotal(mKey));
+
+        //Creates nodes for totals seen all month and sets them to 0;
+        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
+        adRef2.setValue(Variables.getMonthAdTotals(mKey));
+
+        //Creates node for cluster ID and sets its value to ID;
+        DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.CLUSTER_ID);
+        adRef3.setValue(generateClusterID());
+
+        startMainActivity();
+
+    }
+
+    private void startMainActivity(){
+        mAvi.setVisibility(View.GONE);
+        Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private boolean isValidPassword(String password, String confirmPassword) {
@@ -201,5 +223,9 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         //should check null because in airplane mode it will be null
         return (netInfo != null && netInfo.isConnected());
+    }
+
+    private int generateClusterID(){
+        return 0;
     }
 }
