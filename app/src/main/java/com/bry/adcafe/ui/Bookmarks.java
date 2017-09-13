@@ -258,27 +258,27 @@ public class Bookmarks extends AppCompatActivity {
 //    }
 
     private void loadAdsFromFirebase(){
-    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    String uid = user.getUid();
-    Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
-    DatabaseReference mRef = query.getRef();
-    mRef.addValueEventListener(new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            for(DataSnapshot snap: dataSnapshot.getChildren()){
-                Advert advert = snap.getValue(Advert.class);
-                advert.setPushId(advert.getPushId());
-                mSavedAds.add(advert);
-                Log.d("BOOKMARKS"," --Loaded ads from firebase.--"+advert.getPushId());
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
+        DatabaseReference mRef = query.getRef();
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snap: dataSnapshot.getChildren()){
+                    Advert advert = snap.getValue(Advert.class);
+                    advert.setPushId(advert.getPushId());
+                    mSavedAds.add(advert);
+                    Log.d("BOOKMARKS"," --Loaded ads from firebase.--"+advert.getPushId());
+                }
             }
-        }
 
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            Log.d("UTILS","Failed to load ads from firebase.");
-        }
-    });
-}
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("UTILS","Failed to load ads from firebase.");
+            }
+        });
+    }
 
     private boolean isNetworkConnected(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

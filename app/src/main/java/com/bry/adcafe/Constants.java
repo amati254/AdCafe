@@ -39,6 +39,9 @@ public class Constants {
     public static String DATE_IN_FIREBASE = "DATE_IN_FIREBASE";
     public static String TOTAL_NO_OF_ADS_SEEN_All_MONTH = "TOTAL_NO_OF_ADS_SEEN_All_MONTH";
     public static String CLUSTER_ID = "clusterID";
+    public static String CLUSTERS = "clusters";
+    public static String CLUSTERS_LIST = "cluster_list";
+    public static String CLUSTER_LIST_PUSHREF_ID = "cluster_list_pushref_id";
 
 
 }

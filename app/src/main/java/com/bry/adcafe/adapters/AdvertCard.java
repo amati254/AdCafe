@@ -233,8 +233,11 @@ public class AdvertCard{
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
         DatabaseReference pushRef = adRef.push();
         String pushId  = pushRef.getKey();
+
+        Log.d("AdvertCard--","pinning-"+mAdvert.getImageUrl());
         mAdvert.setPushId(pushId);
         pushRef.setValue(mAdvert);
+
 
     }
 

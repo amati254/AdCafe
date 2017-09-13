@@ -27,8 +27,12 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import butterknife.Bind;
@@ -53,6 +57,8 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private String mName;
+    private DatabaseReference mRef1;
+    private int mClusterID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +150,9 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         if(mAuthListener!=null){
             mAuth.removeAuthStateListener(mAuthListener);
         }
+        if(mRef1!=null){
+            mRef1.removeEventListener(val);
+        }
     }
 
 
@@ -156,7 +165,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                 if(user != null){
                     Variables.setMonthAdTotals(mKey,0);
                     Variables.setAdTotal(0,mKey);
-                    setUpFirebaseNodes();
+                    generateClusterID();
                 }
             }
         };
@@ -176,7 +185,17 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
 
         //Creates node for cluster ID and sets its value to ID;
         DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.CLUSTER_ID);
-        adRef3.setValue(generateClusterID());
+        adRef3.setValue(mClusterID);
+
+        //Adds the new users id to children in its respective cluster.
+        DatabaseReference adRef4 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST).child(Integer.toString(mClusterID));
+        DatabaseReference pushRef4 = adRef4.push();
+        String pushId  = pushRef4.getKey();
+        pushRef4.setValue(uid);
+
+        //sets pushref key generated from adding user to cluster to clusterListPushrefID;
+        DatabaseReference adRef5 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.CLUSTER_LIST_PUSHREF_ID);
+        adRef5.setValue(pushId);
 
         startMainActivity();
 
@@ -225,7 +244,55 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         return (netInfo != null && netInfo.isConnected());
     }
 
-    private int generateClusterID(){
-        return 0;
+    private void generateClusterID(){
+        Log.d(TAG,"---Generating Cluster ID.");
+        mRef1 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST);
+        if(mRef1!=null){
+            mRef1.addListenerForSingleValueEvent(val);
+        }else{
+            mClusterID = 1 ;
+            setUpFirebaseNodes();
+        }
+
     }
+
+    ValueEventListener val = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            long currentCluster;
+            if(dataSnapshot.getChildrenCount() == 0){
+                 currentCluster = dataSnapshot.getChildrenCount()+1;
+            }else{
+                currentCluster = dataSnapshot.getChildrenCount();
+            }
+            Log.d(TAG,"--NUMBER OF CLUSTERS IN FIREBASE IS --"+currentCluster);
+            DataSnapshot UsersInCurrentCluster = dataSnapshot.child(Integer.toString((int)currentCluster));
+
+            long numberOfUsersInCurrentCluster;
+            if(UsersInCurrentCluster.getChildrenCount()==0){
+                numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount();
+                Log.d(TAG,"--NUMBER OF USERS IN CURRENT CLUSTER IN FIREBASE IS --"+numberOfUsersInCurrentCluster);
+            }else{
+                numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount()+1;
+                Log.d(TAG,"--NUMBER OF USERS IN CURRENT CLUSTER IN FIREBASE IS --"+numberOfUsersInCurrentCluster);
+            }
+
+            if(numberOfUsersInCurrentCluster<1000){
+                Log.d(TAG,"--NUMBER OF USERS IS LESS THAN LIMIT.SETTING mClusterID TO --"+currentCluster);
+                mClusterID = (int)currentCluster;
+            }else{
+                Log.d(TAG,"--NUMBER OF USERS EXCEEDS LIMIT.SETTING mClusterID TO --"+(currentCluster+1));
+                mClusterID = (int)currentCluster+1;
+            }
+
+            Log.d(TAG,"---Cluster id generated for firebase is-- "+mClusterID);
+            setUpFirebaseNodes();
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d("CREATE_ACCOUNT_ACT---","Unable to get cluster with least users due to error.");
+            Toast.makeText(mContext,"Unable to create your account at the moment, try again in a few minutes.",Toast.LENGTH_LONG).show();
+        }
+    };
 }

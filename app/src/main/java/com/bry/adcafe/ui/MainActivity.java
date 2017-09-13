@@ -330,7 +330,10 @@ public class MainActivity extends AppCompatActivity{
 
     private void logoutUser() {
         clearFromSharedPreferences();
-        FirebaseAuth.getInstance().signOut();
+        unregisterAllReceivers();
+        if(FirebaseAuth.getInstance()!=null){
+            FirebaseAuth.getInstance().signOut();
+        }
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -483,13 +486,15 @@ public class MainActivity extends AppCompatActivity{
 
     private void adDayAndMonthTotalsToFirebase(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
+        if(user.getUid()!=null){
+            String uid = user.getUid();
+            DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+            adRef.setValue(Variables.getAdTotal(mKey));
 
-        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
-        adRef.setValue(Variables.getAdTotal(mKey));
+            DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
+            adRef2.setValue(Variables.getMonthAdTotals(mKey));
+        }
 
-        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
-        adRef2.setValue(Variables.getMonthAdTotals(mKey));
     }
 
     private void getMonthAdTotalFromFirebase() {
