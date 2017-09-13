@@ -42,6 +42,7 @@ public class Constants {
     public static String CLUSTERS = "clusters";
     public static String CLUSTERS_LIST = "cluster_list";
     public static String CLUSTER_LIST_PUSHREF_ID = "cluster_list_pushref_id";
+    public static String FLAGGED_CLUSTERS = "FLAGGED_CLUSTERS";
 
 
 }
