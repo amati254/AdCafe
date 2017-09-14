@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user!= null){
+                if(user!= null &&isOnline(mContext)){
                     mRelative.setVisibility(View.GONE);
                     mAvi.setVisibility(View.VISIBLE);
                     getMonthAdTotalFromFirebase();
@@ -96,7 +96,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
         mRef = query.getRef();
-//        mRef.addValueEventListener(val);
         mRef.addListenerForSingleValueEvent(val);
 
     }
@@ -108,7 +107,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
         mRef2 = query.getRef();
-//        mRef.addValueEventListener(val2);
         mRef.addListenerForSingleValueEvent(val2);
     }
 

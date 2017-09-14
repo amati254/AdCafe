@@ -45,7 +45,7 @@
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:layout_marginLeft="35dp"
-                android:background="@drawable/ic_action_bookmarksfol"/>
+                android:background="@drawable/ic_action_pinn_list_icon"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:id="@+id/bookmarkText"
