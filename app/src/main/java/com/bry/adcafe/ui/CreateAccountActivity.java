@@ -200,6 +200,10 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         DatabaseReference adRef5 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.CLUSTER_LIST_PUSHREF_ID);
         adRef5.setValue(pushId);
 
+        //sets value for boolean if user has made any payments for uploading an advert to false.
+        DatabaseReference adRef6 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants. HAS_USER_MADE_PAMENTS);
+        adRef6.setValue(false);
+
         startMainActivity();
 
     }

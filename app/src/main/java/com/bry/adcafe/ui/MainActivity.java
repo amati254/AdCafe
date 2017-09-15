@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -14,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -45,6 +48,7 @@ import com.mindorks.placeholderview.SwipeDecor;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.wang.avi.AVLoadingIndicatorView;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -81,6 +85,7 @@ public class MainActivity extends AppCompatActivity{
         StartNetworkChecker(mContext);
     }
 
+    //redundant method for multithreading
     private void loadAdsFromThread(){
         try{
             startGetAds();
@@ -103,6 +108,7 @@ public class MainActivity extends AppCompatActivity{
         mLinearLayout.setVisibility(View.GONE);
     }
 
+    //method for loading ads onto thread from db
     private void getAds() {
         try{
             mAdList = new ArrayList<>();
@@ -134,6 +140,7 @@ public class MainActivity extends AppCompatActivity{
         super.onStop();
     }
 
+    //deleting saved data when app is stopped
     @Override
     protected void onDestroy(){
         unregisterAllReceivers();
@@ -497,54 +504,6 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    private void getMonthAdTotalFromFirebase() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-
-        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
-        DatabaseReference mRef = query.getRef();
-        mRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("MAIN ACTIVITY--","Loading Month AdTotals from firebase.");
-                int number = dataSnapshot.getValue(int.class);
-                mMonthTotal = number;
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d("MAIN ACTIVITY--","Failed to load Month AdTotals from firebase.");
-
-            }
-        });
-
-    }
-
-
-
-//    private void loadTodayAdTotalsFromFirebase(){
-//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//        String uid = user.getUid();
-//
-//        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
-//        DatabaseReference mRef = query.getRef();
-//        mRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                Log.d("MAIN_ACTIVITY--","Ad totals from today have been loaded from firebase.");
-//                int number = dataSnapshot.getValue(int.class);
-//                Variables.setAdTotal(number,mKey);
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.d("MAIN_ACTIVITY--","Failed to load todays ad totals from firebase.");
-//                loadFromSharedPreferences();
-//            }
-//
-//        });
-//    }
-
     private String getDate(){
         long date = System.currentTimeMillis();
         SimpleDateFormat sdfMonth = new SimpleDateFormat("MM");
@@ -561,7 +520,7 @@ public class MainActivity extends AppCompatActivity{
         String mm = Integer.toString(c.get(Calendar.MONTH));
         String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
 
-        String todaysDate = (dd+":"+mm+":"+yy);
+        String todaysDate = (dayeString+":"+MonthString+":"+yearString);
 
         return todaysDate;
     }
@@ -588,17 +547,20 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    private void resetSharedPreferences(){
+    private void resetAdTotalSharedPreferencesAndDayAdTotals(){
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.clear();
         editor.commit();
+
+        Variables.setAdTotal(0,mKey);
     }
 
 
 
-    private void resetDayAdTotals(){
-        Variables.setAdTotal(0,mKey);
+    public static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
+        byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
     }
 
 }

@@ -22,6 +22,7 @@ public class Dashboard extends AppCompatActivity {
     private TextView mTotalAdsSeenAllTime;
     private ImageView mInfoImageView;
     private CardView mUploadAnAdIcon;
+    private TextView mAmmountNumber;
     protected String mKey = "";
 
     @Override
@@ -59,10 +60,13 @@ public class Dashboard extends AppCompatActivity {
         mTotalAdsSeenToday = (TextView) findViewById(R.id.AdsSeenTodayNumber);
         mInfoImageView = (ImageView) findViewById(R.id.helpIcon);
         mUploadAnAdIcon = (CardView) findViewById(R.id.uploadAnAdIcon);
+        mAmmountNumber = (TextView) findViewById(R.id.ammountNumber);
     }
 
     private void setValues() {
         mTotalAdsSeenToday.setText(Integer.toString(Variables.getAdTotal(mKey)));
         mTotalAdsSeenAllTime.setText(Integer.toString(Variables.getMonthAdTotals(mKey)));
+        int totalAmounts = (int)(Variables.getMonthAdTotals(mKey)*1.5);
+        mAmmountNumber.setText(Integer.toString(totalAmounts));
     }
 }

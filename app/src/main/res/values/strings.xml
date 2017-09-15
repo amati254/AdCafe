@@ -32,7 +32,11 @@
     <string name="failedUnpinned">"We're unable to unpin this right now."</string>
     <string name="cannotUploadFailedFirebase">"Your connection may be low,try again after a few moments."</string>
     <string name="UploadAdNoConnection">"You may need internet connection to Upload your Advert."</string>
-    <string name="DoNotPayTwice">"Note that once you make the necessary payments, you can upload your advertisements at any time."</string>
+    <string name="DoNotPayTwice">"Note that once you pay, you can upload your advert at any time."</string>
     <string name="MakeSureImage">"Make sure the image looks good in the card."</string>
     <string name="pleaseChooseIcon">"Please choose an image fist."</string>
+    <string name="successfullyUploaded">"Successfully uploaded!"</string>
+    <string name="unsuccessfullyUploaded">"Something went wrong,try uploading again after a few minutes."</string>
+    <string name="uploadMessage">"Upload may take some time..."</string>
+    <string name="settingUpMessage">"Setting a couple of things up..."</string>
 </resources>

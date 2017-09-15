@@ -92,7 +92,7 @@ public class AdCounterBar {
     private void startTimer(){
         if(!hasTimerStarted){
             hasTimerStarted = true;
-             new CountDownTimer(7*1000,1) {
+             new CountDownTimer(7*1000,400) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     hasTimerMessageBeenSent = false;
