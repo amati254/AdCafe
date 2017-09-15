@@ -307,7 +307,7 @@ public class AdUpload extends AppCompatActivity {
 
     private String encodeBitmapForFirebaseStorage(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,40,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,50,baos);
         String imageEncoded = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
         return imageEncoded;
     }

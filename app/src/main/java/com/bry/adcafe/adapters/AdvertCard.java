@@ -251,8 +251,13 @@ public class AdvertCard{
         DatabaseReference pushRef = adRef.push();
         String pushId  = pushRef.getKey();
 
-        Log.d("AdvertCard--","pinning-"+mAdvert.getImageUrl());
+        Log.d("AdvertCard--","pinning the selected ad.");
+
+        Bitmap bm = mAdvert.getImageBitmap();
+        mAdvert.setImageUrl(encodeBitmapForFirebaseStorage(bm));
+        mAdvert.setImageBitmap(null);
         mAdvert.setPushId(pushId);
+
         pushRef.setValue(mAdvert).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -270,9 +275,16 @@ public class AdvertCard{
         return byteArray;
     }
 
-    public static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
+    private static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
         byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
+    }
+
+    private String encodeBitmapForFirebaseStorage(Bitmap bitmap){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG,40,baos);
+        String imageEncoded = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+        return imageEncoded;
     }
 
     @SwipeInState

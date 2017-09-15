@@ -2,6 +2,7 @@ package com.bry.adcafe.models;
 
 import android.graphics.Bitmap;
 
+import com.google.firebase.database.Exclude;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -52,7 +53,6 @@ public class Advert {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
-
 
     public Bitmap getImageBitmap(){
         return imageBitmap;

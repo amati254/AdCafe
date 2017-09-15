@@ -5,9 +5,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -34,6 +37,8 @@ import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
 import com.wang.avi.AVLoadingIndicatorView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 
 import butterknife.OnItemLongClick;
@@ -68,7 +73,6 @@ public class SavedAdsCard {
     @Resolve
     private void onResolved() {
        loadImage();
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForRemovePinnedAd,new IntentFilter(Constants.REMOVE_PINNED_AD));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
 
     }
@@ -82,29 +86,32 @@ public class SavedAdsCard {
 
     private void loadImage(){
         mAvi.setVisibility(android.view.View.VISIBLE);
-//        Log.d("SAVED_ADS_CARD--","Push id is--"+mAdvert.getPushId());
-        Glide.with(mContext).load(mAdvert.getImageUrl())
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        mAvi.setVisibility(android.view.View.GONE);
-                        errorImageView.setVisibility(android.view.View.VISIBLE);
-                        if(!isInternetAvailable()&& !hasMessageBeenSeen){
-                            hasMessageBeenSeen = true;
-                            Intent intent = new Intent(Constants.CONNECTION_OFFLINE);
-                            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-                        }
-                        return false;
-                    }
+        try {
+            Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+            mAdvert.setImageBitmap(bm);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Glide.with(mContext).load(bitmapToByte(mAdvert.getImageBitmap())).asBitmap().listener(new RequestListener<byte[], Bitmap>() {
+            @Override
+            public boolean onException(Exception e, byte[] model, Target<Bitmap> target, boolean isFirstResource) {
+                mAvi.setVisibility(android.view.View.GONE);
+                errorImageView.setVisibility(android.view.View.VISIBLE);
+                if(!isInternetAvailable()&& !hasMessageBeenSeen){
+                    hasMessageBeenSeen = true;
+                    Intent intent = new Intent(Constants.CONNECTION_OFFLINE);
+                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                }
+                return false;
+            }
 
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        mAvi.setVisibility(android.view.View.GONE);
-                        errorImageView.setVisibility(android.view.View.GONE);
-                        return false;
-                    }
-                })
-                .into(imageView);
+            @Override
+            public boolean onResourceReady(Bitmap resource, byte[] model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                mAvi.setVisibility(android.view.View.GONE);
+                errorImageView.setVisibility(android.view.View.GONE);
+                return false;
+            }
+        }).into(imageView);
     }
 
     private boolean isInternetAvailable() {
@@ -117,18 +124,11 @@ public class SavedAdsCard {
 
     }
 
-    private BroadcastReceiver mMessageReceiverForRemovePinnedAd = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-//            unPin();
-        }
-    };
 
     private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("SAVED_ADS_CARD--","Received broadcast to Unregister all receivers");
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForRemovePinnedAd);
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
         }
     };
@@ -158,6 +158,18 @@ public class SavedAdsCard {
             }
         });
 
+    }
+
+    private byte[] bitmapToByte(Bitmap bitmap){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG,90,baos);
+        byte[] byteArray = baos.toByteArray();
+        return byteArray;
+    }
+
+    private static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
+        byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
     }
 
 }

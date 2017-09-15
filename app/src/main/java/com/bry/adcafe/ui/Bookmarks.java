@@ -51,8 +51,6 @@ public class Bookmarks extends AppCompatActivity {
     private ChildEventListener mChildEventListener;
     private DatabaseReference mRef;
 
-
-
     private List<Advert> mSavedAds;
     private Runnable mViewRunnable;
     private ProgressBar mProgressBar;
@@ -77,9 +75,6 @@ public class Bookmarks extends AppCompatActivity {
                     Snackbar.LENGTH_INDEFINITE).show();
         }
 //        loadFromAsynchTask();
-    }
-
-    private void setOnClicks() {
     }
 
 //    private void loadFromAsynchTask() {
