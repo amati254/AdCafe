@@ -34,7 +34,7 @@ public class AdCounterBar {
     private PlaceHolderView mPlaceHolderView;
     private boolean hasTimerMessageBeenSent;
     private boolean hasTimerStarted;
-    protected String mKey = "";
+    private String mKey = "";
 
     public AdCounterBar(Context context, PlaceHolderView PlaceHolderView){
         mContext = context;

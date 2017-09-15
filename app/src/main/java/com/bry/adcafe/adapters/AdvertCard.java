@@ -4,8 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Window;
 import android.widget.ImageButton;
@@ -24,6 +28,8 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -42,6 +48,9 @@ import com.mindorks.placeholderview.annotations.swipe.SwipeInState;
 import com.mindorks.placeholderview.annotations.swipe.SwipeOut;
 import com.mindorks.placeholderview.annotations.swipe.SwipeOutState;
 import com.wang.avi.AVLoadingIndicatorView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
@@ -94,57 +103,66 @@ public class AdvertCard{
         Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
 
         mAvi.setVisibility(android.view.View.VISIBLE);
-        Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext,Utils.dpToPx(4),0,
-                RoundedCornersTransformation.CornerType.TOP))
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        Log.d("ADVERT_CARD--","The image has failed to load due to network error."+e.getMessage());
-                        errorImageView.setVisibility(android.view.View.VISIBLE);
-                        mAvi.setVisibility(android.view.View.GONE);
-//                        mSwipeView.unlockViews();
-                        return false;
-                    }
+        try {
+            Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+            mAdvert.setImageBitmap(bm);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Glide.with(mContext).load(bitmapToByte(mAdvert.getImageBitmap())).bitmapTransform(new RoundedCornersTransformation(mContext,Utils.dpToPx(4),0,
+                RoundedCornersTransformation.CornerType.TOP)).listener(new RequestListener<byte[], GlideDrawable>() {
+            @Override
+            public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
+                Log.d("ADVERT_CARD--","The image has failed to load due to error."+e.getMessage());
+                errorImageView.setVisibility(android.view.View.VISIBLE);
+                mAvi.setVisibility(android.view.View.GONE);
+                if(isFirstResource) {mSwipeView.unlockViews();}
+                return false;
+            }
 
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                       Log.d("ADVERT_CARD--","The image has loaded successfully");
-                        mAvi.setVisibility(android.view.View.GONE);
-                        errorImageView.setVisibility(android.view.View.GONE);
-
-                        sendBroadcast(START_TIMER);
-                        clickable=false;
-                        return false;
-                    }
-                })
-                .into(profileImageView);
+            @Override
+            public boolean onResourceReady(GlideDrawable resource, byte[] model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                Log.d("ADVERT_CARD--","The image has loaded successfully");
+                mAvi.setVisibility(android.view.View.GONE);
+                errorImageView.setVisibility(android.view.View.GONE);
+                if(isFirstResource) {
+                    Log.d("ADVERT_CARD---","sending broadcast to start timer...");
+                    sendBroadcast(START_TIMER);
+                }
+                clickable=false;
+                return false;
+            }
+        }).into(profileImageView);
     }
 
     private void loadOnlyLastAd(){
         Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
         mAvi.setVisibility(android.view.View.VISIBLE);
-        Glide.with(mContext).load(mAdvert.getImageUrl()).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
-                RoundedCornersTransformation.CornerType.TOP))
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        errorImageView.setVisibility(android.view.View.VISIBLE);
-//                        mProgressBar.setVisibility(android.view.View.GONE);
-                        mAvi.setVisibility(android.view.View.GONE);
-                        hasAdLoaded = false;
-                        return false;
-                    }
+        try {
+            Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+            mAdvert.setImageBitmap(bm);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-//                        mProgressBar.setVisibility(android.view.View.GONE);
-                        mAvi.setVisibility(android.view.View.GONE);
-                        errorImageView.setVisibility(android.view.View.GONE);
-                        hasAdLoaded = true;
-                        return false;
-                    }
-                })
-                .into(profileImageView);
+        Glide.with(mContext).load(bitmapToByte(mAdvert.getImageBitmap())).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
+                RoundedCornersTransformation.CornerType.TOP)).listener(new RequestListener<byte[], GlideDrawable>() {
+            @Override
+            public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
+                errorImageView.setVisibility(android.view.View.VISIBLE);
+                mAvi.setVisibility(android.view.View.GONE);
+                hasAdLoaded = false;
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(GlideDrawable resource, byte[] model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                mAvi.setVisibility(android.view.View.GONE);
+                errorImageView.setVisibility(android.view.View.GONE);
+                hasAdLoaded = true;
+                return false;
+            }
+        }).into(profileImageView);
         mSwipeView.lockViews();
         clickable=false;
         sendBroadcast(Constants.LAST);
@@ -220,7 +238,6 @@ public class AdvertCard{
             Log.d("ADVERT_CARD--","Received broadcast to Pin ad.");
             if(!Variables.hasBeenPinned){
                 pinAd();
-                Variables.hasBeenPinned = true;
             }
         }
     };
@@ -236,9 +253,26 @@ public class AdvertCard{
 
         Log.d("AdvertCard--","pinning-"+mAdvert.getImageUrl());
         mAdvert.setPushId(pushId);
-        pushRef.setValue(mAdvert);
+        pushRef.setValue(mAdvert).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Variables.hasBeenPinned = true;
+            }
+        });
 
 
+    }
+
+    private byte[] bitmapToByte(Bitmap bitmap){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG,90,baos);
+        byte[] byteArray = baos.toByteArray();
+        return byteArray;
+    }
+
+    public static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
+        byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
     }
 
     @SwipeInState

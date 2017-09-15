@@ -1,5 +1,7 @@
 package com.bry.adcafe.models;
 
+import android.graphics.Bitmap;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -14,6 +16,7 @@ public class Advert {
 
     private int numberOfAds = 0 ;
     private String pushId;
+    private Bitmap imageBitmap;
 
     public Advert(String ImageUrl){
         this.imageUrl = ImageUrl;
@@ -48,5 +51,14 @@ public class Advert {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+
+    public Bitmap getImageBitmap(){
+        return imageBitmap;
+    }
+
+    public void setImageBitmap(Bitmap bm){
+        imageBitmap = bm;
     }
 }

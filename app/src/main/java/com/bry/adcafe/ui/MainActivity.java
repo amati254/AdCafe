@@ -33,10 +33,12 @@ import com.bry.adcafe.adapters.AdvertCard;
 import com.bry.adcafe.adapters.AdCounterBar;
 import com.bry.adcafe.fragments.ReportDialogFragment;
 import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.ConnectionChecker;
 import com.bry.adcafe.services.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -55,20 +57,20 @@ import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
+    private static final String TAG = "MainActivity";
     private SwipePlaceHolderView mSwipeView;
     private PlaceHolderView mAdCounterView;
     private Context mContext;
-    private static final String TAG = "MainActivity";
-    private int mNumberOfAdsSeen;
     private String mKey = "";
 
-    private List<Advert> mAdList;
+    private List<Advert> mAdList = new ArrayList<>();
+    private List<Advert> mFailedAdList = new ArrayList<>();
     private Runnable mViewRunnable;
-    private ProgressBar mProgressBar;
     private LinearLayout mLinearLayout;
     private AVLoadingIndicatorView mAvi;
-    private String mTodaysDate;
-    private int mMonthTotal = 0;
+
+    private DatabaseReference dbRef;
+    private int mChildToStartFrom = 0;
 
 
     @Override
@@ -78,7 +80,6 @@ public class MainActivity extends AppCompatActivity{
         mContext = getApplicationContext();
 
         registerReceivers();
-        loadDateFromFirebase();
 
         setUpSwipeView();
         loadAdsFromThread();
@@ -88,13 +89,15 @@ public class MainActivity extends AppCompatActivity{
     //redundant method for multithreading
     private void loadAdsFromThread(){
         try{
+            Log.d(TAG,"---Starting the getAds method...");
             startGetAds();
         }catch (Exception e) {
-            Log.e("BACKGROUND_PROC", e.getMessage());
+            Log.e("BACKGROUND_PROC---", e.getMessage());
         }
     }
 
     private void startGetAds() {
+        Log.d(TAG,"---Setting up mViewRunnable thread...");
         mViewRunnable = new Runnable() {
             @Override
             public void run() {
@@ -102,19 +105,19 @@ public class MainActivity extends AppCompatActivity{
             }
         };
         Thread thread =  new Thread(null, mViewRunnable, "Background");
+        Log.d(TAG,"---Starting thread...");
         thread.start();
-//        mProgressBar.setVisibility(View.VISIBLE);
         mAvi.setVisibility(View.VISIBLE);
         mLinearLayout.setVisibility(View.GONE);
-    }
+    } ///////////////////////////
 
-    //method for loading ads onto thread from db
+    //method for loading ads from thread.Contains sleep length...
     private void getAds() {
         try{
-            mAdList = new ArrayList<>();
-            for(Advert ad: Utils.loadProfiles(this.getApplicationContext())){
-                 mAdList.add(ad);
-            }
+//            mAdList = new ArrayList<>();
+            Log.d(TAG,"---The getAdsFromFirebase method has been called...");
+            getGetAdsFromFirebase();
+
             Thread.sleep(3000);
             Log.i("ARRAY", ""+  mAdList.size());
         }catch (Exception e) {
@@ -123,12 +126,44 @@ public class MainActivity extends AppCompatActivity{
         runOnUiThread(returnRes);
     }
 
+    private void getGetAdsFromFirebase(){
+        Log.d(TAG,"---Setting up firebase query...");
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(User.getClusterID(mKey)));
+        dbRef = query.getRef();
+        dbRef.startAt(mChildToStartFrom);
+        dbRef.limitToFirst(10);
+        Log.d(TAG,"---Adding value event listener...");
+        dbRef.addValueEventListener(val);
+    }
+
+    ValueEventListener val = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            if(dataSnapshot.hasChildren()){
+                Log.d(TAG,"---Children in dataSnapshot from firebase exist");
+                for(DataSnapshot snap:dataSnapshot.getChildren()){
+                    Advert ad = snap.getValue(Advert.class);
+                    mAdList.add(ad);
+                }
+                Log.d(TAG,"---All the ads have been handled.Total is "+mAdList.size());
+            }
+            loadAdsIntoAdvertCard();
+            mAvi.setVisibility(View.GONE);
+            mLinearLayout.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Toast.makeText(mContext,"Unable to load the adverts now. Perhaps try again later.",Toast.LENGTH_LONG).show();
+            mAvi.setVisibility(View.GONE);
+            mLinearLayout.setVisibility(View.VISIBLE);
+        }
+    };
+
     private Runnable returnRes = new Runnable() {
         @Override
         public void run() {
-            loadAdsFromJSONFile();
-            mAvi.setVisibility(View.GONE);
-            mLinearLayout.setVisibility(View.VISIBLE);
+//            loadAdsIntoAdvertCard();
         }
     };
 
@@ -138,6 +173,9 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onStop(){
         super.onStop();
+        if(dbRef!=null){
+            dbRef.removeEventListener(val);
+        }
     }
 
     //deleting saved data when app is stopped
@@ -209,16 +247,23 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    private void loadAdsFromJSONFile(){
+    private void loadAdsIntoAdvertCard(){
+        if(mAdCounterView==null){
+            Log.d(TAG,"---Setting up AdCounter...");
+            loadAdCounter();
+        }
         if(mSwipeView == null){
+            Log.d(TAG,"---Setting up Swipe views..");
             setUpSwipeView();
         }
         if(mSwipeView.getChildCount()!=0){
+            Log.d(TAG,"Removing existing children from swipeView...");
             mSwipeView.removeAllViews();
         }
         if(mAdList!=null && mAdList.size()>0){
             for(int i = 0 ; i < mAdList.size() ; i++){
                 if(Variables.getAdTotal(mKey)>=mAdList.size()){
+                    Log.d(TAG,"---User has seen all the ads, thus will load only last ad...");
                     mSwipeView.addView(new AdvertCard(mContext,mAdList.get(mAdList.size()-1),mSwipeView,Constants.LAST));
                     Variables.setIsLastOrNotLast(Constants.LAST);
                     break;
@@ -231,8 +276,8 @@ public class MainActivity extends AppCompatActivity{
             }
         }
 
-        loadAdCounter();
         Variables.setNewNumberOfAds(mAdList.size()-Variables.getAdTotal(mKey));
+        Log.d(TAG,"---Setting up On click listeners...");
         onclicks();
     }
 
@@ -510,42 +555,21 @@ public class MainActivity extends AppCompatActivity{
         String MonthString = sdfMonth.format(date);
 
         SimpleDateFormat sdfDay = new SimpleDateFormat("dd");
-        String dayeString = sdfDay.format(date);
+        String dayString = sdfDay.format(date);
 
         SimpleDateFormat sdfYear = new SimpleDateFormat("yyyy");
         String yearString = sdfYear.format(date);
 
-        final Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance();
         String yy = Integer.toString(c.get(Calendar.YEAR));
         String mm = Integer.toString(c.get(Calendar.MONTH));
         String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
 
-        String todaysDate = (dayeString+":"+MonthString+":"+yearString);
+        String todaysDate = (dayString+":"+MonthString+":"+yearString);
 
         return todaysDate;
     }
 
-    private void loadDateFromFirebase(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-
-        Query query =  FirebaseDatabase.getInstance().getReference(Constants.DATE_IN_FIREBASE);
-        DatabaseReference mRef = query.getRef();
-        mRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-               String FirebaseDate = dataSnapshot.getValue(String.class);
-                mTodaysDate = FirebaseDate;
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                mTodaysDate = getDate();
-            }
-
-        });
-
-    }
 
     private void resetAdTotalSharedPreferencesAndDayAdTotals(){
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);

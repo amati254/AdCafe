@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.ConnectionChecker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -55,6 +56,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private FirebaseAuth.AuthStateListener mAuthListener;
     private DatabaseReference mRef;
     private DatabaseReference mRef2;
+    private DatabaseReference mRef3;
 
     private Context mContext;
     private String mKey = "";
@@ -110,6 +112,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mRef.addListenerForSingleValueEvent(val2);
     }
 
+    private void loadUserIDFromFirebase() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.CLUSTER_ID);
+        mRef3 = query.getRef();
+        mRef3.addListenerForSingleValueEvent(val3);
+    }
+
     ValueEventListener val = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -135,7 +145,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             int number = dataSnapshot.getValue(int.class);
             Variables.setAdTotal(number,mKey);
             Log.d("LOGIN_ACTIVITY--","Ad totals gotten from firebase is --"+number);
-            startMainActivity();
+            loadUserIDFromFirebase();
             mHasLoadingDayTotalsFailed = false;
         }
 
@@ -144,7 +154,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Log.d("LOGIN_ACTIVITY--","Failed to load todays ad totals from firebase.");
             mHasLoadingDayTotalsFailed = true;
             loadFromSharedPreferences();
+        }
+    };
+
+    ValueEventListener val3 = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            int clusterID = dataSnapshot.getValue(int.class);
+            User.setID(clusterID,mKey);
             startMainActivity();
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            mAvi.setVisibility(View.GONE);
+            mRelative.setVisibility(View.VISIBLE);
+            Toast.makeText(mContext,"Your connection may be too unreliable.Perhaps try again later.",Toast.LENGTH_LONG).show();
         }
     };
 
@@ -214,6 +240,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
         if(mRef2!=null){
             mRef2.removeEventListener(val2);
+        }
+        if(mRef3!=null){
+            mRef3.removeEventListener(val3);
         }
     }
 
