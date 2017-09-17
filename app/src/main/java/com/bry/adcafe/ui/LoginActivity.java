@@ -235,6 +235,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void resetAdTotalsInFirebase() {
+        Log.d(TAG,"---Resetting ad total in firebase to 0 due to it being a new day.");
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);

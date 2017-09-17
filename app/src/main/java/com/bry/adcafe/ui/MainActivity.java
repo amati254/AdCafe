@@ -84,11 +84,36 @@ public class MainActivity extends AppCompatActivity{
         setUpSwipeView();
         loadAdsFromThread();
         StartNetworkChecker(mContext);
+
+    }
+
+
+    Handler h = new Handler();
+    Runnable r;
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        Log.d(TAG,"---started the time checker for when it is almost midnight.");
+        h.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                if(isAlmostMidNight()){
+                    resetEverything();
+                }
+                r = this;
+                h.postDelayed(r,15000);
+            }
+        },15000);
     }
 
 
 
     private void loadAdsFromThread(){
+        if(dbRef!=null){
+            dbRef.removeEventListener(val);
+        }
         try{
             Log.d(TAG,"---Starting the getAds method...");
             startGetAds();
@@ -115,7 +140,6 @@ public class MainActivity extends AppCompatActivity{
     //method for loading ads from thread.Contains sleep length...
     private void getAds() {
         try{
-//            mAdList = new ArrayList<>();
             Log.d(TAG,"---The getAdsFromFirebase method has been called...");
             getGetAdsFromFirebase();
 
@@ -127,13 +151,27 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void getGetAdsFromFirebase(){
+        if(mAdList.size()!=0){
+            mAdList.clear();
+        }
         Log.d(TAG,"---Setting up firebase query...");
-        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(User.getClusterID(mKey)));
-        dbRef = query.getRef();
-        dbRef.startAt(mChildToStartFrom);
-        dbRef.limitToFirst(10);
-        Log.d(TAG,"---Adding value event listener...");
-        dbRef.addValueEventListener(val);
+        if(isAlmostMidNight()){
+            Log.d(TAG,"---Day is almost over,so loading tomorrows ads now.");
+            Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(User.getClusterID(mKey)));
+            dbRef = query.getRef();
+            dbRef.startAt(mChildToStartFrom);
+            dbRef.limitToFirst(10);
+            Log.d(TAG,"---Adding value event listener...");
+            dbRef.addValueEventListener(val);
+        }else{
+            Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(User.getClusterID(mKey)));
+            dbRef = query.getRef();
+            dbRef.startAt(mChildToStartFrom);
+            dbRef.limitToFirst(10);
+            Log.d(TAG,"---Adding value event listener...");
+            dbRef.addValueEventListener(val);
+        }
+
     }
 
     ValueEventListener val = new ValueEventListener() {
@@ -172,13 +210,14 @@ public class MainActivity extends AppCompatActivity{
 
 
 
-
     @Override
     protected void onStop(){
         super.onStop();
         if(dbRef!=null){
             dbRef.removeEventListener(val);
         }
+        Log.d(TAG,"---removing callback for checking time of day.");
+        h.removeCallbacks(r);
     }
 
     //deleting saved data when app is stopped
@@ -414,6 +453,8 @@ public class MainActivity extends AppCompatActivity{
         }
     };
 
+
+
     private BroadcastReceiver mMessageReceiverForConnectionOffline = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -487,7 +528,21 @@ public class MainActivity extends AppCompatActivity{
         editor2.commit();
     }
 
+    private boolean isAlmostMidNight() {
+        Calendar c = Calendar.getInstance();
+        int hours = c.get(Calendar.HOUR_OF_DAY);
+        int minutes = c.get(Calendar.MINUTE);
+        int seconds = c.get(Calendar.SECOND);
 
+        Log.d(TAG,"Current time is " + hours + ":"+minutes + ":"+seconds);
+        if(hours == 23 && (minutes == 59) && (seconds>45)){
+            Log.d(TAG,"---Day is approaching midnight,returning true to reset the activity and values.");
+            return true;
+        }else{
+            Log.d(TAG,"---Day is not approaching midnight,so activity will continue normally.");
+            return false;
+        }
+    }
 
 
     private void clearFromSharedPreferences(){
@@ -585,6 +640,27 @@ public class MainActivity extends AppCompatActivity{
         String uid = user.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
         adRef.setValue(0);
+    }
+
+
+
+    private void resetEverything() {
+        resetAdTotalSharedPreferencesAndDayAdTotals();
+        loadAdsFromThread();
+    }
+
+    private String getNextDay(){
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.DAY_OF_MONTH,1);
+        String yy = Integer.toString(c.get(Calendar.YEAR));
+        String mm = Integer.toString(c.get(Calendar.MONTH)+1);
+        String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
+
+        String tomorrowsDate = (dd+":"+mm+":"+yy);
+
+        Log.d(TAG,"Tomorrows date is : "+tomorrowsDate);
+        return tomorrowsDate;
+
     }
 
 }
