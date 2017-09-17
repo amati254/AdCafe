@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class AdUpload extends AppCompatActivity {
@@ -66,6 +67,9 @@ public class AdUpload extends AppCompatActivity {
     private TextView mLoadingTextView;
     private TextView mSelectText;
     private TextView mUploadText;
+    private LinearLayout mNoConnection;
+    private LinearLayout mBottomNavs;
+
 
     private boolean mHasNumberBeenLoaded;
     private boolean mHasUserChosenAnImage;
@@ -93,6 +97,7 @@ public class AdUpload extends AppCompatActivity {
         mHasUserChosenAnImage = false;
         mHasNumberBeenLoaded = false;
 
+
         setUpViews();
         startGetNUmberOfClusters();
     }
@@ -105,10 +110,13 @@ public class AdUpload extends AppCompatActivity {
         }else{
             Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.UploadAdNoConnection,
                     Snackbar.LENGTH_LONG).show();
+            mNoConnection.setVisibility(View.VISIBLE);
+            mBottomNavs.setVisibility(View.GONE);
         }
     }
 
     private void setUpViews() {
+        mBottomNavs = (LinearLayout) findViewById(R.id.bottomNavs);
         mUploadButton = (ImageView) findViewById(R.id.uploadIcon);
         mChoosingImage = (ImageView) findViewById(R.id.chooseImageIcon);
         mProfileImageViewPreview = (ImageView) findViewById(R.id.profileImageViewPreview);
@@ -119,6 +127,7 @@ public class AdUpload extends AppCompatActivity {
         mLoadingTextView = (TextView) findViewById(R.id.loadingText);
         mSelectText = (TextView) findViewById(R.id.selectText);
         mUploadText = (TextView) findViewById(R.id.uploadText);
+        mNoConnection = (LinearLayout) findViewById(R.id.noConnectionMessage);
     }
 
     private void getNumberOfClusters() {
@@ -332,7 +341,7 @@ public class AdUpload extends AppCompatActivity {
                     Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
 
                     String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
-                    mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(number));
+                    mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(number));
                     Advert advert = new Advert(encodedImageToUpload);
                     DatabaseReference pushref= mRef3.push();
                     String pushID = pushref.getKey();
@@ -482,6 +491,20 @@ public class AdUpload extends AppCompatActivity {
         String todaysDate = (dayString+":"+MonthString+":"+yearString);
 
         return todaysDate;
+    }
+
+    private String getNextDay(){
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.DAY_OF_MONTH,1);
+        String yy = Integer.toString(c.get(Calendar.YEAR));
+        String mm = Integer.toString(c.get(Calendar.MONTH)+1);
+        String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
+
+        String tomorrowsDate = (dd+":"+mm+":"+yy);
+
+        Log.d(TAG,"Tomorrows date is : "+tomorrowsDate);
+        return tomorrowsDate;
+
     }
 
 }

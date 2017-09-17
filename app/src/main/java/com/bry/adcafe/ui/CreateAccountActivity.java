@@ -35,6 +35,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.wang.avi.AVLoadingIndicatorView;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -204,6 +207,10 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         DatabaseReference adRef6 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants. HAS_USER_MADE_PAMENTS);
         adRef6.setValue(false);
 
+        //sets the date for when last used in firebase.
+        DatabaseReference adRef7 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
+        adRef7.setValue(getDate());
+
         startMainActivity();
 
     }
@@ -354,5 +361,26 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                 generateClusterID();
             }
         });
+    }
+
+    private String getDate(){
+        long date = System.currentTimeMillis();
+        SimpleDateFormat sdfMonth = new SimpleDateFormat("MM");
+        String MonthString = sdfMonth.format(date);
+
+        SimpleDateFormat sdfDay = new SimpleDateFormat("dd");
+        String dayString = sdfDay.format(date);
+
+        SimpleDateFormat sdfYear = new SimpleDateFormat("yyyy");
+        String yearString = sdfYear.format(date);
+
+        Calendar c = Calendar.getInstance();
+        String yy = Integer.toString(c.get(Calendar.YEAR));
+        String mm = Integer.toString(c.get(Calendar.MONTH));
+        String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
+
+        String todaysDate = (dayString+":"+MonthString+":"+yearString);
+
+        return todaysDate;
     }
 }

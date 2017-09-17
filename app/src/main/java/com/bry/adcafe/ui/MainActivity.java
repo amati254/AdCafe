@@ -86,7 +86,8 @@ public class MainActivity extends AppCompatActivity{
         StartNetworkChecker(mContext);
     }
 
-    //redundant method for multithreading
+
+
     private void loadAdsFromThread(){
         try{
             Log.d(TAG,"---Starting the getAds method...");
@@ -119,7 +120,6 @@ public class MainActivity extends AppCompatActivity{
             getGetAdsFromFirebase();
 
             Thread.sleep(3000);
-            Log.i("ARRAY", ""+  mAdList.size());
         }catch (Exception e) {
             Log.e("BACKGROUND_PROC", e.getMessage());
         }
@@ -146,7 +146,10 @@ public class MainActivity extends AppCompatActivity{
                     mAdList.add(ad);
                 }
                 Log.d(TAG,"---All the ads have been handled.Total is "+mAdList.size());
+            }else{
+                Log.d(TAG,"----No ads are available today");
             }
+
             loadAdsIntoAdvertCard();
             mAvi.setVisibility(View.GONE);
             mLinearLayout.setVisibility(View.VISIBLE);
@@ -181,6 +184,7 @@ public class MainActivity extends AppCompatActivity{
     //deleting saved data when app is stopped
     @Override
     protected void onDestroy(){
+        setLastUsedDateInFirebaseDate();
         unregisterAllReceivers();
         removeAllViews();
         addToSharedPreferences();
@@ -381,7 +385,11 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void logoutUser() {
-        clearFromSharedPreferences();
+        setLastUsedDateInFirebaseDate();
+        if(dbRef!=null){
+            dbRef.removeEventListener(val);
+        }
+        User.setID(0,mKey);
         unregisterAllReceivers();
         if(FirebaseAuth.getInstance()!=null){
             FirebaseAuth.getInstance().signOut();
@@ -481,25 +489,6 @@ public class MainActivity extends AppCompatActivity{
 
 
 
-//    private void loadFromSharedPreferences(){
-//        SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
-//        int number = prefs.getInt("adTotals",0);
-//        Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
-//        Variables.setAdTotal(number,mKey);
-//
-//        SharedPreferences.Editor editor = prefs.edit();
-//        editor.clear();
-//        editor.commit();
-//
-//        SharedPreferences prefs2 = getSharedPreferences(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,MODE_PRIVATE);
-//        int number2 = prefs2.getInt(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,0);
-//        Log.d("MAIN_ACTIVITY-----","NUMBER GOTTEN FROM MONTHLY SHARED PREFERENCES IS - "+ number2);
-//        Variables.setMonthAdTotals(mKey,number);
-//
-//        SharedPreferences.Editor editor2 = prefs2.edit();
-//        editor2.clear();
-//        editor2.commit();
-//    }
 
     private void clearFromSharedPreferences(){
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
@@ -527,13 +516,13 @@ public class MainActivity extends AppCompatActivity{
             },10000);
     }
 
-
-
     private boolean isNetworkConnected(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return (netInfo != null && netInfo.isConnected());
     }
+
+
 
     private void adDayAndMonthTotalsToFirebase(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -569,7 +558,6 @@ public class MainActivity extends AppCompatActivity{
         return todaysDate;
     }
 
-
     private void resetAdTotalSharedPreferencesAndDayAdTotals(){
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -584,6 +572,13 @@ public class MainActivity extends AppCompatActivity{
     public static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
         byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
+    }
+
+    private void setLastUsedDateInFirebaseDate() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
+        adRef.setValue(getDate());
     }
 
 }

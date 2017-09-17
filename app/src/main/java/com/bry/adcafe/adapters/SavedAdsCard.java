@@ -14,6 +14,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
@@ -72,14 +73,16 @@ public class SavedAdsCard {
 
     @Resolve
     private void onResolved() {
-       loadImage();
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
+        if(isInternetAvailable()){
+            loadImage();
+        }else{
+            Toast.makeText(mContext,"You don't seem to have a stable connection.",Toast.LENGTH_LONG).show();
+        }
 
     }
 
     @LongClick(R.id.SavedImageView)
     private void onLongClick(){
-        Log.d("SAVED_ADS_CARD--","Push id is--  "+mAdvert.getPushId());
         unPin();
     }
 
@@ -123,15 +126,6 @@ public class SavedAdsCard {
         }
 
     }
-
-
-    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("SAVED_ADS_CARD--","Received broadcast to Unregister all receivers");
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
-        }
-    };
 
 
     private void unPin(){

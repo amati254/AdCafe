@@ -10,8 +10,28 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:id="@+id/noConnectionMessage"
+        android:visibility="gone"
+        android:layout_marginTop="140dp"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="50dp"
+            android:background="@drawable/ic_action_error"
+            android:contentDescription="error"
+            android:layout_height="50dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="No Connection."
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_gravity="bottom"
         android:orientation="horizontal"
+        android:id="@+id/bottomNavs"
         android:gravity="center"
         android:layout_height="70dp">
 
@@ -113,6 +133,7 @@
         android:layout_gravity="top"
         android:gravity="start"
         android:paddingLeft="24dp"
+        android:visibility="gone"
         android:id="@+id/topBarPreview"
         android:layout_width="match_parent"
         android:layout_height="50dp">
@@ -156,12 +177,14 @@
             android:id="@+id/AdUploadAvi"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:visibility="gone"
             style="@style/AVLoadingIndicatorView"
             app:indicatorName="LineScaleIndicator"
             app:indicatorColor="@color/accent" />
         <TextView
             android:layout_width="wrap_content"
             android:id="@+id/loadingText"
+            android:visibility="gone"
             android:text="@string/settingUpMessage"
             android:textSize="10sp"
             android:layout_height="wrap_content" />

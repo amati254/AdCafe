@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -39,6 +40,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.wang.avi.AVLoadingIndicatorView;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -57,11 +61,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private DatabaseReference mRef;
     private DatabaseReference mRef2;
     private DatabaseReference mRef3;
+    private DatabaseReference mRef4;
+    private DatabaseReference adRef;
 
     private Context mContext;
     private String mKey = "";
     private boolean mHasLoadingMonthTotalsFailed;
     private boolean mHasLoadingDayTotalsFailed;
+    private boolean mIsLastOnlineToday;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,13 +90,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if(user!= null &&isOnline(mContext)){
                     mRelative.setVisibility(View.GONE);
                     mAvi.setVisibility(View.VISIBLE);
-                    getMonthAdTotalFromFirebase();
+                    lastUsed();
                 }
             }
         };
     }
 
+    private void lastUsed(){
+        Log.d(TAG,"---Loading date from when last used from firebase.");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
 
+        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
+        mRef4 = query.getRef();
+        mRef4.addListenerForSingleValueEvent(val4);
+    }
 
     private void getMonthAdTotalFromFirebase() {
         Log.d(TAG,"---Loading Month AdTotals from firebase.");
@@ -143,8 +158,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             int number = dataSnapshot.getValue(int.class);
-            Variables.setAdTotal(number,mKey);
-            Log.d("LOGIN_ACTIVITY--","Ad totals gotten from firebase is --"+number);
+            if(mIsLastOnlineToday) {
+                Variables.setAdTotal(number,mKey);
+                Log.d(TAG,"User was last online today,thus will set adtotals normally");
+                Log.d("LOGIN_ACTIVITY--","Ad totals set from firebase is --"+number);
+            } else {
+                Variables.setAdTotal(0,mKey);
+                Log.d(TAG,"User was not last online today,thus will set ad totals to 0");
+                setLastUsedDateInFirebaseDate();
+            }
+
             loadUserIDFromFirebase();
             mHasLoadingDayTotalsFailed = false;
         }
@@ -174,13 +197,48 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     };
 
+    ValueEventListener val4 = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            if(dataSnapshot.getValue()!=null){
+                String dateInFirebase = dataSnapshot.getValue(String.class);
+                Log.d(TAG,"Date gotten from firebase is : "+dateInFirebase);
+                String currentDate = getDate();
+                if(dateInFirebase.equals(currentDate)){
+                    mIsLastOnlineToday = true;
+                    Log.d(TAG,"---Date in firebase matches date in system,thus User was last online today");
+                }else{
+                    Log.d(TAG,"---Date in firebase  does not match date in system , thus User was not online last today");
+                    Log.d(TAG,"---Date from firebase is--"+dateInFirebase+"--while date in system is "+currentDate);
+                    mIsLastOnlineToday = false;
+                }
+            }else{
+                setLastUsedDateInFirebaseDate();
+                mIsLastOnlineToday = false;
+            }
+            getMonthAdTotalFromFirebase();
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    private void setLastUsedDateInFirebaseDate() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
+        adRef.setValue(getDate());
+    }
+
     private void loadFromSharedPreferences(){
         if(mHasLoadingDayTotalsFailed){
             SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
             int number = prefs.getInt("adTotals",0);
             Log.d("LOGIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
-            Variables.setAdTotal(number,mKey);
-
+            if(mIsLastOnlineToday) Variables.setAdTotal(number,mKey);
+            else Variables.setAdTotal(0,mKey);
             SharedPreferences.Editor editor = prefs.edit();
             editor.clear();
             editor.commit();
@@ -301,6 +359,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         //should check null because in airplane mode it will be null
         return (netInfo != null && netInfo.isConnected());
+    }
+
+    private String getDate(){
+        long date = System.currentTimeMillis();
+        SimpleDateFormat sdfMonth = new SimpleDateFormat("MM");
+        String MonthString = sdfMonth.format(date);
+
+        SimpleDateFormat sdfDay = new SimpleDateFormat("dd");
+        String dayString = sdfDay.format(date);
+
+        SimpleDateFormat sdfYear = new SimpleDateFormat("yyyy");
+        String yearString = sdfYear.format(date);
+
+        Calendar c = Calendar.getInstance();
+        String yy = Integer.toString(c.get(Calendar.YEAR));
+        String mm = Integer.toString(c.get(Calendar.MONTH));
+        String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
+
+        String todaysDate = (dayString+":"+MonthString+":"+yearString);
+
+        return todaysDate;
     }
 
 }
