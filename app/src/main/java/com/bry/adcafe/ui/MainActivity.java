@@ -526,14 +526,12 @@ public class MainActivity extends AppCompatActivity{
 
     private void adDayAndMonthTotalsToFirebase(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user.getUid()!=null){
             String uid = user.getUid();
             DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
             adRef.setValue(Variables.getAdTotal(mKey));
 
             DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
             adRef2.setValue(Variables.getMonthAdTotals(mKey));
-        }
 
     }
 
@@ -565,6 +563,7 @@ public class MainActivity extends AppCompatActivity{
         editor.commit();
 
         Variables.setAdTotal(0,mKey);
+        resetAdTotalsInFirebase();
     }
 
 
@@ -579,6 +578,13 @@ public class MainActivity extends AppCompatActivity{
         String uid = user.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
         adRef.setValue(getDate());
+    }
+
+    private void resetAdTotalsInFirebase() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+        adRef.setValue(0);
     }
 
 }

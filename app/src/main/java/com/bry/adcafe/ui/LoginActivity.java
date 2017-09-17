@@ -166,6 +166,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 Variables.setAdTotal(0,mKey);
                 Log.d(TAG,"User was not last online today,thus will set ad totals to 0");
                 setLastUsedDateInFirebaseDate();
+                resetAdTotalsInFirebase();
             }
 
             loadUserIDFromFirebase();
@@ -179,6 +180,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             loadFromSharedPreferences();
         }
     };
+
 
     ValueEventListener val3 = new ValueEventListener() {
         @Override
@@ -230,6 +232,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         String uid = user.getUid();
         adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
         adRef.setValue(getDate());
+    }
+
+    private void resetAdTotalsInFirebase() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+        adRef.setValue(0);
     }
 
     private void loadFromSharedPreferences(){
