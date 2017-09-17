@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity{
     private Runnable mViewRunnable;
     private LinearLayout mLinearLayout;
     private AVLoadingIndicatorView mAvi;
+    private boolean mIsBeingReset = false;
 
     private DatabaseReference dbRef;
     private int mChildToStartFrom = 0;
@@ -100,12 +101,13 @@ public class MainActivity extends AppCompatActivity{
             public void run() {
 
                 if(isAlmostMidNight()){
+                    mIsBeingReset = true;
                     resetEverything();
                 }
                 r = this;
-                h.postDelayed(r,15000);
+                h.postDelayed(r,30000);
             }
-        },15000);
+        },30000);
     }
 
 
@@ -155,7 +157,7 @@ public class MainActivity extends AppCompatActivity{
             mAdList.clear();
         }
         Log.d(TAG,"---Setting up firebase query...");
-        if(isAlmostMidNight()){
+        if(mIsBeingReset){
             Log.d(TAG,"---Day is almost over,so loading tomorrows ads now.");
             Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(User.getClusterID(mKey)));
             dbRef = query.getRef();
@@ -163,6 +165,7 @@ public class MainActivity extends AppCompatActivity{
             dbRef.limitToFirst(10);
             Log.d(TAG,"---Adding value event listener...");
             dbRef.addValueEventListener(val);
+            mIsBeingReset = false;
         }else{
             Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(User.getClusterID(mKey)));
             dbRef = query.getRef();
@@ -645,8 +648,8 @@ public class MainActivity extends AppCompatActivity{
 
 
     private void resetEverything() {
-        resetAdTotalSharedPreferencesAndDayAdTotals();
-        loadAdsFromThread();
+            resetAdTotalSharedPreferencesAndDayAdTotals();
+            loadAdsFromThread();
     }
 
     private String getNextDay(){
