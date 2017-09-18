@@ -1,5 +1,6 @@
 package com.bry.adcafe.ui;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -18,8 +19,11 @@ import android.support.v7.widget.CardView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,7 +56,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class AdUpload extends AppCompatActivity {
+public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueChangeListener{
     public static final String TAG = AdUpload.class.getSimpleName();
     private static final int PICK_IMAGE_REQUEST = 234;
     private Uri mFilepath;
@@ -69,10 +73,14 @@ public class AdUpload extends AppCompatActivity {
     private TextView mUploadText;
     private LinearLayout mNoConnection;
     private LinearLayout mBottomNavs;
+    private TextView mNumberOfUsersChosenText;
 
 
     private boolean mHasNumberBeenLoaded;
     private boolean mHasUserChosenAnImage;
+    private boolean mHasNumberBeenChosen;
+    private boolean mHasUserPayed;
+
     private List<Integer> clustersToUpLoadTo = new ArrayList<>();
     private int mNumberOfClusters = 1;
     private int mClusterTotal;
@@ -87,7 +95,10 @@ public class AdUpload extends AppCompatActivity {
 
     private Bitmap bm;
     private int cycleCount = 1;
-    private boolean mHasUserPayed;
+    private static TextView tv;
+    static Dialog d;
+    private ImageButton b;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,12 +110,12 @@ public class AdUpload extends AppCompatActivity {
 
 
         setUpViews();
-        startGetNUmberOfClusters();
+        startGetNumberOfClusters();
     }
 
 
 
-    private void startGetNUmberOfClusters(){
+    private void startGetNumberOfClusters(){
         if(isOnline(mContext)){
             getNumberOfClusters();//in-turn triggers the getClusterToStartFrom method.
         }else{
@@ -121,13 +132,15 @@ public class AdUpload extends AppCompatActivity {
         mChoosingImage = (ImageView) findViewById(R.id.chooseImageIcon);
         mProfileImageViewPreview = (ImageView) findViewById(R.id.profileImageViewPreview);
         mCardviewForShowingPreviewOfAd = (CardView) findViewById(R.id.cardviewForShowingPreviewOfAd);
-//        mPlaceHolderImage = (ImageView) findViewById(R.id.imagePlaceholderUponLaunch);
         mTopBarPreview = (LinearLayout) findViewById(R.id.topBarPreview);
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.AdUploadAvi);
         mLoadingTextView = (TextView) findViewById(R.id.loadingText);
         mSelectText = (TextView) findViewById(R.id.selectText);
         mUploadText = (TextView) findViewById(R.id.uploadText);
         mNoConnection = (LinearLayout) findViewById(R.id.noConnectionMessage);
+        tv = (TextView) findViewById(R.id.numberOfUsersToAdvertiseTo);
+        b = (ImageButton) findViewById(R.id.chooseNumberButton);
+        mNumberOfUsersChosenText = (TextView) findViewById(R.id.chooseNumberText);
     }
 
     private void getNumberOfClusters() {
@@ -257,7 +270,13 @@ public class AdUpload extends AppCompatActivity {
             findViewById(R.id.uploadIcon).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    uploadImage();
+                    if(!mHasNumberBeenChosen){
+                        Toast.makeText(mContext,"You may need to choose number of users to advertise to first!",Toast.LENGTH_LONG).show();
+                    }else if(!mHasUserPayed){
+                       Toast.makeText(mContext,"Please pay first.",Toast.LENGTH_SHORT).show();
+                   }else{
+                       uploadImage();
+                   }
                 }
             });
         }
@@ -269,7 +288,60 @@ public class AdUpload extends AppCompatActivity {
                 }
             });
         }
+
+        if(findViewById(R.id.chooseNumberButton)!=null){
+            findViewById(R.id.chooseNumberButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    show();
+                }
+            });
+        }
     }
+
+    private void showDialogForPayments() {
+
+    }
+
+    @Override
+    public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+        Log.i(TAG,"----value is"+" "+newVal);
+
+    }
+
+    public void show() {
+
+        final Dialog d = new Dialog(AdUpload.this);
+        d.setTitle("NumberPicker");
+        d.setContentView(R.layout.dialog);
+        Button b1 = (Button) d.findViewById(R.id.button1);
+        Button b2 = (Button) d.findViewById(R.id.button2);
+        final NumberPicker np = (NumberPicker) d.findViewById(R.id.numberPicker1);
+        np.setMaxValue(mClusterTotal);
+        np.setMinValue(1);
+        np.setWrapSelectorWheel(false);
+        np.setOnValueChangedListener(this);
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tv.setText(String.valueOf(np.getValue()*1000));
+                mHasNumberBeenChosen = true;
+                mNumberOfClusters = np.getValue();
+                findViewById(R.id.numberOfUsersToAdvertiseToLayout).setVisibility(View.VISIBLE);
+                d.dismiss();
+            }
+        });
+        b2.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+        d.show();
+
+    }
+
 
     private void chooseImage() {
         Log.d(TAG,"Starting intent for picking an image.");
@@ -450,15 +522,20 @@ public class AdUpload extends AppCompatActivity {
     private void setAllOtherViewsToBeGone(){
         mChoosingImage.setVisibility(View.GONE);
         mUploadButton.setVisibility(View.GONE);
+        mNumberOfUsersChosenText.setVisibility(View.GONE);
+        b.setVisibility(View.GONE);
         mCardviewForShowingPreviewOfAd.setVisibility(View.GONE);
         mSelectText.setVisibility(View.GONE);
         mUploadText.setVisibility(View.GONE);
         mTopBarPreview.setVisibility(View.GONE);
+
     }
 
     private void setAllOtherViewsToBeVisible(){
         mChoosingImage.setVisibility(View.VISIBLE);
         mUploadButton.setVisibility(View.VISIBLE);
+        mNumberOfUsersChosenText.setVisibility(View.VISIBLE);
+        b.setVisibility(View.VISIBLE);
         mCardviewForShowingPreviewOfAd.setVisibility(View.VISIBLE);
         mSelectText.setVisibility(View.VISIBLE);
         mUploadText.setVisibility(View.VISIBLE);
@@ -506,5 +583,6 @@ public class AdUpload extends AppCompatActivity {
         return tomorrowsDate;
 
     }
+
 
 }
