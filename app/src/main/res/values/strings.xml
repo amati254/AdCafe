@@ -39,6 +39,6 @@
     <string name="unsuccessfullyUploaded">"Something went wrong,try uploading again after a few minutes."</string>
     <string name="uploadMessage">"Upload may take some time..."</string>
     <string name="settingUpMessage">"Setting a couple of things up..."</string>
-    <string name="noteForPickingMessage">"You may have to repay if you made any prior payments!"</string>
+    <string name="noteForPickingMessage">"If you are re-picking the number, you WILL have to repay REGARDLESS OF ANY PRIOR PAYMENTS!"</string>
     <string name="pickBeforePaying">"So make sure you pick before making any payments."</string>
 </resources>
