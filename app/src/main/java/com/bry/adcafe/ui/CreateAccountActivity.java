@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -300,6 +301,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
             }
 
             Log.d(TAG,"---Cluster id generated for firebase is-- "+mClusterID);
+            User.setID(mClusterID,mKey);
             setUpFirebaseNodes();
         }
 
