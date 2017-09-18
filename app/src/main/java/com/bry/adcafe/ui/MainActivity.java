@@ -633,8 +633,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void setLastUsedDateInFirebaseDate() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
+        String uid = Integer.toString(User.getClusterID(mKey));
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
         adRef.setValue(getDate());
     }

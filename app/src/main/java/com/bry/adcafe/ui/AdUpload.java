@@ -312,7 +312,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     public void show() {
 
         final Dialog d = new Dialog(AdUpload.this);
-        d.setTitle("NumberPicker");
+        d.setTitle("No. of people");
         d.setContentView(R.layout.dialog);
         Button b1 = (Button) d.findViewById(R.id.button1);
         Button b2 = (Button) d.findViewById(R.id.button2);
