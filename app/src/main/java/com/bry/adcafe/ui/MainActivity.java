@@ -168,6 +168,7 @@ public class MainActivity extends AppCompatActivity{
             mIsBeingReset = false;
         }else{
             Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(User.getClusterID(mKey)));
+            Log.d(TAG,"---Query set up is : "+Constants.ADVERTS+" : "+getDate()+" : "+User.getClusterID(mKey));
             dbRef = query.getRef();
             dbRef.startAt(mChildToStartFrom);
             dbRef.limitToFirst(10);
@@ -229,7 +230,7 @@ public class MainActivity extends AppCompatActivity{
         setLastUsedDateInFirebaseDate();
         unregisterAllReceivers();
         removeAllViews();
-        addToSharedPreferences();
+//        addToSharedPreferences();
         Variables.clearAdTotal();
         super.onDestroy();
     }
@@ -606,10 +607,10 @@ public class MainActivity extends AppCompatActivity{
 
         Calendar c = Calendar.getInstance();
         String yy = Integer.toString(c.get(Calendar.YEAR));
-        String mm = Integer.toString(c.get(Calendar.MONTH));
+        String mm = Integer.toString(c.get(Calendar.MONTH)+1);
         String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
 
-        String todaysDate = (dayString+":"+MonthString+":"+yearString);
+        String todaysDate = (dd+":"+mm+":"+yy);
 
         return todaysDate;
     }
