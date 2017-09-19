@@ -56,6 +56,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     @Bind(R.id.loginTextView) TextView mLoginTextView;
     @Bind(R.id.signUpRelative) RelativeLayout mRelative;
     @Bind(R.id.SignUpAvi) AVLoadingIndicatorView mAvi;
+    @Bind(R.id.creatingAccountLoadingText) TextView mLoadingText;
 
 
     private FirebaseAuth mAuth;
@@ -110,6 +111,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                     Snackbar.LENGTH_LONG).show();
         }else{
             mAvi.setVisibility(View.VISIBLE);
+            mLoadingText.setVisibility(View.VISIBLE);
             mRelative.setVisibility(View.GONE);
             mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
@@ -120,6 +122,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                     }else {
                         mRelative.setVisibility(View.VISIBLE);
                         mAvi.setVisibility(View.GONE);
+                        mLoadingText.setVisibility(View.GONE);
                         Toast.makeText(CreateAccountActivity.this, "Sign Up may have failed.", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -221,6 +224,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         String uid = user.getUid();
         User.setUid(uid);
         mAvi.setVisibility(View.GONE);
+        mLoadingText.setVisibility(View.GONE);
         Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

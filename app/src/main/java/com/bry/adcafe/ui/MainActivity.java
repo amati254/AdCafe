@@ -16,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.test.suitebuilder.TestMethod;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -23,6 +24,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity{
     private Runnable mViewRunnable;
     private LinearLayout mLinearLayout;
     private AVLoadingIndicatorView mAvi;
+    private TextView mLoadingText;
     private boolean mIsBeingReset = false;
 
     private DatabaseReference dbRef;
@@ -136,6 +139,7 @@ public class MainActivity extends AppCompatActivity{
         Log.d(TAG,"---Starting thread...");
         thread.start();
         mAvi.setVisibility(View.VISIBLE);
+        mLoadingText.setVisibility(View.VISIBLE);
         mLinearLayout.setVisibility(View.GONE);
     } ///////////////////////////
 
@@ -194,6 +198,7 @@ public class MainActivity extends AppCompatActivity{
 
             loadAdsIntoAdvertCard();
             mAvi.setVisibility(View.GONE);
+            mLoadingText.setVisibility(View.GONE);
             mLinearLayout.setVisibility(View.VISIBLE);
         }
 
@@ -201,6 +206,7 @@ public class MainActivity extends AppCompatActivity{
         public void onCancelled(DatabaseError databaseError) {
             Toast.makeText(mContext,"Unable to load the adverts now. Perhaps try again later.",Toast.LENGTH_LONG).show();
             mAvi.setVisibility(View.GONE);
+            mLoadingText.setVisibility(View.GONE);
             mLinearLayout.setVisibility(View.VISIBLE);
         }
     };
@@ -255,9 +261,9 @@ public class MainActivity extends AppCompatActivity{
 
     private void setUpSwipeView() {
         mSwipeView = (SwipePlaceHolderView)findViewById(R.id.swipeView);
-//        mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
         mLinearLayout = (LinearLayout) findViewById(R.id.bottomNavButtons);
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.mainActivityAvi);
+        mLoadingText = (TextView) findViewById(R.id.loadingAdsMessage);
 
         int bottomMargin = Utils.dpToPx(90);
         Point windowSize = Utils.getDisplaySize(getWindowManager());

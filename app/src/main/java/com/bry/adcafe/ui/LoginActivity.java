@@ -53,6 +53,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Bind(R.id.LoginButton)  Button mLoginButton;
     @Bind(R.id.registerLink) TextView mRegisterLink;
     @Bind(R.id.LoginAvi) AVLoadingIndicatorView mAvi;
+    @Bind(R.id.settingUpMessageLogin) TextView mLoadingMessage;
     @Bind(R.id.LoginRelative) RelativeLayout mRelative;
 
 
@@ -90,6 +91,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if(user!= null &&isOnline(mContext)){
                     mRelative.setVisibility(View.GONE);
                     mAvi.setVisibility(View.VISIBLE);
+                    mLoadingMessage.setVisibility(View.VISIBLE);
                     lastUsed();
                 }
             }
@@ -194,6 +196,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         @Override
         public void onCancelled(DatabaseError databaseError) {
             mAvi.setVisibility(View.GONE);
+            mLoadingMessage.setVisibility(View.GONE);
             mRelative.setVisibility(View.VISIBLE);
             Toast.makeText(mContext,"Your connection may be too unreliable.Perhaps try again later.",Toast.LENGTH_LONG).show();
         }
@@ -274,6 +277,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         String uid = user.getUid();
         User.setUid(uid);
         mAvi.setVisibility(View.GONE);
+        mLoadingMessage.setVisibility(View.GONE);
         Intent intent = new Intent (LoginActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -346,6 +350,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     Snackbar.LENGTH_LONG).show();
         }else{
             mAvi.setVisibility(View.VISIBLE);
+            mLoadingMessage.setVisibility(View.VISIBLE);
             mRelative.setVisibility(View.GONE);
             Log.d(TAG,"--Logging in user with username and password...");
 
@@ -359,6 +364,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 Log.w(TAG,"SignInWithEmail",task.getException());
                                 mRelative.setVisibility(View.VISIBLE);
                                 mAvi.setVisibility(View.GONE);
+                                mLoadingMessage.setVisibility(View.GONE);
                                 Toast.makeText(LoginActivity.this,"You may have mistyped your username or password.",Toast.LENGTH_SHORT).show();
                             }
                         }

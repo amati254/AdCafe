@@ -113,9 +113,10 @@
             android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
-    <RelativeLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:gravity="center"
+        android:orientation="vertical"
         android:layout_gravity="center"
         android:layout_height="match_parent">
 
@@ -127,5 +128,12 @@
             android:visibility="gone"
             app:indicatorName="LineScaleIndicator"
             app:indicatorColor="@color/accent" />
-    </RelativeLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/settingUpAccountMessage"
+            android:id="@+id/creatingAccountLoadingText"
+            android:textSize="10sp"
+            android:visibility="gone"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>
