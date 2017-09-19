@@ -1,3 +1,44 @@
 <resources>
-    <string name="app_name">Ad Studio</string>
+    <string name="app_name">AdCafé</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="createAccountText">"Create Account."</string>
+    <string name="dontHaveAccountQuestion">"Don't have an account? Sign up here!"</string>
+    <string name="haveAccountQuestion">"Have an account already? Log in here!"</string>
+    <string name="signUpText">"Sign up."</string>
+    <string name="signInText">"Login."</string>
+    <string name="passwordHintText">"Password."</string>
+    <string name="confirmPasswordText">"Confirm Password."</string>
+    <string name="emailText">"Email."</string>
+    <string name="nameText">"Name."</string>
+    <string name="title_activity_login">"Login."</string>
+    <string name="LogInNoConnection">"You may need internet connection to login."</string>
+    <string name="SignUpNoConnection">"You may need internet connection to sign up."</string>
+    <string name="connectionDropped">"Hmmm, your connection may have a problem."</string>
+    <string name="connectionDropped2">"Your connection may have dropped.You can't move to the next ad without a stable connection to the Internet."</string>
+    <string name="shared">"Shared."</string>
+    <string name="connectionBack">"Your back online, you may now continue."</string>
+    <string name="Logout">"Logout"</string>
+    <string name="pinning">"Pinning."</string>
+    <string name="learnSE">"Learn. Share. Earn."</string>
+    <string name="lastAd">"This may be the last ad we've got for you today."</string>
+    <string name="dashInfo">"This is where all the stats concerning ads you've seen and money you can claim is stored."</string>
+    <string name="cannotPin">"You cannot pin this without an internet connection"</string>
+    <string name="pinningSuccess">"Successfully pinned!"</string>
+    <string name="pinningFailure">"Pinning may have failed."</string>
+    <string name="hasBeenPinned">"You already pinned this."</string>
+    <string name="unpinned">"Unpinned."</string>
+    <string name="failedUnpinned">"We're unable to unpin this right now."</string>
+    <string name="cannotUploadFailedFirebase">"Your connection may be low,try again after a few moments."</string>
+    <string name="UploadAdNoConnection">"You may need internet connection to Upload your Advert."</string>
+    <string name="DoNotPayTwice">"Note that once you pay, you can upload your advert at any time."</string>
+    <string name="MakeSureImage">"Make sure the image looks good in the card."</string>
+    <string name="pleaseChooseIcon">"Please choose an image fist."</string>
+    <string name="successfullyUploaded">"Successfully uploaded!"</string>
+    <string name="unsuccessfullyUploaded">"Something went wrong,try uploading again after a few minutes."</string>
+    <string name="uploadMessage">"Upload may take some time..."</string>
+    <string name="settingUpMessage">"Setting a couple of things up..."</string>
+    <string name="noteForPickingMessage">"If you are re-picking the number, you WILL have to repay REGARDLESS OF ANY PRIOR PAYMENTS!"</string>
+    <string name="pickBeforePaying">"So make sure you pick before making any payments."</string>
 </resources>

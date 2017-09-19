@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "844278426655",
+    "firebase_url": "https://adstudio-fb337.firebaseio.com",
+    "project_id": "adstudio-fb337",
+    "storage_bucket": "adstudio-fb337.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:844278426655:android:ef2ef345c9b7698a",
+        "android_client_info": {
+          "package_name": "com.bry.adstudio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "844278426655-unispqq1k5de365c36ctbj05vtmitbr0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bry.adstudio",
+            "certificate_hash": "02d1b40b6859cb99d9018bee78f227cc7555240b"
+          }
+        },
+        {
+          "client_id": "844278426655-cqv66fv31dcmg3hh8h7til1k9gr6amhh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bry.adstudio",
+            "certificate_hash": "0ab96cbe07439c5f39f03e173eea504194eeb4aa"
+          }
+        },
+        {
+          "client_id": "844278426655-1tp30c3f4e7q6b5cu4kud071cgd6kerk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeqRBnG7ycXHRb9rYa59K5yQuzVEns9n4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "844278426655-1tp30c3f4e7q6b5cu4kud071cgd6kerk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
