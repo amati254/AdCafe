@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity{
     //deleting saved data when app is stopped
     @Override
     protected void onDestroy(){
-        setLastUsedDateInFirebaseDate();
+        setLastUsedDateInFirebaseDate(User.getUid());
         unregisterAllReceivers();
         removeAllViews();
 //        addToSharedPreferences();
@@ -428,7 +428,8 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void logoutUser() {
-        setLastUsedDateInFirebaseDate();
+
+        setLastUsedDateInFirebaseDate(User.getUid());
         if(dbRef!=null){
             dbRef.removeEventListener(val);
         }
@@ -632,8 +633,7 @@ public class MainActivity extends AppCompatActivity{
         return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
     }
 
-    private void setLastUsedDateInFirebaseDate() {
-        String uid = Integer.toString(User.getClusterID(mKey));
+    private void setLastUsedDateInFirebaseDate(String uid) {
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
         adRef.setValue(getDate());
     }

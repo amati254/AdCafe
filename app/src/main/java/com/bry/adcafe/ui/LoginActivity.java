@@ -270,6 +270,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 
     private void startMainActivity(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        User.setUid(uid);
         mAvi.setVisibility(View.GONE);
         Intent intent = new Intent (LoginActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

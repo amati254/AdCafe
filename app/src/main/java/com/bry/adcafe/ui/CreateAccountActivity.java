@@ -217,6 +217,9 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     }
 
     private void startMainActivity(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        User.setUid(uid);
         mAvi.setVisibility(View.GONE);
         Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -330,6 +333,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                 for(DataSnapshot snap: dataSnapshot.getChildren()){
                     mClusterID = snap.getValue(int.class);
                     Log.d(TAG,"Cluster id gotten from Flagged cluster is --"+mClusterID);
+                    User.setID(mClusterID,mKey);
                     removeId(snap.getKey());
                     break;
                 }

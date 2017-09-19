@@ -1,5 +1,7 @@
 package com.bry.adcafe;
 
+import com.google.android.gms.wallet.WalletConstants;
+
 /**
  * Created by bryon on 6/4/2017.
  */
