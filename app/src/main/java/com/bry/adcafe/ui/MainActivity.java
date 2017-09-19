@@ -327,9 +327,13 @@ public class MainActivity extends AppCompatActivity{
                     }
                 }
             }
+            Variables.setNewNumberOfAds(mAdList.size()-Variables.getAdTotal(mKey));
+        }else{
+            Advert noAds = new Advert();
+            mSwipeView.addView(new AdvertCard(mContext,noAds,mSwipeView,Constants.NO_ADS));
+            Variables.setIsLastOrNotLast(Constants.NO_ADS);
         }
 
-        Variables.setNewNumberOfAds(mAdList.size()-Variables.getAdTotal(mKey));
         Log.d(TAG,"---Setting up On click listeners...");
         onclicks();
     }
@@ -358,7 +362,7 @@ public class MainActivity extends AppCompatActivity{
                 @Override
                 public void onClick(View v) {
                     if(isNetworkConnected(mContext)){
-                        if(!Variables.hasBeenPinned){
+                        if(!Variables.hasBeenPinned && Variables.mIsLastOrNotLast != Constants.NO_ADS){
                             Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
                                     Snackbar.LENGTH_SHORT).show();
                             Intent intent = new Intent(Constants.PIN_AD);

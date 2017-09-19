@@ -89,7 +89,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(user!= null &&isOnline(mContext)){
-                    mRelative.setVisibility(View.GONE);
+//                    mRelative.setVisibility(View.GONE);
+                    mRelative.setAlpha(0.0f);
                     mAvi.setVisibility(View.VISIBLE);
                     mLoadingMessage.setVisibility(View.VISIBLE);
                     lastUsed();
@@ -126,7 +127,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
         mRef2 = query.getRef();
-        mRef.addListenerForSingleValueEvent(val2);
+        mRef2.addListenerForSingleValueEvent(val2);
     }
 
     private void loadUserIDFromFirebase() {
@@ -197,7 +198,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         public void onCancelled(DatabaseError databaseError) {
             mAvi.setVisibility(View.GONE);
             mLoadingMessage.setVisibility(View.GONE);
-            mRelative.setVisibility(View.VISIBLE);
+            mRelative.setAlpha(1.0f);
+//            mRelative.setVisibility(View.VISIBLE);
             Toast.makeText(mContext,"Your connection may be too unreliable.Perhaps try again later.",Toast.LENGTH_LONG).show();
         }
     };
@@ -351,7 +353,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }else{
             mAvi.setVisibility(View.VISIBLE);
             mLoadingMessage.setVisibility(View.VISIBLE);
-            mRelative.setVisibility(View.GONE);
+            mRelative.setAlpha(0.2f);
+//            mRelative.setVisibility(View.GONE);
             Log.d(TAG,"--Logging in user with username and password...");
 
             mAuth.signInWithEmailAndPassword(email, password)
@@ -362,7 +365,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             Log.d(TAG,"signInWithEmail:onComplete"+task.isSuccessful());
                             if(!task.isSuccessful()){
                                 Log.w(TAG,"SignInWithEmail",task.getException());
-                                mRelative.setVisibility(View.VISIBLE);
+//                                mRelative.setVisibility(View.VISIBLE);
+                                mRelative.setAlpha(1.0f);
                                 mAvi.setVisibility(View.GONE);
                                 mLoadingMessage.setVisibility(View.GONE);
                                 Toast.makeText(LoginActivity.this,"You may have mistyped your username or password.",Toast.LENGTH_SHORT).show();
@@ -393,10 +397,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         Calendar c = Calendar.getInstance();
         String yy = Integer.toString(c.get(Calendar.YEAR));
-        String mm = Integer.toString(c.get(Calendar.MONTH));
+        String mm = Integer.toString(c.get(Calendar.MONTH)+1);
         String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
 
-        String todaysDate = (dayString+":"+MonthString+":"+yearString);
+        String todaysDate = (dd+":"+mm+":"+yy);
 
         return todaysDate;
     }

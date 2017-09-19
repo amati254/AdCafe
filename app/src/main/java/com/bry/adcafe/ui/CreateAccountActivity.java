@@ -386,10 +386,10 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
 
         Calendar c = Calendar.getInstance();
         String yy = Integer.toString(c.get(Calendar.YEAR));
-        String mm = Integer.toString(c.get(Calendar.MONTH));
+        String mm = Integer.toString(c.get(Calendar.MONTH)+1);
         String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
 
-        String todaysDate = (dayString+":"+MonthString+":"+yearString);
+        String todaysDate = (dd+":"+mm+":"+yy);
 
         return todaysDate;
     }

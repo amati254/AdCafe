@@ -75,6 +75,7 @@ public class AdvertCard{
 
     private static boolean clickable;
     private static String mLastOrNotLast;
+    private static boolean mIsNoAds;
     private static boolean hasAdLoaded;
     private boolean hasBeenSwiped = true;
 
@@ -89,14 +90,25 @@ public class AdvertCard{
     @Resolve
     private void onResolved(){
         if(mLastOrNotLast == Constants.LAST){
+            mIsNoAds = false;
            loadOnlyLastAd();
-        }else{
+        }else if(mLastOrNotLast == Constants.NO_ADS){
+            mIsNoAds = true;
+            loadAdPlaceHolderImage();
+        } else{
+            mIsNoAds = false;
             loadAllAds();
         }
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToPinAd,new IntentFilter(Constants.PIN_AD));
         Variables.hasBeenPinned = false;
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
+    }
+
+    private void loadAdPlaceHolderImage() {
+        Glide.with(mContext).load(R.drawable.noadstoday).into(profileImageView);
+        mSwipeView.lockViews();
+        clickable=false;
     }
 
     private void loadAllAds(){
@@ -236,7 +248,7 @@ public class AdvertCard{
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("ADVERT_CARD--","Received broadcast to Pin ad.");
-            if(!Variables.hasBeenPinned){
+            if(!Variables.hasBeenPinned && !mIsNoAds){
                 pinAd();
             }
         }

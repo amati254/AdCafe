@@ -272,9 +272,11 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 public void onClick(View v) {
                     if(!mHasNumberBeenChosen){
                         Toast.makeText(mContext,"You may need to choose number of users to advertise to first!",Toast.LENGTH_LONG).show();
-                    }else if(!mHasUserPayed){
-                       Toast.makeText(mContext,"Please pay first.",Toast.LENGTH_SHORT).show();
-                   }else{
+                    }
+//                    else if(!mHasUserPayed){
+//                       Toast.makeText(mContext,"Please pay first.",Toast.LENGTH_SHORT).show();
+//                   }
+                   else{
                        uploadImage();
                    }
                 }
