@@ -39,6 +39,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.mindorks.placeholderview.Utils;
+import com.mindorks.placeholderview.annotations.Animate;
 import com.mindorks.placeholderview.annotations.Click;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.Resolve;
@@ -58,7 +59,7 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
  * Created by bryon on 6/11/2017.
  */
 
-
+//@Animate()
 @Layout(R.layout.ad_card_view)
 public class AdvertCard{
     @View(R.id.profileImageView) private ImageView profileImageView;

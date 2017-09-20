@@ -112,7 +112,8 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         }else{
             mAvi.setVisibility(View.VISIBLE);
             mLoadingText.setVisibility(View.VISIBLE);
-            mRelative.setVisibility(View.GONE);
+//            mRelative.setVisibility(View.GONE);
+            mRelative.setAlpha(0.2f);
             mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -120,10 +121,11 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                         Log.d(TAG,"authentication successful");
                         createFirebaseUserProfile(task.getResult().getUser());
                     }else {
-                        mRelative.setVisibility(View.VISIBLE);
+//                        mRelative.setVisibility(View.VISIBLE);
+                        mRelative.setAlpha(1.0f);
                         mAvi.setVisibility(View.GONE);
                         mLoadingText.setVisibility(View.GONE);
-                        Toast.makeText(CreateAccountActivity.this, "Sign Up may have failed.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(CreateAccountActivity.this, "Sign Up has failed.Another user with your info may exist.", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -184,6 +186,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     private void setUpFirebaseNodes() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
+        mRelative.setAlpha(0.0f);
 
         //Creates nodes for totals seen today and sets them to 0;
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
