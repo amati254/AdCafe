@@ -44,6 +44,7 @@
     <string name="settingUpMessage2">"Setting a few things up..."</string>
     <string name="settingUpAccountMessage">"Setting up your account..."</string>
     <string name="loadingTodaysAdsmessage">"Loading today's ads..."</string>
+    <string name="loadingYourPinnedAds">"Loading your pinned ads"</string>
     <string name="failedToLoadTodaysAds">"Failed to load todays ads."</string>
     <string name="noteForPickingMessage">"If you are re-picking the number, you WILL have to repay REGARDLESS OF ANY PRIOR PAYMENTS!"</string>
     <string name="pickBeforePaying">"So make sure you pick before making any payments."</string>

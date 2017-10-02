@@ -14,6 +14,8 @@ import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
@@ -44,8 +46,8 @@ public class Bookmarks extends AppCompatActivity {
 
     private List<Advert> mSavedAds;
     private Runnable mViewRunnable;
-    private ProgressBar mProgressBar;
     private AVLoadingIndicatorView mAvi;
+    private TextView loadingText;
 
 
     @Override
@@ -55,51 +57,16 @@ public class Bookmarks extends AppCompatActivity {
         mContext = getApplicationContext();
 
         loadPlaceHolderViews();
-//        NetworkStateReceiver.StartNetworkChecker(mContext);
         registerReceivers();
 
         if(isNetworkConnected(mContext)){
             loadAdsFromThread();
-//            setOnClicks();
         }else{
             Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.connectionDropped,
                     Snackbar.LENGTH_INDEFINITE).show();
         }
-//        loadFromAsynchTask();
     }
 
-//    private void loadFromAsynchTask() {
-//        new Task().execute();
-//    }
-
-//    class Task extends AsyncTask<String, Integer, Boolean>{
-//
-//        @Override
-//        protected void onPreExecute() {
-//            mProgressBar.setVisibility(View.VISIBLE);
-//            mPlaceHolderView.setVisibility(View.GONE);
-//            super.onPreExecute();
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Boolean result) {
-//            mProgressBar.setVisibility(View.GONE);
-//            mPlaceHolderView.setVisibility(View.VISIBLE);
-//            super.onPostExecute(result);
-//        }
-//
-//        @Override
-//        protected Boolean doInBackground(String... params) {
-//
-//
-//            try {
-//                Thread.sleep(3000);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        return null;
-//        }
-//    }
 
     @Override
     protected void onDestroy(){
@@ -109,14 +76,10 @@ public class Bookmarks extends AppCompatActivity {
 
     private void unregisterAllReceivers() {
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpinned);
-        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOnline);
-        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOffline);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForReceivingUnableToPinAd);
     }
 
     private void registerReceivers(){
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnpinned,new IntentFilter(Constants.REMOVE_PINNED_AD));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForReceivingUnableToPinAd,new IntentFilter(Constants.UNABLE_TO_REMOVE_PINNED_AD));
 
@@ -143,6 +106,7 @@ public class Bookmarks extends AppCompatActivity {
         thread.start();
 //        mProgressBar.setVisibility(View.VISIBLE);
         mAvi.setVisibility(View.VISIBLE);
+        loadingText.setVisibility(View.VISIBLE);
     }
 
     private void getAds() {
@@ -163,19 +127,19 @@ public class Bookmarks extends AppCompatActivity {
     private Runnable returnRes = new Runnable() {
         @Override
         public void run() {
-            loadBookmarkedAdsFromJSONFile();
+            loadBookmarkedAdsIntoCards();
         }
     };
 
     private void loadPlaceHolderViews() {
-        mProgressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
         mPlaceHolderView = (PlaceHolderView) findViewById(R.id.PlaceHolderView);
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.avi);
-        mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,2));
+        loadingText = (TextView) findViewById(R.id.loadingPinnedAdsMessage);
+        mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,1));
 
     }
 
-    private void loadBookmarkedAdsFromJSONFile() {
+    private void loadBookmarkedAdsIntoCards() {
         if(mPlaceHolderView == null){
             loadPlaceHolderViews();
         }
@@ -183,23 +147,16 @@ public class Bookmarks extends AppCompatActivity {
             for(int i = 0; i<mSavedAds.size();i++){
                 mPlaceHolderView.addView(new SavedAdsCard(mSavedAds.get(i),mContext,mPlaceHolderView,mSavedAds.get(i).getPushId()));
             }
+        }else{
+            Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_LONG).show();
         }
-//        mProgressBar.setVisibility(View.GONE);
         mAvi.setVisibility(View.GONE);
+        loadingText.setVisibility(View.GONE);
 
     }
 
 
 
-
-    private BroadcastReceiver mMessageReceiverForConnectionOffline = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("CONNECTION_C-Bookmarks","Connection has been dropped");
-            Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.connectionDropped,
-                    Snackbar.LENGTH_INDEFINITE).show();
-        }
-    };
 
     private BroadcastReceiver mMessageReceiverForUnpinned = new BroadcastReceiver() {
         @Override
@@ -219,29 +176,6 @@ public class Bookmarks extends AppCompatActivity {
         }
     };
 
-    private BroadcastReceiver mMessageReceiverForConnectionOnline = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("CONNECTION_C-Bookmarks","Connection has come online");
-        }
-    };
-
-
-
-
-//    public void StartNetworkChecker(final Context context){
-//        Handler handler=new Handler();
-//
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                if(!isNetworkConnected(context)){
-//                    Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.connectionDropped2,
-//                            Snackbar.LENGTH_INDEFINITE).show();
-//                }
-//            }
-//        },10000);
-//    }
 
     private void loadAdsFromFirebase(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();

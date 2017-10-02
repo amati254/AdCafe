@@ -6,53 +6,79 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/topText"
-        android:layout_marginTop="10dp"
-        android:textAlignment="center"
-        android:textSize="25dp"
-        android:padding="10dp"
-        android:text="Ad Archives." />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/AdArchivesLayout"
+        xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.mindorks.placeholderview.PlaceHolderView
-        android:id="@+id/PlaceHolderView"
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/topText"
+            android:layout_marginTop="10dp"
+            android:textAlignment="center"
+            android:textSize="25dp"
+            android:padding="10dp"
+            android:text="Ad Archives." />
+        <View
+            android:layout_width="match_parent"
+            android:background="@color/colorAccent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_height="1dp"/>
+
+        <com.mindorks.placeholderview.PlaceHolderView
+            android:id="@+id/PlaceHolderView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical"/>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="vertical"/>
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
         android:gravity="center"
         android:layout_gravity="center"
+        android:orientation="vertical"
         android:layout_height="match_parent">
-        <ProgressBar
-            android:id="@+id/pbHeaderProgress"
-            style="?android:attr/progressBarStyleLarge"
-            android:indeterminate="true"
-            android:visibility="gone"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:progressDrawable="@drawable/circular_progress_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-        </ProgressBar>
 
         <com.wang.avi.AVLoadingIndicatorView
             android:id="@+id/avi"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            style="@style/AVLoadingIndicatorView"
             android:visibility="gone"
+            style="@style/AVLoadingIndicatorView"
             app:indicatorName="LineScaleIndicator"
             app:indicatorColor="@color/accent" />
-    </RelativeLayout>
 
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/loadingYourPinnedAds"
+            android:id="@+id/loadingPinnedAdsMessage"
+            android:visibility="gone"
+            android:textSize="10sp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:id="@+id/droppedInternetLayout2"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="70dp"
+            android:background="@drawable/ic_action_connection"
+            android:layout_height="70dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/connectToInternet"
+            android:textSize="11sp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

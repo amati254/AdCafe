@@ -401,8 +401,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 public void onClick(View v) {
                     if(isNetworkConnected(mContext)){
                         if(!Variables.hasBeenPinned ){
-                            if(Variables.mIsLastOrNotLast != Constants.NO_ADS){
-                                Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You cant pin this..",
+                            if(Variables.mIsLastOrNotLast == Constants.NO_ADS){
+                                Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't pin this..",
                                         Snackbar.LENGTH_SHORT).show();
                             }else{
                                 Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
