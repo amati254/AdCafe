@@ -1,14 +1,11 @@
 package com.bry.adcafe.ui;
 
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -16,19 +13,13 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.models.Advert;
-import com.bry.adcafe.services.ConnectionChecker;
-import com.bry.adcafe.services.SavedAdsUtils;
-import com.bry.adcafe.services.Utils;
+import com.bry.adcafe.services.NetworkStateReceiver;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -42,7 +33,7 @@ import com.mindorks.placeholderview.PlaceHolderView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.RunnableFuture;
+
 import com.wang.avi.AVLoadingIndicatorView;
 
 public class Bookmarks extends AppCompatActivity {
@@ -64,7 +55,7 @@ public class Bookmarks extends AppCompatActivity {
         mContext = getApplicationContext();
 
         loadPlaceHolderViews();
-        ConnectionChecker.StartNetworkChecker(mContext);
+//        NetworkStateReceiver.StartNetworkChecker(mContext);
         registerReceivers();
 
         if(isNetworkConnected(mContext)){

@@ -1,14 +1,11 @@
 package com.bry.adcafe.ui;
 
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -18,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,7 +24,6 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.User;
-import com.bry.adcafe.services.ConnectionChecker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -55,6 +52,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Bind(R.id.LoginAvi) AVLoadingIndicatorView mAvi;
     @Bind(R.id.settingUpMessageLogin) TextView mLoadingMessage;
     @Bind(R.id.LoginRelative) RelativeLayout mRelative;
+    @Bind(R.id.noConnectionLayout) LinearLayout mNoConnectionLayout;
+    @Bind(R.id.retry) Button mRetryButton;
+    @Bind(R.id.failedLoadLayout) LinearLayout mFailedLoadLayout;
+    @Bind(R.id.retryLoading) Button mRetryLoadingButton;
 
 
     private FirebaseAuth mAuth;
@@ -67,9 +68,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private Context mContext;
     private String mKey = "";
-    private boolean mHasLoadingMonthTotalsFailed;
-    private boolean mHasLoadingDayTotalsFailed;
+//    private boolean mHasLoadingMonthTotalsFailed;
+//    private boolean mHasLoadingDayTotalsFailed;
     private boolean mIsLastOnlineToday;
+
+    private boolean hasEverythingLoaded;
+    private boolean isActivityVisible;
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,19 +89,41 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
 
 
+
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user!= null &&isOnline(mContext)){
-//                    mRelative.setVisibility(View.GONE);
-                    mRelative.setAlpha(0.0f);
-                    mAvi.setVisibility(View.VISIBLE);
-                    mLoadingMessage.setVisibility(View.VISIBLE);
-                    lastUsed();
+                if(user!= null){
+                    if(isOnline(mContext)){
+                        Log.d(TAG,"user is online, setting up everything normally");
+                        mRelative.setAlpha(0.0f);
+                        mAvi.setVisibility(View.VISIBLE);
+                        mLoadingMessage.setVisibility(View.VISIBLE);
+                        lastUsed();
+                    }else{
+                        setNoInternetView();
+                    }
                 }
             }
         };
+    }
+
+    private  void setNoInternetView(){
+        Log.d(TAG,"There is no internet connection,showing no internet dialog");
+        mRelative.setAlpha(0.01f);
+        mNoConnectionLayout.setVisibility(View.VISIBLE);
+        mRetryButton.setOnClickListener(this);
+    }
+
+    private void setFailedToLoadView(){
+        Log.d(TAG,"Failed to load data,showing failed to load data dialog");
+//        mRelative.setVisibility(View.GONE);
+        mAvi.setVisibility(View.GONE);
+        mLoadingMessage.setVisibility(View.GONE);
+
+        mFailedLoadLayout.setVisibility(View.VISIBLE);
+        mRetryLoadingButton.setOnClickListener(this);
     }
 
     private void lastUsed(){
@@ -144,16 +171,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             int number = dataSnapshot.getValue(int.class);
             Log.d(TAG,"---Month ad totals is--"+number);
             Variables.setMonthAdTotals(mKey,number);
-            mHasLoadingMonthTotalsFailed = false;
+//            mHasLoadingMonthTotalsFailed = false;
             loadTodayAdTotalsFromFirebase();
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
             Log.d(TAG,"---Failed to load Month AdTotals from firebase.");
-            mHasLoadingMonthTotalsFailed = true;
-            loadFromSharedPreferences();
-            loadTodayAdTotalsFromFirebase();
+//            mHasLoadingMonthTotalsFailed = true;
+            setFailedToLoadView();
+//            loadFromSharedPreferences();
+//            loadTodayAdTotalsFromFirebase();
         }
     };
 
@@ -173,23 +201,24 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
 
             loadUserIDFromFirebase();
-            mHasLoadingDayTotalsFailed = false;
+//            mHasLoadingDayTotalsFailed = false;
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
             Log.d("LOGIN_ACTIVITY--","Failed to load todays ad totals from firebase.");
-            mHasLoadingDayTotalsFailed = true;
-            loadFromSharedPreferences();
+//            mHasLoadingDayTotalsFailed = true;
+            setFailedToLoadView();
+//            loadFromSharedPreferences();
         }
     };
-
 
     ValueEventListener val3 = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             int clusterID = dataSnapshot.getValue(int.class);
             User.setID(clusterID,mKey);
+            hasEverythingLoaded = true;
             startMainActivity();
 
         }
@@ -198,9 +227,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         public void onCancelled(DatabaseError databaseError) {
             mAvi.setVisibility(View.GONE);
             mLoadingMessage.setVisibility(View.GONE);
-            mRelative.setAlpha(1.0f);
+            setFailedToLoadView();
+//            mRelative.setAlpha(1.0f);
 //            mRelative.setVisibility(View.VISIBLE);
-            Toast.makeText(mContext,"Your connection may be too unreliable.Perhaps try again later.",Toast.LENGTH_LONG).show();
+//            Toast.makeText(mContext,"Your connection may be too unreliable.Perhaps try again later.",Toast.LENGTH_LONG).show();
         }
     };
 
@@ -228,7 +258,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-
+            setFailedToLoadView();
         }
     };
 
@@ -248,42 +278,44 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void loadFromSharedPreferences(){
-        if(mHasLoadingDayTotalsFailed){
-            SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
-            int number = prefs.getInt("adTotals",0);
-            Log.d("LOGIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
-            if(mIsLastOnlineToday) Variables.setAdTotal(number,mKey);
-            else Variables.setAdTotal(0,mKey);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.clear();
-            editor.commit();
-            mHasLoadingDayTotalsFailed = false;
-        }
-        if(mHasLoadingMonthTotalsFailed){
-            SharedPreferences prefs2 = getSharedPreferences(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,MODE_PRIVATE);
-            int number2 = prefs2.getInt(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,0);
-            Log.d("LOGIN_ACTIVITY-----","NUMBER GOTTEN FROM MONTHLY SHARED PREFERENCES IS - "+ number2);
-            Variables.setMonthAdTotals(mKey,number2);
-
-            SharedPreferences.Editor editor2 = prefs2.edit();
-            editor2.clear();
-            editor2.commit();
-            mHasLoadingMonthTotalsFailed = false;
-        }
+//        if(mHasLoadingDayTotalsFailed){
+//            SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
+//            int number = prefs.getInt("adTotals",0);
+//            Log.d("LOGIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
+//            if(mIsLastOnlineToday) Variables.setAdTotal(number,mKey);
+//            else Variables.setAdTotal(0,mKey);
+//            SharedPreferences.Editor editor = prefs.edit();
+//            editor.clear();
+//            editor.commit();
+//            mHasLoadingDayTotalsFailed = false;
+//        }
+//        if(mHasLoadingMonthTotalsFailed){
+//            SharedPreferences prefs2 = getSharedPreferences(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,MODE_PRIVATE);
+//            int number2 = prefs2.getInt(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,0);
+//            Log.d("LOGIN_ACTIVITY-----","NUMBER GOTTEN FROM MONTHLY SHARED PREFERENCES IS - "+ number2);
+//            Variables.setMonthAdTotals(mKey,number2);
+//
+//            SharedPreferences.Editor editor2 = prefs2.edit();
+//            editor2.clear();
+//            editor2.commit();
+//            mHasLoadingMonthTotalsFailed = false;
+//        }
 
     }
 
 
     private void startMainActivity(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-        User.setUid(uid);
-        mAvi.setVisibility(View.GONE);
-        mLoadingMessage.setVisibility(View.GONE);
-        Intent intent = new Intent (LoginActivity.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        if(hasEverythingLoaded && isActivityVisible){
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            String uid = user.getUid();
+            User.setUid(uid);
+            mAvi.setVisibility(View.GONE);
+            mLoadingMessage.setVisibility(View.GONE);
+            Intent intent = new Intent (LoginActivity.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private BroadcastReceiver mMessageReceiverForConnectionOffline = new BroadcastReceiver() {
@@ -301,13 +333,26 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     };
 
     @Override
-    public void onStart(){
+    protected void onStart(){
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
-    public void onStop(){
+    protected void onPause(){
+        super.onPause();
+        isActivityVisible = false;
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        isActivityVisible = true;
+        if(hasEverythingLoaded)startMainActivity();
+    }
+
+    @Override
+    protected void onStop(){
         super.onStop();
         if(mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
@@ -334,7 +379,28 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if(v == mLoginButton){
             loginUserWithPassword();
         }
+        if(v == mRetryButton){
+            if(isOnline(mContext)){
+                mNoConnectionLayout.setVisibility(View.GONE);
+                mRelative.setAlpha(0.0f);
+                mAvi.setVisibility(View.VISIBLE);
+                mLoadingMessage.setVisibility(View.VISIBLE);
+                lastUsed();
+            }else{
+                Log.d(TAG,"No internet connection!!");
+                Toast.makeText(mContext,"You've may not have an internet connection.",Toast.LENGTH_SHORT).show();
+            }
+        }
+        if(v== mRetryLoadingButton){
+            mRelative.setAlpha(0.0f);
+            mFailedLoadLayout.setVisibility(View.GONE);
+            mAvi.setVisibility(View.VISIBLE);
+            mLoadingMessage.setVisibility(View.VISIBLE);
+            Toast.makeText(mContext,"Retrying...",Toast.LENGTH_SHORT).show();
+            lastUsed();
+        }
     }
+
 
     private void loginUserWithPassword() {
      String email = mEmail.getText().toString().trim();

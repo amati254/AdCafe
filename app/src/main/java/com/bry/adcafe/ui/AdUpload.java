@@ -302,6 +302,10 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
     private void showDialogForPayments() {
+        buildTransactionForPayment();
+    }
+
+    private void buildTransactionForPayment() {
 
     }
 

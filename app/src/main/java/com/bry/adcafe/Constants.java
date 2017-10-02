@@ -50,6 +50,7 @@ public class Constants {
     public static String HAS_USER_MADE_PAMENTS = "has_payed";
 
     public static String NO_ADS = "NO_ADS";
+    public static String DATE = "date";
 
 
 }

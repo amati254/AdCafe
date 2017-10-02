@@ -13,10 +13,12 @@
     <string name="emailText">"Email."</string>
     <string name="nameText">"Name."</string>
     <string name="title_activity_login">"Login."</string>
+    <string name="reloadButton">"Reload"</string>
     <string name="LogInNoConnection">"You may need internet connection to login."</string>
     <string name="SignUpNoConnection">"You may need internet connection to sign up."</string>
     <string name="connectionDropped">"Hmmm, your connection may have a problem."</string>
-    <string name="connectionDropped2">"Your connection may have dropped.You can't move to the next ad without a stable connection to the Internet."</string>
+    <string name="connectionDropped2">"Your connection may have a few problems."</string>
+    <string name="connectToInternet">"You need an internet connection to continue..."</string>
     <string name="shared">"Shared."</string>
     <string name="connectionBack">"Your back online, you may now continue."</string>
     <string name="Logout">"Logout"</string>
@@ -35,13 +37,14 @@
     <string name="DoNotPayTwice">"Note that once you pay, you can upload your advert at any time."</string>
     <string name="MakeSureImage">"Make sure the image looks good in the card."</string>
     <string name="pleaseChooseIcon">"Please choose an image fist."</string>
-    <string name="successfullyUploaded">"Successfully uploaded! Thank you for using AdCafe."</string>
+    <string name="successfullyUploaded">"Successfully uploaded! Thank you."</string>
     <string name="unsuccessfullyUploaded">"Something went wrong,try uploading again after a few minutes."</string>
     <string name="uploadMessage">"Upload may take some time..."</string>
     <string name="settingUpMessage">"Setting a couple of things up..."</string>
     <string name="settingUpMessage2">"Setting a few things up..."</string>
     <string name="settingUpAccountMessage">"Setting up your account..."</string>
     <string name="loadingTodaysAdsmessage">"Loading today's ads..."</string>
+    <string name="failedToLoadTodaysAds">"Failed to load todays ads."</string>
     <string name="noteForPickingMessage">"If you are re-picking the number, you WILL have to repay REGARDLESS OF ANY PRIOR PAYMENTS!"</string>
     <string name="pickBeforePaying">"So make sure you pick before making any payments."</string>
 </resources>

@@ -18,14 +18,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.test.suitebuilder.TestMethod;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,11 +38,10 @@ import com.bry.adcafe.adapters.AdCounterBar;
 import com.bry.adcafe.fragments.ReportDialogFragment;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
-import com.bry.adcafe.services.ConnectionChecker;
+import com.bry.adcafe.services.NetworkStateReceiver;
 import com.bry.adcafe.services.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -60,8 +59,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements  View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener,NetworkStateReceiver.NetworkStateReceiverListener {
     private static final String TAG = "MainActivity";
+    private LinearLayout mFailedToLoadLayout;
+    private Button mRetryButton;
+    private ImageButton mLogoutButton;
     private SwipePlaceHolderView mSwipeView;
     private PlaceHolderView mAdCounterView;
     private Context mContext;
@@ -78,6 +80,11 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
     private DatabaseReference dbRef;
     private int mChildToStartFrom = 0;
 
+    Handler h = new Handler();
+    Runnable r;
+    private NetworkStateReceiver networkStateReceiver;
+    boolean doubleBackToExitPressedOnce = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,22 +96,29 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
 
         setUpSwipeView();
         loadAdsFromThread();
-        StartNetworkChecker(mContext);
+//        StartNetworkChecker(mContext);
 
     }
 
 
-    Handler h = new Handler();
-    Runnable r;
 
     @Override
     protected void onStart(){
         super.onStart();
-        Log.d(TAG,"---started the time checker for when it is almost midnight.");
+    }
+
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        if(!getCurrentDateInSharedPreferences().equals(getDate())){
+            Log.d(TAG,"---Date in shared preferences does not match current date,therefore resetting everything.");
+            resetEverything();
+        }
         h.postDelayed(new Runnable() {
             @Override
             public void run() {
-
+                Log.d(TAG,"---started the time checker for when it is almost midnight.");
                 if(isAlmostMidNight()){
                     mIsBeingReset = true;
                     resetEverything();
@@ -114,6 +128,35 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
             }
         },30000);
     }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        h.removeCallbacks(r);
+        setCurrentTimeToSharedPrefs();
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        if(dbRef!=null){
+            dbRef.removeEventListener(val);
+        }
+        Log.d(TAG,"---removing callback for checking time of day.");
+//        h.removeCallbacks(r);
+    }
+
+    @Override
+    protected void onDestroy(){
+        setLastUsedDateInFirebaseDate(User.getUid());
+        unregisterAllReceivers();
+        removeAllViews();
+//        addToSharedPreferences();
+        Variables.clearAdTotal();
+        networkStateReceiver.removeListener(this);
+        this.unregisterReceiver(networkStateReceiver);
+        super.onDestroy();
+    } //deleting saved data when app is stopped
 
 
 
@@ -157,6 +200,9 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         }
         runOnUiThread(returnRes);
     }
+
+
+
 
     private void getGetAdsFromFirebase(){
         if(mAdList.size()!=0){
@@ -209,9 +255,15 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
             Toast.makeText(mContext,"Unable to load the adverts now. Perhaps try again later.",Toast.LENGTH_LONG).show();
             mAvi.setVisibility(View.GONE);
             mLoadingText.setVisibility(View.GONE);
-            mLinearLayout.setVisibility(View.VISIBLE);
+            showFailedView();
+//            mLinearLayout.setVisibility(View.VISIBLE);
         }
     };
+
+    private void showFailedView() {
+        mFailedToLoadLayout.setVisibility(View.VISIBLE);
+        mRetryButton.setOnClickListener(this);
+    }
 
     private Runnable returnRes = new Runnable() {
         @Override
@@ -222,26 +274,6 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
 
 
 
-    @Override
-    protected void onStop(){
-        super.onStop();
-        if(dbRef!=null){
-            dbRef.removeEventListener(val);
-        }
-        Log.d(TAG,"---removing callback for checking time of day.");
-        h.removeCallbacks(r);
-    }
-
-    //deleting saved data when app is stopped
-    @Override
-    protected void onDestroy(){
-        setLastUsedDateInFirebaseDate(User.getUid());
-        unregisterAllReceivers();
-        removeAllViews();
-//        addToSharedPreferences();
-        Variables.clearAdTotal();
-        super.onDestroy();
-    }
 
     private void unregisterAllReceivers(){
         Log.d("MAIN_ACTIVITY--","Unregistering all receivers");
@@ -266,6 +298,9 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         mLinearLayout = (LinearLayout) findViewById(R.id.bottomNavButtons);
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.mainActivityAvi);
         mLoadingText = (TextView) findViewById(R.id.loadingAdsMessage);
+        mFailedToLoadLayout = (LinearLayout) findViewById(R.id.failedLoadAdsLayout);
+        mRetryButton = (Button) findViewById(R.id.retryLoadingAds);
+        mLogoutButton = (ImageButton) findViewById(R.id.logoutBtn);
 
         int bottomMargin = Utils.dpToPx(90);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
@@ -338,6 +373,10 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
 
         Log.d(TAG,"---Setting up On click listeners...");
         onclicks();
+
+        networkStateReceiver = new NetworkStateReceiver();
+        networkStateReceiver.addListener(this);
+        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
 
@@ -352,6 +391,7 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
     }
 
     private void onclicks() {
+
         findViewById(R.id.logoutBtn).setOnClickListener(this);
 
 
@@ -576,19 +616,19 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         editor2.commit();
     }
 
-    public void StartNetworkChecker(final Context context){
-        Handler handler=new Handler();
-
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if(!isNetworkConnected(context)){
-                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.connectionDropped2,
-                                Snackbar.LENGTH_INDEFINITE).show();
-                    }
-                }
-            },10000);
-    }
+//    public void StartNetworkChecker(final Context context){
+//        Handler handler=new Handler();
+//
+//            handler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if(!isNetworkConnected(context)){
+//                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.connectionDropped2,
+//                                Snackbar.LENGTH_INDEFINITE).show();
+//                    }
+//                }
+//            },10000);
+//    }
 
     private boolean isNetworkConnected(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -682,20 +722,84 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
 
     @Override
     public void onClick(View v) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Are you sure you want to log out?")
-                .setCancelable(true)
-                .setPositiveButton("Yes,I want to", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        logoutUser();
-                    }
-                })
-                .setNegativeButton("No,I'm staying", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                }).show();
+        if(v == mLogoutButton){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Are you sure you want to log out?")
+                    .setCancelable(true)
+                    .setPositiveButton("Yes,I want to", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            logoutUser();
+                        }
+                    })
+                    .setNegativeButton("No,I'm staying", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    }).show();
+        }
+        if(v == mRetryButton){
+            Log.d(TAG,"Retrying to load ads...");
+            mAvi.setVisibility(View.VISIBLE);
+            mLoadingText.setVisibility(View.VISIBLE);
+            mFailedToLoadLayout.setVisibility(View.GONE);
+            Toast.makeText(mContext,"Retrying...",Toast.LENGTH_SHORT).show();
+            loadAdsFromThread();
+        }
+
+    }
+
+    private void setCurrentTimeToSharedPrefs() {
+        Log.d(TAG,"---Setting current date in shared preferences.");
+        SharedPreferences prefs = getSharedPreferences(Constants.DATE,MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("date",getDate());
+        editor.apply();
+    }
+
+    private String getCurrentDateInSharedPreferences(){
+        Log.d(TAG,"---Getting current date in shared preferences.");
+        SharedPreferences prefs = getSharedPreferences(Constants.DATE,MODE_PRIVATE);
+        String date = prefs.getString("date","nill");
+        return date;
+    }
+
+    @Override
+    public void networkAvailable() {
+        Log.d(TAG, "User is connected to the internet via wifi or cellular data");
+        findViewById(R.id.droppedInternetLayout).setVisibility(View.GONE);
+        findViewById(R.id.bottomNavButtons).setVisibility(View.VISIBLE);
+        mSwipeView.setVisibility(View.VISIBLE);
+        mAdCounterView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void networkUnavailable() {
+        Log.d(TAG, "User has gone offline...");
+        findViewById(R.id.bottomNavButtons).setVisibility(View.GONE);
+        mSwipeView.setVisibility(View.GONE);
+        mAdCounterView.setVisibility(View.GONE);
+        findViewById(R.id.droppedInternetLayout).setVisibility(View.VISIBLE);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Press BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
     }
 }
