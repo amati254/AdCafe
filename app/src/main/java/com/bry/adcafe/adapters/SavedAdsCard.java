@@ -73,12 +73,7 @@ public class SavedAdsCard {
 
     @Resolve
     private void onResolved() {
-        if(isInternetAvailable()){
-            loadImage();
-        }else{
-            Toast.makeText(mContext,"You don't seem to have a stable connection.",Toast.LENGTH_LONG).show();
-        }
-
+       loadImage();
     }
 
     @LongClick(R.id.SavedImageView)
@@ -92,6 +87,7 @@ public class SavedAdsCard {
         try {
             Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
             mAdvert.setImageBitmap(bm);
+            Log.d("SavedAdsCard---","Image has been converted to bitmap and set in model instance.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -100,6 +96,7 @@ public class SavedAdsCard {
             public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
                 mAvi.setVisibility(android.view.View.GONE);
                 errorImageView.setVisibility(android.view.View.VISIBLE);
+                Log.d("SavedAdsCard---",e.getMessage());
                 if(!isInternetAvailable()&& !hasMessageBeenSeen){
                     hasMessageBeenSeen = true;
                     Intent intent = new Intent(Constants.CONNECTION_OFFLINE);

@@ -105,6 +105,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     static Dialog d;
     private ImageButton b;
 
+    private boolean uploading = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -442,6 +444,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void uploadImage() {
         String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
+        uploading = true;
 
         for(int i = 0; i < 10; i++){
             final Integer number = clustersToUpLoadTo.get(i);
@@ -737,5 +740,32 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     }
 
+    @Override
+    public void onBackPressed(){
+        if(uploading){
+            final Dialog d = new Dialog(AdUpload.this);
+            d.setTitle("Upload incomplete");
+            d.setContentView(R.layout.dialog3);
+            Button b1 = (Button) d.findViewById(R.id.buttonYes);
+            Button b2 = (Button) d.findViewById(R.id.buttonNo);
+            b1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startDashboardActivity();
+                    d.dismiss();
+                }
+            });
+            b2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    d.dismiss();
+                }
+            });
+            d.show();
+        }else{
+            super.onBackPressed();
+        }
+
+    }
 
 }

@@ -14,7 +14,14 @@
 
         <TextView
             android:layout_width="wrap_content"
-            android:text="Upload may have failed,but not to worry. Just check your connection then click the arrow icon at the top to resume the upload."
+            android:text="Are you sure you want to leave?"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="If you are uploading an ad, it will be incomplete and will not be seen by all your selected number of people."
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
@@ -26,14 +33,25 @@
             android:orientation="horizontal"
             android:layout_height="wrap_content">
             <Button
-                android:id="@+id/buttonOk"
-                android:layout_width="match_parent"
-                android:layout_marginLeft="40dp"
-                android:layout_marginRight="40dp"
+                android:id="@+id/buttonYes"
+                android:layout_width="wrap_content"
+                android:paddingRight="10dp"
+                android:paddingLeft="10dp"
                 android:background="@color/colorAccent"
                 android:textColor="@color/white"
                 android:layout_height="wrap_content"
-                android:text="Cool." />
+                android:text="Yes, i'll leave." />
+
+            <Button
+                android:id="@+id/buttonNo"
+                android:layout_width="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:layout_marginLeft="20dp"
+                android:background="@color/colorAccent"
+                android:textColor="@color/white"
+                android:layout_height="wrap_content"
+                android:text="No, let it finish." />
 
         </LinearLayout>
     </LinearLayout>

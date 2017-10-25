@@ -127,7 +127,7 @@ public class Bookmarks extends AppCompatActivity {
     private Runnable returnRes = new Runnable() {
         @Override
         public void run() {
-            loadBookmarkedAdsIntoCards();
+//            loadBookmarkedAdsIntoCards();
         }
     };
 
@@ -187,10 +187,11 @@ public class Bookmarks extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snap: dataSnapshot.getChildren()){
                     Advert advert = snap.getValue(Advert.class);
-                    advert.setPushId(advert.getPushId());
+//                    advert.setPushId(advert.getPushId());
                     mSavedAds.add(advert);
                     Log.d("BOOKMARKS"," --Loaded ads from firebase.--"+advert.getPushId());
                 }
+                loadBookmarkedAdsIntoCards();
             }
 
             @Override
