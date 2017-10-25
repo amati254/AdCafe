@@ -37,7 +37,7 @@
     <string name="DoNotPayTwice">"Note that once you pay, you can upload your advert at any time."</string>
     <string name="MakeSureImage">"Make sure the image looks good in the card."</string>
     <string name="pleaseChooseIcon">"Please choose an image fist."</string>
-    <string name="successfullyUploaded">"Successfully uploaded! Thank you."</string>
+    <string name="successfullyUploaded">"Thank you for using the AdCafé to advertise your product."</string>
     <string name="unsuccessfullyUploaded">"Something went wrong,try uploading again after a few minutes."</string>
     <string name="uploadMessage">"Upload may take some time..."</string>
     <string name="settingUpMessage">"Setting a couple of things up..."</string>
@@ -46,6 +46,6 @@
     <string name="loadingTodaysAdsmessage">"Loading today's ads..."</string>
     <string name="loadingYourPinnedAds">"Loading your pinned ads"</string>
     <string name="failedToLoadTodaysAds">"Failed to load todays ads."</string>
-    <string name="noteForPickingMessage">"If you are re-picking the number, you WILL have to repay REGARDLESS OF ANY PRIOR PAYMENTS!"</string>
+    <string name="noteForPickingMessage">"The number shown is by 1000 (*1000 users). Select having that in mind."</string>
     <string name="pickBeforePaying">"So make sure you pick before making any payments."</string>
 </resources>

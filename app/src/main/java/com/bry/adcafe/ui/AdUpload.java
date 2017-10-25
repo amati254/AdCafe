@@ -446,99 +446,110 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
         uploading = true;
 
-        for(int i = 0; i < 10; i++){
-            final Integer number = clustersToUpLoadTo.get(i);
-            Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
+        if(clustersToUpLoadTo.size()>10){
+            for(int i = 0; i < 10; i++){
 
-            mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(number));
-            Advert advert = new Advert(encodedImageToUpload);
-            DatabaseReference pushref= mRef3.push();
-            String pushID = pushref.getKey();
-            advert.setPushId(pushID);
-            pushref.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    cycleCount++;
-                    clustersToUpLoadTo.remove(number);
-                    if(clustersToUpLoadTo.isEmpty()){
-                        if(!failedClustersToUploadTo.isEmpty()){
-                            checkAndNotifyAnyFailed();
+                final Integer number = clustersToUpLoadTo.get(i);
+                Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
+
+                mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(number));
+                Advert advert = new Advert(encodedImageToUpload);
+                DatabaseReference pushref= mRef3.push();
+                String pushID = pushref.getKey();
+                advert.setPushId(pushID);
+                pushref.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        cycleCount++;
+                        clustersToUpLoadTo.remove(number);
+                        if(clustersToUpLoadTo.isEmpty()){
+                            if(!failedClustersToUploadTo.isEmpty()){
+                                checkAndNotifyAnyFailed();
+                            }else{
+                                mAvi.setVisibility(View.GONE);
+                                mLoadingTextView.setVisibility(View.GONE);
+                                setAllOtherViewsToBeVisible();
+                                Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
+//                                Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.successfullyUploaded, Snackbar.LENGTH_LONG).show();
+                                setHasPayedInFirebaseToFalse();
+                                cycleCount = 1;
+                                bm = null;
+//                                Toast.makeText(mContext, R.string.successfullyUploaded,Toast.LENGTH_LONG).show();
+                                startDashboardActivity();
+                            }
+
                         }else{
-                            mAvi.setVisibility(View.GONE);
-                            mLoadingTextView.setVisibility(View.GONE);
-                            setAllOtherViewsToBeVisible();
-                            Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
-                            Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.successfullyUploaded, Snackbar.LENGTH_LONG).show();
-                            setHasPayedInFirebaseToFalse();
-                            cycleCount = 1;
-                            bm = null;
-                            Toast.makeText(mContext, R.string.successfullyUploaded,Toast.LENGTH_LONG).show();
-                            startDashboardActivity();
-                        }
+                            if(cycleCount == 10){
+                                cycleCount = 0;
+                                uploadImage();
+                            }
 
-                    }else{
-                        if(cycleCount == 10){
-                            cycleCount = 0;
-                            uploadImage();
                         }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        failedClustersToUploadTo.add(number);
+                        cycleCount++;
+                        clustersToUpLoadTo.remove(number);
+                        if(clustersToUpLoadTo.isEmpty()){
+                            checkAndNotifyAnyFailed();
+                        }
+                    }
+                });
+            }
+        }else{
+            for(final Integer number : clustersToUpLoadTo){
+                Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
 
+                mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(number));
+                Advert advert = new Advert(encodedImageToUpload);
+                DatabaseReference pushref= mRef3.push();
+                String pushID = pushref.getKey();
+                advert.setPushId(pushID);
+                pushref.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        cycleCount++;
+                        clustersToUpLoadTo.remove(number);
+                        if(clustersToUpLoadTo.isEmpty()){
+                            if(!failedClustersToUploadTo.isEmpty()){
+                                checkAndNotifyAnyFailed();
+                            }else{
+                                mAvi.setVisibility(View.GONE);
+                                mLoadingTextView.setVisibility(View.GONE);
+                                setAllOtherViewsToBeVisible();
+                                Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
+                                Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.successfullyUploaded, Snackbar.LENGTH_LONG).show();
+                                setHasPayedInFirebaseToFalse();
+                                cycleCount = 1;
+                                bm = null;
+                                Toast.makeText(mContext, R.string.successfullyUploaded,Toast.LENGTH_LONG).show();
+                                startDashboardActivity();
+                            }
+
+                        }else{
+                            if(cycleCount == 10){
+                                cycleCount = 0;
+                                uploadImage();
+                            }
+
+                        }
                     }
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    failedClustersToUploadTo.add(number);
-                    cycleCount++;
-                    clustersToUpLoadTo.remove(number);
-                    if(clustersToUpLoadTo.isEmpty()){
-                        checkAndNotifyAnyFailed();
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        failedClustersToUploadTo.add(number);
+                        cycleCount++;
+                        clustersToUpLoadTo.remove(number);
+                        if(clustersToUpLoadTo.isEmpty()){
+                            checkAndNotifyAnyFailed();
+                        }
                     }
-                }
-            });
+                });
+            }
         }
-//        for(final Integer number:clustersToUpLoadTo){
-//            Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
-//            mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(number));
-//            Advert advert = new Advert(encodedImageToUpload);
-//            DatabaseReference pushref= mRef3.push();
-//            String pushID = pushref.getKey();
-//            advert.setPushId(pushID);
-//            pushref.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
-//                @Override
-//                public void onSuccess(Void aVoid) {
-//                    clustersToUpLoadTo.remove(number);
-//                    if(clustersToUpLoadTo.isEmpty()){
-//                        if(!failedClustersToUploadTo.isEmpty()){
-//                            checkAndNotifyAnyFailed();
-//                        }else{
-//                            setNewValueToStartFrom();
-//                            mAvi.setVisibility(View.GONE);
-//                            mLoadingTextView.setVisibility(View.GONE);
-//                            setAllOtherViewsToBeVisible();
-//                            Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
-//                            Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.successfullyUploaded, Snackbar.LENGTH_LONG).show();
-//                            setHasPayedInFirebaseToFalse();
-//                            cycleCount = 1;
-//                            bm = null;
-//                            Toast.makeText(mContext, R.string.successfullyUploaded,Toast.LENGTH_LONG).show();
-//                            startDashboardActivity();
-//                        }
-//
-//                    }else{
-//                        cycleCount+=1;
-//                    }
-//                }
-//            }).addOnFailureListener(new OnFailureListener() {
-//                @Override
-//                public void onFailure(@NonNull Exception e) {
-//                    failedClustersToUploadTo.add(number);
-//                    clustersToUpLoadTo.remove(number);
-//                    if(clustersToUpLoadTo.isEmpty()){
-//                        checkAndNotifyAnyFailed();
-//                    }
-//                }
-//            });
-//        }
+
 
     }
 
@@ -567,49 +578,26 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         }
     }
 
-//    OnSuccessListener succ1 = new OnSuccessListener() {
-//        @Override
-//        public void onSuccess(Object o) {
-//            if(cycleCount == mNumberOfClusters){
-//                setNewValueToStartFrom();
-//                mAvi.setVisibility(View.GONE);
-//                mLoadingTextView.setVisibility(View.GONE);
-//                setAllOtherViewsToBeVisible();
-//
-//                Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
-//                Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.successfullyUploaded,
-//                        Snackbar.LENGTH_LONG).show();
-//                setHasPayedInFirebaseToFalse();
-//                cycleCount = 1;
-//                bm = null;
-//                Toast.makeText(mContext, R.string.successfullyUploaded,Toast.LENGTH_LONG).show();
-//                startDashboardActivity();
-//            }else{
-//                cycleCount+=1;
-//            }
-//
-//        }
-//    };
-
     private void startDashboardActivity() {
-        Intent intent = new Intent(AdUpload.this,Dashboard.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+
+        final Dialog d = new Dialog(AdUpload.this);
+        d.setTitle("Upload complete");
+        d.setContentView(R.layout.dialog4);
+        Button b2 = (Button) d.findViewById(R.id.buttonOk);
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+                Intent intent = new Intent(AdUpload.this,Dashboard.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
+        d.show();
+
     }
 
-
-//    OnFailureListener fal = new OnFailureListener() {
-//        @Override
-//        public void onFailure(@NonNull Exception e) {
-//            mAvi.setVisibility(View.GONE);
-//            mLoadingTextView.setVisibility(View.GONE);
-//            setAllOtherViewsToBeVisible();
-//
-//            Toast.makeText(mContext, R.string.unsuccessfullyUploaded,Toast.LENGTH_LONG).show();
-//            Log.d(TAG,"---Unable to upload ad. "+e.getMessage());
-//        }
-//    };
 
 
     private void setNewValueToStartFrom() {
