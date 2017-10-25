@@ -69,4 +69,10 @@ public class Dashboard extends AppCompatActivity {
         int totalAmounts = (int)(Variables.getMonthAdTotals(mKey)*1.5);
         mAmmountNumber.setText(Integer.toString(totalAmounts));
     }
+
+    @Override
+    public void onBackPressed(){
+        Intent intent = new Intent(Dashboard.this,MainActivity.class);
+        startActivity(intent);
+    }
 }

@@ -153,7 +153,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         removeAllViews();
 //        addToSharedPreferences();
         Variables.clearAdTotal();
-        networkStateReceiver.removeListener(this);
+        if(networkStateReceiver!=null){
+            networkStateReceiver.removeListener(this);
+        }
         this.unregisterReceiver(networkStateReceiver);
         super.onDestroy();
     } //deleting saved data when app is stopped

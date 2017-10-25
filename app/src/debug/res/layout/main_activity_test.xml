@@ -1,70 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:text="Check your internet connectivity."
-        android:gravity="center"
-        android:visibility="visible"
-        android:paddingTop="7dp"
-        android:paddingBottom="7dp"
-        android:layout_marginRight="60dp"
-        android:layout_marginTop="10dp"
-        android:layout_height="wrap_content" />
-
     <LinearLayout
-        android:orientation="horizontal"
-        android:layout_gravity="top"
-        android:gravity="end"
-        android:layout_marginEnd="50dp"
-        android:layout_marginRight="50dp"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp">
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_gravity="bottom"
+        android:id="@+id/bottomNavButtons"
+        android:visibility="visible"
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent">
-
-            <ProgressBar
-                android:id="@+id/progressBarTimer"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_centerInParent="true"
-                android:indeterminate="false"
-                android:max="45"
-                android:rotation="-90"
-                android:progress="45"
-                android:progressDrawable="@drawable/timer_layout" />
-
-            <TextView
-                android:id="@+id/textViewTime"
+            android:layout_height="wrap_content">
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
+                android:orientation="vertical"
                 android:gravity="center"
-                android:text="7"
-                android:background="@drawable/circle_design_timer_file"
-                android:textColor="@color/primary_text"
-                android:textSize="12sp" />
-
+                android:layout_height="wrap_content">
+                <ImageButton
+                    android:id="@+id/logoutBtn"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/ic_action_exit"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/settingsText"
+                    android:textSize="8dp"
+                    android:text="Logout."
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
         </RelativeLayout>
 
-
-
-        <TextView
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:id="@+id/adCounter"
-            android:textColor="@color/lightyellow"
-            android:textSize="11sp"
-            android:layout_margin="11dp"
-            android:gravity="center"
-            android:background="@drawable/circle_design_file"
-            android:layout_height="wrap_content" />
+            android:layout_marginLeft="25dp"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+                <ImageButton
+                    android:id="@+id/bookmarkBtn"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/ic_action_pinn_list_icon"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/bookmarkText"
+                    android:textSize="8dp"
+                    android:text="Ad Archives."
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+                <ImageButton
+                    android:id="@+id/dashboard"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/ic_action_dashboard"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/nextAdText"
+                    android:textSize="8dp"
+                    android:text="Dashboard."
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+                <ImageButton
+                    android:id="@+id/shareBtn"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/ic_action_share"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/shareText"
+                    android:textSize="8dp"
+                    android:text="Share."
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </RelativeLayout>
 
     </LinearLayout>
 
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

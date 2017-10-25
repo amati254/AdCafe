@@ -6,7 +6,7 @@ package com.bry.adcafe;
 
 public class Variables {
     private static String mKey = "";
-    public static int numberOfAds;
+    private static int numberOfAds;
 
     private static Integer todaysAdTotal = 0;
     private static int mMonthAdTotals = 0;
@@ -75,6 +75,5 @@ public class Variables {
             return 0;
         }
     }
-
 
 }

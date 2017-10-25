@@ -107,7 +107,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:gravity="center"
-        android:visibility="gone"
         android:layout_gravity="center"
         android:orientation="vertical"
         android:layout_height="match_parent">
@@ -117,13 +116,14 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             style="@style/AVLoadingIndicatorView"
-            android:visibility="visible"
+            android:visibility="gone"
             app:indicatorName="LineScaleIndicator"
             app:indicatorColor="@color/accent" />
         <TextView
             android:layout_width="wrap_content"
             android:text="@string/loadingTodaysAdsmessage"
             android:id="@+id/loadingAdsMessage"
+            android:visibility="gone"
             android:textSize="10sp"
             android:layout_height="wrap_content" />
     </LinearLayout>

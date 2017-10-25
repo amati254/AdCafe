@@ -56,6 +56,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueChangeListener{
     public static final String TAG = AdUpload.class.getSimpleName();
     private static final int PICK_IMAGE_REQUEST = 234;
@@ -74,6 +77,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private LinearLayout mNoConnection;
     private LinearLayout mBottomNavs;
     private TextView mNumberOfUsersChosenText;
+    @Bind(R.id.numberOfUsersToAdvertiseToLayout) RelativeLayout mNumberOfUsersToAdvertiseTo;
+
 
 
     private boolean mHasNumberBeenLoaded;
@@ -82,6 +87,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private boolean mHasUserPayed;
 
     private List<Integer> clustersToUpLoadTo = new ArrayList<>();
+    private List<Integer> failedClustersToUploadTo = new ArrayList<>();
     private int mNumberOfClusters = 1;
     private int mClusterTotal;
     private int mClusterToStartFrom;
@@ -94,7 +100,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private DatabaseReference boolRef;
 
     private Bitmap bm;
-    private int cycleCount = 1;
+    private int cycleCount = 0;
     private static TextView tv;
     static Dialog d;
     private ImageButton b;
@@ -107,6 +113,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         mContext = this.getApplicationContext();
         mHasUserChosenAnImage = false;
         mHasNumberBeenLoaded = false;
+        ButterKnife.bind(this);
 
 
         setUpViews();
@@ -230,7 +237,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             setAllOtherViewsToBeVisible();
             mAvi.setVisibility(View.GONE);
             mLoadingTextView.setVisibility(View.GONE);
-            addToClusterListToUploadTo(mNumberOfClusters);
+//            addToClusterListToUploadTo(mNumberOfClusters);
             OnClicks();
 
             Toast.makeText(mContext, R.string.DoNotPayTwice,Toast.LENGTH_LONG).show();
@@ -272,13 +279,24 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 public void onClick(View v) {
                     if(!mHasNumberBeenChosen){
                         Toast.makeText(mContext,"You may need to choose number of users to advertise to first!",Toast.LENGTH_LONG).show();
+                    }else if(!mHasUserChosenAnImage){
+                        Toast.makeText(mContext, R.string.pleaseChooseIcon,Toast.LENGTH_SHORT).show();
+                    }else if(!isOnline(mContext)){
+                        Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.UploadAdNoConnection,
+                            Snackbar.LENGTH_LONG).show();
+                    }else{
+                        if(bm!=null){
+                            setAllOtherViewsToBeGone();
+                            mAvi.setVisibility(View.VISIBLE);
+                            mLoadingTextView.setVisibility(View.VISIBLE);
+                            mLoadingTextView.setText(R.string.uploadMessage);
+                            setNewValueToStartFrom();
+
+                            uploadImage();
+                        }else{
+                            Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
+                        }
                     }
-//                    else if(!mHasUserPayed){
-//                       Toast.makeText(mContext,"Please pay first.",Toast.LENGTH_SHORT).show();
-//                   }
-                   else{
-                       uploadImage();
-                   }
                 }
             });
         }
@@ -295,7 +313,29 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             findViewById(R.id.chooseNumberButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    show();
+                    showNumberPicker();
+                }
+            });
+        }
+        if(findViewById(R.id.reupload)!=null){
+            findViewById(R.id.reupload).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    for(Integer failedCluster : failedClustersToUploadTo){
+                        clustersToUpLoadTo.add(failedCluster);
+                    }
+                    failedClustersToUploadTo.clear();
+                    if(bm!=null){
+                        setAllOtherViewsToBeGone();
+                        mAvi.setVisibility(View.VISIBLE);
+                        mLoadingTextView.setVisibility(View.VISIBLE);
+                        mLoadingTextView.setText(R.string.uploadMessage);
+                        setNewValueToStartFrom();
+
+                        uploadImage();
+                    }else{
+                        Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
+                    }
                 }
             });
         }
@@ -315,10 +355,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     }
 
-    public void show() {
-
+    public void showNumberPicker() {
         final Dialog d = new Dialog(AdUpload.this);
-        d.setTitle("No. of people");
+        d.setTitle("Targeted people no.");
         d.setContentView(R.layout.dialog);
         Button b1 = (Button) d.findViewById(R.id.button1);
         Button b2 = (Button) d.findViewById(R.id.button2);
@@ -333,7 +372,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 tv.setText(String.valueOf(np.getValue()*1000));
                 mHasNumberBeenChosen = true;
                 mNumberOfClusters = np.getValue();
-                findViewById(R.id.numberOfUsersToAdvertiseToLayout).setVisibility(View.VISIBLE);
+                addToClusterListToUploadTo(mNumberOfClusters);
+                mNumberOfUsersToAdvertiseTo.setVisibility(View.VISIBLE);
                 d.dismiss();
             }
         });
@@ -400,64 +440,153 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
 
-
-
     private void uploadImage() {
-        if(!mHasUserChosenAnImage){
-            Toast.makeText(mContext, R.string.pleaseChooseIcon,Toast.LENGTH_SHORT).show();
-        }else if(!isOnline(mContext)){
-            Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.UploadAdNoConnection,
-                    Snackbar.LENGTH_LONG).show();
-        }else{
-            if(bm!=null){
-                setAllOtherViewsToBeGone();
-                mAvi.setVisibility(View.VISIBLE);
-                mLoadingTextView.setVisibility(View.VISIBLE);
-                mLoadingTextView.setText(R.string.uploadMessage);
+        String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
 
-                for(Integer number:clustersToUpLoadTo){
-                    Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
+        for(int i = 0; i < 10; i++){
+            final Integer number = clustersToUpLoadTo.get(i);
+            Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
 
-                    String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
-                    mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(number));
-                    Advert advert = new Advert(encodedImageToUpload);
-                    DatabaseReference pushref= mRef3.push();
-                    String pushID = pushref.getKey();
-                    advert.setPushId(pushID);
-                    pushref.setValue(advert).addOnSuccessListener(succ1).addOnFailureListener(fal);
-
+            mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(number));
+            Advert advert = new Advert(encodedImageToUpload);
+            DatabaseReference pushref= mRef3.push();
+            String pushID = pushref.getKey();
+            advert.setPushId(pushID);
+            pushref.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    cycleCount++;
                     clustersToUpLoadTo.remove(number);
+                    if(clustersToUpLoadTo.isEmpty()){
+                        if(!failedClustersToUploadTo.isEmpty()){
+                            checkAndNotifyAnyFailed();
+                        }else{
+                            mAvi.setVisibility(View.GONE);
+                            mLoadingTextView.setVisibility(View.GONE);
+                            setAllOtherViewsToBeVisible();
+                            Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
+                            Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.successfullyUploaded, Snackbar.LENGTH_LONG).show();
+                            setHasPayedInFirebaseToFalse();
+                            cycleCount = 1;
+                            bm = null;
+                            Toast.makeText(mContext, R.string.successfullyUploaded,Toast.LENGTH_LONG).show();
+                            startDashboardActivity();
+                        }
+
+                    }else{
+                        if(cycleCount == 10){
+                            cycleCount = 0;
+                            uploadImage();
+                        }
+
+                    }
                 }
-            }else{
-                Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
-            }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    failedClustersToUploadTo.add(number);
+                    cycleCount++;
+                    clustersToUpLoadTo.remove(number);
+                    if(clustersToUpLoadTo.isEmpty()){
+                        checkAndNotifyAnyFailed();
+                    }
+                }
+            });
         }
+//        for(final Integer number:clustersToUpLoadTo){
+//            Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
+//            mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(number));
+//            Advert advert = new Advert(encodedImageToUpload);
+//            DatabaseReference pushref= mRef3.push();
+//            String pushID = pushref.getKey();
+//            advert.setPushId(pushID);
+//            pushref.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                @Override
+//                public void onSuccess(Void aVoid) {
+//                    clustersToUpLoadTo.remove(number);
+//                    if(clustersToUpLoadTo.isEmpty()){
+//                        if(!failedClustersToUploadTo.isEmpty()){
+//                            checkAndNotifyAnyFailed();
+//                        }else{
+//                            setNewValueToStartFrom();
+//                            mAvi.setVisibility(View.GONE);
+//                            mLoadingTextView.setVisibility(View.GONE);
+//                            setAllOtherViewsToBeVisible();
+//                            Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
+//                            Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.successfullyUploaded, Snackbar.LENGTH_LONG).show();
+//                            setHasPayedInFirebaseToFalse();
+//                            cycleCount = 1;
+//                            bm = null;
+//                            Toast.makeText(mContext, R.string.successfullyUploaded,Toast.LENGTH_LONG).show();
+//                            startDashboardActivity();
+//                        }
+//
+//                    }else{
+//                        cycleCount+=1;
+//                    }
+//                }
+//            }).addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception e) {
+//                    failedClustersToUploadTo.add(number);
+//                    clustersToUpLoadTo.remove(number);
+//                    if(clustersToUpLoadTo.isEmpty()){
+//                        checkAndNotifyAnyFailed();
+//                    }
+//                }
+//            });
+//        }
 
     }
 
-    OnSuccessListener succ1 = new OnSuccessListener() {
-        @Override
-        public void onSuccess(Object o) {
-            if(cycleCount == mNumberOfClusters){
-                setNewValueToStartFrom();
-                mAvi.setVisibility(View.GONE);
-                mLoadingTextView.setVisibility(View.GONE);
-                setAllOtherViewsToBeVisible();
 
-                Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
-                Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.successfullyUploaded,
-                        Snackbar.LENGTH_LONG).show();
-                setHasPayedInFirebaseToFalse();
-                cycleCount = 1;
-                bm = null;
-                Toast.makeText(mContext, R.string.successfullyUploaded,Toast.LENGTH_LONG).show();
-                startDashboardActivity();
-            }else{
-                cycleCount+=1;
-            }
+    private void checkAndNotifyAnyFailed() {
+        if(!clustersToUpLoadTo.isEmpty()){
+//           Toast.makeText(mContext,"Upload process is incomplete.",Toast.LENGTH_LONG).show();
+            mAvi.setVisibility(View.GONE);
+            mLoadingTextView.setVisibility(View.GONE);
+            setAllOtherViewsToBeVisible();
+            findViewById(R.id.reupload).setVisibility(View.VISIBLE);
 
+            final Dialog d = new Dialog(AdUpload.this);
+            d.setTitle("Upload incomplete");
+            d.setContentView(R.layout.dialog2);
+            Button b1 = (Button) d.findViewById(R.id.buttonOk);
+            b1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    d.dismiss();
+                }
+            });
+            d.show();
+        }else{
+            findViewById(R.id.reupload).setVisibility(View.GONE);
         }
-    };
+    }
+
+//    OnSuccessListener succ1 = new OnSuccessListener() {
+//        @Override
+//        public void onSuccess(Object o) {
+//            if(cycleCount == mNumberOfClusters){
+//                setNewValueToStartFrom();
+//                mAvi.setVisibility(View.GONE);
+//                mLoadingTextView.setVisibility(View.GONE);
+//                setAllOtherViewsToBeVisible();
+//
+//                Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
+//                Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.successfullyUploaded,
+//                        Snackbar.LENGTH_LONG).show();
+//                setHasPayedInFirebaseToFalse();
+//                cycleCount = 1;
+//                bm = null;
+//                Toast.makeText(mContext, R.string.successfullyUploaded,Toast.LENGTH_LONG).show();
+//                startDashboardActivity();
+//            }else{
+//                cycleCount+=1;
+//            }
+//
+//        }
+//    };
 
     private void startDashboardActivity() {
         Intent intent = new Intent(AdUpload.this,Dashboard.class);
@@ -467,19 +596,17 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
 
-    OnFailureListener fal = new OnFailureListener() {
-        @Override
-        public void onFailure(@NonNull Exception e) {
-            mAvi.setVisibility(View.GONE);
-            mLoadingTextView.setVisibility(View.GONE);
-            setAllOtherViewsToBeVisible();
-
-            Toast.makeText(mContext, R.string.unsuccessfullyUploaded,Toast.LENGTH_LONG).show();
-            Log.d(TAG,"---Unable to upload ad. "+e.getMessage());
-        }
-    };
-
-
+//    OnFailureListener fal = new OnFailureListener() {
+//        @Override
+//        public void onFailure(@NonNull Exception e) {
+//            mAvi.setVisibility(View.GONE);
+//            mLoadingTextView.setVisibility(View.GONE);
+//            setAllOtherViewsToBeVisible();
+//
+//            Toast.makeText(mContext, R.string.unsuccessfullyUploaded,Toast.LENGTH_LONG).show();
+//            Log.d(TAG,"---Unable to upload ad. "+e.getMessage());
+//        }
+//    };
 
 
     private void setNewValueToStartFrom() {
@@ -504,6 +631,26 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             }else{
                 clustersToUpLoadTo.add(mClusterToStartFrom+i);
                 Log.d(TAG,"Adding cluster to list normally : "+(mClusterToStartFrom+i));
+            }
+        }
+
+    }
+
+    private void addToClusterListToUploadToTest(int number){
+        Log.d(TAG,"The number of total clusters is : "+5000);
+        Log.d(TAG,"The cluster to start from is : "+1);
+        Log.d(TAG,"Number of clusters to upload to is : "+mNumberOfClusters);
+
+        int numberOfClustersToStartFrom = 1;
+        int clusterTotal = 5000;
+
+        for(int i = 0; i < 5000; i++){
+            if(numberOfClustersToStartFrom+i>clusterTotal){
+                clustersToUpLoadTo.add(numberOfClustersToStartFrom+i-(clusterTotal));
+                Log.d(TAG,"Limit has been exceeded.setting cluster to upload to : "+(numberOfClustersToStartFrom+i-(clusterTotal)));
+            }else{
+                clustersToUpLoadTo.add(numberOfClustersToStartFrom+i);
+                Log.d(TAG,"Adding cluster to list normally : "+(numberOfClustersToStartFrom+i));
             }
         }
 
@@ -534,7 +681,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         mSelectText.setVisibility(View.GONE);
         mUploadText.setVisibility(View.GONE);
         mTopBarPreview.setVisibility(View.GONE);
-
+        mNumberOfUsersToAdvertiseTo.setVisibility(View.INVISIBLE);
     }
 
     private void setAllOtherViewsToBeVisible(){
