@@ -51,6 +51,7 @@ public class Constants {
 
     public static String NO_ADS = "NO_ADS";
     public static String DATE = "date";
+    public static String LAST_AD_SEEN = "LastAdSeen";
 
 
 }

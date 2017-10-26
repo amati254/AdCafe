@@ -10,6 +10,9 @@ public class Variables {
 
     private static Integer todaysAdTotal = 0;
     private static int mMonthAdTotals = 0;
+    private static String lastSeenAd;
+    private static String lastAdOfList;
+    public static int currentAdNumber = 0;
 
     public static String mIsLastOrNotLast;
     public static boolean hasBeenPinned;
@@ -76,6 +79,22 @@ public class Variables {
         }else{
             return 0;
         }
+    }
+
+    public static String getLastSeenAd(){
+        return lastSeenAd;
+    }
+
+    public static void setLastSeenAd(String lastAd){
+        lastSeenAd = lastAd;
+    }
+
+    public static String getLastAdOfList(){
+        return lastAdOfList;
+    }
+
+    public static void setLastAdOfList(String lastAd){
+        lastAdOfList = lastAd;
     }
 
 }

@@ -91,6 +91,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private int mNumberOfClusters = 1;
     private int mClusterTotal;
     private int mClusterToStartFrom;
+    private int noOfChildrenInClusterToStartFrom;
 
     private DatabaseReference mRef;
     private DatabaseReference mRef2;
@@ -203,13 +204,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             }else{
                 clusterGotten = 1;
             }
-            if(clusterGotten == mClusterTotal){
-                mClusterToStartFrom = 1;
-            }else{
-                mClusterToStartFrom = clusterGotten;
-            }
+            mClusterToStartFrom = clusterGotten;
             Log.d(TAG,"---Cluster to start from is -- "+mClusterToStartFrom);
-            loadHasUserPayedFromFirebase();
+            loadClusterToStartFromChildrenNo();
 
         }
 
@@ -223,27 +220,24 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         }
     };
 
-    private void loadHasUserPayedFromFirebase() {
-        Log.d(TAG,"---Starting query for if user has payed to advertise.");
+    private void loadClusterToStartFromChildrenNo() {
+        Log.d(TAG,"---Starting query for no of ads in cluster to start from.");
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
-        DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants. HAS_USER_MADE_PAMENTS);
+        DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
+                .child(getNextDay()).child(Integer.toString(mClusterToStartFrom));
         boolRef.addListenerForSingleValueEvent(val3);
     }
 
     ValueEventListener val3 = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            mHasUserPayed = dataSnapshot.getValue(boolean.class);
-            Log.d(TAG,"--boolean gotten from firebase for if user has payed is -"+mHasUserPayed);
+            noOfChildrenInClusterToStartFrom = (int)dataSnapshot.getChildrenCount();
+            Log.d(TAG,"--Number of children in cluster to start from gotten from firebase is  -"+noOfChildrenInClusterToStartFrom);
             setAllOtherViewsToBeVisible();
             mAvi.setVisibility(View.GONE);
             mLoadingTextView.setVisibility(View.GONE);
-//            addToClusterListToUploadTo(mNumberOfClusters);
             OnClicks();
-
-            Toast.makeText(mContext, R.string.DoNotPayTwice,Toast.LENGTH_LONG).show();
-            mHasNumberBeenLoaded = true;
         }
 
         @Override
@@ -448,16 +442,20 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
         if(clustersToUpLoadTo.size()>10){
             for(int i = 0; i < 10; i++){
-
+                String pushId;
                 final Integer number = clustersToUpLoadTo.get(i);
+                if(number<mClusterToStartFrom){
+                    pushId = Integer.toString(noOfChildrenInClusterToStartFrom+2);
+                }else{
+                    pushId = Integer.toString(noOfChildrenInClusterToStartFrom+1);
+                }
                 Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
-
-                mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(number));
+                Log.d(TAG,"---The custom push id is ---"+pushId);
+                mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay())
+                        .child(Integer.toString(number)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
-                DatabaseReference pushref= mRef3.push();
-                String pushID = pushref.getKey();
-                advert.setPushId(pushID);
-                pushref.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
+                advert.setPushId(pushId);
+                mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         cycleCount++;
@@ -499,13 +497,18 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         }else{
             for(final Integer number : clustersToUpLoadTo){
                 Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
-
-                mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(number));
+                String pushId;
+                if(number<mClusterToStartFrom){
+                    pushId = Integer.toString(noOfChildrenInClusterToStartFrom+2);
+                }else{
+                    pushId = Integer.toString(noOfChildrenInClusterToStartFrom+1);
+                }
+                Log.d(TAG,"---The custom push id is ---"+pushId);
+                mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
+                        .child(getNextDay()).child(Integer.toString(number)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
-                DatabaseReference pushref= mRef3.push();
-                String pushID = pushref.getKey();
-                advert.setPushId(pushID);
-                pushref.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
+                advert.setPushId(pushId);
+                mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         cycleCount++;

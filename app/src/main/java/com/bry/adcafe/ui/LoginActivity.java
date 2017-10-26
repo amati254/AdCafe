@@ -66,6 +66,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private DatabaseReference mRef3;
     private DatabaseReference mRef4;
     private DatabaseReference adRef;
+    private DatabaseReference mRef5;
 
     private Context mContext;
     private String mKey = "";
@@ -166,6 +167,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mRef3.addListenerForSingleValueEvent(val3);
     }
 
+    private void loadLastSeenAd() {
+        Log.d(TAG,"Loading the last seen ad from firebase...");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+
+        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.LAST_AD_SEEN);
+        mRef5 = query.getRef();
+        mRef5.addListenerForSingleValueEvent(val5);
+    }
+
     ValueEventListener val = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -220,8 +231,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             int clusterID = dataSnapshot.getValue(int.class);
             User.setID(clusterID,mKey);
             hasEverythingLoaded = true;
-            startMainActivity();
-
+            loadLastSeenAd();
+//            startMainActivity();
         }
 
         @Override
@@ -229,9 +240,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mAvi.setVisibility(View.GONE);
             mLoadingMessage.setVisibility(View.GONE);
             setFailedToLoadView();
-//            mRelative.setAlpha(1.0f);
-//            mRelative.setVisibility(View.VISIBLE);
-//            Toast.makeText(mContext,"Your connection may be too unreliable.Perhaps try again later.",Toast.LENGTH_LONG).show();
         }
     };
 
@@ -259,6 +267,24 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
+            setFailedToLoadView();
+        }
+    };
+
+    ValueEventListener val5 = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            if(dataSnapshot.getValue(String.class)!=null){
+                String lastSeenAd = dataSnapshot.getValue(String.class);
+                Variables.setLastSeenAd(lastSeenAd);
+            }
+            startMainActivity();
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            mAvi.setVisibility(View.GONE);
+            mLoadingMessage.setVisibility(View.GONE);
             setFailedToLoadView();
         }
     };

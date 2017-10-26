@@ -103,17 +103,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loadAdsFromThread();
     }
 
-//    Runnable r = new Runnable(){
-//        @Override
-//        public void run() {
-//            Log.d(TAG,"---started the time checker for when it is almost midnight.");
-//            if(isAlmostMidNight()&&Variables.isMainActivityOnline){
-//                mIsBeingReset = true;
-//                resetEverything();
-//            }
-//        }
-//    };
-
 
     @Override
     protected void onStart(){
@@ -164,16 +153,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setLastUsedDateInFirebaseDate(User.getUid());
         unregisterAllReceivers();
         removeAllViews();
-        if(!Variables.isDashboardActivityOnline){
-            Variables.clearAdTotal();
-        }
-        if(networkStateReceiver!=null){
-            networkStateReceiver.removeListener(this);
-        }
+        if(!Variables.isDashboardActivityOnline) Variables.clearAdTotal();
+        if(networkStateReceiver!=null) networkStateReceiver.removeListener(this);
         this.unregisterReceiver(networkStateReceiver);
         Variables.isMainActivityOnline = false;
         super.onDestroy();
-    } //deleting saved data when app is stopped
+    }
 
 
 
@@ -230,19 +215,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG,"---Day is almost over,so loading tomorrows ads now.");
             Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(User.getClusterID(mKey)));
             dbRef = query.getRef();
-            dbRef.startAt(mChildToStartFrom);
-            dbRef.limitToFirst(10);
             Log.d(TAG,"---Adding value event listener...");
-            dbRef.addValueEventListener(val);
+            dbRef.orderByKey().startAt(Integer.toString(1)).limitToFirst(5).addValueEventListener(val);
             mIsBeingReset = false;
         }else{
             Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(User.getClusterID(mKey)));
             Log.d(TAG,"---Query set up is : "+Constants.ADVERTS+" : "+getDate()+" : "+User.getClusterID(mKey));
             dbRef = query.getRef();
-            dbRef.startAt(mChildToStartFrom);
-            dbRef.limitToFirst(10);
             Log.d(TAG,"---Adding value event listener...");
-            dbRef.addValueEventListener(val);
+            if(Variables.getAdTotal(mKey)==0){
+                dbRef.orderByKey().startAt(Integer.toString(1)).limitToFirst(5).addValueEventListener(val);
+            }else{
+                dbRef.orderByKey().startAt(Integer.toString(Variables.getAdTotal(mKey)+1)).limitToFirst(5).addValueEventListener(val);
+            }
         }
 
     }
@@ -256,6 +241,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Advert ad = snap.getValue(Advert.class);
                     mAdList.add(ad);
                 }
+                mChildToStartFrom = Variables.getAdTotal(mKey)+(int)dataSnapshot.getChildrenCount();
                 Log.d(TAG,"---All the ads have been handled.Total is "+mAdList.size());
             }else{
                 Log.d(TAG,"----No ads are available today");
@@ -368,20 +354,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mSwipeView.removeAllViews();
         }
         if(mAdList!=null && mAdList.size()>0){
-            for(int i = 0 ; i < mAdList.size() ; i++){
-                if(Variables.getAdTotal(mKey)>=mAdList.size()){
-                    Log.d(TAG,"---User has seen all the ads, thus will load only last ad...");
-                    mSwipeView.addView(new AdvertCard(mContext,mAdList.get(mAdList.size()-1),mSwipeView,Constants.LAST));
-                    Variables.setIsLastOrNotLast(Constants.LAST);
-                    break;
-                } else {
-                    if(i>=Variables.getAdTotal(mKey)){
-                        mSwipeView.addView(new AdvertCard(mContext,mAdList.get(i),mSwipeView,Constants.NOT_LAST));
-                        Variables.setIsLastOrNotLast(Constants.NOT_LAST);
-                    }
+            if(mAdList.size() == 1){
+                Log.d(TAG,"---User has seen all the ads, thus will load only last ad...");
+                mSwipeView.addView(new AdvertCard(mContext,mAdList.get(0),mSwipeView,Constants.LAST));
+                Variables.setIsLastOrNotLast(Constants.LAST);
+            }else{
+                for(Advert ad: mAdList){
+                    mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.NOT_LAST));
+                    Variables.setIsLastOrNotLast(Constants.NOT_LAST);
                 }
             }
             Variables.setNewNumberOfAds(mAdList.size()-Variables.getAdTotal(mKey));
+//            Variables.setLastAdOfList(mAdList.get(mAdList.size()-1).getPushId());
+
         }else{
             Advert noAds = new Advert();
             mSwipeView.addView(new AdvertCard(mContext,noAds,mSwipeView,Constants.NO_ADS));
@@ -550,8 +535,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private BroadcastReceiver mMessageReceiverForLastAd = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-//            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.lastAd,
-//                    Snackbar.LENGTH_INDEFINITE).show();
             Toast.makeText(mContext,R.string.lastAd,Toast.LENGTH_SHORT).show();
         }
     };
@@ -658,12 +641,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void adDayAndMonthTotalsToFirebase(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            String uid = user.getUid();
-            DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
-            adRef.setValue(Variables.getAdTotal(mKey));
+        String uid = user.getUid();
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+        adRef.setValue(Variables.getAdTotal(mKey));
 
-            DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
-            adRef2.setValue(Variables.getMonthAdTotals(mKey));
+        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
+        adRef2.setValue(Variables.getMonthAdTotals(mKey));
+
+        Variables.currentAdNumber++;
+
+//        DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.LAST_AD_SEEN);
+//        adRef3.setValue(mAdList.get(Variables.currentAdNumber).getPushId());
 
     }
 

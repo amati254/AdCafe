@@ -171,18 +171,18 @@ public class AdvertCard{
     @Click(R.id.profileImageView)
     private void onClick(){
         Log.d("EVENT", "profileImageView click");
-            if (clickable) {
-                mSwipeView.enableTouchSwipe();
-                hasBeenSwiped = true;
-            }
+        if (clickable) {
+            mSwipeView.enableTouchSwipe();
+            hasBeenSwiped = true;
+        }
     }
 
     @SwipeOut
     private void onSwipedOut(){
         Log.d("EVENT----", "onSwipedOut");
-            Variables.removeAd();
-            hasBeenSwiped = true;
-            sendBroadcast(START_TIMER);
+        Variables.removeAd();
+        hasBeenSwiped = true;
+        sendBroadcast(START_TIMER);
     }
 
     @SwipeIn
@@ -199,13 +199,19 @@ public class AdvertCard{
             mSwipeView.lockViews();
             Variables.hasBeenPinned = false;
             clickable = false;
-                Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
-                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            setLastAdSeen();
 
         }else if(message == Constants.LAST){
             Intent intent = new Intent(Constants.LAST);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         }
+    }
+
+    private void setLastAdSeen(){
+        Variables.setLastSeenAd(mAdvert.getPushId());
+        Log.d("ADVERT_CARD---","Setting the last ad seen in Variables class...");
     }
 
     private BroadcastReceiver mMessageReceiverForTimerHasEnded = new BroadcastReceiver() {
