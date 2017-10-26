@@ -26,8 +26,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.mindorks.placeholderview.Animation;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.mindorks.placeholderview.Utils;
+import com.mindorks.placeholderview.annotations.Animate;
 import com.mindorks.placeholderview.annotations.Click;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.Resolve;
@@ -47,14 +49,11 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
  * Created by bryon on 6/11/2017.
  */
 
-//@Animate()
+@Animate(Animation.CARD_RIGHT_IN_DESC)
 @Layout(R.layout.ad_card_view)
 public class AdvertCard{
     @View(R.id.profileImageView) private ImageView profileImageView;
-//    @View(R.id.reportBtn) private ImageButton reportButton;
-//    @View(R.id.bookmark2Btn) private ImageButton bookmarkButton;
     @View(R.id.errorImageView) private ImageView errorImageView;
-//    @View(R.id.pbCardProgress) private ProgressBar mProgressBar;
     @View(R.id.adCardAvi) private AVLoadingIndicatorView mAvi;
 
     private Advert mAdvert;
@@ -271,7 +270,7 @@ public class AdvertCard{
 
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,90,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,40,baos);
         byte[] byteArray = baos.toByteArray();
         return byteArray;
     }
@@ -284,8 +283,7 @@ public class AdvertCard{
     private String encodeBitmapForFirebaseStorage(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG,40,baos);
-        String imageEncoded = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
-        return imageEncoded;
+        return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
     }
 
     @SwipeInState

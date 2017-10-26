@@ -13,6 +13,7 @@ import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -40,6 +41,8 @@ import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.NetworkStateReceiver;
 import com.bry.adcafe.services.Utils;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -84,6 +87,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Runnable r;
     private NetworkStateReceiver networkStateReceiver;
     boolean doubleBackToExitPressedOnce = false;
+    private boolean isFirebaseResetNecessary = false;
+    private boolean isOffline = false;
 
 
     @Override
@@ -91,15 +96,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = getApplicationContext();
-
+        Variables.isMainActivityOnline = true;
         registerReceivers();
 
         setUpSwipeView();
         loadAdsFromThread();
-//        StartNetworkChecker(mContext);
-
     }
 
+//    Runnable r = new Runnable(){
+//        @Override
+//        public void run() {
+//            Log.d(TAG,"---started the time checker for when it is almost midnight.");
+//            if(isAlmostMidNight()&&Variables.isMainActivityOnline){
+//                mIsBeingReset = true;
+//                resetEverything();
+//            }
+//        }
+//    };
 
 
     @Override
@@ -115,18 +128,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG,"---Date in shared preferences does not match current date,therefore resetting everything.");
             resetEverything();
         }
-        h.postDelayed(new Runnable() {
+        r = new Runnable() {
             @Override
             public void run() {
                 Log.d(TAG,"---started the time checker for when it is almost midnight.");
-                if(isAlmostMidNight()){
+                if(isAlmostMidNight()&&Variables.isMainActivityOnline){
                     mIsBeingReset = true;
                     resetEverything();
                 }
-                r = this;
                 h.postDelayed(r,30000);
             }
-        },30000);
+        };
+        h.postDelayed(r,30000);
     }
 
     @Override
@@ -142,8 +155,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(dbRef!=null){
             dbRef.removeEventListener(val);
         }
+
         Log.d(TAG,"---removing callback for checking time of day.");
-//        h.removeCallbacks(r);
     }
 
     @Override
@@ -151,12 +164,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setLastUsedDateInFirebaseDate(User.getUid());
         unregisterAllReceivers();
         removeAllViews();
-//        addToSharedPreferences();
-        Variables.clearAdTotal();
+        if(!Variables.isDashboardActivityOnline){
+            Variables.clearAdTotal();
+        }
         if(networkStateReceiver!=null){
             networkStateReceiver.removeListener(this);
         }
         this.unregisterReceiver(networkStateReceiver);
+        Variables.isMainActivityOnline = false;
         super.onDestroy();
     } //deleting saved data when app is stopped
 
@@ -535,8 +550,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private BroadcastReceiver mMessageReceiverForLastAd = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.lastAd,
-                    Snackbar.LENGTH_INDEFINITE).show();
+//            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.lastAd,
+//                    Snackbar.LENGTH_INDEFINITE).show();
+            Toast.makeText(mContext,R.string.lastAd,Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -698,14 +714,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
-        adRef.setValue(0);
+        adRef.setValue(0).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if(isOffline){
+                    isFirebaseResetNecessary = true;
+                }
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                isFirebaseResetNecessary = false;
+            }
+        });
     }
 
 
 
     private void resetEverything() {
-            resetAdTotalSharedPreferencesAndDayAdTotals();
-            loadAdsFromThread();
+        resetAdTotalSharedPreferencesAndDayAdTotals();
+        loadAdsFromThread();
     }
 
     private String getNextDay(){
@@ -770,15 +798,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void networkAvailable() {
         Log.d(TAG, "User is connected to the internet via wifi or cellular data");
+        isOffline = false;
         findViewById(R.id.droppedInternetLayout).setVisibility(View.GONE);
         findViewById(R.id.bottomNavButtons).setVisibility(View.VISIBLE);
         mSwipeView.setVisibility(View.VISIBLE);
         mAdCounterView.setVisibility(View.VISIBLE);
+        if(isFirebaseResetNecessary){
+            resetAdTotalsInFirebase();
+        }
     }
 
     @Override
     public void networkUnavailable() {
         Log.d(TAG, "User has gone offline...");
+        isOffline = true;
         findViewById(R.id.bottomNavButtons).setVisibility(View.GONE);
         mSwipeView.setVisibility(View.GONE);
         mAdCounterView.setVisibility(View.GONE);

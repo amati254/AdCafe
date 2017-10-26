@@ -29,6 +29,7 @@ public class Dashboard extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+        Variables.isDashboardActivityOnline = true;
 
         loadViews();
         setValues();
@@ -55,6 +56,12 @@ public class Dashboard extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onDestroy(){
+        Variables.isDashboardActivityOnline = false;
+        super.onDestroy();
+    }
+
     private void loadViews() {
         mTotalAdsSeenAllTime = (TextView) findViewById(R.id.AdsSeenAllTimeNumber);
         mTotalAdsSeenToday = (TextView) findViewById(R.id.AdsSeenTodayNumber);
@@ -72,7 +79,14 @@ public class Dashboard extends AppCompatActivity {
 
     @Override
     public void onBackPressed(){
-        Intent intent = new Intent(Dashboard.this,MainActivity.class);
-        startActivity(intent);
+        if(!Variables.isMainActivityOnline){
+            Intent intent = new Intent(Dashboard.this,MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }else{
+            super.onBackPressed();
+        }
+
     }
 }

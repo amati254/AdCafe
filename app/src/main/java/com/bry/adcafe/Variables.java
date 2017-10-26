@@ -13,6 +13,8 @@ public class Variables {
 
     public static String mIsLastOrNotLast;
     public static boolean hasBeenPinned;
+    public static boolean isMainActivityOnline;
+    public static boolean isDashboardActivityOnline;
 
 
 

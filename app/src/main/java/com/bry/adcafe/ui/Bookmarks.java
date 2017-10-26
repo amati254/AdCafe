@@ -114,7 +114,7 @@ public class Bookmarks extends AppCompatActivity {
             mSavedAds = new ArrayList<>();
             loadAdsFromFirebase();
 
-            Thread.sleep(3000);
+            Thread.sleep(50);
             Log.i("ARRAY", ""+ mSavedAds.size());
         }catch (Exception e) {
             Log.e("BACKGROUND_PROC", e.getMessage());
@@ -163,7 +163,7 @@ public class Bookmarks extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Log.d("BOOKMARKS--","Message received to show toast for unpin action");
             Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.unpinned,
-                    Snackbar.LENGTH_INDEFINITE).show();
+                    Snackbar.LENGTH_SHORT).show();
         }
     };
 
@@ -172,17 +172,21 @@ public class Bookmarks extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Log.d("BOOKMARKS--","Unable to unpin ad.");
             Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.failedUnpinned,
-                    Snackbar.LENGTH_INDEFINITE).show();
+                    Snackbar.LENGTH_SHORT).show();
         }
     };
 
 
     private void loadAdsFromFirebase(){
+        if(!mSavedAds.isEmpty()){
+            mSavedAds.clear();
+//            mPlaceHolderView.removeAllViews();
+        }
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
         Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
         DatabaseReference mRef = query.getRef();
-        mRef.addValueEventListener(new ValueEventListener() {
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snap: dataSnapshot.getChildren()){
