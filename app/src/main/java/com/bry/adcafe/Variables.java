@@ -1,5 +1,7 @@
 package com.bry.adcafe;
 
+import com.bry.adcafe.models.Advert;
+
 /**
  * Created by bryon on 26/08/2017.
  */
@@ -13,6 +15,7 @@ public class Variables {
     private static String lastSeenAd;
     private static String lastAdOfList;
     public static int currentAdNumber = 0;
+    public static Advert currentAdvert;
 
     public static String mIsLastOrNotLast;
     public static boolean hasBeenPinned;

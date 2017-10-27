@@ -473,13 +473,11 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                                 bm = null;
                                 startDashboardActivity();
                             }
-
                         }else{
                             if(cycleCount == 10){
                                 cycleCount = 0;
                                 uploadImage();
                             }
-
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {

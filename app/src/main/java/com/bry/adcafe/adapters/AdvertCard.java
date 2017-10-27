@@ -166,6 +166,7 @@ public class AdvertCard{
         }).into(profileImageView);
         mSwipeView.lockViews();
         clickable=false;
+        Variables.currentAdvert = mAdvert;
         sendBroadcast(Constants.LAST);
     }
 
@@ -216,6 +217,7 @@ public class AdvertCard{
 
     private void setLastAdSeen(){
         Variables.setLastSeenAd(mAdvert.getPushId());
+        Variables.currentAdvert = mAdvert;
         Log.d("ADVERT_CARD---","Setting the last ad seen in Variables class...");
     }
 

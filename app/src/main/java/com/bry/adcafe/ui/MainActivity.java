@@ -418,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
                                     Snackbar.LENGTH_SHORT).show();
                         }
-                    }else {
+                    }else{
                         Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.cannotPin,
                                 Snackbar.LENGTH_SHORT).show();
                     }
@@ -477,10 +477,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    FragmentManager fm = getFragmentManager();
-                    ReportDialogFragment reportDialogFragment = new ReportDialogFragment();
-                    reportDialogFragment.show(fm,"Report dialog fragment.");
-                    reportDialogFragment.setfragcontext(mContext);
+                    if(Variables.mIsLastOrNotLast == Constants.NO_ADS) {
+                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't report this..",
+                                Snackbar.LENGTH_SHORT).show();
+                    }else{
+                        FragmentManager fm = getFragmentManager();
+                        ReportDialogFragment reportDialogFragment = new ReportDialogFragment();
+                        reportDialogFragment.show(fm, "Report dialog fragment.");
+                        reportDialogFragment.setfragcontext(mContext);
+                    }
+
                 }
             });
         }

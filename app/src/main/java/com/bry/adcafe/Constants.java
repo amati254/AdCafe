@@ -47,6 +47,7 @@ public class Constants {
     public static String FLAGGED_CLUSTERS = "FLAGGED_CLUSTERS";
     public static String CLUSTER_TO_START_FROM = "cluster_to_start_from";
     public static String ADVERTS = "Adverts";
+    public static String REPORTED_ADS = "Flagged_ads";
     public static String HAS_USER_MADE_PAMENTS = "has_payed";
 
     public static String NO_ADS = "NO_ADS";
