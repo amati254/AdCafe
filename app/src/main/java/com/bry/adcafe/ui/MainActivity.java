@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(Variables.getAdTotal(mKey)==0){
                 dbRef.orderByKey().startAt(Integer.toString(1)).limitToFirst(5).addValueEventListener(val);
             }else{
-                dbRef.orderByKey().startAt(Integer.toString(Variables.getAdTotal(mKey)+1)).limitToFirst(5).addValueEventListener(val);
+                dbRef.orderByKey().startAt(Integer.toString(Variables.getAdTotal(mKey))).limitToFirst(5).addListenerForSingleValueEvent(val);
             }
         }
 
@@ -241,7 +241,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Advert ad = snap.getValue(Advert.class);
                     mAdList.add(ad);
                 }
-                mChildToStartFrom = Variables.getAdTotal(mKey)+(int)dataSnapshot.getChildrenCount();
+                if(mAdList.size()>1) mAdList.remove(0);
+                mChildToStartFrom = Variables.getAdTotal(mKey)+(int)dataSnapshot.getChildrenCount()-1;
                 Log.d(TAG,"---All the ads have been handled.Total is "+mAdList.size());
             }else{
                 Log.d(TAG,"----No ads are available today");
@@ -284,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOffline);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOnline);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForLastAd);
-
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForLoadMoreAds);
         sendBroadcastToUnregisterAllReceivers();
     }
 
@@ -366,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             Variables.setNewNumberOfAds(mAdList.size()-Variables.getAdTotal(mKey));
 //            Variables.setLastAdOfList(mAdList.get(mAdList.size()-1).getPushId());
-
+            mAdList.clear();
         }else{
             Advert noAds = new Advert();
             mSwipeView.addView(new AdvertCard(mContext,noAds,mSwipeView,Constants.NO_ADS));
@@ -389,6 +390,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLastAd,new IntentFilter(Constants.LAST));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLoadMoreAds,new IntentFilter(Constants.LOAD_MORE_ADS));
 
     }
 
@@ -508,6 +510,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d("COUNTER_BAR_TO_MAIN- ","Broadcast has been received to add to shared preferences.");
             Variables.adAdToTotal(mKey);
             Variables.adToMonthTotals(mKey);
+//            if(mSwipeView.getChildCount()==3){
+//                loadMoreAds();
+//            }
             addToSharedPreferences();
             adDayAndMonthTotalsToFirebase();
             onclicks();
@@ -539,6 +544,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
+    private BroadcastReceiver mMessageReceiverForLoadMoreAds = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadMoreAds();
+        }
+    };
+
+    private void loadMoreAds() {
+        Log.d("MAIN-ACTIVITY---","Loading more ads since user has seen almost all....");
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(User.getClusterID(mKey)));
+        Log.d(TAG,"---Query set up is : "+Constants.ADVERTS+" : "+getDate()+" : "+User.getClusterID(mKey));
+        dbRef = query.getRef();
+        dbRef.orderByKey().startAt(Integer.toString(mChildToStartFrom+1)).limitToFirst(5).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()){
+                    Log.d(TAG,"---More children in dataSnapshot from firebase exist");
+                    for(DataSnapshot snap:dataSnapshot.getChildren()){
+                        Advert ad = snap.getValue(Advert.class);
+                        mAdList.add(ad);
+                    }
+                    loadMoreAdsIntoAdvertCard();
+                    mChildToStartFrom +=(int)dataSnapshot.getChildrenCount();
+                    Log.d(TAG,"---All the new ads have been handled.Total is "+mAdList.size());
+                }else{
+                    Log.d(TAG,"----No more ads are available today");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG,"Unable to load more ads for some issue."+databaseError.getMessage());
+            }
+        });
+    }
+
+    private void loadMoreAdsIntoAdvertCard() {
+        for(Advert ad: mAdList){
+            mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.LOAD_MORE_ADS));
+            Variables.setIsLastOrNotLast(Constants.NOT_LAST);
+        }
+    }
 
 
     private void hideNavBars() {
@@ -617,19 +664,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         editor2.commit();
     }
 
-//    public void StartNetworkChecker(final Context context){
-//        Handler handler=new Handler();
-//
-//            handler.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if(!isNetworkConnected(context)){
-//                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.connectionDropped2,
-//                                Snackbar.LENGTH_INDEFINITE).show();
-//                    }
-//                }
-//            },10000);
-//    }
 
     private boolean isNetworkConnected(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -649,9 +683,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         adRef2.setValue(Variables.getMonthAdTotals(mKey));
 
         Variables.currentAdNumber++;
-
-//        DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.LAST_AD_SEEN);
-//        adRef3.setValue(mAdList.get(Variables.currentAdNumber).getPushId());
 
     }
 

@@ -83,7 +83,7 @@ public class AdvertCard{
         }else if(mLastOrNotLast == Constants.NO_ADS){
             mIsNoAds = true;
             loadAdPlaceHolderImage();
-        } else{
+        }else{
             mIsNoAds = false;
             loadAllAds();
         }
@@ -106,6 +106,7 @@ public class AdvertCard{
         try {
             Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
             mAdvert.setImageBitmap(bm);
+            mAdvert.setImageUrl(null);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -125,7 +126,7 @@ public class AdvertCard{
                 Log.d("ADVERT_CARD--","The image has loaded successfully");
                 mAvi.setVisibility(android.view.View.GONE);
                 errorImageView.setVisibility(android.view.View.GONE);
-                if(isFirstResource) {
+                if(isFirstResource && mLastOrNotLast==Constants.NOT_LAST) {
                     Log.d("ADVERT_CARD---","sending broadcast to start timer...");
                     sendBroadcast(START_TIMER);
                 }
@@ -198,13 +199,18 @@ public class AdvertCard{
             Log.d("AdvertCard - ","Sending message to start timer");
             mSwipeView.lockViews();
             Variables.hasBeenPinned = false;
+            mAdvert.setImageBitmap(null);
             clickable = false;
             Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             setLastAdSeen();
+            if(mSwipeView.getChildCount()==3) sendBroadcast(Constants.LOAD_MORE_ADS);
 
         }else if(message == Constants.LAST){
             Intent intent = new Intent(Constants.LAST);
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        }else if(message == Constants.LOAD_MORE_ADS){
+            Intent intent = new Intent(Constants.LOAD_MORE_ADS);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         }
     }
