@@ -48,4 +48,5 @@
     <string name="failedToLoadTodaysAds">"Failed to load todays ads."</string>
     <string name="noteForPickingMessage">"The number shown is by 1000 (*1000 users). Select having that in mind."</string>
     <string name="pickBeforePaying">"So make sure you pick before making any payments."</string>
+    <string name="shareText">"Share for awesomeness."</string>
 </resources>

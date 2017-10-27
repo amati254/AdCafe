@@ -205,7 +205,6 @@ public class AdvertCard{
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             setLastAdSeen();
             if(mSwipeView.getChildCount()==3) sendBroadcast(Constants.LOAD_MORE_ADS);
-
         }else if(message == Constants.LAST){
             Intent intent = new Intent(Constants.LAST);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);

@@ -462,11 +462,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
 
-        findViewById(R.id.shareBtn).setOnLongClickListener(new View.OnLongClickListener() {
+        findViewById(R.id.shareBtn).setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                Toast.makeText(mContext,"This will share the app.",Toast.LENGTH_SHORT).show();
-                return false;
+            public void onClick(View v) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey, have you heard of this cool app called AdCafé?");
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent,getResources().getText(R.string.shareText)));
             }
         });
 
@@ -510,9 +513,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d("COUNTER_BAR_TO_MAIN- ","Broadcast has been received to add to shared preferences.");
             Variables.adAdToTotal(mKey);
             Variables.adToMonthTotals(mKey);
-//            if(mSwipeView.getChildCount()==3){
-//                loadMoreAds();
-//            }
             addToSharedPreferences();
             adDayAndMonthTotalsToFirebase();
             onclicks();
