@@ -67,6 +67,7 @@ public class AdvertCard{
     private static boolean mIsNoAds;
     private static boolean hasAdLoaded;
     private boolean hasBeenSwiped = true;
+    private Bitmap bs;
 
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
@@ -105,9 +106,9 @@ public class AdvertCard{
 
         mAvi.setVisibility(android.view.View.VISIBLE);
         try {
-            Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
-            mAdvert.setImageBitmap(bm);
-            mAdvert.setImageUrl(null);
+            bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+
+            mAdvert.setImageBitmap(bs);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -213,7 +214,7 @@ public class AdvertCard{
             Log.d("AdvertCard - ","Sending message to start timer");
             mSwipeView.lockViews();
             Variables.hasBeenPinned = false;
-            mAdvert.setImageBitmap(null);
+//            mAdvert.setImageBitmap(null);
             clickable = false;
             Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -242,6 +243,7 @@ public class AdvertCard{
                     mSwipeView.unlockViews();
                     clickable = true;
                     hasBeenSwiped = false;
+//                    mAdvert.setImageBitmap(null);
                 }else if(mSwipeView.getChildCount()==1 && mLastOrNotLast!=Constants.ANNOUNCEMENTS){
                     sendBroadcast(Constants.LAST);
                 }
@@ -269,28 +271,30 @@ public class AdvertCard{
     };
 
     private void pinAd() {
+        if(bs==null){
+            Toast.makeText(mContext,"image bitmap is null",Toast.LENGTH_SHORT).show();
+        }else {
+            mAdvert.setImageUrl(encodeBitmapForFirebaseStorage(bs));
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            String uid = user.getUid();
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
+            DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
+            DatabaseReference pushRef = adRef.push();
+            String pushId = pushRef.getKey();
 
-        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
-        DatabaseReference pushRef = adRef.push();
-        String pushId  = pushRef.getKey();
+            Log.d("AdvertCard--", "pinning the selected ad.");
 
-        Log.d("AdvertCard--","pinning the selected ad.");
 
-        Bitmap bm = mAdvert.getImageBitmap();
-        mAdvert.setImageUrl(encodeBitmapForFirebaseStorage(bm));
-        mAdvert.setImageBitmap(null);
-        mAdvert.setPushId(pushId);
+            mAdvert.setImageBitmap(null);
+            mAdvert.setPushId(pushId);
 
-        pushRef.setValue(mAdvert).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Variables.hasBeenPinned = true;
-            }
-        });
-
+            pushRef.setValue(mAdvert).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    Variables.hasBeenPinned = true;
+                }
+            });
+        }
 
     }
 
@@ -308,18 +312,9 @@ public class AdvertCard{
 
     private String encodeBitmapForFirebaseStorage(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,40,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,50,baos);
         return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
     }
 
-    @SwipeInState
-    private void onSwipeInState(){
-        Log.d("EVENT", "onSwipeInState");
-    }
-
-    @SwipeOutState
-    private void onSwipeOutState(){
-        Log.d("EVENT", "onSwipeOutState");
-    }
 
 }

@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     boolean doubleBackToExitPressedOnce = false;
     private boolean isFirebaseResetNecessary = false;
     private boolean isOffline = false;
+    private boolean isLastAd = false;
 
 
     @Override
@@ -262,7 +263,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mAvi.setVisibility(View.GONE);
             mLoadingText.setVisibility(View.GONE);
             showFailedView();
-//            mLinearLayout.setVisibility(View.VISIBLE);
         }
     };
 
@@ -361,6 +361,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG,"---User has seen all the ads, thus will load only last ad...");
                 mSwipeView.addView(new AdvertCard(mContext,mAdList.get(0),mSwipeView,Constants.LAST));
                 Variables.setIsLastOrNotLast(Constants.LAST);
+                isLastAd = true;
             }else{
                 for(Advert ad: mAdList){
                     mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.NOT_LAST));
@@ -405,11 +406,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 public void onClick(View v) {
                     if(isNetworkConnected(mContext)){
                         if(!Variables.hasBeenPinned ){
-                            if(Variables.mIsLastOrNotLast == Constants.NOT_LAST &&mChildToStartFrom!=Variables.getAdTotal(mKey)){
+                            if(Variables.mIsLastOrNotLast == Constants.NOT_LAST && !isLastAd){
                                 Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
                                         Snackbar.LENGTH_SHORT).show();
                                 Intent intent = new Intent(Constants.PIN_AD);
                                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+//                                pinAd();
                             }else{
                                 Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't pin this..",
                                         Snackbar.LENGTH_SHORT).show();
@@ -491,6 +493,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
         }
 
+    }
+
+    private void pinAd() {
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
+                .child(getNextDay()).child(Integer.toString(User.getClusterID(mKey))).child(Integer.toString(Variables.getAdTotal(mKey)));
+        DatabaseReference dbRefX = query.getRef();
+        dbRefX.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+               Advert adToBePinned =  dataSnapshot.getValue(Advert.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void logoutUser() {
