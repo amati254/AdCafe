@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
@@ -128,7 +129,7 @@ public class AdvertCard{
                 errorImageView.setVisibility(android.view.View.GONE);
                 if(isFirstResource && mLastOrNotLast==Constants.NOT_LAST) {
                     Log.d("ADVERT_CARD---","sending broadcast to start timer...");
-                    sendBroadcast(START_TIMER);
+                    if(mLastOrNotLast!=Constants.ANNOUNCEMENTS) sendBroadcast(START_TIMER);
                 }
                 clickable=false;
                 return false;
@@ -173,26 +174,38 @@ public class AdvertCard{
     @Click(R.id.profileImageView)
     private void onClick(){
         Log.d("EVENT", "profileImageView click");
-        if (clickable) {
-            mSwipeView.enableTouchSwipe();
-            hasBeenSwiped = true;
-        }
+            if (clickable) {
+                mSwipeView.enableTouchSwipe();
+                hasBeenSwiped = true;
+            }
     }
 
     @SwipeOut
     private void onSwipedOut(){
         Log.d("EVENT----", "onSwipedOut");
-        Variables.removeAd();
-        hasBeenSwiped = true;
-        sendBroadcast(START_TIMER);
+        if(mLastOrNotLast!=Constants.ANNOUNCEMENTS){
+            Variables.removeAd();
+            hasBeenSwiped = true;
+            sendBroadcast(START_TIMER);
+        }
+        if(mSwipeView.getChildCount()==1 && mLastOrNotLast==Constants.ANNOUNCEMENTS){
+            Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
+            mSwipeView.lockViews();
+        }
     }
 
     @SwipeIn
     private void onSwipeIn(){
         Log.d("EVENT----", "onSwipedIn");
+        if(mLastOrNotLast!=Constants.ANNOUNCEMENTS){
             Variables.removeAd();
             hasBeenSwiped = true;
             sendBroadcast(START_TIMER);
+        }
+        if(mSwipeView.getChildCount()==1 && mLastOrNotLast==Constants.ANNOUNCEMENTS){
+            Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
+            mSwipeView.lockViews();
+        }
     }
 
     private void sendBroadcast(String message ) {
@@ -229,7 +242,7 @@ public class AdvertCard{
                     mSwipeView.unlockViews();
                     clickable = true;
                     hasBeenSwiped = false;
-                }else if(mSwipeView.getChildCount()==1){
+                }else if(mSwipeView.getChildCount()==1 && mLastOrNotLast!=Constants.ANNOUNCEMENTS){
                     sendBroadcast(Constants.LAST);
                 }
         }

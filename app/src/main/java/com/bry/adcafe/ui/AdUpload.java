@@ -269,6 +269,24 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 }
             });
         }
+
+        if(findViewById(R.id.progressBarTimerExample)!=null){
+            findViewById(R.id.progressBarTimerExample).setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if(isOnline(mContext)){
+                        if(bm!=null){
+                            uploadImageAsAnnouncement();
+                        }else{
+                            Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
+                        }
+                    }else{
+                        Toast.makeText(mContext,"Check your internet connection",Toast.LENGTH_SHORT).show();
+                    }
+                    return false;
+                }
+            });
+        }
         if(findViewById(R.id.uploadIcon)!=null){
             findViewById(R.id.uploadIcon).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -435,11 +453,31 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         return imageEncoded;
     }
 
+    private void uploadImageAsAnnouncement(){
+        Toast.makeText(mContext,"Uploading announcement to firebase",Toast.LENGTH_SHORT).show();
+        String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
+        DatabaseReference dba = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(getNextDay());
+        DatabaseReference pushRef = dba.push();
+        String key = pushRef.getKey();
+        Advert announcement = new Advert(encodedImageToUpload);
+        announcement.setPushId(key);
+        pushRef.setValue(announcement).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(mContext,"Announcement Uploaded.",Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(mContext,"Announcement has failed to upload.",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
 
     private void uploadImage() {
         String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
         uploading = true;
-
         if(clustersToUpLoadTo.size()>10){
             for(int i = 0; i < 10; i++){
                 String pushId;
@@ -525,12 +563,6 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                                 startDashboardActivity();
                             }
 
-                        }else{
-                            if(cycleCount == 10){
-                                cycleCount = 0;
-                                uploadImage();
-                            }
-
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -549,6 +581,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
 
     }
+
+
 
 
     private void checkAndNotifyAnyFailed() {

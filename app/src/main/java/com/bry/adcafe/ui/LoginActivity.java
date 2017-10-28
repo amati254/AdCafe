@@ -410,6 +410,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
             loginUserWithPassword();
+
         }
         if(v == mRetryButton){
             if(isOnline(mContext)){

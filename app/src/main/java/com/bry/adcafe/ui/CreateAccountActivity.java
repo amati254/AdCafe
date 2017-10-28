@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,6 +59,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     @Bind(R.id.signUpRelative) RelativeLayout mRelative;
     @Bind(R.id.SignUpAvi) AVLoadingIndicatorView mAvi;
     @Bind(R.id.creatingAccountLoadingText) TextView mLoadingText;
+    @Bind(R.id.ConfirmEmailLayout) LinearLayout mConfirmEmailLayout;
 
 
     private FirebaseAuth mAuth;
@@ -118,7 +120,6 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         }else{
             mAvi.setVisibility(View.VISIBLE);
             mLoadingText.setVisibility(View.VISIBLE);
-//            mRelative.setVisibility(View.GONE);
             mRelative.setAlpha(0.2f);
             mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
@@ -181,12 +182,54 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth){
                 final FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(user != null){
-                    Variables.setMonthAdTotals(mKey,0);
-                    Variables.setAdTotal(0,mKey);
                     generateClusterIDFromFlagedClusters();
+//                    sendVerificationEmail();
                 }
             }
         };
+    }
+
+    private void sendVerificationEmail() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    Variables.isVerifyingEmail = true;
+                    mAvi.setVisibility(View.GONE);
+                    mLoadingText.setVisibility(View.GONE);
+                    mConfirmEmailLayout.setVisibility(View.VISIBLE);
+                    findViewById(R.id.confirmedEmailButton).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            checkIfEmailIsVerified();
+                        }
+                    });
+                    findViewById(R.id.recreateAccount).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mConfirmEmailLayout.setVisibility(View.GONE);
+                            mRelative.setVisibility(View.VISIBLE);
+                            mRelative.setAlpha(1.0f);
+                            FirebaseAuth.getInstance().signOut();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void checkIfEmailIsVerified() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user.isEmailVerified()){
+            mAvi.setVisibility(View.VISIBLE);
+            mLoadingText.setVisibility(View.VISIBLE);
+            mConfirmEmailLayout.setVisibility(View.GONE);
+
+            generateClusterIDFromFlagedClusters();
+        }else {
+            Toast.makeText(mContext,"Your email is not verified!",Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setUpFirebaseNodes() {
@@ -329,6 +372,8 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     };
 
     private void generateClusterIDFromFlagedClusters(){
+        Variables.setMonthAdTotals(mKey,0);
+        Variables.setAdTotal(0,mKey);
         Log.d(TAG,"--Generating clusterID from flagged ads.");
         mRef2 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.FLAGGED_CLUSTERS);
         if(mRef2!=null){

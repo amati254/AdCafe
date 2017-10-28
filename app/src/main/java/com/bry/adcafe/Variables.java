@@ -22,6 +22,8 @@ public class Variables {
     public static boolean isMainActivityOnline;
     public static boolean isDashboardActivityOnline;
 
+    public static boolean isVerifyingEmail;
+
 
 
     public static void setNewNumberOfAds(int number){

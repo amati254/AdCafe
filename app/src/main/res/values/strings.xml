@@ -10,7 +10,7 @@
     <string name="signInText">"Login."</string>
     <string name="passwordHintText">"Password."</string>
     <string name="confirmPasswordText">"Confirm Password."</string>
-    <string name="emailText">"Email."</string>
+    <string name="emailText">"Email (you@example.com)."</string>
     <string name="nameText">"Name."</string>
     <string name="title_activity_login">"Login."</string>
     <string name="reloadButton">"Reload"</string>
@@ -49,4 +49,5 @@
     <string name="noteForPickingMessage">"The number shown is by 1000 (*1000 users). Select having that in mind."</string>
     <string name="pickBeforePaying">"So make sure you pick before making any payments."</string>
     <string name="shareText">"Share for awesomeness."</string>
+    <string name="confirmMessage">"We've just sent you a confirmation email. Head over to your inbox to verify and activate your account(Worry not, its only a one time thing)."</string>
 </resources>

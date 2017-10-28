@@ -242,7 +242,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     mAdList.add(ad);
                 }
                 if(mAdList.size()>1) mAdList.remove(0);
-                mChildToStartFrom = Variables.getAdTotal(mKey)+(int)dataSnapshot.getChildrenCount()-1;
+                mChildToStartFrom = Variables.getAdTotal(mKey) + (int)dataSnapshot.getChildrenCount()-1;
+                Log.d(TAG,"Child set to start from is -- "+mChildToStartFrom);
                 Log.d(TAG,"---All the ads have been handled.Total is "+mAdList.size());
             }else{
                 Log.d(TAG,"----No ads are available today");
@@ -256,7 +257,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-            Toast.makeText(mContext,"Unable to load the adverts now. Perhaps try again later.",Toast.LENGTH_LONG).show();
+//            if(!Variables.isMainActivityOnline)
+//                Toast.makeText(mContext,"Unable to load the adverts now. Perhaps try again later.",Toast.LENGTH_LONG).show();
             mAvi.setVisibility(View.GONE);
             mLoadingText.setVisibility(View.GONE);
             showFailedView();
@@ -355,7 +357,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mSwipeView.removeAllViews();
         }
         if(mAdList!=null && mAdList.size()>0){
-            if(mAdList.size() == 1){
+            if(mAdList.size() == 1 && mChildToStartFrom==Variables.getAdTotal(mKey)){
                 Log.d(TAG,"---User has seen all the ads, thus will load only last ad...");
                 mSwipeView.addView(new AdvertCard(mContext,mAdList.get(0),mSwipeView,Constants.LAST));
                 Variables.setIsLastOrNotLast(Constants.LAST);
@@ -365,18 +367,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Variables.setIsLastOrNotLast(Constants.NOT_LAST);
                 }
             }
-            Variables.setNewNumberOfAds(mAdList.size()-Variables.getAdTotal(mKey));
-//            Variables.setLastAdOfList(mAdList.get(mAdList.size()-1).getPushId());
             mAdList.clear();
         }else{
             Advert noAds = new Advert();
             mSwipeView.addView(new AdvertCard(mContext,noAds,mSwipeView,Constants.NO_ADS));
             Variables.setIsLastOrNotLast(Constants.NO_ADS);
+            loadAnyAnnouncements();
         }
 
         Log.d(TAG,"---Setting up On click listeners...");
         onclicks();
-
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
@@ -405,14 +405,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 public void onClick(View v) {
                     if(isNetworkConnected(mContext)){
                         if(!Variables.hasBeenPinned ){
-                            if(Variables.mIsLastOrNotLast == Constants.NO_ADS){
-                                Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't pin this..",
-                                        Snackbar.LENGTH_SHORT).show();
-                            }else{
+                            if(Variables.mIsLastOrNotLast == Constants.NOT_LAST &&mChildToStartFrom!=Variables.getAdTotal(mKey)){
                                 Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
-                                Snackbar.LENGTH_SHORT).show();
+                                        Snackbar.LENGTH_SHORT).show();
                                 Intent intent = new Intent(Constants.PIN_AD);
                                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                            }else{
+                                Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't pin this..",
+                                        Snackbar.LENGTH_SHORT).show();
                             }
                         }else{
                             Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
@@ -553,7 +553,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private BroadcastReceiver mMessageReceiverForLoadMoreAds = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            loadMoreAds();
+           if(!mIsBeingReset) loadMoreAds();
         }
     };
 
@@ -576,6 +576,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG,"---All the new ads have been handled.Total is "+mAdList.size());
                 }else{
                     Log.d(TAG,"----No more ads are available today");
+                    loadAnyAnnouncements();
                 }
             }
 
@@ -586,13 +587,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+
     private void loadMoreAdsIntoAdvertCard() {
         for(Advert ad: mAdList){
             mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.LOAD_MORE_ADS));
             Variables.setIsLastOrNotLast(Constants.NOT_LAST);
         }
+        mAdList.clear();
     }
 
+    private void loadAnyAnnouncements() {
+        Log.d("MAIN-ACTIVITY---","Now loading announcements since there are no more ads....");
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(getDate());
+        Log.d(TAG,"---Query set up is : "+Constants.ANNOUNCEMENTS+" : "+getDate());
+
+        dbRef = query.getRef();
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()){
+                    for(DataSnapshot snap:dataSnapshot.getChildren()){
+                        Advert ad = snap.getValue(Advert.class);
+                        mAdList.add(ad);
+                    }
+                    loadAnnouncementsIntoCards();
+                }else{
+                    Log.d(TAG,"There are no announcements today...");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG,"Unable to load announcements...");
+            }
+        });
+    }
+
+    private void loadAnnouncementsIntoCards() {
+        for(Advert ad: mAdList){
+            mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.ANNOUNCEMENTS));
+        }
+        mAdList.clear();
+    }
 
     private void hideNavBars() {
         View decorView = getWindow().getDecorView();
