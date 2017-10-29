@@ -359,6 +359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(mAdList!=null && mAdList.size()>0){
             if(mAdList.size() == 1 && mChildToStartFrom==Variables.getAdTotal(mKey)){
                 Log.d(TAG,"---User has seen all the ads, thus will load only last ad...");
+                mSwipeView.lockViews();
                 mSwipeView.addView(new AdvertCard(mContext,mAdList.get(0),mSwipeView,Constants.LAST));
                 Variables.setIsLastOrNotLast(Constants.LAST);
                 isLastAd = true;
@@ -373,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Advert noAds = new Advert();
             mSwipeView.addView(new AdvertCard(mContext,noAds,mSwipeView,Constants.NO_ADS));
             Variables.setIsLastOrNotLast(Constants.NO_ADS);
-            loadAnyAnnouncements();
+//            loadAnyAnnouncements();
         }
 
         Log.d(TAG,"---Setting up On click listeners...");
@@ -396,10 +397,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void onclicks() {
-
         findViewById(R.id.logoutBtn).setOnClickListener(this);
-
-
         if(findViewById(R.id.bookmark2Btn)!= null){
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -479,7 +477,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(Variables.mIsLastOrNotLast == Constants.NO_ADS) {
+                    if(Variables.mIsLastOrNotLast == Constants.NO_ADS || isLastAd) {
                         Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't report this..",
                                 Snackbar.LENGTH_SHORT).show();
                     }else{
@@ -566,6 +564,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(mContext,R.string.lastAd,Toast.LENGTH_SHORT).show();
+            loadAnyAnnouncements();
         }
     };
 
@@ -595,7 +594,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG,"---All the new ads have been handled.Total is "+mAdList.size());
                 }else{
                     Log.d(TAG,"----No more ads are available today");
-                    loadAnyAnnouncements();
                 }
             }
 
@@ -629,7 +627,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Advert ad = snap.getValue(Advert.class);
                         mAdList.add(ad);
                     }
-                    loadAnnouncementsIntoCards();
+                    for(Advert ad: mAdList){
+                        mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.ANNOUNCEMENTS));
+                    }
+                        Toast.makeText(mContext,"Before you leave though, a few messages from the dev team...",Toast.LENGTH_SHORT).show();
+                        mSwipeView.unlockViews();
+                        findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
+                        findViewById(R.id.reportBtn).setAlpha(0.3f);
+                        mAdList.clear();
                 }else{
                     Log.d(TAG,"There are no announcements today...");
                 }
@@ -642,18 +647,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void loadAnnouncementsIntoCards() {
-        for(Advert ad: mAdList){
-            mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.ANNOUNCEMENTS));
-        }
-        mAdList.clear();
-    }
 
     private void hideNavBars() {
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
         decorView.setSystemUiVisibility(uiOptions);
     }
+
+
+
 
     public float density(){
         double constant = 0.000046875;
@@ -712,7 +714,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
     private void clearFromSharedPreferences(){
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -726,13 +727,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+
     private boolean isNetworkConnected(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return (netInfo != null && netInfo.isConnected());
     }
-
-
 
     private void adDayAndMonthTotalsToFirebase(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -811,6 +811,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
+
     private void resetEverything() {
         resetAdTotalSharedPreferencesAndDayAdTotals();
         loadAdsFromThread();
@@ -874,6 +875,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String date = prefs.getString("date","nill");
         return date;
     }
+
+
+
 
     @Override
     public void networkAvailable() {

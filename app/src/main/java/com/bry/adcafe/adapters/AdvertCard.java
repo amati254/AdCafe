@@ -175,10 +175,14 @@ public class AdvertCard{
     @Click(R.id.profileImageView)
     private void onClick(){
         Log.d("EVENT", "profileImageView click");
-            if (clickable) {
-                mSwipeView.enableTouchSwipe();
-                hasBeenSwiped = true;
-            }
+        if (clickable) {
+            mSwipeView.enableTouchSwipe();
+            hasBeenSwiped = true;
+        }
+        if(mLastOrNotLast == Constants.ANNOUNCEMENTS ||mLastOrNotLast == Constants.LAST){
+            mSwipeView.enableTouchSwipe();
+        }
+
     }
 
     @SwipeOut
@@ -189,7 +193,7 @@ public class AdvertCard{
             hasBeenSwiped = true;
             sendBroadcast(START_TIMER);
         }
-        if(mSwipeView.getChildCount()==1 && mLastOrNotLast==Constants.ANNOUNCEMENTS){
+        if(mSwipeView.getChildCount()==2 && mLastOrNotLast==Constants.ANNOUNCEMENTS){
             Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
             mSwipeView.lockViews();
         }
@@ -203,7 +207,7 @@ public class AdvertCard{
             hasBeenSwiped = true;
             sendBroadcast(START_TIMER);
         }
-        if(mSwipeView.getChildCount()==1 && mLastOrNotLast==Constants.ANNOUNCEMENTS){
+        if(mSwipeView.getChildCount()==2 && mLastOrNotLast==Constants.ANNOUNCEMENTS){
             Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
             mSwipeView.lockViews();
         }
@@ -300,7 +304,7 @@ public class AdvertCard{
 
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,40,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,35,baos);
         byte[] byteArray = baos.toByteArray();
         return byteArray;
     }
@@ -312,7 +316,7 @@ public class AdvertCard{
 
     private String encodeBitmapForFirebaseStorage(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,50,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,40,baos);
         return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
     }
 
