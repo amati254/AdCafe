@@ -304,7 +304,7 @@ public class AdvertCard{
 
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,35,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,25,baos);
         byte[] byteArray = baos.toByteArray();
         return byteArray;
     }

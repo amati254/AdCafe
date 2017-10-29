@@ -35,7 +35,7 @@
     <string name="cannotUploadFailedFirebase">"Your connection may be low,try again after a few moments."</string>
     <string name="UploadAdNoConnection">"You may need internet connection to Upload your Advert."</string>
     <string name="DoNotPayTwice">"Note that once you pay, you can upload your advert at any time."</string>
-    <string name="MakeSureImage">"Make sure the image looks good in the card."</string>
+    <string name="MakeSureImage">"Images are compressed to save on our database space. "</string>
     <string name="pleaseChooseIcon">"Please choose an image fist."</string>
     <string name="successfullyUploaded">"Thank you for using the AdCafé to advertise your product."</string>
     <string name="unsuccessfullyUploaded">"Something went wrong,try uploading again after a few minutes."</string>

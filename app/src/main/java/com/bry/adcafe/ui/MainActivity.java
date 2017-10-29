@@ -374,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Advert noAds = new Advert();
             mSwipeView.addView(new AdvertCard(mContext,noAds,mSwipeView,Constants.NO_ADS));
             Variables.setIsLastOrNotLast(Constants.NO_ADS);
-//            loadAnyAnnouncements();
+            loadAnyAnnouncements();
         }
 
         Log.d(TAG,"---Setting up On click listeners...");

@@ -441,7 +441,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,40,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,35,baos);
         byte[] byteArray = baos.toByteArray();
         return byteArray;
     }
