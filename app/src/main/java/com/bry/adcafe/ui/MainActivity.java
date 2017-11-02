@@ -979,12 +979,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void pinAd(){
         Log.d(TAG,"Pinning ad from main activity");
         int adNumber;
+        String datte;
         if(Variables.hasTimerStarted){
             adNumber = Variables.getAdTotal(mKey)+1;
         }else{
             adNumber = Variables.getAdTotal(mKey);
         }
-        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate())
+        if(isAlmostMidNight()){
+            datte = getNextDay();
+        }else{
+            datte = getDate();
+        }
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(datte)
                 .child(Integer.toString(User.getClusterID(mKey))).child(Integer.toString(adNumber));
         Log.d(TAG,"Query set up is :"+Constants.ADVERTS+" : "+getDate()+" : "+User.getClusterID(mKey)+" : "+adNumber);
         DatabaseReference dbRef = query.getRef();

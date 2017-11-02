@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.models.User;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -99,6 +100,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private DatabaseReference mRef4;
     private DatabaseReference mRef5;
     private DatabaseReference boolRef;
+    private String date;
 
     private Bitmap bm;
     private int cycleCount = 0;
@@ -305,7 +307,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                             mLoadingTextView.setVisibility(View.VISIBLE);
                             mLoadingTextView.setText(R.string.uploadMessage);
                             setNewValueToStartFrom();
-
+                            date = getNextDay();
                             uploadImage();
                         }else{
                             Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
@@ -428,8 +430,6 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                     bm = bitmap;
                     Glide.with(mContext).load(bitmapToByte(bitmap)).asBitmap().override(400, 300).into(mProfileImageViewPreview);
 
-                    Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.MakeSureImage,
-                            Snackbar.LENGTH_LONG).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.d(TAG, "---Unable to get and set image. " + e.getMessage());
@@ -457,25 +457,26 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
     private void uploadImageAsAnnouncement(){
-        Toast.makeText(mContext,"Uploading announcement to firebase",Toast.LENGTH_SHORT).show();
-        String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
-        DatabaseReference dba = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(getNextDay());
-        DatabaseReference pushRef = dba.push();
-        String key = pushRef.getKey();
-        Advert announcement = new Advert(encodedImageToUpload);
-        announcement.setPushId(key);
-        pushRef.setValue(announcement).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Toast.makeText(mContext,"Announcement Uploaded.",Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(mContext,"Announcement has failed to upload.",Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        if(User.getUid().equals("WglDJKRpaYUGZEwSuRhqPw2nZPt1")){
+            Toast.makeText(mContext,"Uploading announcement to firebase",Toast.LENGTH_SHORT).show();
+            String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
+            DatabaseReference dba = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(getNextDay());
+            DatabaseReference pushRef = dba.push();
+            String key = pushRef.getKey();
+            Advert announcement = new Advert(encodedImageToUpload);
+            announcement.setPushId(key);
+            pushRef.setValue(announcement).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Toast.makeText(mContext,"Announcement Uploaded.",Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(mContext,"Announcement has failed to upload.",Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void uploadImage() {
@@ -492,7 +493,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 }
                 Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
                 Log.d(TAG,"---The custom push id is ---"+pushId);
-                mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay())
+                mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
                         .child(Integer.toString(number)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
                 advert.setPushId(pushId);
