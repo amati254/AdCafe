@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
@@ -17,6 +18,7 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.models.User;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
@@ -61,6 +63,7 @@ public class AdvertCard{
     private Context mContext;
     private SwipePlaceHolderView mSwipeView;
     private static final String START_TIMER= "startTimer";
+    private String mKey = "";
 
     private static boolean clickable;
     private static String mLastOrNotLast;
@@ -90,7 +93,6 @@ public class AdvertCard{
             loadAllAds();
         }
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToPinAd,new IntentFilter(Constants.PIN_AD));
         Variables.hasBeenPinned = false;
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
     }
@@ -247,7 +249,6 @@ public class AdvertCard{
                     mSwipeView.unlockViews();
                     clickable = true;
                     hasBeenSwiped = false;
-//                    mAdvert.setImageBitmap(null);
                 }else if(mSwipeView.getChildCount()==1 && mLastOrNotLast!=Constants.ANNOUNCEMENTS){
                     sendBroadcast(Constants.LAST);
                 }
@@ -259,66 +260,71 @@ public class AdvertCard{
         public void onReceive(Context context, Intent intent) {
             Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasEnded);
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToPinAd);
-
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
         }
     };
 
-    private BroadcastReceiver mMessageReceiverToPinAd = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("ADVERT_CARD--","Received broadcast to Pin ad.");
-            if(!Variables.hasBeenPinned && !mIsNoAds){
-                pinAd();
-            }
-        }
-    };
 
-    private void pinAd() {
-        if(bs==null){
-            Toast.makeText(mContext,"image bitmap is null",Toast.LENGTH_SHORT).show();
-        }else {
-            mAdvert.setImageUrl(encodeBitmapForFirebaseStorage(bs));
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            String uid = user.getUid();
-
-            DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
-            DatabaseReference pushRef = adRef.push();
-            String pushId = pushRef.getKey();
-
-            Log.d("AdvertCard--", "pinning the selected ad.");
-
-
-            mAdvert.setImageBitmap(null);
-            mAdvert.setPushId(pushId);
-
-            pushRef.setValue(mAdvert).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    Variables.hasBeenPinned = true;
-                }
-            });
-        }
-
-    }
 
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,25,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
         byte[] byteArray = baos.toByteArray();
         return byteArray;
     }
 
     private static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
         byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
-    }
-
-    private String encodeBitmapForFirebaseStorage(Bitmap bitmap){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,40,baos);
-        return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+        Bitmap bitm = BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
+        Bitmap newBm = getResizedBitmap(bitm,500);
+        return newBm;
     }
 
 
+    private static Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float bitmapRatio = (float) width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+
+        return Bitmap.createScaledBitmap(image, width, height, true);
+    }
+
+    private void readImageBitmapDimensions(){
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+//        BitmapFactory.decodeResource(getResources(), R.id.myimage, options);
+        int imageHeight = options.outHeight;
+        int imageWidth = options.outWidth;
+        String imageType = options.outMimeType;
+    }
+
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
 }

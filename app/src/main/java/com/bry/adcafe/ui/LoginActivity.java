@@ -338,6 +338,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             User.setUid(uid);
             mAvi.setVisibility(View.GONE);
             mLoadingMessage.setVisibility(View.GONE);
+            Variables.isStartFromLogin = true;
             Intent intent = new Intent (LoginActivity.this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

@@ -42,9 +42,7 @@ public class AdCounterBar {
     @Resolve
     private void onResolved() {
         adCounter.setText(Integer.toString(Variables.getAdTotal(mKey)));
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForAdCounter,new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_AD_COUNTER));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToStartTimer,new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
-
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
 
 
@@ -68,20 +66,12 @@ public class AdCounterBar {
         }
     };
 
-    private BroadcastReceiver mMessageReceiverForAdCounter = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String adTotal = intent.getStringExtra(Constants.AD_TOTAL);
-//            adCounter.setText(adTotal);
-        }
-    };
 
     private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("AD_COUNTER_BAR--","Received broadcast to Unregister all receivers");
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToStartTimer);
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAdCounter);
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
 
         }
@@ -90,6 +80,7 @@ public class AdCounterBar {
 
     private void startTimer(){
         if(!hasTimerStarted){
+            Variables.hasTimerStarted = true;
             hasTimerStarted = true;
              new CountDownTimer(7*1000,400) {
                 @Override
@@ -122,6 +113,7 @@ public class AdCounterBar {
             Log.d("AD_COUNTER_BAR---","sending message that timer has ended.");
             Intent intent = new Intent(Constants.TIMER_HAS_ENDED);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            Variables.hasTimerStarted = false;
             hasTimerMessageBeenSent = true;
         }
     }

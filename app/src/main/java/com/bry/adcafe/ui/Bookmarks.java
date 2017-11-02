@@ -21,6 +21,7 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.NetworkStateReceiver;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -70,8 +71,10 @@ public class Bookmarks extends AppCompatActivity {
 
     @Override
     protected void onDestroy(){
-        super.onDestroy();
+        mPlaceHolderView.removeAllViews();
+
         unregisterAllReceivers();
+        super.onDestroy();
     }
 
     private void unregisterAllReceivers() {
@@ -139,21 +142,7 @@ public class Bookmarks extends AppCompatActivity {
 
     }
 
-    private void loadBookmarkedAdsIntoCards() {
-        if(mPlaceHolderView == null){
-            loadPlaceHolderViews();
-        }
-        if(mSavedAds!=null && mSavedAds.size()>0){
-            for(int i = 0; i<mSavedAds.size();i++){
-                mPlaceHolderView.addView(new SavedAdsCard(mSavedAds.get(i),mContext,mPlaceHolderView,mSavedAds.get(i).getPushId()));
-            }
-        }else{
-            Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_LONG).show();
-        }
-        mAvi.setVisibility(View.GONE);
-        loadingText.setVisibility(View.GONE);
 
-    }
 
 
 
@@ -180,10 +169,8 @@ public class Bookmarks extends AppCompatActivity {
     private void loadAdsFromFirebase(){
         if(!mSavedAds.isEmpty()){
             mSavedAds.clear();
-//            mPlaceHolderView.removeAllViews();
         }
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
+        String uid = User.getUid();
         Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
         DatabaseReference mRef = query.getRef();
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -191,7 +178,6 @@ public class Bookmarks extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snap: dataSnapshot.getChildren()){
                     Advert advert = snap.getValue(Advert.class);
-//                    advert.setPushId(advert.getPushId());
                     mSavedAds.add(advert);
                     Log.d("BOOKMARKS"," --Loaded ads from firebase.--"+advert.getPushId());
                 }
@@ -203,6 +189,23 @@ public class Bookmarks extends AppCompatActivity {
                 Log.d("UTILS","Failed to load ads from firebase.");
             }
         });
+    }
+
+    private void loadBookmarkedAdsIntoCards() {
+        if(mPlaceHolderView == null){
+            loadPlaceHolderViews();
+        }
+        if(mSavedAds!=null && mSavedAds.size()>0){
+            for(int i = 0; i<mSavedAds.size();i++){
+                mPlaceHolderView.addView(new SavedAdsCard(mSavedAds.get(i),mContext,mPlaceHolderView,mSavedAds.get(i).getPushId()));
+            }
+        }else{
+            Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_LONG).show();
+        }
+        mSavedAds.clear();
+        mAvi.setVisibility(View.GONE);
+        loadingText.setVisibility(View.GONE);
+
     }
 
     private boolean isNetworkConnected(Context context){

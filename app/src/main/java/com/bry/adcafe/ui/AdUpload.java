@@ -415,26 +415,29 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     @Override
     protected void onActivityResult(int requestCode, int resultCode,Intent data){
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null){
-            Log.d(TAG,"---Data gotten from activiy is ok.");
-            mFilepath = data.getData();
-            try{
-                mCardviewForShowingPreviewOfAd.setVisibility(View.VISIBLE);
-                mTopBarPreview.setVisibility(View.VISIBLE);
-                mHasUserChosenAnImage = true;
+        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Log.d(TAG, "---Data gotten from activity is ok.");
+            if (data.getData() != null) {
+                mFilepath = data.getData();
+                try {
+                    mCardviewForShowingPreviewOfAd.setVisibility(View.VISIBLE);
+                    mTopBarPreview.setVisibility(View.VISIBLE);
+                    mHasUserChosenAnImage = true;
 
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),mFilepath);
-                bm = bitmap;
-                Glide.with(mContext).load(bitmapToByte(bitmap)).asBitmap().override(400,300).into(mProfileImageViewPreview);
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), mFilepath);
+                    bm = bitmap;
+                    Glide.with(mContext).load(bitmapToByte(bitmap)).asBitmap().override(400, 300).into(mProfileImageViewPreview);
 
-                Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.MakeSureImage,
-                        Snackbar.LENGTH_LONG).show();
-            }catch (IOException e){
-                e.printStackTrace();
-                Log.d(TAG,"---Unable to get and set image. "+e.getMessage());
+                    Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.MakeSureImage,
+                            Snackbar.LENGTH_LONG).show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "---Unable to get and set image. " + e.getMessage());
+                }
+            } else {
+                Log.d(TAG, "---Unable to work on the result code for some reason.");
+                Toast.makeText(mContext,"the data.getData method returns null for some reason...",Toast.LENGTH_SHORT).show();
             }
-        }else{
-            Log.d(TAG,"---Unable to work on the result code for some reason.");
         }
 
     }

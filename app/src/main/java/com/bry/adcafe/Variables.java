@@ -23,6 +23,8 @@ public class Variables {
     public static boolean isDashboardActivityOnline;
 
     public static boolean isVerifyingEmail;
+    public static boolean isStartFromLogin = false;
+    public static boolean hasTimerStarted = false;
 
 
 

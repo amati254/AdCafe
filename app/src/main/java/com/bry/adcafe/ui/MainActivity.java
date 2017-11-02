@@ -41,8 +41,10 @@ import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.NetworkStateReceiver;
 import com.bry.adcafe.services.Utils;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -113,23 +115,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onResume(){
+        Variables.isMainActivityOnline = true;
         super.onResume();
         if(!getCurrentDateInSharedPreferences().equals(getDate())){
             Log.d(TAG,"---Date in shared preferences does not match current date,therefore resetting everything.");
             resetEverything();
+            sendBroadcastToUnregisterAllReceivers();
+            removeAllViews();
+        }
+        if(isAlmostMidNight()&&Variables.isMainActivityOnline){
+            resetEverything();
+            sendBroadcastToUnregisterAllReceivers();
+            removeAllViews();
         }
         r = new Runnable() {
             @Override
             public void run() {
                 Log.d(TAG,"---started the time checker for when it is almost midnight.");
                 if(isAlmostMidNight()&&Variables.isMainActivityOnline){
-                    mIsBeingReset = true;
                     resetEverything();
+                    sendBroadcastToUnregisterAllReceivers();
+                    removeAllViews();
                 }
-                h.postDelayed(r,30000);
+                h.postDelayed(r,60000);
             }
         };
-        h.postDelayed(r,30000);
+        h.postDelayed(r,60000);
     }
 
     @Override
@@ -145,8 +156,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(dbRef!=null){
             dbRef.removeEventListener(val);
         }
-
+        setUserDataInSharedPrefs();
         Log.d(TAG,"---removing callback for checking time of day.");
+    }
+
+    private void setUserDataInSharedPrefs() {
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("TodayTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.putInt("TodaysTotals",Variables.getAdTotal(mKey));
+        Log.d("MAIN_ACTIVITY--","Setting todays ad totals in shared preferences - "+Integer.toString(Variables.getAdTotal(mKey)));
+        editor.apply();
+
+        SharedPreferences pref2 = getApplicationContext().getSharedPreferences("MonthTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = pref2.edit();
+        editor2.clear();
+        editor2.putInt("MonthsTotals",Variables.getMonthAdTotals(mKey));
+        Log.d("MAIN_ACTIVITY--","Setting the month totals in shared preferences - "+Integer.toString(Variables.getMonthAdTotals(mKey)));
+        editor2.apply();
+
+        SharedPreferences pref3 = getApplicationContext().getSharedPreferences("ClusterID", MODE_PRIVATE);
+        SharedPreferences.Editor editor3 = pref3.edit();
+        editor3.clear();
+        editor3.putInt("Cluster",User.getClusterID(mKey));
+        Log.d("MAIN_ACTIVITY--","Setting the users cluster id in shared preferences - "+Integer.toString(User.getClusterID(mKey)));
+        editor3.apply();
+
+        SharedPreferences pref4 = mContext.getSharedPreferences("UID", MODE_PRIVATE);
+        SharedPreferences.Editor editor4 = pref4.edit();
+        editor4.clear();
+        editor4.putString("Uid",User.getUid());
+        Log.d("MAIN_ACTIVITY---","Setting the user uid in shared preferences - "+User.getUid());
+        editor4.apply();
+
     }
 
     @Override
@@ -167,15 +209,59 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(dbRef!=null){
             dbRef.removeEventListener(val);
         }
-        try{
-            Log.d(TAG,"---Starting the getAds method...");
+        if(Variables.isStartFromLogin) {
+            try {
+                Log.d(TAG, "---Starting the getAds method...");
+                startGetAds();
+            } catch (Exception e) {
+                Log.e("BACKGROUND_PROC---", e.getMessage());
+            }
+        }else{
+            loadUserDataFromSharedPrefs();
+        }
+    }
+
+    private void loadUserDataFromSharedPrefs() {
+        Log.d(TAG,"Loading user data from shared preferences first...");
+        SharedPreferences prefs = getSharedPreferences("TodayTotals",MODE_PRIVATE);
+        int number = prefs.getInt("TodaysTotals",0);
+        Log.d(TAG,"AD TOTAL NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
+        if(mIsBeingReset || !getCurrentDateInSharedPreferences().equals(getDate())){
+            Variables.setAdTotal(0,mKey);
+            Log.d(TAG,"Setting ad totals in firebase to 0 since is being reset...");
+        }else{
+            Variables.setAdTotal(number,mKey);
+        }
+
+        SharedPreferences prefs2 = getSharedPreferences("MonthTotals",MODE_PRIVATE);
+        int number2 = prefs2.getInt("MonthsTotals",0);
+        Log.d(TAG,"MONTH AD TOTAL NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number2);
+        Variables.setMonthAdTotals(mKey,number2);
+
+        SharedPreferences prefs3 = getSharedPreferences("ClusterID",MODE_PRIVATE);
+        int number3 = prefs3.getInt("Cluster",0);
+        Log.d(TAG,"CLUSTER ID NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number3);
+        User.setID(number3,mKey);
+
+        SharedPreferences prefs4 = getSharedPreferences("UID",MODE_PRIVATE);
+        String uid = prefs4.getString("Uid","");
+        Log.d(TAG,"UID NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ uid);
+        User.setUid(uid);
+
+        Variables.isStartFromLogin = false;
+        try {
+            Log.d(TAG, "---Starting the getAds method...");
             startGetAds();
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("BACKGROUND_PROC---", e.getMessage());
         }
     }
 
     private void startGetAds() {
+        setUpSwipeView();
+        mAvi.setVisibility(View.VISIBLE);
+        mLoadingText.setVisibility(View.VISIBLE);
+        mLinearLayout.setVisibility(View.GONE);
         Log.d(TAG,"---Setting up mViewRunnable thread...");
         mViewRunnable = new Runnable() {
             @Override
@@ -186,9 +272,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Thread thread =  new Thread(null, mViewRunnable, "Background");
         Log.d(TAG,"---Starting thread...");
         thread.start();
-        mAvi.setVisibility(View.VISIBLE);
-        mLoadingText.setVisibility(View.VISIBLE);
-        mLinearLayout.setVisibility(View.GONE);
+
     } ///////////////////////////
 
     //method for loading ads from thread.Contains sleep length...
@@ -196,7 +280,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try{
             Log.d(TAG,"---The getAdsFromFirebase method has been called...");
             getGetAdsFromFirebase();
-
             Thread.sleep(3000);
         }catch (Exception e) {
             Log.e("BACKGROUND_PROC", e.getMessage());
@@ -242,24 +325,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Advert ad = snap.getValue(Advert.class);
                     mAdList.add(ad);
                 }
-                if(mAdList.size()>1) mAdList.remove(0);
-                mChildToStartFrom = Variables.getAdTotal(mKey) + (int)dataSnapshot.getChildrenCount()-1;
+                if(Variables.getAdTotal(mKey)!=0){
+                    if(mAdList.size()>1) mAdList.remove(0);
+                    mChildToStartFrom = Variables.getAdTotal(mKey) + (int)dataSnapshot.getChildrenCount()-1;
+                }else{
+                    mChildToStartFrom = Variables.getAdTotal(mKey) + (int)dataSnapshot.getChildrenCount()-1;
+                }
+
                 Log.d(TAG,"Child set to start from is -- "+mChildToStartFrom);
                 Log.d(TAG,"---All the ads have been handled.Total is "+mAdList.size());
             }else{
                 Log.d(TAG,"----No ads are available today");
             }
-
-            loadAdsIntoAdvertCard();
             mAvi.setVisibility(View.GONE);
             mLoadingText.setVisibility(View.GONE);
             mLinearLayout.setVisibility(View.VISIBLE);
+            loadAdsIntoAdvertCard();
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-//            if(!Variables.isMainActivityOnline)
-//                Toast.makeText(mContext,"Unable to load the adverts now. Perhaps try again later.",Toast.LENGTH_LONG).show();
             mAvi.setVisibility(View.GONE);
             mLoadingText.setVisibility(View.GONE);
             showFailedView();
@@ -356,6 +441,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG,"Removing existing children from swipeView...");
             mSwipeView.removeAllViews();
         }
+        if(mAdCounterView.getChildCount()==0){
+            Log.d(TAG,"Loading the top timer now...");
+            loadAdCounter();
+        }
         if(mAdList!=null && mAdList.size()>0){
             if(mAdList.size() == 1 && mChildToStartFrom==Variables.getAdTotal(mKey)){
                 Log.d(TAG,"---User has seen all the ads, thus will load only last ad...");
@@ -376,7 +465,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Variables.setIsLastOrNotLast(Constants.NO_ADS);
             loadAnyAnnouncements();
         }
-
         Log.d(TAG,"---Setting up On click listeners...");
         onclicks();
         networkStateReceiver = new NetworkStateReceiver();
@@ -402,14 +490,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(isNetworkConnected(mContext)){
                         if(!Variables.hasBeenPinned ){
                             if(Variables.mIsLastOrNotLast == Constants.NOT_LAST && !isLastAd){
                                 Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
                                         Snackbar.LENGTH_SHORT).show();
-                                Intent intent = new Intent(Constants.PIN_AD);
-                                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-//                                pinAd();
+                                pinAd();
                             }else{
                                 Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't pin this..",
                                         Snackbar.LENGTH_SHORT).show();
@@ -418,10 +503,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
                                     Snackbar.LENGTH_SHORT).show();
                         }
-                    }else{
-                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.cannotPin,
-                                Snackbar.LENGTH_SHORT).show();
-                    }
 
                 }
             });
@@ -493,23 +574,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void pinAd() {
-        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(Integer.toString(User.getClusterID(mKey))).child(Integer.toString(Variables.getAdTotal(mKey)));
-        DatabaseReference dbRefX = query.getRef();
-        dbRefX.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-               Advert adToBePinned =  dataSnapshot.getValue(Advert.class);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
     private void logoutUser() {
 
         setLastUsedDateInFirebaseDate(User.getUid());
@@ -575,10 +639,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
+
+
+
     private void loadMoreAds() {
         Log.d("MAIN-ACTIVITY---","Loading more ads since user has seen almost all....");
-        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(User.getClusterID(mKey)));
-        Log.d(TAG,"---Query set up is : "+Constants.ADVERTS+" : "+getDate()+" : "+User.getClusterID(mKey));
+        Query query;
+        if(isAlmostMidNight()){
+            query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getNextDay()).child(Integer.toString(User.getClusterID(mKey)));
+            Log.d(TAG,"---Query set up is : "+Constants.ADVERTS+" : "+getNextDay()+" : "+User.getClusterID(mKey));
+        }else{
+            query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(User.getClusterID(mKey)));
+            Log.d(TAG,"---Query set up is : "+Constants.ADVERTS+" : "+getDate()+" : "+User.getClusterID(mKey));
+        }
         dbRef = query.getRef();
         dbRef.orderByKey().startAt(Integer.toString(mChildToStartFrom+1)).limitToFirst(5).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -604,7 +677,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-
     private void loadMoreAdsIntoAdvertCard() {
         for(Advert ad: mAdList){
             mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.LOAD_MORE_ADS));
@@ -615,8 +687,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void loadAnyAnnouncements() {
         Log.d("MAIN-ACTIVITY---","Now loading announcements since there are no more ads....");
-        Query query = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(getDate());
-        Log.d(TAG,"---Query set up is : "+Constants.ANNOUNCEMENTS+" : "+getDate());
+        Query query;
+        if(isAlmostMidNight()){
+            query = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(getNextDay());
+            Log.d(TAG,"---Query set up is : "+Constants.ANNOUNCEMENTS+" : "+getNextDay());
+        }else{
+            query = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(getDate());
+            Log.d(TAG,"---Query set up is : "+Constants.ANNOUNCEMENTS+" : "+getDate());
+        }
 
         dbRef = query.getRef();
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -646,7 +724,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
-
 
     private void hideNavBars() {
         View decorView = getWindow().getDecorView();
@@ -705,7 +782,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int seconds = c.get(Calendar.SECOND);
 
         Log.d(TAG,"Current time is " + hours + ":"+minutes + ":"+seconds);
-        if(hours == 23 && (minutes == 59) && (seconds>45)){
+        if(hours == 23 && (minutes == 59) && (seconds>=0)){
             Log.d(TAG,"---Day is approaching midnight,returning true to reset the activity and values.");
             return true;
         }else{
@@ -714,29 +791,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void clearFromSharedPreferences(){
-        SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.clear();
-        editor.commit();
 
-        SharedPreferences prefs2 = getSharedPreferences(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,MODE_PRIVATE);
-        SharedPreferences.Editor editor2 = prefs2.edit();
-        editor2.clear();
-        editor2.commit();
-    }
-
-
-
-    private boolean isNetworkConnected(Context context){
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return (netInfo != null && netInfo.isConnected());
-    }
 
     private void adDayAndMonthTotalsToFirebase(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
+        String uid = User.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
         adRef.setValue(Variables.getAdTotal(mKey));
 
@@ -780,19 +838,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-    public static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
-        byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
-    }
-
     private void setLastUsedDateInFirebaseDate(String uid) {
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
         adRef.setValue(getDate());
     }
 
     private void resetAdTotalsInFirebase() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
+        String uid = User.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
         adRef.setValue(0).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -809,10 +861,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-
-
-
     private void resetEverything() {
+        mIsBeingReset = true;
         resetAdTotalSharedPreferencesAndDayAdTotals();
         loadAdsFromThread();
     }
@@ -830,6 +880,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return tomorrowsDate;
 
     }
+
+
+
 
     @Override
     public void onClick(View v) {
@@ -920,5 +973,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 doubleBackToExitPressedOnce=false;
             }
         }, 2000);
+    }
+
+
+    private void pinAd(){
+        Log.d(TAG,"Pinning ad from main activity");
+        int adNumber;
+        if(Variables.hasTimerStarted){
+            adNumber = Variables.getAdTotal(mKey)+1;
+        }else{
+            adNumber = Variables.getAdTotal(mKey);
+        }
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate())
+                .child(Integer.toString(User.getClusterID(mKey))).child(Integer.toString(adNumber));
+        Log.d(TAG,"Query set up is :"+Constants.ADVERTS+" : "+getDate()+" : "+User.getClusterID(mKey)+" : "+adNumber);
+        DatabaseReference dbRef = query.getRef();
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()){
+                    Advert ad = dataSnapshot.getValue(Advert.class);
+                    uploadToUserList(ad);
+                }else{
+                 Toast.makeText(mContext,"data snapshot is empty..",Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(mContext,"Pinning may have failed.",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void uploadToUserList(Advert ad) {
+        String uid = User.getUid();
+
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
+        DatabaseReference pushRef = adRef.push();
+        String pushId = pushRef.getKey();
+
+        Log.d(TAG, "pinning the selected ad.");
+        ad.setPushId(pushId);
+
+        pushRef.setValue(ad).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Log.d(TAG,"Pinning is complete.");
+                Variables.hasBeenPinned = true;
+            }
+        });
     }
 }

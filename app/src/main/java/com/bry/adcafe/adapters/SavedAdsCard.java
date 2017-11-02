@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.models.User;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
@@ -84,10 +85,12 @@ public class SavedAdsCard {
 
 
     private void loadImage(){
-        mAvi.setVisibility(android.view.View.VISIBLE);
+//        mAvi.setVisibility(android.view.View.VISIBLE);
+        Log.d("SavedAdCard--","Setting avi to be visible");
         try {
             Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
             mAdvert.setImageBitmap(bm);
+//            mAdvert.setImageUrl(null);
             Log.d("SavedAdsCard---","Image has been converted to bitmap and set in model instance.");
         } catch (IOException e) {
             e.printStackTrace();
@@ -131,8 +134,7 @@ public class SavedAdsCard {
         mPlaceHolderView.removeView(this);
         Log.d("SAVED_ADS_CARD--","Removing pinned ad"+id);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
+        String uid = User.getUid();
 
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST).child(id);
         adRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -154,14 +156,31 @@ public class SavedAdsCard {
 
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,90,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
         byte[] byteArray = baos.toByteArray();
         return byteArray;
     }
 
     private static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
         byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
+        Bitmap bitm = BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
+        Bitmap newBm = getResizedBitmap(bitm,600);
+        return newBm;
     }
 
+    private static Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float bitmapRatio = (float) width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+
+        return Bitmap.createScaledBitmap(image, width, height, true);
+    }
 }
