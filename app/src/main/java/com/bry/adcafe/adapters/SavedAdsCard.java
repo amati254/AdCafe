@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
+import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -18,6 +21,7 @@ import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
+import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.bumptech.glide.Glide;
@@ -33,6 +37,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.annotations.Animate;
+import com.mindorks.placeholderview.annotations.Click;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.LongClick;
 import com.mindorks.placeholderview.annotations.NonReusable;
@@ -41,6 +46,8 @@ import com.mindorks.placeholderview.annotations.View;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 
@@ -63,6 +70,7 @@ public class SavedAdsCard {
     public String mId;
     private ProgressDialog mAuthProgressDialog;
     private boolean hasMessageBeenSeen = false;
+    private boolean onDoublePressed = false;
 
 
 
@@ -70,7 +78,6 @@ public class SavedAdsCard {
         mAdvert = advert;
         mContext = context;
         mPlaceHolderView = placeHolderView;
-//        mId = pinID;
     }
 
     @Resolve
@@ -83,6 +90,29 @@ public class SavedAdsCard {
         unPin();
     }
 
+    @Click(R.id.SavedImageView)
+    private void onClick(){
+        if(onDoublePressed){
+            shareAd();
+        }
+        onDoublePressed = true;
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                onDoublePressed=false;
+            }
+        }, 1000);
+    }
+
+    private void shareAd() {
+        Log.d("SavedAdsCard","Setting the ad to be shared.");
+        Variables.adToBeShared = mAdvert;
+        Intent intent = new Intent("SHARE");
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+
+    }
+
 
     private void loadImage(){
 //        mAvi.setVisibility(android.view.View.VISIBLE);
@@ -90,7 +120,6 @@ public class SavedAdsCard {
         try {
             Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
             mAdvert.setImageBitmap(bm);
-//            mAdvert.setImageUrl(null);
             Log.d("SavedAdsCard---","Image has been converted to bitmap and set in model instance.");
         } catch (IOException e) {
             e.printStackTrace();

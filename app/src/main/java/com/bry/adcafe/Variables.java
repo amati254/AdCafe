@@ -25,6 +25,7 @@ public class Variables {
     public static boolean isVerifyingEmail;
     public static boolean isStartFromLogin = false;
     public static boolean hasTimerStarted = false;
+    public static Advert adToBeShared;
 
 
 

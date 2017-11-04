@@ -275,6 +275,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
         User.setUid(uid);
+        Variables.isStartFromLogin = true;
         mAvi.setVisibility(View.GONE);
         mLoadingText.setVisibility(View.GONE);
         Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
