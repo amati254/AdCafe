@@ -93,6 +93,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private int mClusterTotal;
     private int mClusterToStartFrom;
     private int noOfChildrenInClusterToStartFrom;
+    private int noOfChildrenInLatestCluster;
 
     private DatabaseReference mRef;
     private DatabaseReference mRef2;
@@ -183,11 +184,10 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-            setAllOtherViewsToBeVisible();
+//            setAllOtherViewsToBeVisible();
             mAvi.setVisibility(View.GONE);
-            Log.d(TAG,"---Unable to connect to firebase at the moment."+databaseError.getMessage());
-            Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.cannotUploadFailedFirebase,
-                    Snackbar.LENGTH_LONG).show();
+            mNoConnection.setVisibility(View.VISIBLE);
+            mBottomNavs.setVisibility(View.GONE);
         }
     }; //triggers getClusterToStartFrom method.
 
@@ -214,7 +214,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-            setAllOtherViewsToBeVisible();
+//            setAllOtherViewsToBeVisible();
+            mNoConnection.setVisibility(View.VISIBLE);
+            mBottomNavs.setVisibility(View.GONE);
             mAvi.setVisibility(View.GONE);
             Log.d(TAG,"---Unable to connect to firebase at the moment. "+databaseError.getMessage());
             Snackbar.make(findViewById(R.id.SignUpCoordinatorLayout), R.string.cannotUploadFailedFirebase,
@@ -224,8 +226,6 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void loadClusterToStartFromChildrenNo() {
         Log.d(TAG,"---Starting query for no of ads in cluster to start from.");
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
                 .child(getNextDay()).child(Integer.toString(mClusterToStartFrom));
         boolRef.addListenerForSingleValueEvent(val3);
@@ -236,21 +236,52 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         public void onDataChange(DataSnapshot dataSnapshot) {
             noOfChildrenInClusterToStartFrom = (int)dataSnapshot.getChildrenCount();
             Log.d(TAG,"--Number of children in cluster to start from gotten from firebase is  -"+noOfChildrenInClusterToStartFrom);
-            setAllOtherViewsToBeVisible();
-            mAvi.setVisibility(View.GONE);
-            mLoadingTextView.setVisibility(View.GONE);
-            OnClicks();
+            getNumberOfUploadedAdsInLatestCluster();
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-            setAllOtherViewsToBeVisible();
+//            setAllOtherViewsToBeVisible();
+            mNoConnection.setVisibility(View.VISIBLE);
+            mBottomNavs.setVisibility(View.GONE);
             mAvi.setVisibility(View.GONE);
             Log.d(TAG,"---Unable to connect to firebase at the moment. "+databaseError.getMessage());
             Snackbar.make(findViewById(R.id.SignUpCoordinatorLayout), R.string.cannotUploadFailedFirebase,
                     Snackbar.LENGTH_LONG).show();
         }
     };
+
+    private void getNumberOfUploadedAdsInLatestCluster(){
+        Log.d(TAG,"---Starting query for no of ads in Latest cluster now.");
+        DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
+                .child(getNextDay()).child(Integer.toString(mClusterTotal));
+        boolRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()){
+                    noOfChildrenInLatestCluster = (int)dataSnapshot.getChildrenCount();
+                }else{
+                    noOfChildrenInLatestCluster = 0;
+                }
+                Log.d(TAG,"---the number of children gotten is: "+noOfChildrenInLatestCluster);
+                setAllOtherViewsToBeVisible();
+                mAvi.setVisibility(View.GONE);
+                mLoadingTextView.setVisibility(View.GONE);
+                OnClicks();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+//                setAllOtherViewsToBeVisible();
+                mNoConnection.setVisibility(View.VISIBLE);
+                mBottomNavs.setVisibility(View.GONE);
+                mAvi.setVisibility(View.GONE);
+                Log.d(TAG,"---Unable to connect to firebase at the moment. "+databaseError.getMessage());
+                Snackbar.make(findViewById(R.id.SignUpCoordinatorLayout), R.string.cannotUploadFailedFirebase,
+                        Snackbar.LENGTH_LONG).show();
+            }
+        });
+    }
 
 
 
@@ -487,9 +518,15 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 String pushId;
                 final Integer number = clustersToUpLoadTo.get(i);
                 if(number<mClusterToStartFrom){
+                    //push id is set to +2 to avoid setting the same push ID twice.
                     pushId = Integer.toString(noOfChildrenInClusterToStartFrom+2);
                 }else{
-                    pushId = Integer.toString(noOfChildrenInClusterToStartFrom+1);
+                    if(number==mClusterTotal){
+                        //The latest cluster may have fewer children than other cluster, thus should be handled differently.
+                        pushId = Integer.toString(noOfChildrenInLatestCluster+1);
+                    }else{
+                        pushId = Integer.toString(noOfChildrenInClusterToStartFrom+1);
+                    }
                 }
                 Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
                 Log.d(TAG,"---The custom push id is ---"+pushId);
@@ -539,9 +576,15 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
                 String pushId;
                 if(number<mClusterToStartFrom){
+                    //push id is set to +2 to avoid setting the same push ID twice.
                     pushId = Integer.toString(noOfChildrenInClusterToStartFrom+2);
                 }else{
-                    pushId = Integer.toString(noOfChildrenInClusterToStartFrom+1);
+                    if(number==mClusterTotal){
+                        //The latest cluster may have fewer children than other cluster, thus should be handled differently.
+                        pushId = Integer.toString(noOfChildrenInLatestCluster+1);
+                    }else{
+                        pushId = Integer.toString(noOfChildrenInClusterToStartFrom+1);
+                    }
                 }
                 Log.d(TAG,"---The custom push id is ---"+pushId);
                 mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)

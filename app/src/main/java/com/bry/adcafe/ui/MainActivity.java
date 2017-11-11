@@ -575,7 +575,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void logoutUser() {
-
         setLastUsedDateInFirebaseDate(User.getUid());
         if(dbRef!=null){
             dbRef.removeEventListener(val);

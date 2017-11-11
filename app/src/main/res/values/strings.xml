@@ -45,9 +45,29 @@
     <string name="settingUpAccountMessage">"Setting up your account..."</string>
     <string name="loadingTodaysAdsmessage">"Loading today's ads..."</string>
     <string name="loadingYourPinnedAds">"Loading your pinned ads"</string>
-    <string name="failedToLoadTodaysAds">"Failed to load todays ads."</string>
+    <string name="failedToLoadTodaysAds">"Failed to load today's ads."</string>
     <string name="noteForPickingMessage">"The number shown is by 1000 (*1000 users). Select having that in mind."</string>
     <string name="pickBeforePaying">"So make sure you pick before making any payments."</string>
     <string name="shareText">"Share for awesomeness."</string>
     <string name="confirmMessage">"We've just sent you a confirmation email. Head over to your inbox to verify and activate your account(Worry not, its only a one time thing)."</string>
+    <string name="next">NEXT</string>
+    <string name="skip">SKIP</string>
+    <string name="start">GOT IT</string>
+    <string name="slider1text">It\'s basically an app for advertising information, products and all
+    types of services to users from across the country. </string>
+    <string name="slider1title">Tap, View And Go</string>
+    <string name="slider2title">AdCafé</string>
+    <string name="slider2text">Basically you\'ll be able to view ads uploaded by advertisers in the app
+    and also advertise your product to the app\'s users.</string>
+    <string name="slider2hello">Hello!</string>
+    <string name="slider2take">Take a Tour</string>
+
+    <string name="slide3text">You will be able to earn money! By just viewing the ads, you can make
+        extra cash. Cool right?</string>
+
+    <string name="slide4text">Even better! Among other benefits, the AdCafe gives you the ability to
+        reach many of its users in a very short period of time.</string>
+
+    <string name="slide5text">Not quite yet! First you\'ll need to know how to use the app and for that we\'ve prepared
+        a short tutorial on how you will interact with it.</string>
 </resources>

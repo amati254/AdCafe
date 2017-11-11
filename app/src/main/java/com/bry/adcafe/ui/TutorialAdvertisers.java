@@ -20,25 +20,36 @@ import android.widget.TextView;
 
 import com.bry.adcafe.R;
 import com.bry.adcafe.services.SliderPrefManager;
-import com.google.firebase.auth.FirebaseAuth;
 
-public class TutorialActivity extends AppCompatActivity {
+public class TutorialAdvertisers extends AppCompatActivity {
     private ViewPager viewPager;
-    private MyViewPagerAdapter myViewPagerAdapter;
+    private TutorialAdvertisers.MyViewPagerAdapter myViewPagerAdapter;
     private LinearLayout myDotsLayout;
     private TextView[] myDots;
     private int[] myLayouts;
     private Button myBtnSkip, myBtnNext;
     private SliderPrefManager myPrefManager;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        // Checking for first time launch - before calling setContentView()
+        myPrefManager = new SliderPrefManager(this);
+        if (!myPrefManager.isFirstTimeLaunch()){
+            LaunchHomeScreen();
+//            finish();
+        }
+
+
         if (Build.VERSION.SDK_INT >= 21){
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
-        setContentView(R.layout.activity_tutorial);
-        myPrefManager = new SliderPrefManager(getApplicationContext());
+
+        setContentView(R.layout.activity_tutorial_advertisers);
+
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         myDotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
         myBtnSkip = (Button) findViewById(R.id.btn_skip);
@@ -46,12 +57,12 @@ public class TutorialActivity extends AppCompatActivity {
 
         // layouts of all welcome sliders
         myLayouts = new int[]{
-                R.layout.welcome_slider_0,
-                R.layout.welcome_slider_1,
-                R.layout.welcome_slider_2,
-                R.layout.welcome_slider_3,
-                R.layout.welcome_slider_4,
-                R.layout.welcome_slider_5
+//                R.layout.welcome_slider_2,
+//                R.layout.welcome_slider_1,
+//                R.layout.welcome_slider_0,
+//                R.layout.welcome_slider_3,
+//                R.layout.welcome_slider_4,
+//                R.layout.welcome_slider_5
         };
 
         // adding bottom dots
@@ -60,7 +71,7 @@ public class TutorialActivity extends AppCompatActivity {
         // making notification bar transparent
         changeStatusBarColor();
 
-        myViewPagerAdapter  = new MyViewPagerAdapter();
+        myViewPagerAdapter  = new TutorialAdvertisers.MyViewPagerAdapter();
         viewPager.setAdapter(myViewPagerAdapter);
         viewPager.addOnPageChangeListener(viewPageChangeListener);
 
@@ -68,7 +79,7 @@ public class TutorialActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                LaunchNextActivity();
+                LaunchHomeScreen();
             }
         });
 
@@ -79,7 +90,7 @@ public class TutorialActivity extends AppCompatActivity {
                 if (current < myLayouts.length){
                     viewPager.setCurrentItem(current);
                 }else {
-                    LaunchNextActivity();
+                    LaunchHomeScreen();
                 }
             }
         });
@@ -108,12 +119,9 @@ public class TutorialActivity extends AppCompatActivity {
         return viewPager.getCurrentItem()+ i ;
     }
 
-    private void LaunchNextActivity(){
+    private void LaunchHomeScreen(){
         myPrefManager.setFirstTimeLaunch(false);
-        if(FirebaseAuth.getInstance()!=null){
-            FirebaseAuth.getInstance().signOut();
-        }
-        startActivity(new Intent(TutorialActivity.this,CreateAccountActivity.class));
+        startActivity(new Intent(TutorialAdvertisers.this, AdUpload.class));
         finish();
     }
 
@@ -190,3 +198,4 @@ public class TutorialActivity extends AppCompatActivity {
         }
     }
 }
+

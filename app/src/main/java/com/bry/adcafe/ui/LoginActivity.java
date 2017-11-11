@@ -96,7 +96,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user!= null){
+                if(firebaseAuth.getCurrentUser()!= null){
+                    Log.d(TAG,"A user exists."+firebaseAuth.getCurrentUser().getUid());
                     if(isOnline(mContext)){
                         Log.d(TAG,"user is online, setting up everything normally");
                         mRelative.setAlpha(0.0f);
