@@ -34,22 +34,13 @@ public class TutorialAdvertisers extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         // Checking for first time launch - before calling setContentView()
-        myPrefManager = new SliderPrefManager(this);
-        if (!myPrefManager.isFirstTimeLaunch()){
-            LaunchHomeScreen();
-//            finish();
-        }
-
-
         if (Build.VERSION.SDK_INT >= 21){
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
 
         setContentView(R.layout.activity_tutorial_advertisers);
-
+        myPrefManager = new SliderPrefManager(this);
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         myDotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
         myBtnSkip = (Button) findViewById(R.id.btn_skip);
@@ -57,12 +48,12 @@ public class TutorialAdvertisers extends AppCompatActivity {
 
         // layouts of all welcome sliders
         myLayouts = new int[]{
-//                R.layout.welcome_slider_2,
-//                R.layout.welcome_slider_1,
-//                R.layout.welcome_slider_0,
-//                R.layout.welcome_slider_3,
-//                R.layout.welcome_slider_4,
-//                R.layout.welcome_slider_5
+                R.layout.welcome_slider_2,
+                R.layout.welcome_slider_1,
+                R.layout.welcome_slider_0,
+                R.layout.welcome_slider_3,
+                R.layout.welcome_slider_4,
+                R.layout.welcome_slider_5
         };
 
         // adding bottom dots
@@ -120,8 +111,8 @@ public class TutorialAdvertisers extends AppCompatActivity {
     }
 
     private void LaunchHomeScreen(){
-        myPrefManager.setFirstTimeLaunch(false);
         startActivity(new Intent(TutorialAdvertisers.this, AdUpload.class));
+        myPrefManager.setIsFirstTimeLaunchInAdvertise(false);
         finish();
     }
 

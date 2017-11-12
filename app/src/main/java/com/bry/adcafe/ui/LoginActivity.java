@@ -443,11 +443,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      String email = mEmail.getText().toString().trim();
         String password = mPassword.getText().toString().trim();
         if(email.equals("")){
-            mEmail.setText("Please enter your email");
+//            mEmail.setText("Please enter your email");
+            mEmail.setError("Please enter your email");
             return;
         }
         if(password.equals("")){
-            mEmail.setText("Password cannot be blank");
+//            mEmail.setText("Password cannot be blank");
+            mEmail.setError("Password cannot be blank");
             return;
         }
         if(!isOnline(mContext)){
@@ -474,7 +476,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 mAvi.setVisibility(View.GONE);
                                 mLoadingMessage.setVisibility(View.GONE);
                                 mIsLoggingIn = false;
-                                Toast.makeText(LoginActivity.this,"You may have mistyped your username or password.",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this,"You may have mistyped your username or password.",Toast.LENGTH_LONG).show();
                             }
                         }
                     });

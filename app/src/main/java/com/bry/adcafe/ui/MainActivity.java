@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume(){
         Variables.isMainActivityOnline = true;
         super.onResume();
-        if(!getCurrentDateInSharedPreferences().equals(getDate())){
+        if(!getCurrentDateInSharedPreferences().equals("0") && !getCurrentDateInSharedPreferences().equals(getDate())){
             Log.d(TAG,"---Date in shared preferences does not match current date,therefore resetting everything.");
             resetEverything();
             sendBroadcastToUnregisterAllReceivers();
@@ -782,7 +782,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Log.d(TAG,"Current time is " + hours + ":"+minutes + ":"+seconds);
         if(hours == 23 && (minutes == 59) && (seconds>=0)){
-            Log.d(TAG,"---Day is approaching midnight,returning true to reset the activity and values.");
+            Log.d(TAG,"---Day is approaching midnight,returning true to reset the activity and values. Time is:"+hours+" : "+minutes+" : "+seconds);
             return true;
         }else{
             Log.d(TAG,"---Day is not approaching midnight,so activity will continue normally.");
@@ -924,7 +924,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String getCurrentDateInSharedPreferences(){
         Log.d(TAG,"---Getting current date in shared preferences.");
         SharedPreferences prefs = getSharedPreferences(Constants.DATE,MODE_PRIVATE);
-        String date = prefs.getString("date","nill");
+        String date = prefs.getString("date","0");
         return date;
     }
 

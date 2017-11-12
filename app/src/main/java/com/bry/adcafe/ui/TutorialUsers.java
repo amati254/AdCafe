@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bry.adcafe.R;
+import com.bry.adcafe.Variables;
 import com.bry.adcafe.services.SliderPrefManager;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -105,9 +106,15 @@ public class TutorialUsers extends AppCompatActivity {
     }
 
     private void LaunchNextActivity(){
-        myPrefManager.setFirstTimeLaunch(false);
-        startActivity(new Intent(TutorialUsers.this,CreateAccountActivity.class));
-        finish();
+        if(Variables.isInfo){
+            startActivity(new Intent(TutorialUsers.this,Dashboard.class));
+            finish();
+        }else{
+            myPrefManager.setFirstTimeLaunch(false);
+            startActivity(new Intent(TutorialUsers.this,CreateAccountActivity.class));
+            finish();
+        }
+
     }
 
     ViewPager.OnPageChangeListener viewPageChangeListener = new ViewPager.OnPageChangeListener() {

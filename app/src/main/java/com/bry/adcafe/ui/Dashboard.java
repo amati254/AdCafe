@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.services.SliderPrefManager;
 
 import butterknife.Bind;
 
@@ -24,6 +25,8 @@ public class Dashboard extends AppCompatActivity {
     private CardView mUploadAnAdIcon;
     private TextView mAmmountNumber;
     protected String mKey = "";
+    private SliderPrefManager myPrefManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,16 +43,24 @@ public class Dashboard extends AppCompatActivity {
         mInfoImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Snackbar.make(findViewById(R.id.dashboardCoordinator), R.string.dashInfo,
-                        Snackbar.LENGTH_INDEFINITE).show();
+                Intent intent = new Intent(Dashboard.this,TutorialUsers.class);
+                startActivity(intent);
+                Variables.isInfo = true;
+                finish();
             }
         });
 
         mUploadAnAdIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Dashboard.this,AdUpload.class);
-                startActivity(intent);
+                myPrefManager = new SliderPrefManager(getApplicationContext());
+                if (myPrefManager.isFirstTimeLaunchForAdvertisers()){
+                    Intent intent = new Intent(Dashboard.this,TutorialAdvertisers.class);
+                    startActivity(intent);
+                }else{
+                    Intent intent = new Intent(Dashboard.this,AdUpload.class);
+                    startActivity(intent);
+                }
             }
         });
 
