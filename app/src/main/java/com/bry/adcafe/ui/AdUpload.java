@@ -333,13 +333,18 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                             Snackbar.LENGTH_LONG).show();
                     }else{
                         if(bm!=null){
-                            setAllOtherViewsToBeGone();
-                            mAvi.setVisibility(View.VISIBLE);
-                            mLoadingTextView.setVisibility(View.VISIBLE);
-                            mLoadingTextView.setText(R.string.uploadMessage);
-                            setNewValueToStartFrom();
-                            date = getNextDay();
-                            uploadImage();
+                            if(noOfChildrenInClusterToStartFrom>=510){
+                                Toast.makeText(mContext,"The ad limit has been exceeded.You may need to upload tomorrow instead.",Toast.LENGTH_LONG).show();
+                            }else{
+                                setAllOtherViewsToBeGone();
+                                mAvi.setVisibility(View.VISIBLE);
+                                mLoadingTextView.setVisibility(View.VISIBLE);
+                                mLoadingTextView.setText(R.string.uploadMessage);
+                                setNewValueToStartFrom();
+                                date = getNextDay();
+                                uploadImage();
+                            }
+
                         }else{
                             Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
                         }
@@ -475,7 +480,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,35,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,65,baos);
         byte[] byteArray = baos.toByteArray();
         return byteArray;
     }

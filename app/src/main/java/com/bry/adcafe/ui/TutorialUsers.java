@@ -22,9 +22,9 @@ import com.bry.adcafe.R;
 import com.bry.adcafe.services.SliderPrefManager;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class TutorialActivity extends AppCompatActivity {
+public class TutorialUsers extends AppCompatActivity {
     private ViewPager viewPager;
-    private MyViewPagerAdapter myViewPagerAdapter;
+    private TutorialUsers.MyViewPagerAdapter myViewPagerAdapter;
     private LinearLayout myDotsLayout;
     private TextView[] myDots;
     private int[] myLayouts;
@@ -37,7 +37,7 @@ public class TutorialActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 21){
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
-        setContentView(R.layout.activity_tutorial);
+        setContentView(R.layout.activity_tutorial_users);
         myPrefManager = new SliderPrefManager(getApplicationContext());
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         myDotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
@@ -46,24 +46,20 @@ public class TutorialActivity extends AppCompatActivity {
 
         // layouts of all welcome sliders
         myLayouts = new int[]{
-                R.layout.welcome_slider_0,
-                R.layout.welcome_slider_1,
-                R.layout.welcome_slider_2,
-                R.layout.welcome_slider_3,
+                R.layout.welcome_slider_5,
                 R.layout.welcome_slider_4,
-                R.layout.welcome_slider_5
+                R.layout.welcome_slider_3,
+                R.layout.welcome_slider_2,
+                R.layout.welcome_slider_1,
+                R.layout.welcome_slider_0
         };
-
         // adding bottom dots
         addBottomDots(0);
-
-        // making notification bar transparent
         changeStatusBarColor();
 
-        myViewPagerAdapter  = new MyViewPagerAdapter();
+        myViewPagerAdapter  = new TutorialUsers.MyViewPagerAdapter();
         viewPager.setAdapter(myViewPagerAdapter);
         viewPager.addOnPageChangeListener(viewPageChangeListener);
-
         myBtnSkip.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -110,14 +106,10 @@ public class TutorialActivity extends AppCompatActivity {
 
     private void LaunchNextActivity(){
         myPrefManager.setFirstTimeLaunch(false);
-        if(FirebaseAuth.getInstance()!=null){
-            FirebaseAuth.getInstance().signOut();
-        }
-        startActivity(new Intent(TutorialActivity.this,TutorialUsers.class));
+        startActivity(new Intent(TutorialUsers.this,CreateAccountActivity.class));
         finish();
     }
 
-    //  viewpager change listener
     ViewPager.OnPageChangeListener viewPageChangeListener = new ViewPager.OnPageChangeListener() {
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -144,10 +136,8 @@ public class TutorialActivity extends AppCompatActivity {
         }
     };
 
-    /**
-     * Making notification bar transparent
-     */
 
+//     Making notification bar transparent
     private void changeStatusBarColor(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
             Window window = getWindow();

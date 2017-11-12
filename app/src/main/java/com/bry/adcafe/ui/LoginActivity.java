@@ -70,6 +70,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private Context mContext;
     private String mKey = "";
+    private boolean mIsLoggingIn = false;
 //    private boolean mHasLoadingMonthTotalsFailed;
 //    private boolean mHasLoadingDayTotalsFailed;
     private boolean mIsLastOnlineToday;
@@ -103,6 +104,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         mRelative.setAlpha(0.0f);
                         mAvi.setVisibility(View.VISIBLE);
                         mLoadingMessage.setVisibility(View.VISIBLE);
+                        mIsLoggingIn = false;
                         lastUsed();
                     }else{
                         setNoInternetView();
@@ -399,13 +401,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v){
-        if(v == mRegisterLink){
+        if(v == mRegisterLink && !mIsLoggingIn){
             Intent intent = new Intent(LoginActivity.this,CreateAccountActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         }
-        if(v == mLoginButton){
+        if(v == mLoginButton && !mIsLoggingIn){
             View view = this.getCurrentFocus();
             if (view != null) {
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -455,6 +457,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mAvi.setVisibility(View.VISIBLE);
             mLoadingMessage.setVisibility(View.VISIBLE);
             mRelative.setAlpha(0.2f);
+            mIsLoggingIn = true;
 //            mRelative.setVisibility(View.GONE);
             Log.d(TAG,"--Logging in user with username and password...");
 
@@ -470,6 +473,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 mRelative.setAlpha(1.0f);
                                 mAvi.setVisibility(View.GONE);
                                 mLoadingMessage.setVisibility(View.GONE);
+                                mIsLoggingIn = false;
                                 Toast.makeText(LoginActivity.this,"You may have mistyped your username or password.",Toast.LENGTH_SHORT).show();
                             }
                         }

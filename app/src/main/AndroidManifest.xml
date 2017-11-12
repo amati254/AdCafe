@@ -51,7 +51,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.TutorialActivity" />
-        <activity android:name=".ui.TutorialAdvertisers"></activity>
+        <activity android:name=".ui.TutorialAdvertisers" />
+        <activity android:name=".ui.TutorialUsers"></activity>
     </application>
 
 </manifest>
