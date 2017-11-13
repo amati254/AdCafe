@@ -41,12 +41,14 @@ import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.NetworkStateReceiver;
 import com.bry.adcafe.services.Utils;
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -104,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         setUpSwipeView();
         loadAdsFromThread();
+        logUser();
     }
 
 
@@ -373,6 +376,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOnline);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForLastAd);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForLoadMoreAds);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasStarted);
         sendBroadcastToUnregisterAllReceivers();
     }
 
@@ -481,6 +485,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLastAd,new IntentFilter(Constants.LAST));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLoadMoreAds,new IntentFilter(Constants.LOAD_MORE_ADS));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForTimerHasStarted,new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
 
     }
 
@@ -628,6 +633,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(mContext,R.string.lastAd,Toast.LENGTH_SHORT).show();
             loadAnyAnnouncements();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForTimerHasStarted = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onclicks();
         }
     };
 
@@ -1029,4 +1041,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
+
+    private void logUser() {
+        Crashlytics.setUserIdentifier(User.getUid());
+        Crashlytics.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        Crashlytics.setUserName("Test User");
+    }
+
 }

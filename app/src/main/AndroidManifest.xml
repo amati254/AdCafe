@@ -53,6 +53,9 @@
         <activity android:name=".ui.TutorialActivity" />
         <activity android:name=".ui.TutorialAdvertisers" />
         <activity android:name=".ui.TutorialUsers"></activity>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="e8d463a013974f8861522487a012c2b4de2f72f3" />
     </application>
 
 </manifest>

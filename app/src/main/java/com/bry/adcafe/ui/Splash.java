@@ -9,6 +9,8 @@ import android.view.View;
 
 import com.bry.adcafe.R;
 import com.bry.adcafe.services.SliderPrefManager;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 public class Splash extends AppCompatActivity {
     private final int SPLASH_DISPLAY_LENGTH = 3700;
@@ -18,6 +20,7 @@ public class Splash extends AppCompatActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_splash);
 //        hideNavBars();
 

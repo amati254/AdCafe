@@ -107,7 +107,10 @@ public class TutorialUsers extends AppCompatActivity {
 
     private void LaunchNextActivity(){
         if(Variables.isInfo){
-            startActivity(new Intent(TutorialUsers.this,Dashboard.class));
+//            startActivity(new Intent(TutorialUsers.this,Dashboard.class));
+            Intent intent = new Intent(TutorialUsers.this,Dashboard.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
             finish();
         }else{
             myPrefManager.setFirstTimeLaunch(false);
