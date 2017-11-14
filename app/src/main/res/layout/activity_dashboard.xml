@@ -100,7 +100,7 @@
                 android:textSize="13sp"
                 android:textAlignment="center"
                 android:layout_marginBottom="5dp"
-                android:text="THIS MONTH"
+                android:text="ALL TIME"
                 android:layout_height="wrap_content" />
 
         </android.support.v7.widget.CardView>
@@ -220,7 +220,7 @@
                 android:textSize="10sp"
                 android:textAlignment="center"
                 android:layout_marginBottom="5dp"
-                android:text="THIS MONTH"
+                android:text="SO FAR"
                 android:layout_height="wrap_content" />
 
         </android.support.v7.widget.CardView>

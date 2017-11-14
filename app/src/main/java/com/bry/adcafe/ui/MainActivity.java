@@ -66,6 +66,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import io.fabric.sdk.android.Fabric;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,NetworkStateReceiver.NetworkStateReceiverListener {
     private static final String TAG = "MainActivity";
     private LinearLayout mFailedToLoadLayout;
@@ -103,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mContext = getApplicationContext();
         Variables.isMainActivityOnline = true;
         registerReceivers();
-
+        if(!Fabric.isInitialized()) Fabric.with(this, new Crashlytics());
         setUpSwipeView();
         loadAdsFromThread();
         logUser();
@@ -127,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             removeAllViews();
         }
         if(isAlmostMidNight()&&Variables.isMainActivityOnline){
+            mIsBeingReset = true;
             resetEverything();
             sendBroadcastToUnregisterAllReceivers();
             removeAllViews();
@@ -136,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
                 Log.d(TAG,"---started the time checker for when it is almost midnight.");
                 if(isAlmostMidNight()&&Variables.isMainActivityOnline){
+                    mIsBeingReset = true;
                     resetEverything();
                     sendBroadcastToUnregisterAllReceivers();
                     removeAllViews();
@@ -873,7 +877,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void resetEverything() {
-        mIsBeingReset = true;
         resetAdTotalSharedPreferencesAndDayAdTotals();
         loadAdsFromThread();
     }
