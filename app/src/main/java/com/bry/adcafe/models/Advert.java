@@ -104,7 +104,11 @@ public class Advert {
     }
 
     public String getWebsiteLink() {
-        return websiteLink;
+        if(websiteLink == null){
+            return null;
+        }else{
+            return websiteLink;
+        }
     }
 
     public void setWebsiteLink(String websiteLink) {

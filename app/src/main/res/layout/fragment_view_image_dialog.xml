@@ -86,7 +86,7 @@
                     android:background="@drawable/ic_action_website"/>
                 <TextView
                     android:layout_width="wrap_content"
-                    android:id="@+id/websiteText"
+                    android:id="@+id/websiteTextxx"
                     android:textSize="8dp"
                     android:text="Visit Website."
                     android:layout_height="wrap_content" />

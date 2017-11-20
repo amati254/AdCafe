@@ -112,7 +112,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private boolean uploading = false;
     private String pushrefInAdminConsole;
-    private String mLink = "";
+    private String mLink = "none";
 
 
     @Override
@@ -565,6 +565,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         advert.setNumberOfTimesSeen(0);
         advert.setNumberOfUsersToReach(mNumberOfClusters*1000);
         advert.setPushRefInAdminConsole(pushId);
+        advert.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
         advert.setWebsiteLink(mLink);
         pushrefInAdminConsole = pushId;
         pushRef.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {

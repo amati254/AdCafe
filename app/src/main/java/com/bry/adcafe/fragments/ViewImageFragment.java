@@ -3,6 +3,7 @@ package com.bry.adcafe.fragments;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bry.adcafe.R;
@@ -33,6 +35,7 @@ public class ViewImageFragment extends DialogFragment {
     private ImageButton mWebsiteLink;
 //    private ImageButton mDeleteButton;
     private Advert mAdvert;
+    private String igsNein = "none";
 
     public void setfragcontext(Context context){
         mContext = context;
@@ -44,10 +47,14 @@ public class ViewImageFragment extends DialogFragment {
         mBackButton = (ImageButton) rootView.findViewById(R.id.backBtn);
         mShareButton = (ImageButton) rootView.findViewById(R.id.shareBtn);
         mWebsiteLink = (ImageButton) rootView.findViewById(R.id.Website);
+        TextView websiteTextxx = (TextView) rootView.findViewById(R.id.websiteTextxx);
 //        mDeleteButton = (ImageButton) rootView.findViewById(R.id.Delete);
-//        if(mAdvert.getWebsiteLink()==null) mWebsiteLink.setAlpha(0.1f);
-        mImageView = (ImageView) rootView.findViewById(R.id.theAdImage);
         mAdvert = Variables.adToBeViewed;
+        if(mAdvert.getWebsiteLink().equals(igsNein)) {
+            mWebsiteLink.setAlpha(0.4f);
+            websiteTextxx.setAlpha(0.4f);
+        }
+        mImageView = (ImageView) rootView.findViewById(R.id.theAdImage);
         mImageView.setImageBitmap(mAdvert.getImageBitmap());
 
         mBackButton.setOnClickListener(new View.OnClickListener() {
@@ -68,9 +75,10 @@ public class ViewImageFragment extends DialogFragment {
         mWebsiteLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                if(mAdvert.getWebsiteLink()!=null){
-//                    Toast.makeText(mContext,"This will take user to website",Toast.LENGTH_SHORT).show();
-//                }
+                if(!mAdvert.getWebsiteLink().equals(igsNein)){
+                    Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Variables.getCurrentAdvert().getWebsiteLink()));
+                    startActivity(webIntent);
+                }
             }
         });
 
@@ -80,9 +88,6 @@ public class ViewImageFragment extends DialogFragment {
 //
 //            }
 //        });
-
-
-
         return rootView;
     }
 }

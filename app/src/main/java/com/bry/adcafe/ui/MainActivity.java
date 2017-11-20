@@ -111,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isFirebaseResetNecessary = false;
     private boolean isOffline = false;
     private boolean isLastAd = false;
+    private String igsNein = "none";
 
 
     @Override
@@ -515,7 +516,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void onclicks() {
         findViewById(R.id.logoutBtn).setOnClickListener(this);
-        if(Variables.getCurrentAdvert().getWebsiteLink()!=null){
+        if(!Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein)){
             findViewById(R.id.WebsiteIcon).setAlpha(1.0f);
             findViewById(R.id.websiteText).setAlpha(1.0f);
         }
@@ -952,7 +953,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(mContext,"Retrying...",Toast.LENGTH_SHORT).show();
             loadAdsFromThread();
         }
-        if(v==findViewById(R.id.WebsiteIcon)&& Variables.getCurrentAdvert().getWebsiteLink()!=null){
+        if(v==findViewById(R.id.WebsiteIcon)&& !Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein)){
             Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Variables.getCurrentAdvert().getWebsiteLink()));
             startActivity(webIntent);
         }
@@ -1067,7 +1068,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Log.d(TAG, "pinning the selected ad.");
         ad.setPushId(pushId);
-
         pushRef.setValue(ad).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
