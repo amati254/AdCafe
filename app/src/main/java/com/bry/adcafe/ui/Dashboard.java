@@ -49,6 +49,7 @@ public class Dashboard extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(Dashboard.this,TutorialUsers.class);
                 startActivity(intent);
+                Variables.isStartFromLogin = false;
                 Variables.isInfo = true;
                 finish();
             }
