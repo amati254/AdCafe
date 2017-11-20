@@ -525,19 +525,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                        if(!Variables.hasBeenPinned ){
-                            if(Variables.mIsLastOrNotLast == Constants.NOT_LAST && !isLastAd){
-                                Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
-                                        Snackbar.LENGTH_SHORT).show();
-                                pinAd();
-                            }else{
-                                Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't pin that..",
-                                        Snackbar.LENGTH_SHORT).show();
-                            }
+                    if(!Variables.hasBeenPinned ){
+                        if(Variables.mIsLastOrNotLast == Constants.NOT_LAST ||Variables.mIsLastOrNotLast == Constants.LAST){
+                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
+                                    Snackbar.LENGTH_SHORT).show();
+                            pinAd();
                         }else{
-                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
+                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't pin that..",
                                     Snackbar.LENGTH_SHORT).show();
                         }
+                    }else{
+                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
+                                Snackbar.LENGTH_SHORT).show();
+                    }
 
                 }
             });
@@ -594,7 +594,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(Variables.mIsLastOrNotLast == Constants.NO_ADS || isLastAd) {
+                    if(Variables.mIsLastOrNotLast == Constants.NO_ADS) {
                         Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't report that..",
                                 Snackbar.LENGTH_SHORT).show();
                     }else{
