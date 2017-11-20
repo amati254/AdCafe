@@ -34,12 +34,14 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:text="You uploaded no ads yesterday."
+        android:text="You uploaded no ads yesterday.If you uploaded an ad today, you will be able to monitor it starting at midnight."
         android:layout_marginTop="100dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:gravity="center"
         android:textSize="13sp"
         android:id="@+id/noAdsUploadedText"
-        android:visibility="invisible"
+        android:visibility="visible"
         android:layout_height="wrap_content" />
 
     <LinearLayout

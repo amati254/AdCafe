@@ -1,16 +1,27 @@
 package com.bry.adcafe.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.models.Advert;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.NonReusable;
 import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * Created by bryon on 19/11/2017.
@@ -45,6 +56,70 @@ public class MyAdStatsItem {
         int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
         String number = Integer.toString(numberOfUsersWhoDidntSeeAd);
         mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
+
+        loadListeners();
     }
+
+    private void loadListeners() {
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
+                .child(getDate()).child(mAdvert.getPushRefInAdminConsole());
+        DatabaseReference dbRef = query.getRef();
+        dbRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Log.d("MY_AD_STAT_ITEM","Listener from firebase has responded.Updating users reached so far");
+                Advert refreshedAd = dataSnapshot.getValue(Advert.class);
+                int newValue = refreshedAd.getNumberOfTimesSeen();
+                Log.d("MY_AD_STAT_ITEM","New value gotten from firebase --"+newValue);
+                mUsersReachedSoFar.setText("Users reached so far : "+newValue);
+
+                int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- newValue;
+                String number = Integer.toString(numberOfUsersWhoDidntSeeAd);
+                mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private String getDate(){
+        long date = System.currentTimeMillis();
+        SimpleDateFormat sdfMonth = new SimpleDateFormat("MM");
+        String MonthString = sdfMonth.format(date);
+
+        SimpleDateFormat sdfDay = new SimpleDateFormat("dd");
+        String dayString = sdfDay.format(date);
+
+        SimpleDateFormat sdfYear = new SimpleDateFormat("yyyy");
+        String yearString = sdfYear.format(date);
+
+        Calendar c = Calendar.getInstance();
+        String yy = Integer.toString(c.get(Calendar.YEAR));
+        String mm = Integer.toString(c.get(Calendar.MONTH)+1);
+        String dd = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
+
+        String todaysDate = (dd+":"+mm+":"+yy);
+
+        return todaysDate;
+    }
+
 
 }

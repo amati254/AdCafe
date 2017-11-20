@@ -1,6 +1,7 @@
 package com.bry.adcafe.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import com.bry.adcafe.adapters.AdminStatItem;
 import com.bry.adcafe.adapters.MyAdStatsItem;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -115,9 +117,11 @@ public class AdStats extends AppCompatActivity {
                     Toast.makeText(mContext,"We're having a few connectivity issues...",Toast.LENGTH_LONG).show();
                 }
             });
+
         }
 
     }
+
 
     private void loadStats() {
         DataListsView.setVisibility(View.VISIBLE);
@@ -137,18 +141,6 @@ public class AdStats extends AppCompatActivity {
 
     }
 
-
-    ValueEventListener val = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };
 
     private String getDate(){
         long date = System.currentTimeMillis();

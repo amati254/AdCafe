@@ -47,7 +47,7 @@ public class Variables {
 
 
     public static int getAdTotal(String key){
-        if (key==mKey){
+        if (key.equals(mKey)){
             return todaysAdTotal;
         }
         else{

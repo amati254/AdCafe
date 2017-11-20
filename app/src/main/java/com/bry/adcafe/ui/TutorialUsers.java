@@ -2,6 +2,7 @@ package com.bry.adcafe.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
@@ -109,7 +110,10 @@ public class TutorialUsers extends AppCompatActivity {
         if(Variables.isInfo){
 //            startActivity(new Intent(TutorialUsers.this,Dashboard.class));
             Intent intent = new Intent(TutorialUsers.this,Dashboard.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            SharedPreferences prefs = getSharedPreferences("TodayTotals",MODE_PRIVATE);
+            int number = prefs.getInt("TodaysTotals",0);
+            Variables.setAdTotal(number,"");
             startActivity(intent);
             finish();
         }else{

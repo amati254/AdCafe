@@ -112,7 +112,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private boolean uploading = false;
     private String pushrefInAdminConsole;
-    private String mLink;
+    private String mLink = "";
 
 
     @Override
