@@ -78,6 +78,7 @@ public class SavedAdsCard {
         mAdvert = advert;
         mContext = context;
         mPlaceHolderView = placeHolderView;
+
     }
 
     @Resolve
@@ -94,6 +95,8 @@ public class SavedAdsCard {
     private void onClick(){
         if(onDoublePressed){
             shareAd();
+        }else{
+            viewAd();
         }
         onDoublePressed = true;
         new Handler().postDelayed(new Runnable() {
@@ -103,6 +106,13 @@ public class SavedAdsCard {
                 onDoublePressed=false;
             }
         }, 1000);
+    }
+
+    private void viewAd() {
+        Log.d("SavedAdsCard","Setting the ad to be viewed.");
+        Variables.adToBeViewed = mAdvert;
+        Intent intent = new Intent("VIEW");
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     private void shareAd() {
@@ -124,7 +134,7 @@ public class SavedAdsCard {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Glide.with(mContext).load(bitmapToByte(mAdvert.getImageBitmap())).listener(new RequestListener<byte[], GlideDrawable>() {
+        Glide.with(mContext).load(bitmapToByte(getResizedBitmap(mAdvert.getImageBitmap(),300))).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
             public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
                 mAvi.setVisibility(android.view.View.GONE);
@@ -193,7 +203,7 @@ public class SavedAdsCard {
     private static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
         byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
         Bitmap bitm = BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
-        Bitmap newBm = getResizedBitmap(bitm,600);
+        Bitmap newBm = getResizedBitmap(bitm,500);
         return newBm;
     }
 

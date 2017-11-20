@@ -15,7 +15,7 @@ public class Variables {
     private static String lastSeenAd;
     private static String lastAdOfList;
     public static int currentAdNumber = 0;
-    public static Advert currentAdvert;
+    private static Advert currentAdvert;
 
     public static String mIsLastOrNotLast;
     public static boolean hasBeenPinned;
@@ -26,6 +26,7 @@ public class Variables {
     public static boolean isStartFromLogin = false;
     public static boolean hasTimerStarted = false;
     public static Advert adToBeShared;
+    public static Advert adToBeViewed;
     public static boolean isInfo = false;
 
 
@@ -106,4 +107,11 @@ public class Variables {
         lastAdOfList = lastAd;
     }
 
+    public static Advert getCurrentAdvert() {
+        return currentAdvert;
+    }
+
+    public static void setCurrentAdvert(Advert currentAdvert) {
+        Variables.currentAdvert = currentAdvert;
+    }
 }

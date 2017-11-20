@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    tools:context="com.bry.adcafe.ui.AdStats">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/topText"
+        android:layout_marginTop="10dp"
+        android:textAlignment="center"
+        android:textSize="25dp"
+        android:padding="10dp"
+        android:text="My Ad Stats." />
+
+    <View
+        android:layout_width="match_parent"
+        android:background="@color/colorAccent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_height="1dp"/>
+
+    <com.mindorks.placeholderview.PlaceHolderView
+        android:id="@+id/PlaceHolderViewInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:text="You uploaded no ads yesterday."
+        android:layout_marginTop="100dp"
+        android:gravity="center"
+        android:textSize="13sp"
+        android:id="@+id/noAdsUploadedText"
+        android:visibility="invisible"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:id="@+id/droppedInternetLayoutForAdStats"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="70dp"
+            android:background="@drawable/ic_action_connection"
+            android:layout_height="70dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/connectToInternet"
+            android:textSize="11sp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:visibility="gone"
+        android:id="@+id/LoadingViews"
+        android:orientation="vertical">
+
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/mainActivityAvi"
+            style="@style/AVLoadingIndicatorView"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:indicatorColor="@color/accent"
+            app:indicatorName="LineScaleIndicator" />
+
+        <TextView
+            android:id="@+id/loadingAdsMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loading..."
+            android:textSize="10sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

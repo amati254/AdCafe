@@ -1,6 +1,10 @@
 package com.bry.adcafe.ui;
 
+import android.app.AlarmManager;
 import android.app.FragmentManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,15 +14,19 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.accessibility.AccessibilityManagerCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -39,7 +47,9 @@ import com.bry.adcafe.adapters.AdCounterBar;
 import com.bry.adcafe.fragments.ReportDialogFragment;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
+import com.bry.adcafe.services.AlarmReceiver;
 import com.bry.adcafe.services.NetworkStateReceiver;
+import com.bry.adcafe.services.NotificationHelper;
 import com.bry.adcafe.services.Utils;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -70,6 +80,8 @@ import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,NetworkStateReceiver.NetworkStateReceiverListener {
     private static final String TAG = "MainActivity";
+    public  String NOTIFICATION_ID = "notification_id";
+    public  String NOTIFICATION = "notification";
     private LinearLayout mFailedToLoadLayout;
     private Button mRetryButton;
     private ImageButton mLogoutButton;
@@ -109,6 +121,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setUpSwipeView();
         loadAdsFromThread();
         logUser();
+        NotificationHelper.cancelAlarmElapsed();
+        NotificationHelper.disableBootReceiver(mContext);
     }
 
 
@@ -207,6 +221,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(networkStateReceiver!=null) networkStateReceiver.removeListener(this);
         this.unregisterReceiver(networkStateReceiver);
         Variables.isMainActivityOnline = false;
+
+        NotificationHelper.scheduleRepeatingElapsedNotification(mContext);
+        NotificationHelper.enableBootReceiver(mContext);
         super.onDestroy();
     }
 
@@ -315,8 +332,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             dbRef = query.getRef();
             Log.d(TAG,"---Adding value event listener...");
             if(Variables.getAdTotal(mKey)==0){
+                Log.d(TAG,"User adTotal is 0, so is starting at 1");
                 dbRef.orderByKey().startAt(Integer.toString(1)).limitToFirst(5).addValueEventListener(val);
             }else{
+                Log.d(TAG,"User adTotal is not 0, so starting at " +Variables.getAdTotal(mKey));
                 dbRef.orderByKey().startAt(Integer.toString(Variables.getAdTotal(mKey))).limitToFirst(5).addListenerForSingleValueEvent(val);
             }
         }
@@ -336,7 +355,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if(mAdList.size()>1) mAdList.remove(0);
                     mChildToStartFrom = Variables.getAdTotal(mKey) + (int)dataSnapshot.getChildrenCount()-1;
                 }else{
-                    mChildToStartFrom = Variables.getAdTotal(mKey) + (int)dataSnapshot.getChildrenCount()-1;
+                    mChildToStartFrom = Variables.getAdTotal(mKey) + (int)dataSnapshot.getChildrenCount();
                 }
 
                 Log.d(TAG,"Child set to start from is -- "+mChildToStartFrom);
@@ -458,11 +477,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG,"---User has seen all the ads, thus will load only last ad...");
                 mSwipeView.lockViews();
                 mSwipeView.addView(new AdvertCard(mContext,mAdList.get(0),mSwipeView,Constants.LAST));
+
                 Variables.setIsLastOrNotLast(Constants.LAST);
                 isLastAd = true;
             }else{
                 for(Advert ad: mAdList){
                     mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.NOT_LAST));
+                    Log.d(TAG,"Loading ad "+ad.getPushRefInAdminConsole());
                     Variables.setIsLastOrNotLast(Constants.NOT_LAST);
                 }
             }
@@ -505,7 +526,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         Snackbar.LENGTH_SHORT).show();
                                 pinAd();
                             }else{
-                                Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't pin this..",
+                                Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't pin that..",
                                         Snackbar.LENGTH_SHORT).show();
                             }
                         }else{
@@ -516,6 +537,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             });
         }
+
 
         findViewById(R.id.bookmarkBtn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -568,7 +590,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 @Override
                 public void onClick(View v) {
                     if(Variables.mIsLastOrNotLast == Constants.NO_ADS || isLastAd) {
-                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't report this..",
+                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout),"You can't report that..",
                                 Snackbar.LENGTH_SHORT).show();
                     }else{
                         FragmentManager fm = getFragmentManager();
@@ -611,6 +633,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             addToSharedPreferences();
             adDayAndMonthTotalsToFirebase();
             onclicks();
+            getNumberOfTimesAndSetNewNumberOfTimes();
         }
     };
 
@@ -1051,4 +1074,78 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Crashlytics.setUserName("Test User");
     }
 
+    private void getNumberOfTimesAndSetNewNumberOfTimes(){
+        Log.d(TAG,"Getting the current ad's numberOfTimesSeen from firebase");
+        final int adNumber;
+        final String datte;
+        if(Variables.hasTimerStarted){
+            adNumber = Variables.getAdTotal(mKey)+1;
+        }else{
+            adNumber = Variables.getAdTotal(mKey);
+        }
+        if(isAlmostMidNight()){
+            datte = getNextDay();
+        }else{
+            datte = getDate();
+        }
+        Log.d(TAG,"Push ref for current Advert is : "+ Variables.getCurrentAdvert().getPushRefInAdminConsole());
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
+                .child(datte)
+                .child(Variables.getCurrentAdvert().getPushRefInAdminConsole())
+                .child("numberOfTimesSeen");
+        Log.d(TAG,"Query set up is :"+Constants.ADS_FOR_CONSOLE+" : "+datte+" : "+Variables.getCurrentAdvert().getPushRefInAdminConsole()+" : numberOfTimesSeen");
+        DatabaseReference dbRef = query.getRef();
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int number = dataSnapshot.getValue(int.class);
+                int newNumber = number+1;
+                setNewNumberOfTimesSeen(newNumber,datte,adNumber);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG,"Unable to get number of times seen");
+            }
+        });
+    }
+
+    private void setNewNumberOfTimesSeen(int number,String date,int adNumber) {
+        Log.d(TAG,"Setting the new number of times seen in firebase.");
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
+                .child(date).child(Variables.getCurrentAdvert().getPushRefInAdminConsole()).child("numberOfTimesSeen");
+
+        Log.d(TAG,"Query set up is :"+Constants.ADS_FOR_CONSOLE+" : "+date+" : "+Variables.getCurrentAdvert().getPushRefInAdminConsole()+" : numberOfTimesSeen");
+        DatabaseReference dbRef = query.getRef();
+        dbRef.setValue(number).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG,"The new number has been set.");
+            }
+        });
+    }
+
+//    public static void scheduleRepeatingRTCNotification(Context context, String hour, String min) {
+//        //get calendar instance to be able to select what time notification should be scheduled
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTimeInMillis(System.currentTimeMillis());
+//        //Setting time of the day (8am here) when notification will be sent every day (default)
+//        calendar.set(Calendar.HOUR_OF_DAY,
+//                Integer.getInteger(hour, 8),
+//                Integer.getInteger(min, 0));
+//
+//        //Setting intent to class where Alarm broadcast message will be handled
+//        Intent intent = new Intent(context, AlarmReceiver.class);
+//        //Setting alarm pending intent
+//        PendingIntent alarmIntentRTC = PendingIntent.getBroadcast(context, 100, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//        //getting instance of AlarmManager service
+//        AlarmManager alarmManagerRTC = (AlarmManager)context.getSystemService(ALARM_SERVICE);
+//        //Setting alarm to wake up device every day for clock time.
+//        //AlarmManager.RTC_WAKEUP is responsible to wake up device for sure, which may not be good practice all the time.
+//        // Use this when you know what you're doing.
+//        //Use RTC when you don't need to wake up device, but want to deliver the notification whenever device is woke-up
+//        //We'll be using RTC.WAKEUP for demo purpose only
+//        alarmManagerRTC.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntentRTC);
+//    }
 }

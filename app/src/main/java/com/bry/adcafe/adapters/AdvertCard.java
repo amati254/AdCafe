@@ -170,7 +170,7 @@ public class AdvertCard{
         }).into(profileImageView);
         mSwipeView.lockViews();
         clickable=false;
-        Variables.currentAdvert = mAdvert;
+        Variables.setCurrentAdvert(mAdvert);
         sendBroadcast(Constants.LAST);
     }
 
@@ -237,8 +237,10 @@ public class AdvertCard{
 
     private void setLastAdSeen(){
         Variables.setLastSeenAd(mAdvert.getPushId());
-        Variables.currentAdvert = mAdvert;
-        Log.d("ADVERT_CARD---","Setting the last ad seen in Variables class...");
+        Variables.setCurrentAdvert(mAdvert);
+        Log.d("ADVERT_CARD---","Setting the last ad seen in Variables class... "+Variables.getCurrentAdvert().getPushRefInAdminConsole());
+        Log.d("ADVERT_CARD---","Setting the last ad seen in Variables class... "+mAdvert.getPushRefInAdminConsole());
+
     }
 
     private BroadcastReceiver mMessageReceiverForTimerHasEnded = new BroadcastReceiver() {

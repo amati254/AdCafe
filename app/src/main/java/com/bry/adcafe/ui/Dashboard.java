@@ -7,13 +7,16 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.SliderPrefManager;
 
 import butterknife.Bind;
@@ -26,6 +29,7 @@ public class Dashboard extends AppCompatActivity {
     private TextView mAmmountNumber;
     protected String mKey = "";
     private SliderPrefManager myPrefManager;
+    private Button mUploadedAdsStats;
 
 
     @Override
@@ -64,6 +68,27 @@ public class Dashboard extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.uploadedAdsStats).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Dashboard.this, AdStats.class);
+                startActivity(intent);
+            }
+        });
+
+        findViewById(R.id.uploadedAdsStats).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if(User.getUid().equals("WglDJKRpaYUGZEwSuRhqPw2nZPt1")){
+                    Intent intent = new Intent(Dashboard.this, AdminConsole.class);
+                    startActivity(intent);
+                }else{
+                    Log.d("Dashboard","NOT administrator.");
+                }
+                return false;
+            }
+        });
+
 
     }
 
@@ -79,6 +104,7 @@ public class Dashboard extends AppCompatActivity {
         mInfoImageView = (ImageView) findViewById(R.id.helpIcon);
         mUploadAnAdIcon = (CardView) findViewById(R.id.uploadAnAdIcon);
         mAmmountNumber = (TextView) findViewById(R.id.ammountNumber);
+        mUploadedAdsStats = (Button) findViewById(R.id.uploadedAdsStats);
     }
 
     private void setValues() {

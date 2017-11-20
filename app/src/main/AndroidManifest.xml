@@ -52,10 +52,23 @@
         </activity>
         <activity android:name=".ui.TutorialActivity" />
         <activity android:name=".ui.TutorialAdvertisers" />
-        <activity android:name=".ui.TutorialUsers"></activity>
+        <activity android:name=".ui.TutorialUsers" />
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="e8d463a013974f8861522487a012c2b4de2f72f3" />
+
+        <receiver android:name=".services.AlarmReceiver" />
+        <receiver
+            android:name=".services.AlarmBootReceiver"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".ui.AdminConsole" />
+        <activity android:name=".ui.AdStats"></activity>
     </application>
 
 </manifest>

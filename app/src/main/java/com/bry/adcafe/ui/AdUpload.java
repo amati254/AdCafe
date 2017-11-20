@@ -110,6 +110,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private ImageButton b;
 
     private boolean uploading = false;
+    private String pushrefInAdminConsole;
 
 
     @Override
@@ -307,14 +308,16 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             findViewById(R.id.progressBarTimerExample).setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    if(isOnline(mContext)){
-                        if(bm!=null){
-                            uploadImageAsAnnouncement();
-                        }else{
-                            Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
+                    if(User.getUid().equals("WglDJKRpaYUGZEwSuRhqPw2nZPt1")) {
+                        if (isOnline(mContext)) {
+                            if (bm != null) {
+                                uploadImageAsAnnouncement();
+                            } else {
+                                Toast.makeText(mContext, "Please choose your image again.", Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                            Toast.makeText(mContext, "Check your internet connection", Toast.LENGTH_SHORT).show();
                         }
-                    }else{
-                        Toast.makeText(mContext,"Check your internet connection",Toast.LENGTH_SHORT).show();
                     }
                     return false;
                 }
@@ -342,7 +345,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                                 mLoadingTextView.setText(R.string.uploadMessage);
                                 setNewValueToStartFrom();
                                 date = getNextDay();
-                                uploadImage();
+                                uploadImageToManagerConsole();
                             }
 
                         }else{
@@ -384,7 +387,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                         mLoadingTextView.setText(R.string.uploadMessage);
                         setNewValueToStartFrom();
 
-                        uploadImage();
+                        uploadImage(bm);
                     }else{
                         Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
                     }
@@ -392,6 +395,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             });
         }
     }
+
 
     private void showDialogForPayments() {
         buildTransactionForPayment();
@@ -515,7 +519,32 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         }
     }
 
-    private void uploadImage() {
+    private void uploadImageToManagerConsole() {
+        String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
+        Log.d(TAG, "Uploading Ad to AdminConsole.");
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE).child(getNextDay());
+        DatabaseReference pushRef = adRef.push();
+        String pushId = pushRef.getKey();
+
+        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(User.getUid()).child(Constants.UPLOADED_AD_LIST).child(getNextDay());
+        DatabaseReference pushRef2 = adRef2.push();
+        pushRef2.setValue(pushId);
+
+        Advert advert = new Advert(encodedImageToUpload);
+        advert.setNumberOfTimesSeen(0);
+        advert.setNumberOfUsersToReach(mNumberOfClusters*1000);
+        advert.setPushRefInAdminConsole(pushId);
+        pushrefInAdminConsole = pushId;
+        pushRef.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+               uploadImage(bm);
+            }
+        });
+    }
+
+    private void uploadImage(final Bitmap bm) {
         String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
         uploading = true;
         if(clustersToUpLoadTo.size()>10){
@@ -539,6 +568,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                         .child(Integer.toString(number)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
                 advert.setPushId(pushId);
+                advert.setPushRefInAdminConsole(pushrefInAdminConsole);
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -554,13 +584,12 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                                 Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
                                 setHasPayedInFirebaseToFalse();
                                 cycleCount = 1;
-                                bm = null;
                                 startDashboardActivity();
                             }
                         }else{
                             if(cycleCount == 10){
                                 cycleCount = 0;
-                                uploadImage();
+                                uploadImage(bm);
                             }
                         }
                     }
@@ -596,6 +625,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                         .child(getNextDay()).child(Integer.toString(number)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
                 advert.setPushId(pushId);
+                advert.setPushRefInAdminConsole(pushrefInAdminConsole);
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -611,7 +641,6 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                                 Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
                                 setHasPayedInFirebaseToFalse();
                                 cycleCount = 1;
-                                bm = null;
                                 startDashboardActivity();
                             }
 

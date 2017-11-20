@@ -136,8 +136,8 @@
                 android:layout_height="98dp">
             <TextView
                 android:layout_width="wrap_content"
-                android:textSize="20sp"
-                android:text="Start Earning"
+                android:textSize="15sp"
+                android:text="My uploaded ad stats."
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
                 android:paddingRight="20dp"
@@ -146,15 +146,14 @@
                 android:layout_width="wrap_content"
                 android:textSize="13sp"
                 android:layout_gravity="center"
-                android:text="Make some extra cash by"
+                android:text="Find out how your uploaded ad"
                 android:layout_marginTop="10dp"
                 android:paddingRight="5dp"
                 android:layout_height="wrap_content" />
             <TextView
                 android:layout_width="wrap_content"
                 android:textSize="13sp"
-                android:textAlignment="center"
-                android:text="our monetization program."
+                android:text="is doing so far out there."
                 android:layout_gravity="center"
                 android:paddingRight="5dp"
                 android:layout_height="wrap_content" />
@@ -165,12 +164,13 @@
             <Button
                 android:layout_width="match_parent"
                 android:padding="5dp"
-                android:text="Sign me up!"
+                android:text="Find out."
                 android:layout_gravity="bottom"
                 android:textSize="12dp"
                 android:textColor="@color/white"
                 android:background="@color/colorPrimaryDark"
                 android:layout_marginRight="10dp"
+                android:id="@+id/uploadedAdsStats"
                 android:layout_marginLeft="10dp"
                 android:layout_marginBottom="14dp"
                 android:layout_height="wrap_content" />

@@ -18,6 +18,11 @@ public class Advert {
     private int numberOfAds = 0 ;
     private String pushId;
     private Bitmap imageBitmap;
+    private int numberOfTimesSeen;
+    private int numberOfUsersToReach;
+    private String pushRefInAdminConsole;
+    private String userEmail;
+    private String websiteLink;
 
     public Advert(String ImageUrl){
         this.imageUrl = ImageUrl;
@@ -60,5 +65,49 @@ public class Advert {
 
     public void setImageBitmap(Bitmap bm){
         imageBitmap = bm;
+    }
+
+
+    public void setNumberOfTimesSeen(int number){
+        numberOfTimesSeen = number;
+    }
+
+    public int getNumberOfTimesSeen(){
+        return  numberOfTimesSeen;
+    }
+
+
+
+
+    public String getPushRefInAdminConsole() {
+        return pushRefInAdminConsole;
+    }
+
+    public void setPushRefInAdminConsole(String pushRefInAdminConsole) {
+        this.pushRefInAdminConsole = pushRefInAdminConsole;
+    }
+
+    public int getNumberOfUsersToReach() {
+        return numberOfUsersToReach;
+    }
+
+    public void setNumberOfUsersToReach(int numberOfUsersToReach) {
+        this.numberOfUsersToReach = numberOfUsersToReach;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
+    public String getWebsiteLink() {
+        return websiteLink;
+    }
+
+    public void setWebsiteLink(String websiteLink) {
+        this.websiteLink = websiteLink;
     }
 }

@@ -51,7 +51,7 @@ public class ReportDialogFragment extends DialogFragment {
                 final RadioButton selectedRadioButton = (RadioButton) rootView.findViewById((selectedId));
 
                 Log.d("ReportDialog---",selectedRadioButton.getText().toString());
-                Log.d("ReportDialog---","Ad being reported is : "+ Variables.currentAdvert.getPushId());
+                Log.d("ReportDialog---","Ad being reported is : "+ Variables.getCurrentAdvert().getPushId());
 
                 flagTheAd(selectedRadioButton.getText().toString());
             }
@@ -63,7 +63,7 @@ public class ReportDialogFragment extends DialogFragment {
     private void flagTheAd(String Message) {
         DatabaseReference mRef3 = FirebaseDatabase.getInstance().getReference(Constants.REPORTED_ADS).child(getDate())
                 .child(Integer.toString(User.getClusterID(mKey)))
-                .child(Variables.currentAdvert.getPushId());
+                .child(Variables.getCurrentAdvert().getPushId());
         mRef3.setValue(Message);
         Toast.makeText(mContext,"Duly reported.",Toast.LENGTH_SHORT).show();
         dismiss();

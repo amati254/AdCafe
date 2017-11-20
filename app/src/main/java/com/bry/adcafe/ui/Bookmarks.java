@@ -1,5 +1,6 @@
 package com.bry.adcafe.ui;
 
+import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import com.bry.adcafe.Manifest;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.adapters.SavedAdsCard;
+import com.bry.adcafe.fragments.ViewImageFragment;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.NetworkStateReceiver;
@@ -95,6 +97,7 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpinned);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForReceivingUnableToPinAd);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForSharingAd);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForViewingAd);
 
     }
 
@@ -102,6 +105,7 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnpinned,new IntentFilter(Constants.REMOVE_PINNED_AD));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForReceivingUnableToPinAd,new IntentFilter(Constants.UNABLE_TO_REMOVE_PINNED_AD));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForSharingAd,new IntentFilter("SHARE"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForViewingAd,new IntentFilter("VIEW"));
     }
 
 
@@ -154,7 +158,7 @@ public class Bookmarks extends AppCompatActivity {
         mPlaceHolderView = (PlaceHolderView) findViewById(R.id.PlaceHolderView);
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.avi);
         loadingText = (TextView) findViewById(R.id.loadingPinnedAdsMessage);
-        mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,1));
+        mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,3));
 
     }
 
@@ -188,6 +192,21 @@ public class Bookmarks extends AppCompatActivity {
             isStoragePermissionGranted();
         }
     };
+
+    private BroadcastReceiver mMessageReceiverForViewingAd = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BOOKMARKS--","Received message to view ad.");
+            loadAdFragment();
+        }
+    };
+
+    private void loadAdFragment() {
+        FragmentManager fm = getFragmentManager();
+        ViewImageFragment imageFragment = new ViewImageFragment();
+        imageFragment.show(fm, "View image.");
+        imageFragment.setfragcontext(mContext);
+    }
 
 
     private void loadAdsFromFirebase(){
