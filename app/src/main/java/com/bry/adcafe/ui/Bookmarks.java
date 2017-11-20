@@ -99,6 +99,8 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForSharingAd);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForViewingAd);
 
+        Intent intent = new Intent("UNREGISTER");
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     private void registerReceivers(){

@@ -33,7 +33,7 @@ public class ViewImageFragment extends DialogFragment {
     private ImageButton mBackButton;
     private ImageButton mShareButton;
     private ImageButton mWebsiteLink;
-//    private ImageButton mDeleteButton;
+    private ImageButton mDeleteButton;
     private Advert mAdvert;
     private String igsNein = "none";
 
@@ -48,7 +48,7 @@ public class ViewImageFragment extends DialogFragment {
         mShareButton = (ImageButton) rootView.findViewById(R.id.shareBtn);
         mWebsiteLink = (ImageButton) rootView.findViewById(R.id.Website);
         TextView websiteTextxx = (TextView) rootView.findViewById(R.id.websiteTextxx);
-//        mDeleteButton = (ImageButton) rootView.findViewById(R.id.Delete);
+        mDeleteButton = (ImageButton) rootView.findViewById(R.id.Delete);
         mAdvert = Variables.adToBeViewed;
         if(mAdvert.getWebsiteLink().equals(igsNein)) {
             mWebsiteLink.setAlpha(0.4f);
@@ -79,6 +79,14 @@ public class ViewImageFragment extends DialogFragment {
                     Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Variables.getCurrentAdvert().getWebsiteLink()));
                     startActivity(webIntent);
                 }
+            }
+        });
+        mDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mAdvert.getPushRefInAdminConsole());
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                dismiss();
             }
         });
 

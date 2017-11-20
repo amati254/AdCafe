@@ -78,13 +78,31 @@ public class SavedAdsCard {
         mAdvert = advert;
         mContext = context;
         mPlaceHolderView = placeHolderView;
-
     }
 
     @Resolve
     private void onResolved() {
        loadImage();
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter("UNREGISTER"));
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin,new IntentFilter(mAdvert.getPushRefInAdminConsole()));
     }
+
+    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForUnpin = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
+            unPin();
+        }
+    };
 
     @LongClick(R.id.SavedImageView)
     private void onLongClick(){
