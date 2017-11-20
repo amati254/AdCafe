@@ -146,6 +146,10 @@ public class TutorialUsers extends AppCompatActivity {
         }
     };
 
+    @Override
+    public void onBackPressed(){
+        LaunchNextActivity();
+    }
 
 //     Making notification bar transparent
     private void changeStatusBarColor(){
