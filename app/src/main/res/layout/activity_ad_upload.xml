@@ -119,7 +119,6 @@
 
     <android.support.v7.widget.CardView
         android:orientation="vertical"
-        android:visibility="gone"
         android:id="@+id/cardviewForShowingPreviewOfAd"
         android:background="@color/white"
         android:layout_width="match_parent"
@@ -144,6 +143,7 @@
             <ImageButton
                 android:id="@+id/reportBtnPreview"
                 android:layout_width="42dp"
+                android:alpha="0.6"
                 android:layout_height="42dp"
                 android:layout_marginLeft="10dp"
                 android:background="@drawable/ic_action_flag"/>
@@ -151,6 +151,7 @@
             <ImageButton
                 android:id="@+id/bookmark2BtnPreview"
                 android:layout_width="44dp"
+                android:alpha="0.6"
                 android:layout_height="44dp"
                 android:layout_marginLeft="3dp"
                 android:background="@drawable/ic_action_pin"/>
@@ -167,6 +168,24 @@
             android:layout_marginTop="0.5dp"
             android:layout_height="match_parent"
             android:layout_marginBottom="48dp"/>
+
+        <ImageButton
+            android:id="@+id/WebsiteIcon"
+            android:layout_width="44dp"
+            android:layout_gravity="bottom"
+            android:layout_height="44dp"
+            android:layout_marginLeft="273dp"
+            android:background="@drawable/ic_action_website"/>
+
+        <View
+            android:layout_width="2dp"
+            android:visibility="invisible"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="307dp"
+            android:layout_marginBottom="30dp"
+            android:id="@+id/smallDot"
+            android:background="@color/fuchsia"
+            android:layout_height="2dp"/>
 
     </android.support.v7.widget.CardView>
 

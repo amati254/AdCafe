@@ -1,5 +1,6 @@
 package com.bry.adcafe.ui;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.FragmentManager;
 import android.app.Notification;
@@ -17,6 +18,7 @@ import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
@@ -50,6 +52,7 @@ import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.AlarmReceiver;
 import com.bry.adcafe.services.NetworkStateReceiver;
 import com.bry.adcafe.services.NotificationHelper;
+import com.bry.adcafe.services.NotificationPublisher;
 import com.bry.adcafe.services.Utils;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -121,14 +124,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setUpSwipeView();
         loadAdsFromThread();
         logUser();
-        NotificationHelper.cancelAlarmElapsed();
-        NotificationHelper.disableBootReceiver(mContext);
     }
 
 
     @Override
     protected void onStart(){
         super.onStart();
+//        NotificationHelper.scheduleRepeatingRTCNotification(mContext,"13","40");
     }
 
 
@@ -221,9 +223,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(networkStateReceiver!=null) networkStateReceiver.removeListener(this);
         this.unregisterReceiver(networkStateReceiver);
         Variables.isMainActivityOnline = false;
-
-        NotificationHelper.scheduleRepeatingElapsedNotification(mContext);
-        NotificationHelper.enableBootReceiver(mContext);
         super.onDestroy();
     }
 
@@ -516,6 +515,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void onclicks() {
         findViewById(R.id.logoutBtn).setOnClickListener(this);
+        if(Variables.getCurrentAdvert().getWebsiteLink()!=null){
+            findViewById(R.id.WebsiteIcon).setAlpha(1.0f);
+            findViewById(R.id.websiteText).setAlpha(1.0f);
+        }
+        findViewById(R.id.WebsiteIcon).setOnClickListener(this);
         if(findViewById(R.id.bookmark2Btn)!= null){
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -948,6 +952,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(mContext,"Retrying...",Toast.LENGTH_SHORT).show();
             loadAdsFromThread();
         }
+        if(v==findViewById(R.id.WebsiteIcon)&& Variables.getCurrentAdvert().getWebsiteLink()!=null){
+            Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Variables.getCurrentAdvert().getWebsiteLink()));
+            startActivity(webIntent);
+        }
 
     }
 
@@ -1052,7 +1060,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void uploadToUserList(Advert ad) {
         String uid = User.getUid();
 
-        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST);
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.PINNED_AD_LIST);
         DatabaseReference pushRef = adRef.push();
         String pushId = pushRef.getKey();
 
@@ -1124,6 +1133,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
+
+    private void scheduleNotification(Notification notification, int delay) {
+        Intent notificationIntent = new Intent(this, NotificationPublisher.class);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+    }
+
+//    @TargetApi(21)
+    private Notification getNotification() {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentText("We might have some ads for you today.");
+        builder.setSmallIcon(R.mipmap.ic_launcher2);
+//        builder.setColor(getResources().getColor(R.color.darkslategrey));
+        return builder.build();
+    }
+
+
 
 //    public static void scheduleRepeatingRTCNotification(Context context, String hour, String min) {
 //        //get calendar instance to be able to select what time notification should be scheduled

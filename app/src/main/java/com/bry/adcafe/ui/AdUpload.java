@@ -20,6 +20,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -111,6 +112,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private boolean uploading = false;
     private String pushrefInAdminConsole;
+    private String mLink;
 
 
     @Override
@@ -304,6 +306,15 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             });
         }
 
+        if(findViewById(R.id.WebsiteIcon)!=null){
+            findViewById(R.id.WebsiteIcon).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    promptUserForLink();
+                }
+            });
+        }
+
         if(findViewById(R.id.progressBarTimerExample)!=null){
             findViewById(R.id.progressBarTimerExample).setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -394,6 +405,25 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 }
             });
         }
+    }
+
+    private void promptUserForLink() {
+        final Dialog d = new Dialog(AdUpload.this);
+        d.setTitle("Ad any relevant link.");
+        d.setContentView(R.layout.dialog5);
+        Button b2 = (Button) d.findViewById(R.id.buttonOk);
+        final EditText e = (EditText) d.findViewById(R.id.editText);
+
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLink = e.getText().toString();
+                Log.d(TAG,"Link gotten is :---"+mLink);
+                findViewById(R.id.smallDot).setVisibility(View.VISIBLE);
+                d.dismiss();
+            }
+        });
+        d.show();
     }
 
 
@@ -535,6 +565,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         advert.setNumberOfTimesSeen(0);
         advert.setNumberOfUsersToReach(mNumberOfClusters*1000);
         advert.setPushRefInAdminConsole(pushId);
+        advert.setWebsiteLink(mLink);
         pushrefInAdminConsole = pushId;
         pushRef.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -568,6 +599,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                         .child(Integer.toString(number)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
                 advert.setPushId(pushId);
+                advert.setWebsiteLink(mLink);
                 advert.setPushRefInAdminConsole(pushrefInAdminConsole);
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -625,6 +657,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                         .child(getNextDay()).child(Integer.toString(number)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
                 advert.setPushId(pushId);
+                advert.setWebsiteLink(mLink);
                 advert.setPushRefInAdminConsole(pushrefInAdminConsole);
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

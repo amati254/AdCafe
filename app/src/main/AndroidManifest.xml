@@ -69,6 +69,8 @@
 
         <activity android:name=".ui.AdminConsole" />
         <activity android:name=".ui.AdStats"></activity>
+
+        <receiver android:name="services.NotificationPublisher" />
     </application>
 
 </manifest>

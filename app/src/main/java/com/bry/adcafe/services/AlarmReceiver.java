@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
@@ -33,6 +34,7 @@ public class AlarmReceiver extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d("ALARM_RECEIVER","Alarm has been received by AlarmReceiver..");
         mContext = context;
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate()).child(Integer.toString(User.getClusterID(mKey)));
         dbRef = query.getRef();
@@ -41,6 +43,7 @@ public class AlarmReceiver extends BroadcastReceiver{
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren()&& isApproppriateTime()){
                     message = "We've got some ads for you today.";
+                    Log.d("AlarmReceiver","Set message to: "+message);
                     buildStuff(mContext);
                 }
             }
@@ -48,6 +51,7 @@ public class AlarmReceiver extends BroadcastReceiver{
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 message = "We might have some ads for you today.";
+                Log.d("AlarmReceiver","Set message to: "+message);
                 buildStuff(mContext);
             }
         });
@@ -60,7 +64,7 @@ public class AlarmReceiver extends BroadcastReceiver{
         if(hours==3){
             return true;
         }else{
-            return false;
+            return true;
         }
     }
 
@@ -84,6 +88,7 @@ public class AlarmReceiver extends BroadcastReceiver{
                         .setContentIntent(pendingIntent)
                         .setSmallIcon(R.mipmap.ic_launcher2)
                         .setColor(context.getResources().getColor(R.color.darkslategrey))
+                        .setContentTitle("AdCafe")
                         .setContentText(message)
                         .setAutoCancel(true);
 

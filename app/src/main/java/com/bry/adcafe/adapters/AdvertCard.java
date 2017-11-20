@@ -82,6 +82,9 @@ public class AdvertCard{
 
     @Resolve
     private void onResolved(){
+        if(mAdvert.getWebsiteLink()!=null){
+            mSwipeView.findViewById(R.id.smallDot).setVisibility(android.view.View.VISIBLE);
+        }
         if(mLastOrNotLast == Constants.LAST){
             mIsNoAds = false;
            loadOnlyLastAd();
@@ -114,8 +117,7 @@ public class AdvertCard{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Glide.with(mContext).load(bitmapToByte(mAdvert.getImageBitmap())).bitmapTransform(new RoundedCornersTransformation(mContext,Utils.dpToPx(4),0,
-                RoundedCornersTransformation.CornerType.TOP)).listener(new RequestListener<byte[], GlideDrawable>() {
+        Glide.with(mContext).load(bitmapToByte(mAdvert.getImageBitmap())).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
             public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
                 Log.d("ADVERT_CARD--","The image has failed to load due to error."+e.getMessage());
@@ -150,8 +152,7 @@ public class AdvertCard{
             e.printStackTrace();
         }
 
-        Glide.with(mContext).load(bitmapToByte(mAdvert.getImageBitmap())).bitmapTransform(new RoundedCornersTransformation(mContext, Utils.dpToPx(4), 0,
-                RoundedCornersTransformation.CornerType.TOP)).listener(new RequestListener<byte[], GlideDrawable>() {
+        Glide.with(mContext).load(bitmapToByte(mAdvert.getImageBitmap())).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
             public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
                 errorImageView.setVisibility(android.view.View.VISIBLE);
