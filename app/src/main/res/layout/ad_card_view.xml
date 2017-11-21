@@ -90,6 +90,26 @@
                     android:layout_height="wrap_content" />
             </RelativeLayout>
 
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:visibility="visible"
+                android:layout_height="wrap_content">
+                <ImageButton
+                    android:id="@+id/shareImageIcon"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/ic_action_share"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/shareImageText"
+                    android:text="Share"
+                    android:textSize="8dp"
+                    android:paddingTop="35dp"
+                    android:paddingLeft="20dp"
+                    android:layout_height="wrap_content" />
+            </RelativeLayout>
+
         </LinearLayout>
 
         <ImageView

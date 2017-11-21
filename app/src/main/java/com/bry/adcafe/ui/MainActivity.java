@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -19,11 +20,14 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.accessibility.AccessibilityManagerCompat;
 import android.support.v7.app.AlertDialog;
@@ -74,6 +78,9 @@ import com.mindorks.placeholderview.SwipeDecor;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.wang.avi.AVLoadingIndicatorView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -607,6 +614,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         reportDialogFragment.setfragcontext(mContext);
                     }
 
+                }
+            });
+        }
+
+        if(findViewById(R.id.shareImageIcon)!=null){
+            findViewById(R.id.shareImageIcon).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Variables.adToBeShared = Variables.getCurrentAdvert();
+                    isStoragePermissionGranted();
                 }
             });
         }
@@ -1168,8 +1185,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return builder.build();
     }
 
-
-
 //    public static void scheduleRepeatingRTCNotification(Context context, String hour, String min) {
 //        //get calendar instance to be able to select what time notification should be scheduled
 //        Calendar calendar = Calendar.getInstance();
@@ -1193,4 +1208,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        //We'll be using RTC.WAKEUP for demo purpose only
 //        alarmManagerRTC.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntentRTC);
 //    }
+
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG,"Permission is granted");
+                shareImage(Variables.adToBeShared.getImageBitmap());
+                return true;
+            } else {
+
+                Log.v(TAG,"Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG,"Permission is granted");
+            shareImage(Variables.adToBeShared.getImageBitmap());
+            return true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            Log.v(TAG,"Permission: "+permissions[0]+ "was "+grantResults[0]);
+            //resume tasks needing this permission
+            shareImage(Variables.adToBeShared.getImageBitmap());
+        }
+    }
+
+    private void shareImage(Bitmap icon){
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(30);
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("image/jpeg");
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        icon.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");
+        try {
+            f.createNewFile();
+            FileOutputStream fo = new FileOutputStream(f);
+            fo.write(bytes.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
+        startActivity(Intent.createChooser(share, "Share Image"));
+    }
+
+
 }
