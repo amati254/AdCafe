@@ -660,6 +660,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             adDayAndMonthTotalsToFirebase();
             onclicks();
             getNumberOfTimesAndSetNewNumberOfTimes();
+            getAndSetAllAdsThatHaveBeenSeenEver();
         }
     };
 
@@ -1257,6 +1258,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
         startActivity(Intent.createChooser(share, "Share Image"));
+    }
+
+
+    private void getAndSetAllAdsThatHaveBeenSeenEver(){
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.TOTAL_ALL_TIME_ADS);
+        DatabaseReference dbRef = query.getRef();
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                long number;
+                if (dataSnapshot.getValue(long.class)!=null) number = dataSnapshot.getValue(long.class);
+                else number = 0;
+                Log.d(TAG,"number gotten for global ad totals is : "+number);
+                long newNumber = number+1;
+                setNewAllAdsThatHaveBeenSeenEver(newNumber);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG,"Unable to update totals");
+            }
+        });
+    }
+
+    private void setNewAllAdsThatHaveBeenSeenEver(long number) {
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.TOTAL_ALL_TIME_ADS);
+        DatabaseReference dbRef = query.getRef();
+        dbRef.setValue(number).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG,"New value has been set");
+            }
+        });
     }
 
 

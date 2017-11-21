@@ -58,7 +58,8 @@ public class Constants {
     public static String ADS_FOR_CONSOLE = "AdsForConsole";
     public static String UPLOADED_AD_LIST = "UploadedAdList";
 
-    public static int CONSTANT_AMOUNT_PER_AD = 4;
+    public static long CONSTANT_AMOUNT_PER_AD = 4;
+    public static String TOTAL_ALL_TIME_ADS = "AllUserTotals";
 
 
 }

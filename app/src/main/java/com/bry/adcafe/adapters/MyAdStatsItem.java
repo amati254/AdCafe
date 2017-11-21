@@ -67,7 +67,7 @@ public class MyAdStatsItem {
 
 
         int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
-        String number = Integer.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+        String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
         mAmountToReimburse.setText("Reimbursing amount: "+number+" Ksh");
 
         loadListeners();
@@ -105,7 +105,7 @@ public class MyAdStatsItem {
                 mUsersReachedSoFar.setText("Users reached so far : "+newValue);
 
                 int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- newValue;
-                String number = Integer.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+                String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
                 mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
             }
 

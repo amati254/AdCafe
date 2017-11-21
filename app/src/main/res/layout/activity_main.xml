@@ -88,9 +88,9 @@
                 android:layout_width="wrap_content"
                 android:id="@+id/shareText"
                 android:layout_marginTop="40dp"
-                android:layout_marginLeft="40dp"
+                android:layout_marginLeft="35dp"
                 android:textSize="8dp"
-                android:text="Share."
+                android:text="Share App."
                 android:layout_height="wrap_content" />
         </RelativeLayout>
     </LinearLayout>
