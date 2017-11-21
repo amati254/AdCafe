@@ -104,7 +104,7 @@
 
         <View
             android:layout_width="2dp"
-            android:visibility="invisible"
+            android:visibility="visible"
             android:layout_gravity="bottom"
             android:layout_marginLeft="147dp"
             android:layout_marginBottom="35dp"

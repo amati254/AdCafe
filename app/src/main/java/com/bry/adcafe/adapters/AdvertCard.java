@@ -12,6 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
@@ -58,6 +59,9 @@ public class AdvertCard{
     @View(R.id.profileImageView) private ImageView profileImageView;
     @View(R.id.errorImageView) private ImageView errorImageView;
     @View(R.id.adCardAvi) private AVLoadingIndicatorView mAvi;
+    @View(R.id.WebsiteIcon) private ImageView webIcon;
+    @View(R.id.websiteText) private TextView webText;
+    @View(R.id.smallDot) private android.view.View Dot;
 
     private Advert mAdvert;
     private Context mContext;
@@ -71,6 +75,8 @@ public class AdvertCard{
     private static boolean hasAdLoaded;
     private boolean hasBeenSwiped = true;
     private Bitmap bs;
+    private String igsNein = "none";
+
 
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
@@ -82,9 +88,6 @@ public class AdvertCard{
 
     @Resolve
     private void onResolved(){
-        if(mAdvert.getWebsiteLink()!=null){
-            mSwipeView.findViewById(R.id.smallDot).setVisibility(android.view.View.VISIBLE);
-        }
         if(mLastOrNotLast == Constants.LAST){
             mIsNoAds = false;
            loadOnlyLastAd();
@@ -104,6 +107,7 @@ public class AdvertCard{
         Glide.with(mContext).load(R.drawable.noadstoday2).into(profileImageView);
         mSwipeView.lockViews();
         clickable=false;
+        Variables.setCurrentAdvert(mAdvert);
     }
 
     private void loadAllAds(){
@@ -112,7 +116,6 @@ public class AdvertCard{
         mAvi.setVisibility(android.view.View.VISIBLE);
         try {
             bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
-
             mAdvert.setImageBitmap(bs);
         } catch (IOException e) {
             e.printStackTrace();
@@ -135,6 +138,7 @@ public class AdvertCard{
                 if(isFirstResource && mLastOrNotLast==Constants.NOT_LAST) {
                     Log.d("ADVERT_CARD---","sending broadcast to start timer...");
                     if(mLastOrNotLast!=Constants.ANNOUNCEMENTS) sendBroadcast(START_TIMER);
+                    setLastAdSeen();
                 }
                 clickable=false;
                 return false;
@@ -172,6 +176,10 @@ public class AdvertCard{
         mSwipeView.lockViews();
         clickable=false;
         Variables.setCurrentAdvert(mAdvert);
+        if(!mAdvert.getWebsiteLink().equals(igsNein)){
+            webIcon.setAlpha(1.0f);
+            webText.setAlpha(1.0f);
+        }
         sendBroadcast(Constants.LAST);
     }
 
@@ -230,6 +238,7 @@ public class AdvertCard{
         }else if(message == Constants.LAST){
             Intent intent = new Intent(Constants.LAST);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            setLastAdSeen();
         }else if(message == Constants.LOAD_MORE_ADS){
             Intent intent = new Intent(Constants.LOAD_MORE_ADS);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -237,10 +246,21 @@ public class AdvertCard{
     }
 
     private void setLastAdSeen(){
-        Variables.setLastSeenAd(mAdvert.getPushId());
-        Variables.setCurrentAdvert(mAdvert);
+        Variables.setLastSeenAd(Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList()).getPushId());
+        Variables.setCurrentAdvert(Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList()));
+        if(!Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein)){
+            Log.d("ADVERT_CARD---","Advert has a website link. Setting icon and dot to be visible");
+            mSwipeView.findViewById(R.id.smallDot).setVisibility(android.view.View.VISIBLE);
+            webIcon.setAlpha(1.0f);
+            webText.setAlpha(1.0f);
+        }else{
+            Log.d("ADVERT_CARD---","Advert doesnt have website link. Setting icon and dot to be invisible");
+            mSwipeView.findViewById(R.id.smallDot).setVisibility(android.view.View.INVISIBLE);
+            webIcon.setAlpha(0.4f);
+            webText.setAlpha(0.4f);
+        }
+
         Log.d("ADVERT_CARD---","Setting the last ad seen in Variables class... "+Variables.getCurrentAdvert().getPushRefInAdminConsole());
-        Log.d("ADVERT_CARD---","Setting the last ad seen in Variables class... "+mAdvert.getPushRefInAdminConsole());
 
     }
 

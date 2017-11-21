@@ -2,6 +2,9 @@ package com.bry.adcafe;
 
 import com.bry.adcafe.models.Advert;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by bryon on 26/08/2017.
  */
@@ -14,7 +17,7 @@ public class Variables {
     private static int mMonthAdTotals = 0;
     private static String lastSeenAd;
     private static String lastAdOfList;
-    public static int currentAdNumber = 0;
+    public static int currentAdNumberForAllAdsList = 0;
     private static Advert currentAdvert;
 
     public static String mIsLastOrNotLast;
@@ -28,6 +31,8 @@ public class Variables {
     public static Advert adToBeShared;
     public static Advert adToBeViewed;
     public static boolean isInfo = false;
+    private static List<Advert> allAdsList = new ArrayList<>();
+
 
 
 
@@ -113,5 +118,29 @@ public class Variables {
 
     public static void setCurrentAdvert(Advert currentAdvert) {
         Variables.currentAdvert = currentAdvert;
+    }
+
+    public static void adToVariablesAdList(Advert ad){
+        allAdsList.add(ad);
+    }
+
+    public static void clearAllAdsFromAdList(){
+        if(allAdsList.size()!=0) allAdsList.clear();
+    }
+
+    public static Advert getAdFromVariablesAdList(int i){
+        return allAdsList.get(i);
+    }
+
+    public static void adOneToCurrentAdNumberForAllAdsList(){
+        currentAdNumberForAllAdsList++;
+    }
+
+    public static void setCurrentAdNumberForAllAdsList(int number){
+        currentAdNumberForAllAdsList = number;
+    }
+
+    public static int getCurrentAdNumberForAllAdsList(){
+        return currentAdNumberForAllAdsList;
     }
 }

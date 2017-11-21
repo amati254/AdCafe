@@ -66,17 +66,20 @@ public class AdStats extends AppCompatActivity {
     }
 
     private void loadAdsThatHaveBeenUploaded() {
-        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+        Log.d(TAG,"Loading ads uploaded by user.");
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(User.getUid()).child(Constants.UPLOADED_AD_LIST).child(getDate());
-        DatabaseReference pushRef = adRef.push();
-        pushRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference dbref = query.getRef();
+        dbref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren()){
+                    Log.d(TAG,"Children have been gotten from firebase");
                     for(DataSnapshot snap: dataSnapshot.getChildren()){
                         String pushValue = snap.getValue(String.class);
                         mAdList.add(pushValue);
                     }
+                    Log.d(TAG,"Number of children is : "+mAdList.size());
                     loadAdsUploadedByUser();
                 }else{
 //                    DataListsView.setVisibility(View.VISIBLE);
@@ -97,6 +100,7 @@ public class AdStats extends AppCompatActivity {
     private void loadAdsUploadedByUser() {
         for(int i = 0; i<mAdList.size(); i++){
             String adToBeLoaded = mAdList.get(i);
+
             Query query = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
                     .child(getDate()).child(adToBeLoaded);
             DatabaseReference dbRef = query.getRef();
@@ -104,9 +108,11 @@ public class AdStats extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Advert adUploadedByUser = dataSnapshot.getValue(Advert.class);
+                    Log.d(TAG,"Gotten one ad from firebase. : "+adUploadedByUser.getPushRefInAdminConsole());
                     mUploadedAds.add(adUploadedByUser);
                     cycleCount++;
                     if(cycleCount == mAdList.size()){
+                        Log.d(TAG,"All the ads have been handled.");
                         loadStats();
                     }
                 }

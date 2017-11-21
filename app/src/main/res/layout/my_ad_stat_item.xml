@@ -3,13 +3,12 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_height="match_parent"
-    android:weightSum="1">
+    android:layout_height="wrap_content">
 
 
     <android.support.v7.widget.CardView
-        android:layout_width="180dp"
-        android:layout_height="190dp"
+        android:layout_width="160dp"
+        android:layout_height="240dp"
         android:layout_margin="10dp"
         app:cardCornerRadius="4dp"
         app:cardElevation="2dp"
@@ -24,14 +23,14 @@
             android:id="@+id/adImage"
             android:scaleType="fitXY"
             android:layout_gravity="center"
-            android:background="@drawable/owl"
             android:layout_marginBottom="5dp"
+            android:layout_marginTop="20dp"
             android:layout_height="100dp" />
 
         <TextView
             android:layout_width="match_parent"
-            android:textSize="12sp"
-            android:layout_marginBottom="15dp"
+            android:textSize="11sp"
+            android:layout_marginBottom="10dp"
             android:id="@+id/EmailText"
             android:layout_marginTop="5dp"
             android:textAlignment="center"
@@ -40,7 +39,7 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:id="@+id/TargetedNumber"
             android:layout_marginTop="5dp"
             android:textAlignment="center"
@@ -50,7 +49,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_marginTop="5dp"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:id="@+id/usersReachedSoFar"
             android:textAlignment="center"
             android:text="Users reached so far : 4100"
@@ -59,10 +58,10 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_marginTop="5dp"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:id="@+id/AmountToReimburse"
             android:textAlignment="center"
-            android:text="Amount to be reimbursed : 2800Ksh"
+            android:text="Reimbursing amount : 2800Ksh"
             android:layout_height="wrap_content" />
 
         </LinearLayout>

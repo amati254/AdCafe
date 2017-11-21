@@ -21,6 +21,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -346,6 +347,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             if(dataSnapshot.hasChildren()){
+                Variables.clearAllAdsFromAdList();
                 Log.d(TAG,"---Children in dataSnapshot from firebase exist");
                 for(DataSnapshot snap:dataSnapshot.getChildren()){
                     Advert ad = snap.getValue(Advert.class);
@@ -357,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }else{
                     mChildToStartFrom = Variables.getAdTotal(mKey) + (int)dataSnapshot.getChildrenCount();
                 }
-
+                Variables.setCurrentAdNumberForAllAdsList(0);
                 Log.d(TAG,"Child set to start from is -- "+mChildToStartFrom);
                 Log.d(TAG,"---All the ads have been handled.Total is "+mAdList.size());
             }else{
@@ -477,13 +479,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG,"---User has seen all the ads, thus will load only last ad...");
                 mSwipeView.lockViews();
                 mSwipeView.addView(new AdvertCard(mContext,mAdList.get(0),mSwipeView,Constants.LAST));
-
+                Variables.adToVariablesAdList(mAdList.get(0));
                 Variables.setIsLastOrNotLast(Constants.LAST);
                 isLastAd = true;
             }else{
                 for(Advert ad: mAdList){
                     mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.NOT_LAST));
                     Log.d(TAG,"Loading ad "+ad.getPushRefInAdminConsole());
+                    Variables.adToVariablesAdList(ad);
                     Variables.setIsLastOrNotLast(Constants.NOT_LAST);
                 }
             }
@@ -491,6 +494,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }else{
             Advert noAds = new Advert();
             mSwipeView.addView(new AdvertCard(mContext,noAds,mSwipeView,Constants.NO_ADS));
+            Variables.adToVariablesAdList(noAds);
             Variables.setIsLastOrNotLast(Constants.NO_ADS);
             loadAnyAnnouncements();
         }
@@ -516,10 +520,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void onclicks() {
         findViewById(R.id.logoutBtn).setOnClickListener(this);
-        if(!Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein)){
-            findViewById(R.id.WebsiteIcon).setAlpha(1.0f);
-            findViewById(R.id.websiteText).setAlpha(1.0f);
-        }
         findViewById(R.id.WebsiteIcon).setOnClickListener(this);
         if(findViewById(R.id.bookmark2Btn)!= null){
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
@@ -582,6 +582,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.shareBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Vibrator s = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                s.vibrate(50);
+
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
                 sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey, have you heard of this cool app called AdCafé?");
@@ -635,6 +638,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d("COUNTER_BAR_TO_MAIN- ","Broadcast has been received to add to shared preferences.");
             Variables.adAdToTotal(mKey);
             Variables.adToMonthTotals(mKey);
+            Variables.adOneToCurrentAdNumberForAllAdsList();
             addToSharedPreferences();
             adDayAndMonthTotalsToFirebase();
             onclicks();
@@ -672,6 +676,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             onclicks();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(!Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein)){
+                        mSwipeView.findViewById(R.id.WebsiteIcon).setAlpha(1.0f);
+                        mSwipeView.findViewById(R.id.websiteText).setAlpha(1.0f);
+                        mSwipeView.findViewById(R.id.smallDot).setVisibility(View.VISIBLE);
+                    }else{
+                        findViewById(R.id.WebsiteIcon).setAlpha(0.4f);
+                        findViewById(R.id.websiteText).setAlpha(0.4f);
+                        findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
+                    }
+                }
+            },400);
+
         }
     };
 
@@ -723,6 +742,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void loadMoreAdsIntoAdvertCard() {
         for(Advert ad: mAdList){
             mSwipeView.addView(new AdvertCard(mContext,ad,mSwipeView,Constants.LOAD_MORE_ADS));
+            Variables.adToVariablesAdList(ad);
             Variables.setIsLastOrNotLast(Constants.NOT_LAST);
         }
         mAdList.clear();
@@ -844,8 +864,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
         adRef2.setValue(Variables.getMonthAdTotals(mKey));
 
-        Variables.currentAdNumber++;
-
     }
 
     private String getDate(){
@@ -953,9 +971,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(mContext,"Retrying...",Toast.LENGTH_SHORT).show();
             loadAdsFromThread();
         }
-        if(v==findViewById(R.id.WebsiteIcon)&& !Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein)){
-            Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Variables.getCurrentAdvert().getWebsiteLink()));
-            startActivity(webIntent);
+        if(v==findViewById(R.id.WebsiteIcon)&& Variables.getCurrentAdvert()!=null ){
+            if(!Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein)) {
+                Vibrator b = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                b.vibrate(30);
+                Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Variables.getCurrentAdvert().getWebsiteLink()));
+                startActivity(webIntent);
+            }
         }
 
     }
@@ -1085,31 +1107,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void getNumberOfTimesAndSetNewNumberOfTimes(){
         Log.d(TAG,"Getting the current ad's numberOfTimesSeen from firebase");
-        final int adNumber;
         final String datte;
-        if(Variables.hasTimerStarted){
-            adNumber = Variables.getAdTotal(mKey)+1;
-        }else{
-            adNumber = Variables.getAdTotal(mKey);
-        }
-        if(isAlmostMidNight()){
-            datte = getNextDay();
-        }else{
-            datte = getDate();
-        }
-        Log.d(TAG,"Push ref for current Advert is : "+ Variables.getCurrentAdvert().getPushRefInAdminConsole());
+        //ad gotten will be previous since the broadcast receiver added one to currentAdNumberForAllAdsList
+        final Advert ad = Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList()-1);
+        datte = isAlmostMidNight() ? getNextDay() : getDate();
+
+        Log.d(TAG,"Push ref for current Advert is : "+ ad.getPushRefInAdminConsole());
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
                 .child(datte)
-                .child(Variables.getCurrentAdvert().getPushRefInAdminConsole())
+                .child(ad.getPushRefInAdminConsole())
                 .child("numberOfTimesSeen");
-        Log.d(TAG,"Query set up is :"+Constants.ADS_FOR_CONSOLE+" : "+datte+" : "+Variables.getCurrentAdvert().getPushRefInAdminConsole()+" : numberOfTimesSeen");
+        Log.d(TAG,"Query set up is :"+Constants.ADS_FOR_CONSOLE+" : "+datte+" : "+ad.getPushRefInAdminConsole()+" : numberOfTimesSeen");
         DatabaseReference dbRef = query.getRef();
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int number = dataSnapshot.getValue(int.class);
                 int newNumber = number+1;
-                setNewNumberOfTimesSeen(newNumber,datte,adNumber);
+                setNewNumberOfTimesSeen(newNumber,datte ,ad);
             }
 
             @Override
@@ -1119,12 +1134,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void setNewNumberOfTimesSeen(int number,String date,int adNumber) {
+    private void setNewNumberOfTimesSeen(int number,String date,Advert advert) {
         Log.d(TAG,"Setting the new number of times seen in firebase.");
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
                 .child(date).child(Variables.getCurrentAdvert().getPushRefInAdminConsole()).child("numberOfTimesSeen");
 
-        Log.d(TAG,"Query set up is :"+Constants.ADS_FOR_CONSOLE+" : "+date+" : "+Variables.getCurrentAdvert().getPushRefInAdminConsole()+" : numberOfTimesSeen");
+        Log.d(TAG,"Query set up is :"+Constants.ADS_FOR_CONSOLE+" : "+date+" : "+advert.getPushRefInAdminConsole()+" : numberOfTimesSeen");
         DatabaseReference dbRef = query.getRef();
         dbRef.setValue(number).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
