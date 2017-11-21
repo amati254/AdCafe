@@ -1,10 +1,8 @@
 package com.bry.adcafe.ui;
 
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.FragmentManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,11 +12,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -29,12 +23,9 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.accessibility.AccessibilityManagerCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -46,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.bry.adcafe.AlarmReceiver1;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
@@ -54,9 +46,7 @@ import com.bry.adcafe.adapters.AdCounterBar;
 import com.bry.adcafe.fragments.ReportDialogFragment;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
-import com.bry.adcafe.services.AlarmReceiver;
 import com.bry.adcafe.services.NetworkStateReceiver;
-import com.bry.adcafe.services.NotificationHelper;
 import com.bry.adcafe.services.NotificationPublisher;
 import com.bry.adcafe.services.Utils;
 import com.crashlytics.android.Crashlytics;
@@ -65,8 +55,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -225,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onDestroy(){
+        setAlarmForNotifications();
         setLastUsedDateInFirebaseDate(User.getUid());
         unregisterAllReceivers();
         removeAllViews();
@@ -1291,6 +1280,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG,"New value has been set");
             }
         });
+    }
+
+    private void setAlarmForNotifications(){
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent alarmIntent = new Intent(mContext, AlarmReceiver1.class); // AlarmReceiver1 = broadcast receiver
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmIntent.setData((Uri.parse("custom://"+System.currentTimeMillis())));
+        alarmManager.cancel(pendingIntent);
+
+        Calendar alarmStartTime = Calendar.getInstance();
+        Calendar now = Calendar.getInstance();
+        alarmStartTime.set(Calendar.HOUR_OF_DAY, 04);
+        alarmStartTime.set(Calendar.MINUTE, 21);
+        alarmStartTime.set(Calendar.SECOND, 0);
+        if(now.after(alarmStartTime)) {
+            Log.d("Hey","Added a day");
+            alarmStartTime.add(Calendar.DATE, 1);
+        }
+         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmStartTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+         Log.w("Alarm","Alarms set for everyday 04:15 hrs.");
+
+
     }
 
 
