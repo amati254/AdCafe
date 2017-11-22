@@ -34,7 +34,7 @@ public class AdminStatItem {
 
     @Resolve
     private void onResolved(){
-        mEmail.setText(mAdvert.getUserEmail());
+        mEmail.setText("Advertiser :"+mAdvert.getUserEmail());
         mTargetedNumber.setText("Targeted : "+mAdvert.getNumberOfUsersToReach()+" users");
         mNumberReached.setText("Number Reached : "+mAdvert.getNumberOfTimesSeen()+" users.");
 

@@ -177,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             dbRef.removeEventListener(val);
         }
         setUserDataInSharedPrefs();
+        setAlarmForNotifications();
         Log.d(TAG,"---removing callback for checking time of day.");
     }
 
@@ -213,7 +214,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onDestroy(){
-        setAlarmForNotifications();
         setLastUsedDateInFirebaseDate(User.getUid());
         unregisterAllReceivers();
         removeAllViews();

@@ -81,7 +81,7 @@ public class MyAdStatsItem {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Glide.with(mContext).load(bitmapToByte(getResizedBitmap(mAdvert.getImageBitmap(),300))).into(mAdImage);
+        Glide.with(mContext).load(bitmapToByte(getResizedBitmap(mAdvert.getImageBitmap(),150))).into(mAdImage);
     }
 
 

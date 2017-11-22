@@ -152,7 +152,7 @@ public class SavedAdsCard {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Glide.with(mContext).load(bitmapToByte(getResizedBitmap(mAdvert.getImageBitmap(),300))).listener(new RequestListener<byte[], GlideDrawable>() {
+        Glide.with(mContext).load(bitmapToByte(getResizedBitmap(mAdvert.getImageBitmap(),100))).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
             public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
                 mAvi.setVisibility(android.view.View.GONE);
