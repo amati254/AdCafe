@@ -25,6 +25,7 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.User;
+import com.bry.adcafe.services.DatabaseManager;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -90,10 +91,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mRegisterLink.setOnClickListener(this);
         mLoginButton.setOnClickListener(this);
         mContext = this.getApplicationContext();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,new IntentFilter(Constants.CONNECTION_OFFLINE));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,new IntentFilter(Constants.CONNECTION_ONLINE));
-
-
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForFinishedLoadingData,new IntentFilter(Constants.LOADED_USER_DATA_SUCCESSFULLY));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForFailedToLoadData,new IntentFilter(Constants.FAILED_TO_LOAD_USER_DATA));
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -107,7 +106,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         mAvi.setVisibility(View.VISIBLE);
                         mLoadingMessage.setVisibility(View.VISIBLE);
                         mIsLoggingIn = false;
-                        lastUsed();
+                        DatabaseManager dbMan = new DatabaseManager();
+                        dbMan.loadUserData(mContext);
+//                        lastUsed();
                     }else{
                         setNoInternetView();
                     }
@@ -167,7 +168,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void loadUserIDFromFirebase() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
-        Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.CLUSTER_ID);
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.SUBSCRIPTION_lIST);
         mRef3 = query.getRef();
         mRef3.addListenerForSingleValueEvent(val3);
     }
@@ -233,11 +235,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     ValueEventListener val3 = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            int clusterID = dataSnapshot.getValue(int.class);
-            User.setID(clusterID,mKey);
+            for(DataSnapshot snap: dataSnapshot.getChildren()){
+                String category = snap.getKey();
+                Integer cluster = snap.getValue(Integer.class);
+                Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
+                Variables.Subscriptions.put(category,cluster);
+            }
+
+
+//            int clusterID = dataSnapshot.getValue(int.class);
+//            User.setID(clusterID,mKey);
             hasEverythingLoaded = true;
             loadLastSeenAd();
-//            startMainActivity();
         }
 
         @Override
@@ -309,32 +318,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         adRef.setValue(0);
     }
 
-    private void loadFromSharedPreferences(){
-//        if(mHasLoadingDayTotalsFailed){
-//            SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL,MODE_PRIVATE);
-//            int number = prefs.getInt("adTotals",0);
-//            Log.d("LOGIN_ACTIVITY-----","NUMBER GOTTEN FROM SHARED PREFERENCES IS - "+ number);
-//            if(mIsLastOnlineToday) Variables.setAdTotal(number,mKey);
-//            else Variables.setAdTotal(0,mKey);
-//            SharedPreferences.Editor editor = prefs.edit();
-//            editor.clear();
-//            editor.commit();
-//            mHasLoadingDayTotalsFailed = false;
-//        }
-//        if(mHasLoadingMonthTotalsFailed){
-//            SharedPreferences prefs2 = getSharedPreferences(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,MODE_PRIVATE);
-//            int number2 = prefs2.getInt(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH,0);
-//            Log.d("LOGIN_ACTIVITY-----","NUMBER GOTTEN FROM MONTHLY SHARED PREFERENCES IS - "+ number2);
-//            Variables.setMonthAdTotals(mKey,number2);
-//
-//            SharedPreferences.Editor editor2 = prefs2.edit();
-//            editor2.clear();
-//            editor2.commit();
-//            mHasLoadingMonthTotalsFailed = false;
-//        }
-
-    }
-
 
     private void startMainActivity(){
         if(hasEverythingLoaded && isActivityVisible){
@@ -351,17 +334,35 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private BroadcastReceiver mMessageReceiverForConnectionOffline = new BroadcastReceiver() {
+    private void startSelectCategory(){
+        if(hasEverythingLoaded && isActivityVisible) {
+            Variables.isStartFromLogin = true;
+            mAvi.setVisibility(View.GONE);
+            mLoadingMessage.setVisibility(View.GONE);
+            Intent intent = new Intent(LoginActivity.this, SelectCategory.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
+    }
+
+
+    private BroadcastReceiver mMessageReceiverForFinishedLoadingData = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("CONNECTION_C-MAIN_A","Connection has been dropped");
+            Log.d(TAG,"Finished loading user data");
+            hasEverythingLoaded = true;
+            if(Variables.Subscriptions.isEmpty())startSelectCategory();
+            else startMainActivity();
         }
     };
 
-    private BroadcastReceiver mMessageReceiverForConnectionOnline = new BroadcastReceiver() {
+    private BroadcastReceiver mMessageReceiverForFailedToLoadData = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("CONNECTION_C-MAIN_A","Connection has come online");
+            Log.d(TAG,"Failed to load User data");
+            hasEverythingLoaded = false;
+            setFailedToLoadView();
         }
     };
 
@@ -381,7 +382,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     protected void onResume(){
         super.onResume();
         isActivityVisible = true;
-        if(hasEverythingLoaded)startMainActivity();
+        if(hasEverythingLoaded &&!Variables.Subscriptions.isEmpty()) {
+            startMainActivity();
+        }else if(hasEverythingLoaded &&Variables.Subscriptions.isEmpty()){
+            startSelectCategory();
+        }
     }
 
     @Override
@@ -400,6 +405,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mRef3.removeEventListener(val3);
         }
     }
+
+    @Override
+    protected void onDestroy(){
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForFailedToLoadData);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForFinishedLoadingData);
+        super.onDestroy();
+    }
+
 
     @Override
     public void onClick(View v){
@@ -424,7 +437,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 mRelative.setAlpha(0.0f);
                 mAvi.setVisibility(View.VISIBLE);
                 mLoadingMessage.setVisibility(View.VISIBLE);
-                lastUsed();
+                DatabaseManager dbMan = new DatabaseManager();
+                dbMan.loadUserData(mContext);
+//                lastUsed();
             }else{
                 Log.d(TAG,"No internet connection!!");
                 Toast.makeText(mContext,"You've may not have an internet connection.",Toast.LENGTH_SHORT).show();

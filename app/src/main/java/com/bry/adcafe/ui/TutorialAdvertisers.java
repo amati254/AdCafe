@@ -111,7 +111,7 @@ public class TutorialAdvertisers extends AppCompatActivity {
     }
 
     private void LaunchHomeScreen(){
-        startActivity(new Intent(TutorialAdvertisers.this, AdUpload.class));
+        startActivity(new Intent(TutorialAdvertisers.this, SelectCategoryAdvertiser.class));
         myPrefManager.setIsFirstTimeLaunchInAdvertise(false);
         finish();
     }

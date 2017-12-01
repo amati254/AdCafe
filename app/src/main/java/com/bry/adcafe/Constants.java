@@ -38,8 +38,8 @@ public class Constants {
     public static String FIREBASE_CHILD_ADS = "savedAds";
     public static String FIREBASE_CHILD_USERS = "users";
     public static String TOTAL_NO_OF_ADS_SEEN_TODAY = "TodaysTotalAds";
-    public static String DATE_IN_FIREBASE = "DATE_IN_FIREBASE";
-    public static String TOTAL_NO_OF_ADS_SEEN_All_MONTH = "TOTAL_NO_OF_ADS_SEEN_All_MONTH";
+    public static String DATE_IN_FIREBASE = "date";
+    public static String TOTAL_NO_OF_ADS_SEEN_All_MONTH = "allTimeTotals";
     public static String CLUSTER_ID = "clusterID";
     public static String CLUSTERS = "clusters";
     public static String CLUSTERS_LIST = "cluster_list";
@@ -57,9 +57,20 @@ public class Constants {
     public static String ANNOUNCEMENTS = "Announcements";
     public static String ADS_FOR_CONSOLE = "AdsForConsole";
     public static String UPLOADED_AD_LIST = "UploadedAdList";
+    public static String FEEDBACK = "Feedback";
 
     public static long CONSTANT_AMOUNT_PER_AD = 4;
     public static String TOTAL_ALL_TIME_ADS = "AllUserTotals";
+    public static String SUBSCRIPTION_lIST = "UserSubscriptionList";
+    public static String CREATE_USER_SPACE_COMPLETE = "UserSpaceCompleted";
+    public static String SET_UP_USERS_SUBSCRIPTION_LIST = "setUpUsersSubscriptionList";
+
+    public static String CURRENT_SUBSCRIPTION_INDEX = "currentSub";
+    public static String CURRENT_AD_IN_SUBSCRIPTION = "currentAdInSubscription";
+    public static String LOADED_USER_DATA_SUCCESSFULLY = "LoadedUserDataSuccessfully";
+    public static String FAILED_TO_LOAD_USER_DATA = "FailedToLoadUserData";
+
+    public static String CATEGORY_LIST = "categoryList";
 
 
 }

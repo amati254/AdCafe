@@ -9,7 +9,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="true"
@@ -19,8 +18,9 @@
         android:roundIcon="@mipmap/ic_launcher2"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <receiver android:name="AlarmReceiver1" android:enabled="true"/>
+        <receiver
+            android:name=".AlarmReceiver1"
+            android:enabled="true" />
 
         <meta-data
             android:name="com.google.android.gms.wallet.api.enabled"
@@ -54,9 +54,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.TutorialActivity" />
-        <activity android:name=".ui.TutorialAdvertisers" />
-        <activity android:name=".ui.TutorialUsers" />
+        <activity
+            android:name=".ui.TutorialActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.TutorialAdvertisers"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.TutorialUsers"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
@@ -72,9 +78,16 @@
         </receiver>
 
         <activity android:name=".ui.AdminConsole" />
-        <activity android:name=".ui.AdStats" />
+        <activity
+            android:name=".ui.AdStats"
+            android:screenOrientation="portrait" />
 
         <receiver android:name="services.NotificationPublisher" />
+
+        <activity
+            android:name=".ui.SelectCategory"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ui.SelectCategoryAdvertiser"></activity>
     </application>
 
 </manifest>

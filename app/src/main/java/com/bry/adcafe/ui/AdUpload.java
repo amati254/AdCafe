@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
+import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.bumptech.glide.Glide;
@@ -80,6 +81,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private LinearLayout mBottomNavs;
     private TextView mNumberOfUsersChosenText;
     @Bind(R.id.numberOfUsersToAdvertiseToLayout) RelativeLayout mNumberOfUsersToAdvertiseTo;
+    @Bind(R.id.categoryText)TextView mCategoryText;
 
 
 
@@ -113,6 +115,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private boolean uploading = false;
     private String pushrefInAdminConsole;
     private String mLink = "none";
+    private String mCategory;
 
 
     @Override
@@ -124,6 +127,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         mHasNumberBeenLoaded = false;
         ButterKnife.bind(this);
 
+        mCategory = Variables.SelectedCategory;
+        Log.d(TAG,"Category gotten from Variables class is : "+mCategory);
+        mCategoryText.setText("Category: "+mCategory);
 
         setUpViews();
         startGetNumberOfClusters();
@@ -164,7 +170,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         mLoadingTextView.setVisibility(View.VISIBLE);
         setAllOtherViewsToBeGone();
         Log.d(TAG,"---Getting number of clusters.");
-        mRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST);
+        //When restructuring to advertising to specific type of users,add .child("%AdvertCategory%");
+        mRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST).child(mCategory);
         mRef.addListenerForSingleValueEvent(val);
 
     }
@@ -176,7 +183,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         public void onDataChange(DataSnapshot dataSnapshot) {
             long numberOfClusters;
             if(dataSnapshot.getChildrenCount() == 0){
-                numberOfClusters = dataSnapshot.getChildrenCount()+1;
+                numberOfClusters = 1;
             }else{
                 numberOfClusters = dataSnapshot.getChildrenCount();
             }
@@ -196,7 +203,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void getClusterToStartForm() {
         Log.d(TAG,"---getting cluster to start from");
-        mRef2 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM);
+        //When changing to specific clusters, this will need to change from this to .getReference("%AdvertCategory%_cluster_to_start_from");
+        mRef2 = FirebaseDatabase.getInstance().getReference(mCategory+"_cluster_to_start_from").child(Constants.CLUSTER_TO_START_FROM);
         mRef2.addListenerForSingleValueEvent(val2);
     }
 
@@ -229,8 +237,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void loadClusterToStartFromChildrenNo() {
         Log.d(TAG,"---Starting query for no of ads in cluster to start from.");
+        //When changing to targeted advertising,this will need to have .child("%AdvertCategory%") between getNextDay and clusterToStartFrom child;
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(Integer.toString(mClusterToStartFrom));
+                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterToStartFrom));
         boolRef.addListenerForSingleValueEvent(val3);
     }
 
@@ -256,8 +265,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void getNumberOfUploadedAdsInLatestCluster(){
         Log.d(TAG,"---Starting query for no of ads in Latest cluster now.");
+        //When changing to targeted advertising,this will need to have .child("%AdvertCategory%") between getNextDay and clusterTotal child;
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(Integer.toString(mClusterTotal));
+                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterTotal));
         boolRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -417,7 +427,11 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mLink = e.getText().toString();
+                if(e.getText().toString()=="") {
+                    mLink = "none";
+                }else{
+                    mLink = e.getText().toString();
+                }
                 Log.d(TAG,"Link gotten is :---"+mLink);
                 findViewById(R.id.smallDot).setVisibility(View.VISIBLE);
                 d.dismiss();
@@ -582,31 +596,34 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         if(clustersToUpLoadTo.size()>10){
             for(int i = 0; i < 10; i++){
                 String pushId;
-                final Integer number = clustersToUpLoadTo.get(i);
-                if(number<mClusterToStartFrom){
+                final Integer clusterNumber = clustersToUpLoadTo.get(i);
+                if(clusterNumber<mClusterToStartFrom){
                     //push id is set to +2 to avoid setting the same push ID twice.
                     pushId = Integer.toString(noOfChildrenInClusterToStartFrom+2);
                 }else{
-                    if(number==mClusterTotal){
+                    if(clusterNumber==mClusterTotal){
                         //The latest cluster may have fewer children than other cluster, thus should be handled differently.
                         pushId = Integer.toString(noOfChildrenInLatestCluster+1);
                     }else{
                         pushId = Integer.toString(noOfChildrenInClusterToStartFrom+1);
                     }
                 }
-                Log.d(TAG,"---Uploading encoded image to cluster -"+number+" now...");
+                Log.d(TAG,"---Uploading encoded image to cluster -"+clusterNumber+" now...");
                 Log.d(TAG,"---The custom push id is ---"+pushId);
+                //When configuring for targeted advertising based on user prefs, this will change by add ing .child("%AdvertCategory%") between
+                //date and cluster number.
                 mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
-                        .child(Integer.toString(number)).child(pushId);
+                        .child(Integer.toString(clusterNumber)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
                 advert.setPushId(pushId);
                 advert.setWebsiteLink(mLink);
+                advert.setCategory(mCategory);
                 advert.setPushRefInAdminConsole(pushrefInAdminConsole);
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         cycleCount++;
-                        clustersToUpLoadTo.remove(number);
+                        clustersToUpLoadTo.remove(clusterNumber);
                         if(clustersToUpLoadTo.isEmpty()){
                             if(!failedClustersToUploadTo.isEmpty()){
                                 checkAndNotifyAnyFailed();
@@ -629,9 +646,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        failedClustersToUploadTo.add(number);
+                        failedClustersToUploadTo.add(clusterNumber);
                         cycleCount++;
-                        clustersToUpLoadTo.remove(number);
+                        clustersToUpLoadTo.remove(clusterNumber);
                         if(clustersToUpLoadTo.isEmpty()){
                             checkAndNotifyAnyFailed();
                         }
@@ -654,11 +671,14 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                     }
                 }
                 Log.d(TAG,"---The custom push id is ---"+pushId);
+                //When configuring for targeted advertising based on user prefs, this will change by add ing .child("%AdvertCategory%") between
+                //date and cluster number.
                 mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                        .child(getNextDay()).child(Integer.toString(number)).child(pushId);
+                        .child(date).child(Integer.toString(number)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
                 advert.setPushId(pushId);
                 advert.setWebsiteLink(mLink);
+                advert.setCategory(mCategory);
                 advert.setPushRefInAdminConsole(pushrefInAdminConsole);
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -747,7 +767,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
 
     private void setNewValueToStartFrom() {
-        mRef4 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM);
+        mRef4 = FirebaseDatabase.getInstance().getReference(mCategory+"_cluster_to_start_from").child(Constants.CLUSTER_TO_START_FROM);
         if(mClusterToStartFrom + mNumberOfClusters > mClusterTotal){
             mRef4.setValue((mClusterToStartFrom + mNumberOfClusters)-mClusterTotal);
         }else{
@@ -798,13 +818,6 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         String uid = user.getUid();
         mRef5 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants. HAS_USER_MADE_PAMENTS);
         mRef5.setValue(false);
-    }
-
-    private void setHasPayedInFirebaseToTrue(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-        mRef5 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants. HAS_USER_MADE_PAMENTS);
-        mRef5.setValue(true);
     }
 
 

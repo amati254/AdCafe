@@ -138,6 +138,10 @@ public class AdvertCard{
                 if(isFirstResource && mLastOrNotLast==Constants.NOT_LAST) {
                     Log.d("ADVERT_CARD---","sending broadcast to start timer...");
                     if(mLastOrNotLast!=Constants.ANNOUNCEMENTS) sendBroadcast(START_TIMER);
+                    if(!mAdvert.getWebsiteLink().equals(igsNein)){
+                        webIcon.setAlpha(1.0f);
+                        webText.setAlpha(1.0f);
+                    }
                     setLastAdSeen();
                 }
                 clickable=false;
@@ -234,7 +238,7 @@ public class AdvertCard{
             Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             setLastAdSeen();
-            if(mSwipeView.getChildCount()==3) sendBroadcast(Constants.LOAD_MORE_ADS);
+            if(mSwipeView.getChildCount()<3) sendBroadcast(Constants.LOAD_MORE_ADS);
         }else if(message == Constants.LAST){
             Intent intent = new Intent(Constants.LAST);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -259,9 +263,7 @@ public class AdvertCard{
             webIcon.setAlpha(0.4f);
             webText.setAlpha(0.4f);
         }
-
         Log.d("ADVERT_CARD---","Setting the last ad seen in Variables class... "+Variables.getCurrentAdvert().getPushRefInAdminConsole());
-
     }
 
     private BroadcastReceiver mMessageReceiverForTimerHasEnded = new BroadcastReceiver() {

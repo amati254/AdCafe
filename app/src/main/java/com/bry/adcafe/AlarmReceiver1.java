@@ -6,7 +6,9 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.util.Log;
 import android.app.IntentService;
@@ -57,7 +59,12 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         Intent service1 = new Intent(context, NotificationService1.class);
         service1.setData((Uri.parse("custom://"+System.currentTimeMillis())));
         checkForAdsInFirebase();
-//        handleEverything();
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                cancelAlarm();
+            }
+        },new IntentFilter("CANCEL_ALARM"));
     }
 
     private void checkForAdsInFirebase() {
@@ -85,11 +92,8 @@ public class AlarmReceiver1 extends BroadcastReceiver {
 
     private void handleEverything(long number) {
         String message;
-        if(number>1){
-            message = Html.fromHtml("&#128077;")+"We've got "+number+" ads for you today.";
-        }else{
-            message = Html.fromHtml("&#128516;")+"We've got "+number+" ad for you today.";
-        }
+        if (number > 1)message = Html.fromHtml("&#128077;") + "We've got " + number + " ads for you today.";
+        else message = Html.fromHtml("&#128516;") + "We've got " + number + " ad for you today.";
         Context context = mContext;
         notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         Intent mIntent = new Intent(context, Splash.class);
@@ -104,7 +108,6 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         notification = new NotificationCompat.Builder(context)
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.ic_stat_notification2)
-//                .setLargeIcon(BitmapFactory.decodeResource(res,R.drawable.ic_stat_notification))
                 .setTicker("ticker value")
                 .setColor(mContext.getResources().getColor(R.color.colorPrimaryDark))
                 .setAutoCancel(true)
@@ -158,4 +161,8 @@ public class AlarmReceiver1 extends BroadcastReceiver {
 
     }
 
+    private void cancelAlarm(){
+        if(notificationManager!=null)
+        notificationManager.cancelAll();
+    }
 }

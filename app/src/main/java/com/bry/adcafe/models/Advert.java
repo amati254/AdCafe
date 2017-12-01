@@ -23,6 +23,7 @@ public class Advert {
     private String pushRefInAdminConsole;
     private String userEmail;
     private String websiteLink;
+    private String category;
 
     public Advert(String ImageUrl){
         this.imageUrl = ImageUrl;
@@ -59,6 +60,8 @@ public class Advert {
         this.imageUrl = imageUrl;
     }
 
+
+
     public Bitmap getImageBitmap(){
         return imageBitmap;
     }
@@ -87,6 +90,8 @@ public class Advert {
         this.pushRefInAdminConsole = pushRefInAdminConsole;
     }
 
+
+
     public int getNumberOfUsersToReach() {
         return numberOfUsersToReach;
     }
@@ -95,6 +100,8 @@ public class Advert {
         this.numberOfUsersToReach = numberOfUsersToReach;
     }
 
+
+
     public String getUserEmail() {
         return userEmail;
     }
@@ -102,6 +109,8 @@ public class Advert {
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
     }
+
+
 
     public String getWebsiteLink() {
         if(websiteLink == null){
@@ -113,5 +122,14 @@ public class Advert {
 
     public void setWebsiteLink(String websiteLink) {
         this.websiteLink = websiteLink;
+    }
+
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

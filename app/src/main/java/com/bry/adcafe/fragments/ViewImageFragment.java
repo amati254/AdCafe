@@ -76,8 +76,13 @@ public class ViewImageFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 if(!mAdvert.getWebsiteLink().equals(igsNein)){
-                    Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Variables.getCurrentAdvert().getWebsiteLink()));
-                    startActivity(webIntent);
+                    try{
+                        Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Variables.getCurrentAdvert().getWebsiteLink()));
+                        startActivity(webIntent);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        Toast.makeText(mContext,"There's something wrong with the link",Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });

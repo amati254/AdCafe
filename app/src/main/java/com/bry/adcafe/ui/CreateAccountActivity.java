@@ -1,13 +1,16 @@
 package com.bry.adcafe.ui;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,6 +27,7 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.User;
+import com.bry.adcafe.services.DatabaseManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -39,7 +43,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -158,21 +165,38 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     public void onStart(){
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForFinishedCreatingUserSpace,
+                new IntentFilter(Constants.CREATE_USER_SPACE_COMPLETE));
     }
 
     @Override
     public void onStop(){
         super.onStop();
-        if(mAuthListener!=null){
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
-        if(mRef1!=null){
-            mRef1.removeEventListener(val);
-        }
-        if(mRef2!=null){
-            mRef2.removeEventListener(val);
-        }
+        if(mAuthListener!=null) mAuth.removeAuthStateListener(mAuthListener);
+//        if(mRef1!=null){
+//            mRef1.removeEventListener(val);
+//        }
+//        if(mRef2!=null){
+//            mRef2.removeEventListener(val);
+//        }
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForFinishedCreatingUserSpace);
     }
+
+    private BroadcastReceiver mMessageReceiverForFinishedCreatingUserSpace = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG,"Finished creating user space");
+            startSelectCategory();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForFinishedCreatingUserSubscriptionList = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG,"Finished creating user subscription list");
+//            startMainActivity();
+        }
+    };
 
 
     private void createAuthStateListener() {
@@ -182,7 +206,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth){
                 final FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(user != null){
-                    generateClusterIDFromFlagedClusters();
+                    setUpUserSpace();
 //                    sendVerificationEmail();
                 }
             }
@@ -226,50 +250,54 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
             mLoadingText.setVisibility(View.VISIBLE);
             mConfirmEmailLayout.setVisibility(View.GONE);
 
-            generateClusterIDFromFlagedClusters();
+//            generateClusterIDFromFlagedClusters();
         }else {
             Toast.makeText(mContext,"Your email is not verified!",Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void setUpFirebaseNodes() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-        mRelative.setAlpha(0.0f);
-
-        //Creates nodes for totals seen today and sets them to 0;
-        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
-        adRef.setValue(Variables.getAdTotal(mKey));
-
-        //Creates nodes for totals seen all month and sets them to 0;
-        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
-        adRef2.setValue(Variables.getMonthAdTotals(mKey));
-
-        //Creates node for cluster ID and sets its value to ID;
-        DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.CLUSTER_ID);
-        adRef3.setValue(mClusterID);
-
-        //Adds the new users id to children in its respective cluster.
-        DatabaseReference adRef4 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST).child(Integer.toString(mClusterID));
-        DatabaseReference pushRef4 = adRef4.push();
-        String pushId  = pushRef4.getKey();
-        pushRef4.setValue(uid);
-
-        //sets pushref key generated from adding user to cluster to clusterListPushrefID;
-        DatabaseReference adRef5 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.CLUSTER_LIST_PUSHREF_ID);
-        adRef5.setValue(pushId);
-
-        //sets value for boolean if user has made any payments for uploading an advert to false.
-        DatabaseReference adRef6 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants. HAS_USER_MADE_PAMENTS);
-        adRef6.setValue(false);
-
-        //sets the date for when last used in firebase.
-        DatabaseReference adRef7 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
-        adRef7.setValue(getDate());
-
-        startMainActivity();
-
-    }
+//    private void setUpFirebaseNodes() {
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        String uid = user.getUid();
+//        mRelative.setAlpha(0.0f);
+//
+//        //Creates nodes for totals seen today and sets them to 0;
+//        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+//                .child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+//        adRef.setValue(Variables.getAdTotal(mKey));
+//
+//        //Creates nodes for totals seen all month and sets them to 0;
+//        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+//                .child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
+//        adRef2.setValue(Variables.getMonthAdTotals(mKey));
+//
+//        //This is going to change
+//        //Creates node for cluster ID and sets its value to ID;
+//        DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+//                .child(uid).child(Constants.CLUSTER_ID);
+//        adRef3.setValue(mClusterID);
+//
+//        //This is going to change since user will subscribe to multiple categories based on preferences
+//        //Adds the new users id to children in its respective cluster.
+//        DatabaseReference adRef4 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
+//                .child(Constants.CLUSTERS_LIST).child(Integer.toString(mClusterID));
+//        DatabaseReference pushRef4 = adRef4.push();
+//        String pushId  = pushRef4.getKey();
+//        pushRef4.setValue(uid);
+//
+//        //sets pushref key generated from adding user to cluster to clusterListPushrefID;
+//        DatabaseReference adRef5 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+//                .child(uid).child(Constants.CLUSTER_LIST_PUSHREF_ID);
+//        adRef5.setValue(pushId);
+//
+//        //sets the date for when last used in firebase.
+//        DatabaseReference adRef7 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+//                .child(uid).child(Constants.DATE_IN_FIREBASE);
+//        adRef7.setValue(getDate());
+//
+//        startMainActivity();
+//
+//    }
 
     private void startMainActivity(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -279,6 +307,16 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         mAvi.setVisibility(View.GONE);
         mLoadingText.setVisibility(View.GONE);
         Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void startSelectCategory(){
+        Variables.isStartFromLogin = true;
+        mAvi.setVisibility(View.GONE);
+        mLoadingText.setVisibility(View.GONE);
+        Intent intent = new Intent(CreateAccountActivity.this, SelectCategory.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
@@ -298,7 +336,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     private boolean isValidEmail(String email) {
         boolean isGoodEmail = (email!=null && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches());
         if(!isGoodEmail){
-            mEmailEditText.setError("Please enter a valid email address");
+            mEmailEditText.setError("We need your actual email address please");
             return false;
         }
         return isGoodEmail;
@@ -319,114 +357,120 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         return (netInfo != null && netInfo.isConnected());
     }
 
-    private void generateClusterID(){
-        Log.d(TAG,"---Generating Cluster ID normally.");
-        mRef1 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST);
-        if(mRef1!=null){
-            mRef1.addListenerForSingleValueEvent(val);
-        }else{
-            mClusterID = 1 ;
-            setUpFirebaseNodes();
-        }
 
-    }
+    //has to change
+//    private void generateClusterID(){
+//        Log.d(TAG,"---Generating Cluster ID normally.");
+//        mRef1 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST);
+//        if(mRef1!=null){
+//            mRef1.addListenerForSingleValueEvent(val);
+//        }else{
+//            mClusterID = 1 ;
+//            setUpFirebaseNodes();
+//        }
+//
+//    }
 
-    ValueEventListener val = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            long currentCluster;
-            if(dataSnapshot.getChildrenCount() == 0){
-                 currentCluster = dataSnapshot.getChildrenCount()+1;
-            }else{
-                currentCluster = dataSnapshot.getChildrenCount();
-            }
-            Log.d(TAG,"--NUMBER OF CLUSTERS IN FIREBASE IS --"+currentCluster);
-            DataSnapshot UsersInCurrentCluster = dataSnapshot.child(Integer.toString((int)currentCluster));
+//    ValueEventListener val = new ValueEventListener() {
+//        @Override
+//        public void onDataChange(DataSnapshot dataSnapshot) {
+//            long currentCluster;
+//            if (dataSnapshot.getChildrenCount() == 0) {
+//                currentCluster = dataSnapshot.getChildrenCount() + 1;
+//            } else {
+//                currentCluster = dataSnapshot.getChildrenCount();
+//            }
+//            Log.d(TAG, "--NUMBER OF CLUSTERS IN FIREBASE IS --" + currentCluster);
+//            DataSnapshot UsersInCurrentCluster = dataSnapshot.child(Integer.toString((int) currentCluster));
+//
+//            long numberOfUsersInCurrentCluster;
+//            if (UsersInCurrentCluster.getChildrenCount() == 0) {
+//                numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount();
+//                Log.d(TAG, "--NUMBER OF USERS IN CURRENT CLUSTER IN FIREBASE IS --" + numberOfUsersInCurrentCluster);
+//            } else {
+//                numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount() + 1;
+//                Log.d(TAG, "--NUMBER OF USERS IN CURRENT CLUSTER IN FIREBASE IS --" + numberOfUsersInCurrentCluster);
+//            }
+//
+//            if (numberOfUsersInCurrentCluster < 1000) {
+//                Log.d(TAG, "--NUMBER OF USERS IS LESS THAN LIMIT.SETTING mClusterID TO --" + currentCluster);
+//                mClusterID = (int) currentCluster;
+//            } else {
+//                Log.d(TAG, "--NUMBER OF USERS EXCEEDS LIMIT.SETTING mClusterID TO --" + (currentCluster + 1));
+//                mClusterID = (int) currentCluster + 1;
+//            }
+//
+//            Log.d(TAG, "---Cluster id generated for firebase is-- " + mClusterID);
+//            User.setID(mClusterID, mKey);
+//            setUpFirebaseNodes();
+//        }
+//    }
+//
+//        @Override
+//        public void onCancelled(DatabaseError databaseError) {
+//            Log.d("CREATE_ACCOUNT_ACT---","Unable to get cluster with least users due to error.");
+//            Toast.makeText(mContext,"Unable to create your account at the moment, try again in a few minutes.",Toast.LENGTH_LONG).show();
+//        }
+//    };
 
-            long numberOfUsersInCurrentCluster;
-            if(UsersInCurrentCluster.getChildrenCount()==0){
-                numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount();
-                Log.d(TAG,"--NUMBER OF USERS IN CURRENT CLUSTER IN FIREBASE IS --"+numberOfUsersInCurrentCluster);
-            }else{
-                numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount()+1;
-                Log.d(TAG,"--NUMBER OF USERS IN CURRENT CLUSTER IN FIREBASE IS --"+numberOfUsersInCurrentCluster);
-            }
+    //has to change
+//    private void generateClusterIDFromFlagedClusters(){
+//        Variables.setMonthAdTotals(mKey,0);
+//        Variables.setAdTotal(0,mKey);
+//        Log.d(TAG,"--Generating clusterID from flagged ads.");
+//        mRef2 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.FLAGGED_CLUSTERS);
+//        if(mRef2!=null){
+//            mRef2.addListenerForSingleValueEvent(val2);
+//        }else{
+//            generateClusterID();
+//        }
+//    }
 
-            if(numberOfUsersInCurrentCluster<1000){
-                Log.d(TAG,"--NUMBER OF USERS IS LESS THAN LIMIT.SETTING mClusterID TO --"+currentCluster);
-                mClusterID = (int)currentCluster;
-            }else{
-                Log.d(TAG,"--NUMBER OF USERS EXCEEDS LIMIT.SETTING mClusterID TO --"+(currentCluster+1));
-                mClusterID = (int)currentCluster+1;
-            }
+//    ValueEventListener val2 = new ValueEventListener() {
+//        @Override
+//        public void onDataChange(DataSnapshot dataSnapshot) {
+//            if(dataSnapshot.hasChildren()){
+//                Log.d(TAG,"Flagged clusters has got children in it.");
+//                for(DataSnapshot snap: dataSnapshot.getChildren()){
+//                    mClusterID = snap.getValue(int.class);
+//                    Log.d(TAG,"Cluster id gotten from Flagged cluster is --"+mClusterID);
+//                    User.setID(mClusterID,mKey);
+//                    removeId(snap.getKey());
+//                    break;
+//                }
+//            }else{
+//                Log.d(TAG,"--Flagged clusters has got no children in it. Generating normally");
+//                generateClusterID();
+//            }
+//        }
+//
+//        @Override
+//        public void onCancelled(DatabaseError databaseError) {
+//            Log.d("CREATE_ACCOUNT_ACT---","Unable to generate cluster from flagged clusters."+databaseError.getMessage());
+//            Toast.makeText(mContext,"Unable to create your account at the moment, try again in a few minutes.",Toast.LENGTH_LONG).show();
+//        }
+//    };
 
-            Log.d(TAG,"---Cluster id generated for firebase is-- "+mClusterID);
-            User.setID(mClusterID,mKey);
-            setUpFirebaseNodes();
-        }
+    //has to change
+//    private void removeId(String key) {
+//        DatabaseReference dbr = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.FLAGGED_CLUSTERS).child(key);
+//        dbr.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                Log.d(TAG,"---Removing cluster id from the flagged clusters list");
+//                dataSnapshot.getRef().removeValue();
+//                setUpFirebaseNodes();
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.d(TAG,"---Unable to remove cluster id from the flagged clusters list."+databaseError.getMessage());
+//                Log.d(TAG,"---generating cluster id normally instead.");
+//                generateClusterID();
+//            }
+//        });
+//    }
 
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            Log.d("CREATE_ACCOUNT_ACT---","Unable to get cluster with least users due to error.");
-            Toast.makeText(mContext,"Unable to create your account at the moment, try again in a few minutes.",Toast.LENGTH_LONG).show();
-        }
-    };
-
-    private void generateClusterIDFromFlagedClusters(){
-        Variables.setMonthAdTotals(mKey,0);
-        Variables.setAdTotal(0,mKey);
-        Log.d(TAG,"--Generating clusterID from flagged ads.");
-        mRef2 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.FLAGGED_CLUSTERS);
-        if(mRef2!=null){
-            mRef2.addListenerForSingleValueEvent(val2);
-        }else{
-            generateClusterID();
-        }
-    }
-
-    ValueEventListener val2 = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            if(dataSnapshot.hasChildren()){
-                Log.d(TAG,"Flagged clusters has got children in it.");
-                for(DataSnapshot snap: dataSnapshot.getChildren()){
-                    mClusterID = snap.getValue(int.class);
-                    Log.d(TAG,"Cluster id gotten from Flagged cluster is --"+mClusterID);
-                    User.setID(mClusterID,mKey);
-                    removeId(snap.getKey());
-                    break;
-                }
-            }else{
-                Log.d(TAG,"--Flagged clusters has got no children in it. Generating normally");
-                generateClusterID();
-            }
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            Log.d("CREATE_ACCOUNT_ACT---","Unable to generate cluster from flagged clusters."+databaseError.getMessage());
-            Toast.makeText(mContext,"Unable to create your account at the moment, try again in a few minutes.",Toast.LENGTH_LONG).show();
-        }
-    };
-
-    private void removeId(String key) {
-        DatabaseReference dbr = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.FLAGGED_CLUSTERS).child(key);
-        dbr.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG,"---Removing cluster id from the flagged clusters list");
-                dataSnapshot.getRef().removeValue();
-                setUpFirebaseNodes();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG,"---Unable to remove cluster id from the flagged clusters list."+databaseError.getMessage());
-                Log.d(TAG,"---generating cluster id normally instead.");
-                generateClusterID();
-            }
-        });
-    }
 
     private String getDate(){
         long date = System.currentTimeMillis();
@@ -448,4 +492,21 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
 
         return todaysDate;
     }
+
+    private void setUpUserSpace(){
+        mRelative.setAlpha(0.0f);
+        DatabaseManager dbManager = new DatabaseManager();
+        dbManager.createUserSpace(mContext);
+    }
+
+    private void SetUpSubs(){
+        DatabaseManager dmManager = new DatabaseManager();
+        List<String> interests = new ArrayList<>();
+        interests.add("technology");
+        interests.add("food");
+        interests.add("lifestyle");
+        dmManager.setUpUserSubscriptions(interests);
+    }
+
 }
+

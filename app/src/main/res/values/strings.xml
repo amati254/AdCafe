@@ -71,4 +71,13 @@
 
     <string name="slide5text">Not quite yet! First you\'ll need to know how to use the app and for that we\'ve prepared
         a short tutorial on how you will interact with it.</string>
+
+    <string name="feedbacktype">Feedback Type</string>
+    <string name="feedbacktype1">Praise</string>
+        
+    <string name="feedbacktype2">Gripe</string>
+        
+    <string name="feedbacktype3">Suggestion</string>
+        
+    <string name="feedbacktype4">Bug</string>
 </resources>

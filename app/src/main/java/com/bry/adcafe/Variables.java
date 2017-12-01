@@ -3,6 +3,8 @@ package com.bry.adcafe;
 import com.bry.adcafe.models.Advert;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -32,6 +34,14 @@ public class Variables {
     public static Advert adToBeViewed;
     public static boolean isInfo = false;
     private static List<Advert> allAdsList = new ArrayList<>();
+
+    public static LinkedHashMap<String,Integer> Subscriptions  = new LinkedHashMap<>();
+    private static int currentSubscriptionIndex = 0;
+    private static int currentAdInSubscription = 0;
+
+    public static int nextSubscriptionIndex;
+    public static String SelectedCategory;
+    public static List<String> selectedCategoriesToSubscribeTo = new ArrayList<>();
 
 
 
@@ -142,5 +152,34 @@ public class Variables {
 
     public static int getCurrentAdNumberForAllAdsList(){
         return currentAdNumberForAllAdsList;
+    }
+
+
+
+
+    public static int getCurrentSubscriptionIndex() {
+        return currentSubscriptionIndex;
+    }
+
+    public static void setCurrentSubscriptionIndex(int currentSubscriptionIndex) {
+        Variables.currentSubscriptionIndex = currentSubscriptionIndex;
+    }
+
+    public static void setNextSubscriptionIndex(){
+        currentSubscriptionIndex+=1;
+    }
+
+
+
+    public static int getCurrentAdInSubscription() {
+        return currentAdInSubscription;
+    }
+
+    public static void setCurrentAdInSubscription(int currentAdInSubscription) {
+        Variables.currentAdInSubscription = currentAdInSubscription;
+    }
+
+    public static void adOneToCurrentAdInSubscription(){
+        currentAdInSubscription+=1;
     }
 }

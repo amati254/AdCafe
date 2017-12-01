@@ -7,17 +7,21 @@ import android.content.IntentFilter;
 import android.os.CountDownTimer;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.fragments.FeedbackFragment;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.LongClick;
 import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
+
+import butterknife.OnClick;
 
 /**
  * Created by bryon on 26/08/2017.
@@ -57,6 +61,11 @@ public class AdCounterBar {
     private void onLongClick(){
 
     }
+
+//    @OnClick(R.id.FeedbackBtn)
+//    private void onClick(){
+//
+//    }
 
     private BroadcastReceiver mMessageReceiverToStartTimer = new BroadcastReceiver() {
         @Override
@@ -123,5 +132,6 @@ public class AdCounterBar {
         Intent intent = new Intent(Constants.ADD_TO_SHARED_PREFERENCES);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
+
 
 }

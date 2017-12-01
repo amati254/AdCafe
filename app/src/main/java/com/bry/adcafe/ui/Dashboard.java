@@ -1,5 +1,7 @@
 package com.bry.adcafe.ui;
 
+import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Image;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.fragments.FeedbackFragment;
 import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.SliderPrefManager;
 
@@ -30,6 +33,7 @@ public class Dashboard extends AppCompatActivity {
     protected String mKey = "";
     private SliderPrefManager myPrefManager;
     private Button mUploadedAdsStats;
+    private Context mContext;
 
 
     @Override
@@ -37,6 +41,7 @@ public class Dashboard extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
         Variables.isDashboardActivityOnline = true;
+        mContext = this.getApplicationContext();
 
         loadViews();
         setValues();
@@ -63,7 +68,7 @@ public class Dashboard extends AppCompatActivity {
                     Intent intent = new Intent(Dashboard.this,TutorialAdvertisers.class);
                     startActivity(intent);
                 }else{
-                    Intent intent = new Intent(Dashboard.this,AdUpload.class);
+                    Intent intent = new Intent(Dashboard.this,SelectCategoryAdvertiser.class);
                     startActivity(intent);
                 }
             }
@@ -87,6 +92,17 @@ public class Dashboard extends AppCompatActivity {
                     Log.d("Dashboard","NOT administrator.");
                 }
                 return false;
+            }
+        });
+
+        findViewById(R.id.FeedbackBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getFragmentManager();
+                Log.d("DASHBOARD","Setting up fragment");
+                FeedbackFragment reportDialogFragment = new FeedbackFragment();
+                reportDialogFragment.show(fm, "Feedback.");
+                reportDialogFragment.setfragContext(mContext);
             }
         });
 
