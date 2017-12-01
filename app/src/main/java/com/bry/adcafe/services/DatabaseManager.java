@@ -215,7 +215,7 @@ public class DatabaseManager {
     public void loadUserData(final Context mContext){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         User.setUid(uid);
-
+        Log.d(TAG,"Starting to load users data");
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid);
         adRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

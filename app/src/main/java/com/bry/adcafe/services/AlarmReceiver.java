@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -12,25 +13,33 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.models.User;
 import com.bry.adcafe.ui.LoginActivity;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by bryon on 15/11/2017.
  */
 
 public class AlarmReceiver extends BroadcastReceiver{
+    private static final String TAG = "AlarmReceiver - ";
     private DatabaseReference dbRef;
     private String mKey = "";
     private Context mContext;
     private String message = "";
+    private int numberOfhildrenFromFirebase = 0;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -57,6 +66,7 @@ public class AlarmReceiver extends BroadcastReceiver{
         });
 
     }
+
 
     private boolean isApproppriateTime() {
         Calendar c = Calendar.getInstance();

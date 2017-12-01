@@ -1380,7 +1380,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         alarmStartTime.set(Calendar.MINUTE, 21);
         alarmStartTime.set(Calendar.SECOND, 0);
         if (now.after(alarmStartTime)) {
-            Log.d("Hey", "Added a day");
+            Log.d(TAG, "Setting alarm to tomorrow morning.");
             alarmStartTime.add(Calendar.DATE, 1);
         }
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmStartTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
