@@ -39,6 +39,18 @@
 
     </LinearLayout>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/noPins"
+        android:visibility="gone"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:textSize="15sp"
+        android:padding="10dp"
+        android:text="Pin an ad to see it here..." />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:gravity="center"

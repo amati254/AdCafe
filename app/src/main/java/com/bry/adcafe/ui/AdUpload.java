@@ -204,7 +204,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private void getClusterToStartForm() {
         Log.d(TAG,"---getting cluster to start from");
         //When changing to specific clusters, this will need to change from this to .getReference("%AdvertCategory%_cluster_to_start_from");
-        mRef2 = FirebaseDatabase.getInstance().getReference(mCategory+"_cluster_to_start_from").child(Constants.CLUSTER_TO_START_FROM);
+        mRef2 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM).child(mCategory+"_cluster_to_start_from");
         mRef2.addListenerForSingleValueEvent(val2);
     }
 
@@ -613,6 +613,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 //When configuring for targeted advertising based on user prefs, this will change by add ing .child("%AdvertCategory%") between
                 //date and cluster number.
                 mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
+                        .child(mCategory)
                         .child(Integer.toString(clusterNumber)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
                 advert.setPushId(pushId);
@@ -673,8 +674,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 Log.d(TAG,"---The custom push id is ---"+pushId);
                 //When configuring for targeted advertising based on user prefs, this will change by add ing .child("%AdvertCategory%") between
                 //date and cluster number.
-                mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                        .child(date).child(Integer.toString(number)).child(pushId);
+                mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
+                        .child(mCategory)
+                        .child(Integer.toString(number)).child(pushId);
                 Advert advert = new Advert(encodedImageToUpload);
                 advert.setPushId(pushId);
                 advert.setWebsiteLink(mLink);
@@ -767,7 +769,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
 
     private void setNewValueToStartFrom() {
-        mRef4 = FirebaseDatabase.getInstance().getReference(mCategory+"_cluster_to_start_from").child(Constants.CLUSTER_TO_START_FROM);
+        mRef4 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM).child(mCategory+"_cluster_to_start_from");
         if(mClusterToStartFrom + mNumberOfClusters > mClusterTotal){
             mRef4.setValue((mClusterToStartFrom + mNumberOfClusters)-mClusterTotal);
         }else{

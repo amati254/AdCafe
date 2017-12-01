@@ -359,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
                 .child(getSubscriptionValue(Variables.getCurrentSubscriptionIndex()))
                 .child(Integer.toString(getClusterValue(Variables.getCurrentSubscriptionIndex())));
-        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : " + getSubscriptionValue(Variables.getCurrentSubscriptionIndex()) + getClusterValue(Variables.getCurrentSubscriptionIndex()));
+        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : " + getSubscriptionValue(Variables.getCurrentSubscriptionIndex())+ " : " + getClusterValue(Variables.getCurrentSubscriptionIndex()));
         dbRef = query.getRef();
 
         if (Variables.getAdTotal(mKey) == 0) {

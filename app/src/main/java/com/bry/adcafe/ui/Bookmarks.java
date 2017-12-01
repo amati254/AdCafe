@@ -65,6 +65,7 @@ public class Bookmarks extends AppCompatActivity {
     private Runnable mViewRunnable;
     private AVLoadingIndicatorView mAvi;
     private TextView loadingText;
+    private TextView noAdsText;
 
 
     @Override
@@ -161,7 +162,7 @@ public class Bookmarks extends AppCompatActivity {
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.avi);
         loadingText = (TextView) findViewById(R.id.loadingPinnedAdsMessage);
         mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,3));
-
+        noAdsText = (TextView) findViewById(R.id.noPins);
     }
 
 
@@ -246,6 +247,7 @@ public class Bookmarks extends AppCompatActivity {
             }
         }else{
             Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_LONG).show();
+            noAdsText.setVisibility(View.VISIBLE);
         }
         mSavedAds.clear();
         mAvi.setVisibility(View.GONE);
