@@ -329,7 +329,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             findViewById(R.id.progressBarTimerExample).setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    if(User.getUid().equals("WglDJKRpaYUGZEwSuRhqPw2nZPt1")) {
+                    if(FirebaseAuth.getInstance().getCurrentUser().getEmail().equals("bryonyoni@gmail.com")) {
                         if (isOnline(mContext)) {
                             if (bm != null) {
                                 uploadImageAsAnnouncement();

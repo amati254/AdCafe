@@ -30,7 +30,7 @@
                 android:layout_width="wrap_content"
                 android:id="@+id/helpIcon"
                 android:layout_marginTop="20dp"
-                android:layout_marginRight="40dp"
+                android:layout_marginLeft="40dp"
                 android:background="@drawable/ic_action_helpp"
                 android:layout_height="wrap_content" />
 

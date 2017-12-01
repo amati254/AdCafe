@@ -21,6 +21,7 @@ import com.bry.adcafe.Variables;
 import com.bry.adcafe.fragments.FeedbackFragment;
 import com.bry.adcafe.models.User;
 import com.bry.adcafe.services.SliderPrefManager;
+import com.google.firebase.auth.FirebaseAuth;
 
 import butterknife.Bind;
 
@@ -85,7 +86,7 @@ public class Dashboard extends AppCompatActivity {
         findViewById(R.id.uploadedAdsStats).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if(User.getUid().equals("WglDJKRpaYUGZEwSuRhqPw2nZPt1")){
+                if(FirebaseAuth.getInstance().getCurrentUser().getEmail().equals("bryonyoni@gmail.com")){
                     Intent intent = new Intent(Dashboard.this, AdminConsole.class);
                     startActivity(intent);
                 }else{
