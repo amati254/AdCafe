@@ -366,7 +366,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "User adTotal is 0, so is starting at 1");
             dbRef.orderByKey().startAt(Integer.toString(1)).limitToFirst(5).addValueEventListener(val2);
         } else {
-            Log.d(TAG, "User adTotal is not 0, so starting at " + Variables.getAdTotal(mKey));
+            Log.d(TAG, "User adTotal is not 0, so starting at " + Variables.getCurrentAdInSubscription());
             dbRef.orderByKey().startAt(Integer.toString(Variables.getCurrentAdInSubscription()))
                     .limitToFirst(5).addListenerForSingleValueEvent(val2);
         }
@@ -433,6 +433,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG, "---Children in dataSnapshot from firebase exist");
                 for (DataSnapshot snap : dataSnapshot.getChildren()) {
                     Advert ad = snap.getValue(Advert.class);
+                    ad.setPushId(snap.getKey());
                     mAdList.add(ad);
                 }
                 if (Variables.getCurrentAdInSubscription() != 0) {
@@ -558,7 +559,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             loadAdCounter();
         }
         if (mAdList != null && mAdList.size() > 0) {
-            if (mAdList.size() == 1 && mChildToStartFrom == Variables.getCurrentAdInSubscription() && Variables.Subscriptions.size() == Variables.getCurrentSubscriptionIndex()) {
+            if (mAdList.size() == 1 && mChildToStartFrom == Variables.getCurrentAdInSubscription()) {
                 Log.d(TAG, "---User has seen all the ads, thus will load only last ad...");
                 mSwipeView.lockViews();
                 mSwipeView.addView(new AdvertCard(mContext, mAdList.get(0), mSwipeView, Constants.LAST));
@@ -566,7 +567,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Variables.setIsLastOrNotLast(Constants.LAST);
                 isLastAd = true;
             } else {
-                if (mAdList.size() == 1 && Variables.getCurrentSubscriptionIndex() + 1 <= Variables.Subscriptions.size()) {
+                if (mAdList.size() == 1 && Variables.getCurrentSubscriptionIndex() + 1 < Variables.Subscriptions.size()) {
                     Variables.nextSubscriptionIndex = Variables.getCurrentSubscriptionIndex() + 1;
                     loadMoreAds();
                 }
@@ -838,12 +839,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "---More children in dataSnapshot from firebase exist");
                     for (DataSnapshot snap : dataSnapshot.getChildren()) {
                         Advert ad = snap.getValue(Advert.class);
+                        ad.setPushId(snap.getKey());
                         mAdList.add(ad);
                     }
                     isLoadingMoreAds = false;
+                    Log.d(TAG, "---All the new ads have been handled.Total is " + mAdList.size());
                     loadMoreAdsIntoAdvertCard();
                     mChildToStartFrom += (int) dataSnapshot.getChildrenCount();
-                    Log.d(TAG, "---All the new ads have been handled.Total is " + mAdList.size());
+
                 } else {
                     Log.d(TAG, "----No ads are available in subscription index "+Variables.nextSubscriptionIndex);
                     if(Variables.nextSubscriptionIndex+1<Variables.Subscriptions.size()){
@@ -993,10 +996,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String uid = User.getUid();
         DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.CURRENT_SUBSCRIPTION_INDEX);
+        Log.d(TAG,"Setting current subscription index in firebase to :"+Variables.getCurrentSubscriptionIndex());
         adRef3.setValue(Variables.getCurrentSubscriptionIndex());
 
         DatabaseReference adRef4 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.CURRENT_AD_IN_SUBSCRIPTION);
+        Log.d(TAG,"Setting current ad in subscription index in firebase to : "+Variables.getCurrentAdInSubscription());
         adRef4.setValue(Variables.getCurrentAdInSubscription());
     }
 
@@ -1198,6 +1203,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String pushId = pushRef.getKey();
 
         Log.d(TAG, "pinning the selected ad.");
+        ad.setImageBitmap(null);
         ad.setPushId(pushId);
         pushRef.setValue(ad).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
