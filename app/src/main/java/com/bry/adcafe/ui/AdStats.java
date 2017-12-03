@@ -94,10 +94,8 @@ public class AdStats extends AppCompatActivity {
                         String pushValue = snap.getValue(String.class);
                         mAdList.add(pushValue);
                     }
-                    Log.d(TAG,"Number of children is : "+mAdList.size());
-                }
-                if(mAdList.size()>0){
                     loadAdsUploadedByUser();
+                    Log.d(TAG,"Number of children is : "+mAdList.size());
                 }else{
                     loadPreviousDaysAds();
                 }
@@ -171,15 +169,14 @@ public class AdStats extends AppCompatActivity {
                     Log.d(TAG,"Number of children is : "+mAdList2.size());
                     loadAdsUploadedByUser2();
                 }else{
-                    if(DataListsView.getChildCount()==0) {
-                        findViewById(R.id.topText).setVisibility(View.VISIBLE);
-                        findViewById(R.id.LoadingViews).setVisibility(View.GONE);
-                        findViewById(R.id.noAdsUploadedText).setVisibility(View.VISIBLE);
-                    }else{
+                    if(mAdList.size()>0) {
                         findViewById(R.id.topText).setVisibility(View.VISIBLE);
                         findViewById(R.id.LoadingViews).setVisibility(View.GONE);
                         DataListsView.setVisibility(View.VISIBLE);
-
+                    }else{
+                        findViewById(R.id.topText).setVisibility(View.VISIBLE);
+                        findViewById(R.id.LoadingViews).setVisibility(View.GONE);
+                        findViewById(R.id.noAdsUploadedText).setVisibility(View.VISIBLE);
                     }
                 }
             }
