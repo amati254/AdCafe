@@ -129,9 +129,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
-        Log.i(TAG, "sending notification to cancel alarm");
-        Intent intent = new Intent("CANCEL_ALARM");
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
 
@@ -565,6 +562,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mSwipeView.addView(new AdvertCard(mContext, mAdList.get(0), mSwipeView, Constants.LAST));
                 Variables.adToVariablesAdList(mAdList.get(0));
                 Variables.setIsLastOrNotLast(Constants.LAST);
+                if(mAdList.get(0).getWebsiteLink().equals(igsNein)){
+                    findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
+                }
                 isLastAd = true;
             } else {
                 if (mAdList.size() == 1 && Variables.getCurrentSubscriptionIndex() + 1 < Variables.Subscriptions.size()) {

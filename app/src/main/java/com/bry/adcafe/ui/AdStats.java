@@ -1,7 +1,6 @@
 package com.bry.adcafe.ui;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
@@ -14,11 +13,9 @@ import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
-import com.bry.adcafe.adapters.AdminStatItem;
 import com.bry.adcafe.adapters.MyAdStatsItem;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -44,7 +41,7 @@ public class AdStats extends AppCompatActivity {
     private List<Advert> mUploadedAds2 = new ArrayList<>();
     private Context mContext;
     @Bind(R.id.PlaceHolderViewInfo) PlaceHolderView DataListsView;
-    @Bind(R.id.YesterdaysTitle) TextView YesterdayAdsTest;
+    @Bind(R.id.YesterdaysTitle) TextView YesterdayAdsTitle;
     @Bind(R.id.PlaceHolderViewInfoPrevious) PlaceHolderView yesterdayPlaceHolderView;
     private int cycleCount = 0;
     private int cycleCount2 = 0;
@@ -59,8 +56,9 @@ public class AdStats extends AppCompatActivity {
         if(isNetworkConnected(mContext)){
             DataListsView.setVisibility(View.GONE);
             yesterdayPlaceHolderView.setVisibility(View.GONE);
+
             findViewById(R.id.topText).setVisibility(View.GONE);
-            YesterdayAdsTest.setVisibility(View.GONE);
+            YesterdayAdsTitle.setVisibility(View.GONE);
 
             findViewById(R.id.LoadingViews).setVisibility(View.VISIBLE);
 
@@ -73,7 +71,7 @@ public class AdStats extends AppCompatActivity {
     private void showNoConnectionView() {
         DataListsView.setVisibility(View.GONE);
         yesterdayPlaceHolderView.setVisibility(View.GONE);
-        YesterdayAdsTest.setVisibility(View.GONE);
+        YesterdayAdsTitle.setVisibility(View.GONE);
         findViewById(R.id.topText).setVisibility(View.GONE);
 
         findViewById(R.id.droppedInternetLayoutForAdStats).setVisibility(View.VISIBLE);
@@ -97,12 +95,11 @@ public class AdStats extends AppCompatActivity {
                         mAdList.add(pushValue);
                     }
                     Log.d(TAG,"Number of children is : "+mAdList.size());
+                }
+                if(mAdList.size()>0){
                     loadAdsUploadedByUser();
                 }else{
-//                    DataListsView.setVisibility(View.VISIBLE);
-//                    findViewById(R.id.topText).setVisibility(View.VISIBLE);
-//                    findViewById(R.id.LoadingViews).setVisibility(View.GONE);
-//                    findViewById(R.id.noAdsUploadedText).setVisibility(View.VISIBLE);
+                    loadPreviousDaysAds();
                 }
             }
 
@@ -146,10 +143,6 @@ public class AdStats extends AppCompatActivity {
     }
 
     private void loadStats() {
-//        DataListsView.setVisibility(View.VISIBLE);
-//        findViewById(R.id.topText).setVisibility(View.VISIBLE);
-//        findViewById(R.id.LoadingViews).setVisibility(View.GONE);
-
         DataListsView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,2));
         for(int i = 0; i<mUploadedAds.size();i++){
             DataListsView.addView(new MyAdStatsItem(mContext,DataListsView,mUploadedAds.get(i)));
@@ -182,6 +175,11 @@ public class AdStats extends AppCompatActivity {
                         findViewById(R.id.topText).setVisibility(View.VISIBLE);
                         findViewById(R.id.LoadingViews).setVisibility(View.GONE);
                         findViewById(R.id.noAdsUploadedText).setVisibility(View.VISIBLE);
+                    }else{
+                        findViewById(R.id.topText).setVisibility(View.VISIBLE);
+                        findViewById(R.id.LoadingViews).setVisibility(View.GONE);
+                        DataListsView.setVisibility(View.VISIBLE);
+
                     }
                 }
             }
@@ -227,7 +225,7 @@ public class AdStats extends AppCompatActivity {
     private void loadStats2() {
         DataListsView.setVisibility(View.VISIBLE);
         yesterdayPlaceHolderView.setVisibility(View.VISIBLE);
-        YesterdayAdsTest.setVisibility(View.VISIBLE);
+        YesterdayAdsTitle.setVisibility(View.VISIBLE);
         findViewById(R.id.topText).setVisibility(View.VISIBLE);
         findViewById(R.id.LoadingViews).setVisibility(View.GONE);
 
