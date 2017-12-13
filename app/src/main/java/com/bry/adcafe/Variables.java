@@ -43,6 +43,8 @@ public class Variables {
     public static String SelectedCategory;
     public static List<String> selectedCategoriesToSubscribeTo = new ArrayList<>();
 
+    public static boolean isLockedBecauseOfFlagedAds = false;
+
 
 
 
@@ -122,6 +124,8 @@ public class Variables {
         lastAdOfList = lastAd;
     }
 
+
+
     public static Advert getCurrentAdvert() {
         return currentAdvert;
     }
@@ -134,6 +138,8 @@ public class Variables {
         allAdsList.add(ad);
     }
 
+
+
     public static void clearAllAdsFromAdList(){
         if(allAdsList.size()!=0) allAdsList.clear();
     }
@@ -145,6 +151,8 @@ public class Variables {
     public static void adOneToCurrentAdNumberForAllAdsList(){
         currentAdNumberForAllAdsList++;
     }
+
+
 
     public static void setCurrentAdNumberForAllAdsList(int number){
         currentAdNumberForAllAdsList = number;

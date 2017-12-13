@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isLastAd = false;
     private String igsNein = "none";
     private boolean isLoadingMoreAds = false;
+    private boolean mDoublePressedToPin = false;
 
 
     @Override
@@ -309,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadSubsFromSharedPrefs() {
+        if(!Variables.Subscriptions.isEmpty())Variables.Subscriptions.clear();
         Gson gson = new Gson();
         SharedPreferences prefs = getSharedPreferences("Subscriptions", MODE_PRIVATE);
         String storedHashMapString = prefs.getString("hashString", "nil");
@@ -562,8 +564,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mSwipeView.addView(new AdvertCard(mContext, mAdList.get(0), mSwipeView, Constants.LAST));
                 Variables.adToVariablesAdList(mAdList.get(0));
                 Variables.setIsLastOrNotLast(Constants.LAST);
+                Variables.setCurrentAdvert(mAdList.get(0));
+                if(mAdList.get(0).isFlagged())mAdList.get(0).setWebsiteLink(igsNein);
                 if(mAdList.get(0).getWebsiteLink().equals(igsNein)){
                     findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
+                }else{
+                    findViewById(R.id.smallDot).setVisibility(View.VISIBLE);
                 }
                 isLastAd = true;
             } else {
@@ -571,11 +577,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Variables.nextSubscriptionIndex = Variables.getCurrentSubscriptionIndex() + 1;
                     loadMoreAds();
                 }
-                for (Advert ad : mAdList) {
-                    mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.NOT_LAST));
-                    Log.d(TAG, "Loading ad " + ad.getPushRefInAdminConsole());
-                    Variables.adToVariablesAdList(ad);
-                    Variables.setIsLastOrNotLast(Constants.NOT_LAST);
+                if(mAdList.size()>1) {
+                    for (Advert ad : mAdList) {
+                        if (!ad.isFlagged()) {
+                            mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.NOT_LAST));
+                            Log.d(TAG, "Loading ad " + ad.getPushRefInAdminConsole());
+                            Variables.adToVariablesAdList(ad);
+                            Variables.setIsLastOrNotLast(Constants.NOT_LAST);
+                        } else {
+                            Log.d(TAG, "Skipping ad " + ad.getPushRefInAdminConsole() + " because it has been flagged in firebase");
+                        }
+                    }
+                }else{
+                    for (Advert ad : mAdList) {
+                        if(ad.isFlagged()) ad.setImageUrl(igsNein);
+                        mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.NOT_LAST));
+                        Log.d(TAG, "Loading ad " + ad.getPushRefInAdminConsole());
+                        Variables.adToVariablesAdList(ad);
+                        Variables.setIsLastOrNotLast(Constants.NOT_LAST);
+                    }
                 }
             }
             mAdList.clear();
@@ -616,7 +636,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 @Override
                 public void onClick(View v) {
                     if (!Variables.hasBeenPinned) {
-                        if (Variables.mIsLastOrNotLast == Constants.NOT_LAST || Variables.mIsLastOrNotLast == Constants.LAST) {
+                        if (Variables.mIsLastOrNotLast == Constants.NOT_LAST || Variables.mIsLastOrNotLast == Constants.LAST
+                                && !Variables.getCurrentAdvert().isFlagged()) {
                             Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
                                     Snackbar.LENGTH_SHORT).show();
                             pinAd();
@@ -632,28 +653,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             });
         }
-
-
-        findViewById(R.id.bookmarkBtn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, Bookmarks.class);
-                startActivity(intent);
-            }
-        });
+        findViewById(R.id.bookmarkBtn).setOnClickListener(this);
 
         if (findViewById(R.id.profileImageView) != null) {
-            findViewById(R.id.profileImageView).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mSwipeView.doSwipe(true);
-                }
-            });
+            findViewById(R.id.profileImageView).setOnClickListener(this);
 
             findViewById(R.id.profileImageView).setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    findViewById(R.id.bookmark2Btn).callOnClick();
+                    findViewById(R.id.reportBtn).callOnClick();
                     return false;
                 }
             });
@@ -686,7 +694,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (Variables.mIsLastOrNotLast == Constants.NO_ADS) {
+                    if (Variables.mIsLastOrNotLast == Constants.NO_ADS || Variables.getCurrentAdvert().isFlagged()) {
                         Snackbar.make(findViewById(R.id.mainCoordinatorLayout), "You can't report that..",
                                 Snackbar.LENGTH_SHORT).show();
                     } else {
@@ -704,7 +712,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.shareImageIcon).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (Variables.mIsLastOrNotLast == Constants.NO_ADS) {
+                    if (Variables.mIsLastOrNotLast == Constants.NO_ADS || Variables.getCurrentAdvert().isFlagged()) {
                         Snackbar.make(findViewById(R.id.mainCoordinatorLayout), "You can't share that..",
                                 Snackbar.LENGTH_SHORT).show();
                     } else {
@@ -715,6 +723,71 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
         }
 
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v==findViewById(R.id.profileImageView)){
+            if(mDoublePressedToPin) {
+                findViewById(R.id.bookmark2Btn).callOnClick();
+            }else{
+                mSwipeView.doSwipe(true);
+            }
+            mDoublePressedToPin = true;
+            new Handler().postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    mDoublePressedToPin=false;
+                }
+            }, 1000);
+        }
+
+        if (v == mLogoutButton) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Are you sure you want to log out?")
+                    .setCancelable(true)
+                    .setPositiveButton("Yes,I want to", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            logoutUser();
+                        }
+                    })
+                    .setNegativeButton("No,I'm staying", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    }).show();
+        }
+        if (v == mRetryButton) {
+            Log.d(TAG, "Retrying to load ads...");
+            mAvi.setVisibility(View.VISIBLE);
+            mLoadingText.setVisibility(View.VISIBLE);
+            mFailedToLoadLayout.setVisibility(View.GONE);
+            Toast.makeText(mContext, "Retrying...", Toast.LENGTH_SHORT).show();
+            loadAdsFromThread();
+        }
+        if (v == findViewById(R.id.WebsiteIcon) && Variables.getCurrentAdvert() != null) {
+            if (!Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein) && !Variables.getCurrentAdvert().isFlagged()) {
+                Vibrator b = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                b.vibrate(30);
+                try {
+                    String url = Variables.getCurrentAdvert().getWebsiteLink();
+                    if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
+                    Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(webIntent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(mContext, "There's something wrong with the link", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+        if(v==findViewById(R.id.bookmarkBtn)){
+            Intent intent = new Intent(MainActivity.this, Bookmarks.class);
+            startActivity(intent);
+        }
 
     }
 
@@ -840,13 +913,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     for (DataSnapshot snap : dataSnapshot.getChildren()) {
                         Advert ad = snap.getValue(Advert.class);
                         ad.setPushId(snap.getKey());
-                        mAdList.add(ad);
+                        if(!ad.isFlagged()) mAdList.add(ad);
                     }
-                    isLoadingMoreAds = false;
                     Log.d(TAG, "---All the new ads have been handled.Total is " + mAdList.size());
-                    loadMoreAdsIntoAdvertCard();
-                    mChildToStartFrom += (int) dataSnapshot.getChildrenCount();
-
+                    if(mAdList.size()!=0){
+                        loadMoreAdsIntoAdvertCard();
+                        mChildToStartFrom += (int) dataSnapshot.getChildrenCount();
+                        isLoadingMoreAds = false;
+                    }else{
+                        Log.d(TAG,"Loaded no ad, loading more ads...");
+                        if(Variables.nextSubscriptionIndex+1<Variables.Subscriptions.size()){
+                            mChildToStartFrom=0;
+                            Variables.nextSubscriptionIndex+=1;
+                            loadMoreAds();
+                        }else{
+                            Log.d(TAG,"No more ads are available from the rest of the subscriptions");
+                            isLoadingMoreAds = false;
+                        }
+                    }
+                    if(Variables.isLockedBecauseOfFlagedAds){
+                        mSwipeView.unlockViews();
+                        Variables.isLockedBecauseOfFlagedAds = false;
+                    }
                 } else {
                     Log.d(TAG, "----No ads are available in subscription index "+Variables.nextSubscriptionIndex);
                     if(Variables.nextSubscriptionIndex+1<Variables.Subscriptions.size()){
@@ -1089,49 +1177,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-
-    @Override
-    public void onClick(View v) {
-        if (v == mLogoutButton) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Are you sure you want to log out?")
-                    .setCancelable(true)
-                    .setPositiveButton("Yes,I want to", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            logoutUser();
-                        }
-                    })
-                    .setNegativeButton("No,I'm staying", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    }).show();
-        }
-        if (v == mRetryButton) {
-            Log.d(TAG, "Retrying to load ads...");
-            mAvi.setVisibility(View.VISIBLE);
-            mLoadingText.setVisibility(View.VISIBLE);
-            mFailedToLoadLayout.setVisibility(View.GONE);
-            Toast.makeText(mContext, "Retrying...", Toast.LENGTH_SHORT).show();
-            loadAdsFromThread();
-        }
-        if (v == findViewById(R.id.WebsiteIcon) && Variables.getCurrentAdvert() != null) {
-            if (!Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein)) {
-                Vibrator b = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                b.vibrate(30);
-                try {
-                    Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Variables.getCurrentAdvert().getWebsiteLink()));
-                    startActivity(webIntent);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(mContext, "There's something wrong with the link", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-    }
 
     private void setCurrentTimeToSharedPrefs() {
         Log.d(TAG, "---Setting current date in shared preferences.");

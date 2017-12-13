@@ -6,6 +6,9 @@ import com.google.firebase.database.Exclude;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by bryon on 6/4/2017.
  */
@@ -24,6 +27,8 @@ public class Advert {
     private String userEmail;
     private String websiteLink;
     private String category;
+    private boolean isFlagged = false;
+    private List<Integer> clustersToUpLoadTo = new ArrayList<>();
 
     public Advert(String ImageUrl){
         this.imageUrl = ImageUrl;
@@ -131,5 +136,21 @@ public class Advert {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public boolean isFlagged() {
+        return isFlagged;
+    }
+
+    public void setFlagged(boolean flagged) {
+        isFlagged = flagged;
+    }
+
+    public List<Integer> getClustersToUpLoadTo() {
+        return clustersToUpLoadTo;
+    }
+
+    public void setClustersToUpLoadTo(List<Integer> clustersToUpLoadTo) {
+        this.clustersToUpLoadTo = clustersToUpLoadTo;
     }
 }

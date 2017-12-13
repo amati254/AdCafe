@@ -79,6 +79,7 @@ public class AdvertCard{
 
 
 
+
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
         mContext = context;
         mAdvert = advert;
@@ -104,7 +105,7 @@ public class AdvertCard{
     }
 
     private void loadAdPlaceHolderImage() {
-        Glide.with(mContext).load(R.drawable.noadstoday2).into(profileImageView);
+        Glide.with(mContext).load(R.drawable.noads5).into(profileImageView);
         mSwipeView.lockViews();
         clickable=false;
         Variables.setCurrentAdvert(mAdvert);
@@ -115,8 +116,12 @@ public class AdvertCard{
 
         mAvi.setVisibility(android.view.View.VISIBLE);
         try {
-            bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
-            mAdvert.setImageBitmap(bs);
+            if(mAdvert.isFlagged()){
+                bs = BitmapFactory.decodeResource(mContext.getResources(),R.drawable.placeholderimage);
+            }else {
+                bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+                mAdvert.setImageBitmap(bs);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -136,8 +141,19 @@ public class AdvertCard{
                 mAvi.setVisibility(android.view.View.GONE);
                 errorImageView.setVisibility(android.view.View.GONE);
                 if(isFirstResource && mLastOrNotLast==Constants.NOT_LAST) {
-                    Log.d("ADVERT_CARD---","sending broadcast to start timer...");
-                    if(mLastOrNotLast!=Constants.ANNOUNCEMENTS) sendBroadcast(START_TIMER);
+                    if(mLastOrNotLast!=Constants.ANNOUNCEMENTS) {
+                        Log.d("ADVERT_CARD---","sending broadcast to start timer...");
+                        if(mAdvert.isFlagged()){
+                            if(mSwipeView.getChildCount()==1) {
+                                mSwipeView.lockViews();
+                                Variables.isLockedBecauseOfFlagedAds= true;
+                            } else{
+                                mSwipeView.unlockViews();
+                            }
+                        }else{
+                            sendBroadcast(START_TIMER);
+                        }
+                    }
                     if(!mAdvert.getWebsiteLink().equals(igsNein)){
                         webIcon.setAlpha(1.0f);
                         webText.setAlpha(1.0f);
@@ -154,8 +170,12 @@ public class AdvertCard{
         Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
         mAvi.setVisibility(android.view.View.VISIBLE);
         try {
-            Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
-            mAdvert.setImageBitmap(bm);
+            if(mAdvert.isFlagged()){
+                bs = BitmapFactory.decodeResource(mContext.getResources(),R.drawable.placeholderimage);
+            }else {
+                bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+                mAdvert.setImageBitmap(bs);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -230,13 +250,12 @@ public class AdvertCard{
 
     private void sendBroadcast(String message ) {
         if(message == START_TIMER && hasBeenSwiped){
-            Log.d("AdvertCard - ","Sending message to start timer");
+            Log.d("AdvertCard - ", "Sending message to start timer");
             mSwipeView.lockViews();
-            Variables.hasBeenPinned = false;
-//            mAdvert.setImageBitmap(null);
             clickable = false;
             Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            Variables.hasBeenPinned = false;
             setLastAdSeen();
             if(mSwipeView.getChildCount()<3) sendBroadcast(Constants.LOAD_MORE_ADS);
         }else if(message == Constants.LAST){

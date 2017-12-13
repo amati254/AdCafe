@@ -87,7 +87,8 @@
         <activity
             android:name=".ui.SelectCategory"
             android:screenOrientation="portrait" />
-        <activity android:name=".ui.SelectCategoryAdvertiser"></activity>
+        <activity android:name=".ui.SelectCategoryAdvertiser" />
+        <activity android:name=".ui.WebActivity"></activity>
     </application>
 
 </manifest>

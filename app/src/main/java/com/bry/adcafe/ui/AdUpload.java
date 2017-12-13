@@ -431,9 +431,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                     mLink = "none";
                 }else{
                     mLink = e.getText().toString();
+                    findViewById(R.id.smallDot).setVisibility(View.VISIBLE);
+                    Log.d(TAG,"Link gotten is :---"+mLink);
                 }
-                Log.d(TAG,"Link gotten is :---"+mLink);
-                findViewById(R.id.smallDot).setVisibility(View.VISIBLE);
                 d.dismiss();
             }
         });
@@ -581,6 +581,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         advert.setPushRefInAdminConsole(pushId);
         advert.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
         advert.setWebsiteLink(mLink);
+        advert.setClustersToUpLoadTo(clustersToUpLoadTo);
+
         pushrefInAdminConsole = pushId;
         pushRef.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -619,6 +621,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 advert.setPushId(pushId);
                 advert.setWebsiteLink(mLink);
                 advert.setCategory(mCategory);
+                advert.setFlagged(false);
                 advert.setPushRefInAdminConsole(pushrefInAdminConsole);
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -681,6 +684,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 advert.setPushId(pushId);
                 advert.setWebsiteLink(mLink);
                 advert.setCategory(mCategory);
+                advert.setFlagged(false);
                 advert.setPushRefInAdminConsole(pushrefInAdminConsole);
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

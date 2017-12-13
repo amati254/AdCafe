@@ -106,6 +106,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         mAvi.setVisibility(View.VISIBLE);
                         mLoadingMessage.setVisibility(View.VISIBLE);
                         mIsLoggingIn = false;
+                        Variables.Subscriptions.clear();
                         DatabaseManager dbMan = new DatabaseManager();
                         dbMan.loadUserData(mContext);
 //                        lastUsed();
@@ -437,6 +438,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 mRelative.setAlpha(0.0f);
                 mAvi.setVisibility(View.VISIBLE);
                 mLoadingMessage.setVisibility(View.VISIBLE);
+                Variables.Subscriptions.clear();
                 DatabaseManager dbMan = new DatabaseManager();
                 dbMan.loadUserData(mContext);
 //                lastUsed();
