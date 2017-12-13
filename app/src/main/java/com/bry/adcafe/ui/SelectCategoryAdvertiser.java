@@ -100,7 +100,7 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
 
     private void startAdUpload() {
         Intent intent = new Intent(SelectCategoryAdvertiser.this, AdUpload.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
