@@ -71,6 +71,11 @@ public class Constants {
     public static String FAILED_TO_LOAD_USER_DATA = "FailedToLoadUserData";
 
     public static String CATEGORY_LIST = "categoryList";
+    public static String FINISHED_UNSUBSCRIBING = "finishedUnsubscribing";
 
-
+    public static String STARTING_UPDATING = "startingUpdating";
+    public static String FINISHED_UPDATING = "FinishedUpdating";
+    public static String CONFIRM_START = "ConfirmStart";
+    public static String ALL_CLEAR = "AllClear";
+    public static String CANCELLED = "canceled";
 }

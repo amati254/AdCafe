@@ -81,12 +81,61 @@ public class DatabaseManager {
 
 
 
+
+    public void unSubscribeUserFormAdvertCategory(String AdvertCategory, int clusterIDInCategory){
+        FlagSubscriptionThenUnsubscribeUser(AdvertCategory,clusterIDInCategory);
+    }
+
+    private void FlagSubscriptionThenUnsubscribeUser(final String AdvertCategory, final int clusterIDInCategory){
+        Log.d(TAG,"Unsubscribing user from cluster "+ AdvertCategory);
+        DatabaseReference dbRef =FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS).child(AdvertCategory);
+        dbRef.push();
+        dbRef.setValue(clusterIDInCategory).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                removeSpecificAdCategryFromUserSpaceAndSubscriptions(AdvertCategory,clusterIDInCategory);
+            }
+        });
+    }
+
+    private void removeSpecificAdCategryFromUserSpaceAndSubscriptions(String AdvertCategory,int Cluster){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        Log.d(TAG,"Removing user from subscription");
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
+                .child(Constants.CLUSTERS_LIST).child(AdvertCategory).child(Integer.toString(Cluster)).child(uid);
+        dbRef.removeValue();
+
+        Log.d(TAG,"Removing category "+AdvertCategory+" from users categories list.");
+        DatabaseReference dbRefUser = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.SUBSCRIPTION_lIST).child(AdvertCategory);
+        dbRefUser.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Intent intent = new Intent(Constants.FINISHED_UNSUBSCRIBING);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+            }
+        });
+
+    }
+
+
+
+
+    public void subscribeUserToSpecificCategory(String AdvertCategory){
+        numberOfSubs = 1;
+        generateClusterIDFromCategoryFlaggedClusters(AdvertCategory);
+    }
+
     public void setUpUserSubscriptions(List<String> subscriptions){
         numberOfSubs = subscriptions.size();
         for(String sub:subscriptions){
             generateClusterIDFromCategoryFlaggedClusters(sub);
         }
     }
+
+
+
 
     public void generateClusterIDFromCategoryFlaggedClusters(final String AdvertCategory){
         Variables.setMonthAdTotals(mKey,0);
@@ -102,7 +151,7 @@ public class DatabaseManager {
                     for(DataSnapshot snap: dataSnapshot.getChildren()){
                         int clusterIDInCategory = snap.getValue(int.class);
                         Log.d(TAG,"Cluster id gotten from Flagged cluster is --"+clusterIDInCategory);
-                        User.setID(clusterIDInCategory,mKey);
+//                        User.setID(clusterIDInCategory,mKey);
                         removeIdThenSubscribeUser(snap.getKey(),AdvertCategory,clusterIDInCategory);
                         break;
                     }
@@ -196,8 +245,6 @@ public class DatabaseManager {
             public void onComplete(@NonNull Task<Void> task) {
                 iterations++;
                 if(iterations == numberOfSubs){
-                    Variables.setCurrentAdInSubscription(0);
-                    Variables.setCurrentSubscriptionIndex(0);
                     Intent intent = new Intent(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }

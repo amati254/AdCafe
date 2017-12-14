@@ -44,6 +44,7 @@ public class Variables {
     public static List<String> selectedCategoriesToSubscribeTo = new ArrayList<>();
 
     public static boolean isLockedBecauseOfFlagedAds = false;
+    public static String areYouSureText;
 
 
 

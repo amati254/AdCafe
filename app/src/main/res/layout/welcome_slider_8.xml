@@ -22,7 +22,7 @@
             android:layout_marginLeft="50dp"
             android:gravity="center"
             android:layout_marginRight="50dp"
-            android:text="But why?"
+            android:text="..."
             android:textSize="25sp" />
 
         <TextView
@@ -34,7 +34,7 @@
             android:gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_height="wrap_content"
-            android:text="@string/slide3text2"
+            android:text="@string/slide8text"
             android:textSize="16sp" />
 
     </LinearLayout>
