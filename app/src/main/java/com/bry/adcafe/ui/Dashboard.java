@@ -107,6 +107,13 @@ public class Dashboard extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.subscriptionsImage).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Dashboard.this, SubscriptionManager.class);
+                startActivity(intent);
+            }
+        });
 
     }
 

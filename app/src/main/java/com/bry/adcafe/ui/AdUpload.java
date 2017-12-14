@@ -636,7 +636,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                                 mLoadingTextView.setVisibility(View.GONE);
                                 setAllOtherViewsToBeVisible();
                                 Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
-                                setHasPayedInFirebaseToFalse();
+//                                setHasPayedInFirebaseToFalse();
                                 cycleCount = 1;
                                 startDashboardActivity();
                             }
@@ -699,7 +699,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                                 mLoadingTextView.setVisibility(View.GONE);
                                 setAllOtherViewsToBeVisible();
                                 Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
-                                setHasPayedInFirebaseToFalse();
+//                                setHasPayedInFirebaseToFalse();
                                 cycleCount = 1;
                                 startDashboardActivity();
                             }

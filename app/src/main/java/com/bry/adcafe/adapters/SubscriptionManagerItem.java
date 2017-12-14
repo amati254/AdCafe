@@ -134,6 +134,7 @@ public class SubscriptionManagerItem {
         @Override
         public void onReceive(Context context, Intent intent) {
             removeTransactionListeners();
+            checkBox.setChecked(isChecked);
         }
     };
 

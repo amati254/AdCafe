@@ -89,8 +89,8 @@ public class DatabaseManager {
     private void FlagSubscriptionThenUnsubscribeUser(final String AdvertCategory, final int clusterIDInCategory){
         Log.d(TAG,"Unsubscribing user from cluster "+ AdvertCategory);
         DatabaseReference dbRef =FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS).child(AdvertCategory);
-        dbRef.push();
-        dbRef.setValue(clusterIDInCategory).addOnCompleteListener(new OnCompleteListener<Void>() {
+        DatabaseReference dbref = dbRef.push();
+        dbref.setValue(clusterIDInCategory).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 removeSpecificAdCategryFromUserSpaceAndSubscriptions(AdvertCategory,clusterIDInCategory);
