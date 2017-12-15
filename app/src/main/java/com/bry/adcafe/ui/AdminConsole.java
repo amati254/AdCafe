@@ -76,8 +76,10 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if(v == adsWhichHaveBeenSeenLess){
+            DataListsView.removeAllViews();
             loadAdsWhichHaveBeenSeenLess();
         }else if(v == mLoadTomorrowsAdsButton){
+            TomorrowsAdsListView.removeAllViews();
             loadTomorrowsads();
         }
     }
@@ -219,12 +221,13 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
     private void takeDownAd() {
         mAuthProgressDialog.show();
         Advert ad = Variables.adToBeFlagged;
+        boolean bol = ad.isFlagged() ? false : true;
 
         DatabaseReference  mRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
                 .child(getNextDay())
                 .child(ad.getPushRefInAdminConsole())
                 .child("flagged");
-        mRef.setValue(true);
+        mRef.setValue(bol);
 
         Log.d(TAG,"Flagging ad : "+ad.getPushRefInAdminConsole());
          numberOfClusters = ad.clusters.size();
@@ -236,7 +239,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
                     .child(Integer.toString(cluster))
                     .child(Integer.toString(pushId))
                     .child("flagged");
-            mRef3.setValue(true).addOnCompleteListener(new OnCompleteListener<Void>() {
+            mRef3.setValue(bol).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     runCount++;
@@ -253,7 +256,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
     private void createProgressDialog(){
         mAuthProgressDialog = new ProgressDialog(this);
         mAuthProgressDialog.setTitle("AdCafe.");
-        mAuthProgressDialog.setMessage("Taking down ad...");
+        mAuthProgressDialog.setMessage("One second...");
         mAuthProgressDialog.setCancelable(false);
     }
 

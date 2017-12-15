@@ -77,13 +77,6 @@ public class AdminAdsItem {
         loadListeners();
     }
 
-    @Click(R.id.takeDownButton)
-    private void onClick(){
-        Variables.adToBeFlagged = mAdvert;
-        Intent intent = new Intent("TAKE_DOWN");
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-    }
-
     private void loadListeners() {
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
                 .child(getNextDay()).child(mAdvert.getPushRefInAdminConsole());
@@ -100,6 +93,7 @@ public class AdminAdsItem {
                 boolean newValue = dataSnapshot.getValue(boolean.class);
                 Log.d("MY_AD_STAT_ITEM","New value gotten from firebase --"+newValue);
                 mFlagged.setText("Is Flagged : "+newValue);
+                mAdvert.setFlagged(newValue);
 
             }
 
@@ -118,6 +112,13 @@ public class AdminAdsItem {
 
             }
         });
+    }
+
+    @Click(R.id.takeDownButton)
+    private void onClick(){
+        Variables.adToBeFlagged = mAdvert;
+        Intent intent = new Intent("TAKE_DOWN");
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     private String getNextDay(){
