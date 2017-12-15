@@ -7,7 +7,7 @@
 
     <android.support.v7.widget.CardView
         android:layout_width="261dp"
-        android:layout_height="350dp"
+        android:layout_height="390dp"
         android:layout_margin="10dp"
         app:cardCornerRadius="4dp"
         app:cardElevation="2dp">
@@ -42,6 +42,24 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:text="No. of users targeted : 5000"
+                android:textAlignment="center"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Category : food"
+                android:textAlignment="center"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/isFlagged"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Is Flagged : false"
                 android:textAlignment="center"
                 android:textSize="11sp" />
 

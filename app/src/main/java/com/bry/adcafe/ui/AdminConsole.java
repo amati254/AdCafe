@@ -93,6 +93,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadTomorrowsads() {
+        mAuthProgressDialog.show();
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
                 .child(getNextDay());
         DatabaseReference dbref = query.getRef();
@@ -111,6 +112,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
                         TomorrowsAdsListView.addView(new AdminAdsItem(mContext,TomorrowsAdsListView,ad));
                     }
                 }
+                mAuthProgressDialog.dismiss();
             }
 
             @Override
@@ -122,6 +124,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadAdsWhichHaveBeenSeenLess() {
+        mAuthProgressDialog.show();
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
                 .child(getPreviousDay());
 
@@ -136,6 +139,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
                             DataListsView.addView(new AdminStatItem(mContext,DataListsView,ad));
                         }
                     }
+                    mAuthProgressDialog.dismiss();
                 }else{
                     Toast.makeText(mContext,"No children from database exist",Toast.LENGTH_SHORT).show();
                 }
@@ -215,6 +219,13 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
     private void takeDownAd() {
         mAuthProgressDialog.show();
         Advert ad = Variables.adToBeFlagged;
+
+        DatabaseReference  mRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
+                .child(getNextDay())
+                .child(ad.getPushRefInAdminConsole())
+                .child("flagged");
+        mRef.setValue(true);
+
         Log.d(TAG,"Flagging ad : "+ad.getPushRefInAdminConsole());
          numberOfClusters = ad.clusters.size();
         for(Integer cluster : ad.clusters.keySet()){
