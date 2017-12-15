@@ -590,7 +590,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         advert.setPushRefInAdminConsole(pushId);
         advert.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
         advert.setWebsiteLink(mLink);
-        advert.setClustersToUpLoadTo(clustersToUpLoadTo);
+//        advert.setClustersToUpLoadTo(clustersToUpLoadTo);
+        advert.setCategory(mCategory);
 
         pushrefInAdminConsole = pushId;
         pushRef.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -640,6 +641,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 advert.setCategory(mCategory);
                 advert.setFlagged(false);
                 advert.setPushRefInAdminConsole(pushrefInAdminConsole);
+                setClusterInAdminAdvert(clusterNumber,Integer.parseInt(pushId));
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -705,6 +707,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 advert.setCategory(mCategory);
                 advert.setFlagged(false);
                 advert.setPushRefInAdminConsole(pushrefInAdminConsole);
+                setClusterInAdminAdvert(number,Integer.parseInt(pushId));
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -746,6 +749,14 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
 
 
+    private void setClusterInAdminAdvert(int cluster,int pushId){
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
+                .child(getNextDay())
+                .child(pushrefInAdminConsole)
+                .child("clustersToUpLoadTo")
+                .child(Integer.toString(cluster));
+        adRef.setValue(pushId);
+    }
 
     private void checkAndNotifyAnyFailed() {
         if(!clustersToUpLoadTo.isEmpty()){

@@ -7,6 +7,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class Advert {
     private String websiteLink;
     private String category;
     private boolean isFlagged = false;
-    private List<Integer> clustersToUpLoadTo = new ArrayList<>();
+    public LinkedHashMap<Integer,Integer> clusters  = new LinkedHashMap<>();
 
     public Advert(String ImageUrl){
         this.imageUrl = ImageUrl;
@@ -146,11 +147,4 @@ public class Advert {
         isFlagged = flagged;
     }
 
-    public List<Integer> getClustersToUpLoadTo() {
-        return clustersToUpLoadTo;
-    }
-
-    public void setClustersToUpLoadTo(List<Integer> clustersToUpLoadTo) {
-        this.clustersToUpLoadTo = clustersToUpLoadTo;
-    }
 }
