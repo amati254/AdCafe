@@ -21,6 +21,7 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.adapters.AdminAdsItem;
+import com.bry.adcafe.adapters.AdminFeedBackItem;
 import com.bry.adcafe.adapters.AdminStatItem;
 import com.bry.adcafe.models.Advert;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -46,10 +47,14 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
     private Context mContext;
     @Bind(R.id.LoadAdsWhichHaveBeenSeenLess) Button adsWhichHaveBeenSeenLess;
     @Bind(R.id.PlaceHolderViewData) PlaceHolderView DataListsView;
+
     @Bind(R.id.LoadTomorrowsAds) Button mLoadTomorrowsAdsButton;
     @Bind(R.id.PlaceHolderViewTomorrowsAds) PlaceHolderView TomorrowsAdsListView;
+
+    @Bind(R.id.LoadFeedback) Button mLoadFeedbackButton;
+    @Bind(R.id.PlaceHolderViewFeedback) PlaceHolderView FeedbackView;
+
     private ProgressDialog mAuthProgressDialog;
-    public List<Integer> clusters = new ArrayList<>();
     private int runCount = 0;
     private int numberOfClusters =0;
 
@@ -63,6 +68,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
 
         adsWhichHaveBeenSeenLess.setOnClickListener(this);
         mLoadTomorrowsAdsButton.setOnClickListener(this);
+        mLoadFeedbackButton.setOnClickListener(this);
         registerReceivers();
         createProgressDialog();
     }
@@ -75,13 +81,52 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        DataListsView.removeAllViews();
+        TomorrowsAdsListView.removeAllViews();
+        FeedbackView.removeAllViews();
         if(v == adsWhichHaveBeenSeenLess){
-            DataListsView.removeAllViews();
+//            DataListsView.removeAllViews();
             loadAdsWhichHaveBeenSeenLess();
         }else if(v == mLoadTomorrowsAdsButton){
-            TomorrowsAdsListView.removeAllViews();
+//            TomorrowsAdsListView.removeAllViews();
             loadTomorrowsads();
+        }else if(v == mLoadFeedbackButton){
+//            FeedbackView.removeAllViews();
+            loadFeedBack();
         }
+    }
+
+    private void loadFeedBack() {
+        Toast.makeText(mContext,"Loading feedback ...",Toast.LENGTH_SHORT).show();
+        final DatabaseReference mRef = FirebaseDatabase.getInstance().getReference(Constants.FEEDBACK);
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()){
+                    for (DataSnapshot snap : dataSnapshot.getChildren()){
+                        DataSnapshot feedbacktype = snap.child("feedbacktype");
+                        String ftype = feedbacktype.getValue(String.class);
+
+                        DataSnapshot msage = snap.child("message");
+                        String message = msage.getValue(String.class);
+
+                        DataSnapshot usr = snap.child("user");
+                        String user = usr.getValue(String.class);
+
+                        String pushRef = snap.getKey();
+                        FeedbackView.addView(new AdminFeedBackItem(mContext,FeedbackView,pushRef,message,user,ftype));
+                    }
+                }else{
+                    Toast.makeText(mContext,"There are no feedback messages.",Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(mContext,"There was a firebase error."+databaseError.getMessage(),Toast.LENGTH_SHORT).show();
+
+            }
+        });
     }
 
     private void registerReceivers(){
@@ -141,11 +186,10 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
                             DataListsView.addView(new AdminStatItem(mContext,DataListsView,ad));
                         }
                     }
-                    mAuthProgressDialog.dismiss();
                 }else{
                     Toast.makeText(mContext,"No children from database exist",Toast.LENGTH_SHORT).show();
                 }
-
+                mAuthProgressDialog.dismiss();
             }
 
             @Override

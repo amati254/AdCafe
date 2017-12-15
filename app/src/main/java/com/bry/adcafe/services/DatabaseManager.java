@@ -98,7 +98,7 @@ public class DatabaseManager {
         });
     }
 
-    private void removeSpecificAdCategryFromUserSpaceAndSubscriptions(String AdvertCategory,int Cluster){
+    private void removeSpecificAdCategryFromUserSpaceAndSubscriptions(final String AdvertCategory, int Cluster){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         Log.d(TAG,"Removing user from subscription");
@@ -112,6 +112,7 @@ public class DatabaseManager {
         dbRefUser.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+                Variables.Subscriptions.remove(AdvertCategory);
                 Intent intent = new Intent(Constants.FINISHED_UNSUBSCRIBING);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }

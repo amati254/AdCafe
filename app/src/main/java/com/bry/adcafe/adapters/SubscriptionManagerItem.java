@@ -65,8 +65,14 @@ public class SubscriptionManagerItem {
     @Click(R.id.cat_select)
     private void onClick(){
         if(isChecked){
-            if(isOnline(mContext)) removeSubscription();
-            else Toast.makeText(mContext, "You might need an internet connection to un-subscribe.", Toast.LENGTH_SHORT).show();
+            if(isOnline(mContext)) {
+                if(Variables.Subscriptions.size()>1){
+                    removeSubscription();
+                }else{
+                    Toast.makeText(mContext,"You have to have at least one category!",Toast.LENGTH_LONG).show();
+                    checkBox.setChecked(true);
+                }
+            } else Toast.makeText(mContext, "You might need an internet connection to un-subscribe.", Toast.LENGTH_SHORT).show();
         }else{
             if(isOnline(mContext)) addSubscription();
             else Toast.makeText(mContext, "You might need an internet connection to subscribe.", Toast.LENGTH_SHORT).show();

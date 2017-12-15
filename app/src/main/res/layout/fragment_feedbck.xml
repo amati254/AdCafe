@@ -26,7 +26,7 @@
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
             android:layout_height="wrap_content"
-            android:text="Be as honest as you want .Your feedback is completely anonymous." />
+            android:text="Be as honest as you want. We greatly appreciate your opinion." />
 
         <Spinner
             android:layout_width="match_parent"

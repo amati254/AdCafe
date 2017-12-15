@@ -19,16 +19,43 @@
             android:orientation="vertical"
             android:layout_height="wrap_content">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_height="wrap_content">
             <Button
                 android:layout_width="wrap_content"
                 android:id="@+id/LoadAdsWhichHaveBeenSeenLess"
-                android:text="AdvertisersToReemburse"
+                android:text="A.T.Reeimburse"
+                android:textSize="12sp"
+                android:layout_marginRight="10dp"
+                android:paddingRight="5dp"
+                android:paddingLeft="5dp"
+                android:textColor="@color/icons"
+                android:background="@color/colorAccent"
                 android:layout_height="wrap_content" />
             <Button
                 android:layout_width="wrap_content"
                 android:id="@+id/LoadTomorrowsAds"
                 android:text="TomorrowsAds"
+                android:textSize="12sp"
+                android:layout_marginRight="10dp"
+                android:paddingRight="5dp"
+                android:paddingLeft="5dp"
+                android:textColor="@color/icons"
+                android:background="@color/colorAccent"
                 android:layout_height="wrap_content" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:id="@+id/LoadFeedback"
+                android:text="Feedback"
+                android:textSize="12sp"
+                android:textColor="@color/icons"
+                android:background="@color/colorAccent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
             <com.mindorks.placeholderview.PlaceHolderView
                 android:id="@+id/PlaceHolderViewData"
@@ -39,6 +66,13 @@
             <com.mindorks.placeholderview.PlaceHolderView
                 android:layout_marginTop="10dp"
                 android:id="@+id/PlaceHolderViewTomorrowsAds"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"/>
+
+            <com.mindorks.placeholderview.PlaceHolderView
+                android:layout_marginTop="10dp"
+                android:id="@+id/PlaceHolderViewFeedback"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="vertical"/>

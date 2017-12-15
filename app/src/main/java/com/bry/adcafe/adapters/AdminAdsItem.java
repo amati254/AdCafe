@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ public class AdminAdsItem {
     @View(R.id.ammountPaid) private TextView mAmountToReimburse;
     @View(R.id.category) private TextView mCategory;
     @View(R.id.isFlagged) private TextView mFlagged;
+    @View(R.id.takeDownButton) private Button mTakeDown;
 
     @View(R.id.adImage) private ImageView mImage;
     private Context mContext;
@@ -65,6 +67,8 @@ public class AdminAdsItem {
         mFlagged.setText("Is Flagged : "+mAdvert.isFlagged());
         String ammount = Integer.toString(mAdvert.getNumberOfUsersToReach()*4);
         mAmountToReimburse.setText(String.format("Reimbursing amount : %s", ammount));
+        if(mAdvert.isFlagged()) mTakeDown.setText("Put Up.");
+        else mTakeDown.setText("Take Down.");
 
         try {
             Glide.with(mContext).load(bitmapToByte(getResizedBitmap(decodeFromFirebaseBase64(mAdvert.getImageUrl()),400)))
@@ -94,7 +98,8 @@ public class AdminAdsItem {
                 Log.d("MY_AD_STAT_ITEM","New value gotten from firebase --"+newValue);
                 mFlagged.setText("Is Flagged : "+newValue);
                 mAdvert.setFlagged(newValue);
-
+                if(newValue) mTakeDown.setText("Put Up.");
+                else mTakeDown.setText("Take Down.");
             }
 
             @Override

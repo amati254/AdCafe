@@ -17,6 +17,7 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.User;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -63,9 +64,15 @@ public class FeedbackFragment extends DialogFragment implements View.OnClickList
     }
 
     private void uploadFeedBackToDatabase(String feedback, String feedbackType) {
-        DatabaseReference mRef3 = FirebaseDatabase.getInstance().getReference(Constants.FEEDBACK).child(feedbackType);
-        mRef3.push();
-        mRef3.setValue(feedback);
+        String user = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+//        String message = feedbackType+" - "+user+" says : "+feedback;
+        DatabaseReference mRef3 = FirebaseDatabase.getInstance().getReference(Constants.FEEDBACK);
+        DatabaseReference dbRef = mRef3.push();
+
+        dbRef.child("feedbacktype").setValue(feedbackType);
+        dbRef.child("message").setValue(feedback);
+        dbRef.child("user").setValue(user);
+//        dbRef.setValue(message);
         Toast.makeText(mContext,"Feedback received.",Toast.LENGTH_SHORT).show();
         dismiss();
     }
