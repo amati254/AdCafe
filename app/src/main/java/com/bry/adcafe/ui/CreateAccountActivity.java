@@ -127,7 +127,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         }else{
             mAvi.setVisibility(View.VISIBLE);
             mLoadingText.setVisibility(View.VISIBLE);
-            mRelative.setAlpha(0.2f);
+            mRelative.setAlpha(0.0f);
             mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {

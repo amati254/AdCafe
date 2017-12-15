@@ -477,7 +477,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }else{
             mAvi.setVisibility(View.VISIBLE);
             mLoadingMessage.setVisibility(View.VISIBLE);
-            mRelative.setAlpha(0.2f);
+            mRelative.setAlpha(0.0f);
             mIsLoggingIn = true;
 //            mRelative.setVisibility(View.GONE);
             Log.d(TAG,"--Logging in user with username and password...");

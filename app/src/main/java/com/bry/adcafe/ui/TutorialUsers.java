@@ -48,7 +48,7 @@ public class TutorialUsers extends AppCompatActivity {
 
         // layouts of all welcome sliders
         myLayouts = new int[]{
-                R.layout.welcome_slider_5,
+                R.layout.welcome_slider_6,
                 R.layout.welcome_slider_4,
                 R.layout.welcome_slider_3,
                 R.layout.welcome_slider_2,

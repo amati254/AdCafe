@@ -236,8 +236,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         unregisterAllReceivers();
         removeAllViews();
         if (!Variables.isDashboardActivityOnline) Variables.clearAdTotal();
-        if (networkStateReceiver != null) networkStateReceiver.removeListener(this);
-        this.unregisterReceiver(networkStateReceiver);
+        if (networkStateReceiver != null) {
+            networkStateReceiver.removeListener(this);
+            this.unregisterReceiver(networkStateReceiver);
+        }
+
         Variables.isMainActivityOnline = false;
         super.onDestroy();
     }

@@ -1,6 +1,7 @@
 package com.bry.adcafe.ui;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -116,6 +117,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private String pushrefInAdminConsole;
     private String mLink = "none";
     private String mCategory;
+    private ProgressDialog mAuthProgressDialog;
+    private int numberOfClustersBeingUploadedTo = 0;
 
 
     @Override
@@ -132,6 +135,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         mCategoryText.setText("Category: "+mCategory);
 
         setUpViews();
+        createProgressDialog();
         startGetNumberOfClusters();
     }
 
@@ -360,12 +364,14 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                             if(noOfChildrenInClusterToStartFrom>=510){
                                 Toast.makeText(mContext,"The ad limit has been exceeded.You may need to upload tomorrow instead.",Toast.LENGTH_LONG).show();
                             }else{
-                                setAllOtherViewsToBeGone();
-                                mAvi.setVisibility(View.VISIBLE);
-                                mLoadingTextView.setVisibility(View.VISIBLE);
-                                mLoadingTextView.setText(R.string.uploadMessage);
+//                                setAllOtherViewsToBeGone();
+//                                mAvi.setVisibility(View.VISIBLE);
+//                                mLoadingTextView.setVisibility(View.VISIBLE);
+//                                mLoadingTextView.setText(R.string.uploadMessage);
+                                mAuthProgressDialog.show();
                                 setNewValueToStartFrom();
                                 date = getNextDay();
+                                numberOfClustersBeingUploadedTo = clustersToUpLoadTo.size();
                                 uploadImageToManagerConsole();
                             }
 
@@ -423,11 +429,14 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         d.setContentView(R.layout.dialog5);
         Button b2 = (Button) d.findViewById(R.id.buttonOk);
         final EditText e = (EditText) d.findViewById(R.id.editText);
+        if(mLink.equals("none")) e.setText("");
+        else e.setText(mLink);
 
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(e.getText().toString()=="") {
+                if(e.getText().toString().equals("")) {
+                    findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
                     mLink = "none";
                 }else{
                     mLink = e.getText().toString();
@@ -592,6 +601,14 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         });
     }
 
+    private void createProgressDialog(){
+        mAuthProgressDialog = new ProgressDialog(this);
+        mAuthProgressDialog.setTitle("AdCafe.");
+        mAuthProgressDialog.setMessage("Uploading your advertisement...");
+        mAuthProgressDialog.setCancelable(false);
+        mAuthProgressDialog.setProgress(0);
+    }
+
     private void uploadImage(final Bitmap bm) {
         String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
         uploading = true;
@@ -628,13 +645,15 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                     public void onSuccess(Void aVoid) {
                         cycleCount++;
                         clustersToUpLoadTo.remove(clusterNumber);
+//                        mAuthProgressDialog.setProgress((clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100);
                         if(clustersToUpLoadTo.isEmpty()){
                             if(!failedClustersToUploadTo.isEmpty()){
                                 checkAndNotifyAnyFailed();
                             }else{
-                                mAvi.setVisibility(View.GONE);
-                                mLoadingTextView.setVisibility(View.GONE);
-                                setAllOtherViewsToBeVisible();
+//                                mAvi.setVisibility(View.GONE);
+//                                mLoadingTextView.setVisibility(View.GONE);
+//                                setAllOtherViewsToBeVisible();
+                                mAuthProgressDialog.dismiss();
                                 Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
 //                                setHasPayedInFirebaseToFalse();
                                 cycleCount = 1;
@@ -691,13 +710,15 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                     public void onSuccess(Void aVoid) {
                         cycleCount++;
                         clustersToUpLoadTo.remove(number);
+//                        mAuthProgressDialog.setProgress((clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100);
                         if(clustersToUpLoadTo.isEmpty()){
                             if(!failedClustersToUploadTo.isEmpty()){
                                 checkAndNotifyAnyFailed();
                             }else{
-                                mAvi.setVisibility(View.GONE);
-                                mLoadingTextView.setVisibility(View.GONE);
-                                setAllOtherViewsToBeVisible();
+//                                mAvi.setVisibility(View.GONE);
+//                                mLoadingTextView.setVisibility(View.GONE);
+//                                setAllOtherViewsToBeVisible();
+                                mAuthProgressDialog.dismiss();
                                 Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
 //                                setHasPayedInFirebaseToFalse();
                                 cycleCount = 1;

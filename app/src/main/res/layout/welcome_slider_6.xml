@@ -16,14 +16,21 @@
 
         <TextView
             android:id="@+id/textView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:textColor="@color/colorPrimary"
-            android:layout_marginLeft="50dp"
+            android:layout_width="wrap_content"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
-            android:layout_marginRight="50dp"
-            android:text="..."
-            android:textSize="25sp" />
+            android:layout_marginLeft="20dp"
+            android:layout_height="wrap_content"
+            android:text="The Main Page."
+            android:textSize="20sp" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:background="@drawable/mainoutlinejpeg2"
+            android:layout_height="400dp" />
 
         <TextView
             android:id="@+id/textView2"
