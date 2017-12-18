@@ -437,7 +437,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG, "---Children in dataSnapshot from firebase exist");
                 for (DataSnapshot snap : dataSnapshot.getChildren()) {
                     Advert ad = snap.getValue(Advert.class);
-                    ad.setPushId(snap.getKey());
+                    DataSnapshot snpsht = snap.child("pushId");
+                    String pushID = snpsht.getValue(String.class);
+                    ad.setPushId(pushID);
                     if(!ad.isFlagged()) mAdList.add(ad);
                 }
                 if(mAdList.size()!=0){
@@ -925,8 +927,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "---More children in dataSnapshot from firebase exist");
                     for (DataSnapshot snap : dataSnapshot.getChildren()) {
                         Advert ad = snap.getValue(Advert.class);
+                        DataSnapshot snpsht = snap.child("pushId");
+                        String pushID = snpsht.getValue(String.class);
+                        ad.setPushId(pushID);
                         Log.d(TAG,"setting push id to : "+ ad.getPushId());
-                        ad.setPushId(ad.getPushId());
                         if(!ad.isFlagged()) mAdList.add(ad);
                     }
                     Log.d(TAG, "---All the new ads have been handled.Total is " + mAdList.size());
