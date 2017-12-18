@@ -271,18 +271,20 @@ public class AdvertCard{
     private void setLastAdSeen(){
         Variables.setLastSeenAd(Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList()).getPushId());
         Variables.setCurrentAdvert(Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList()));
-        if(!Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein)){
-            Log.d("ADVERT_CARD---","Advert has a website link. Setting icon and dot to be visible");
-            mSwipeView.findViewById(R.id.smallDot).setVisibility(android.view.View.VISIBLE);
-            webIcon.setAlpha(1.0f);
-            webText.setAlpha(1.0f);
-        }else{
-            Log.d("ADVERT_CARD---","Advert doesnt have website link. Setting icon and dot to be invisible");
-            mSwipeView.findViewById(R.id.smallDot).setVisibility(android.view.View.INVISIBLE);
-            webIcon.setAlpha(0.4f);
-            webText.setAlpha(0.4f);
-        }
-        Log.d("ADVERT_CARD---","Setting the last ad seen in Variables class... "+Variables.getCurrentAdvert().getPushRefInAdminConsole());
+//        if(!Variables.getCurrentAdvert().getWebsiteLink().equals(igsNein)){
+//            Log.d("ADVERT_CARD---","Advert has a website link. Setting icon and dot to be visible");
+//            mSwipeView.findViewById(R.id.smallDot).setVisibility(android.view.View.VISIBLE);
+//            webIcon.setAlpha(1.0f);
+//            webText.setAlpha(1.0f);
+//        }else{
+//            Log.d("ADVERT_CARD---","Advert doesnt have website link. Setting icon and dot to be invisible");
+//            mSwipeView.findViewById(R.id.smallDot).setVisibility(android.view.View.INVISIBLE);
+//            webIcon.setAlpha(0.4f);
+//            webText.setAlpha(0.4f);
+//        }
+        Log.d("ADVERT-CARD","Setting the current advert to ad - "+Variables.getCurrentAdvert().getPushRefInAdminConsole());
+        Log.d("ADVERT_CARD---","Setting the last ad seen in Variables class... "+
+                Variables.getCurrentAdvert().getPushRefInAdminConsole());
     }
 
     private BroadcastReceiver mMessageReceiverForTimerHasEnded = new BroadcastReceiver() {
@@ -320,8 +322,7 @@ public class AdvertCard{
     private static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
         byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
         Bitmap bitm = BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
-        Bitmap newBm = getResizedBitmap(bitm,700);
-        return newBm;
+        return getResizedBitmap(bitm,700);
     }
 
 

@@ -170,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onPause();
         h.removeCallbacks(r);
         setCurrentTimeToSharedPrefs();
+        setUserDataInSharedPrefs();
     }
 
     @Override
@@ -436,28 +437,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 for (DataSnapshot snap : dataSnapshot.getChildren()) {
                     Advert ad = snap.getValue(Advert.class);
                     ad.setPushId(snap.getKey());
-                    mAdList.add(ad);
+                    if(!ad.isFlagged()) mAdList.add(ad);
                 }
-                if (Variables.getCurrentAdInSubscription() != 0) {
-                    //this means user has seen some ads in current subscription index.
-                    //removing first ad from ad list if there are more than one ads.
-                    //this is because user has seen the first ad in the ad list.
-                    if (mAdList.size() > 1) mAdList.remove(0);
-                    //setting the child to start from to the number of children gotten to current ad in sub + children count minus one.
-                    //this is because snapshot contains child that has been seen by user.
-                    mChildToStartFrom = Variables.getCurrentAdInSubscription() + (int) dataSnapshot.getChildrenCount() - 1;
-                } else {
-                    //this means that user has not seen any ad in current subscription index.
-                    mChildToStartFrom = (int) dataSnapshot.getChildrenCount();
-                    //setting the child to start from to number of children gotten.
+                if(mAdList.size()!=0){
+                    if (Variables.getCurrentAdInSubscription() != 0) {
+                        //this means user has seen some ads in current subscription index.
+                        //removing first ad from ad list if there are more than one ads.
+                        //this is because user has seen the first ad in the ad list.
+                        if (mAdList.size() > 1) mAdList.remove(0);
+                        //setting the child to start from to the number of children gotten to current ad in sub + children count minus one.
+                        //this is because snapshot contains child that has been seen by user.
+                        mChildToStartFrom = Variables.getCurrentAdInSubscription() + (int) dataSnapshot.getChildrenCount() - 1;
+                    } else {
+                        //this means that user has not seen any ad in current subscription index.
+                        mChildToStartFrom = (int) dataSnapshot.getChildrenCount();
+                        //setting the child to start from to number of children gotten.
+                    }
+                    Variables.setCurrentAdNumberForAllAdsList(0);
+                    Log.d(TAG, "Child set to start from is -- " + mChildToStartFrom);
+                    Log.d(TAG, "---All the ads have been handled.Total is " + mAdList.size());
+                    mAvi.setVisibility(View.GONE);
+                    mLoadingText.setVisibility(View.GONE);
+                    mLinearLayout.setVisibility(View.VISIBLE);
+                    loadAdsIntoAdvertCard();
+                }else{
+                    if (Variables.getCurrentSubscriptionIndex()+1 < Variables.Subscriptions.size()) {
+                        Log.d(TAG, "---There was 1 flagged ad subscription : " +
+                                getSubscriptionValue(Variables.getCurrentSubscriptionIndex()) + ". Retrying in the next category");
+                        Variables.setNextSubscriptionIndex();
+                        Variables.setCurrentAdInSubscription(0);
+                        getGetAdsFromFirebase();
+                    } else {
+                        Log.d(TAG, "---There are no ads in any other subscriptions");
+                        mAvi.setVisibility(View.GONE);
+                        mLoadingText.setVisibility(View.GONE);
+                        mLinearLayout.setVisibility(View.VISIBLE);
+                        loadAdsIntoAdvertCard();
+                    }
                 }
-                Variables.setCurrentAdNumberForAllAdsList(0);
-                Log.d(TAG, "Child set to start from is -- " + mChildToStartFrom);
-                Log.d(TAG, "---All the ads have been handled.Total is " + mAdList.size());
-                mAvi.setVisibility(View.GONE);
-                mLoadingText.setVisibility(View.GONE);
-                mLinearLayout.setVisibility(View.VISIBLE);
-                loadAdsIntoAdvertCard();
+
             }
         }
 
@@ -544,6 +562,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadAdsIntoAdvertCard() {
+        boolean loadMoreAds = false;
         if (mAdCounterView == null) {
             Log.d(TAG, "---Setting up AdCounter...");
             loadAdCounter();
@@ -578,27 +597,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else {
                 if (mAdList.size() == 1 && Variables.getCurrentSubscriptionIndex() + 1 < Variables.Subscriptions.size()) {
                     Variables.nextSubscriptionIndex = Variables.getCurrentSubscriptionIndex() + 1;
-                    loadMoreAds();
+                    loadMoreAds = true;
+//                    loadMoreAds();
                 }
-                if(mAdList.size()>1) {
-                    for (Advert ad : mAdList) {
-                        if (!ad.isFlagged()) {
-                            mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.NOT_LAST));
-                            Log.d(TAG, "Loading ad " + ad.getPushRefInAdminConsole());
-                            Variables.adToVariablesAdList(ad);
-                            Variables.setIsLastOrNotLast(Constants.NOT_LAST);
-                        } else {
-                            Log.d(TAG, "Skipping ad " + ad.getPushRefInAdminConsole() + " because it has been flagged in firebase");
-                        }
-                    }
-                }else{
-                    for (Advert ad : mAdList) {
-                        if(ad.isFlagged()) ad.setImageUrl(igsNein);
-                        mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.NOT_LAST));
-                        Log.d(TAG, "Loading ad " + ad.getPushRefInAdminConsole());
-                        Variables.adToVariablesAdList(ad);
-                        Variables.setIsLastOrNotLast(Constants.NOT_LAST);
-                    }
+                for (Advert ad : mAdList) {
+                    mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.NOT_LAST));
+                    Log.d(TAG, "Loading ad " + ad.getPushRefInAdminConsole());
+                    Variables.adToVariablesAdList(ad);
+                    Variables.setIsLastOrNotLast(Constants.NOT_LAST);
                 }
             }
             mAdList.clear();
@@ -618,6 +624,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        if(loadMoreAds) loadMoreAds();
     }
 
 
@@ -866,7 +873,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private BroadcastReceiver mMessageReceiverForTimerHasStarted = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onclicks();
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -879,6 +885,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         findViewById(R.id.websiteText).setAlpha(0.4f);
                         findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
                     }
+                    onclicks();
                 }
             }, 400);
 

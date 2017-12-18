@@ -95,12 +95,6 @@ public class ViewImageFragment extends DialogFragment {
             }
         });
 
-//        mDeleteButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//            }
-//        });
         return rootView;
     }
 }
