@@ -297,6 +297,7 @@ public class AdvertCard{
                     hasBeenSwiped = false;
                 }else if(mSwipeView.getChildCount()==1 && mLastOrNotLast!=Constants.ANNOUNCEMENTS){
                     sendBroadcast(Constants.LAST);
+                    Variables.isLockedBecauseOfNoMoreAds = true;
                 }
         }
     };

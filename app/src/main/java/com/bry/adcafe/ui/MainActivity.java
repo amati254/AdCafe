@@ -163,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         };
         h.postDelayed(r, 60000);
+//        onclicks();
     }
 
     @Override
@@ -582,6 +583,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (mAdList != null && mAdList.size() > 0) {
             if (mAdList.size() == 1 && mChildToStartFrom == Variables.getCurrentAdInSubscription()) {
                 Log.d(TAG, "---User has seen all the ads, thus will load only last ad...");
+                Log.d(TAG,"The child to start from is : "+mChildToStartFrom+" and currentAdInSubscriptionIs : "+
+                        Variables.getCurrentAdInSubscription());
                 mSwipeView.lockViews();
                 mSwipeView.addView(new AdvertCard(mContext, mAdList.get(0), mSwipeView, Constants.LAST));
                 Variables.adToVariablesAdList(mAdList.get(0));
@@ -922,7 +925,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "---More children in dataSnapshot from firebase exist");
                     for (DataSnapshot snap : dataSnapshot.getChildren()) {
                         Advert ad = snap.getValue(Advert.class);
-                        ad.setPushId(snap.getKey());
+                        Log.d(TAG,"setting push id to : "+ ad.getPushId());
+                        ad.setPushId(ad.getPushId());
                         if(!ad.isFlagged()) mAdList.add(ad);
                     }
                     Log.d(TAG, "---All the new ads have been handled.Total is " + mAdList.size());
@@ -970,6 +974,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.LOAD_MORE_ADS));
             Variables.adToVariablesAdList(ad);
             Variables.setIsLastOrNotLast(Constants.NOT_LAST);
+        }
+        if(Variables.isLockedBecauseOfNoMoreAds){
+            mSwipeView.unlockViews();
+            Variables.isLockedBecauseOfNoMoreAds = false;
         }
         mAdList.clear();
     }

@@ -84,14 +84,17 @@ public class SavedAdsCard {
     private void onResolved() {
        loadImage();
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter("UNREGISTER"));
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin,new IntentFilter(mAdvert.getPushRefInAdminConsole()));
     }
 
     private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
+            try{
+                LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
         }
     };
@@ -99,8 +102,9 @@ public class SavedAdsCard {
     private BroadcastReceiver mMessageReceiverForUnpin = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
+            Log.d("ADVERT_CARD--","Received broadcast to Unpin ad");
             unPin();
+            removeReceiver();
         }
     };
 
@@ -131,6 +135,15 @@ public class SavedAdsCard {
         Variables.adToBeViewed = mAdvert;
         Intent intent = new Intent("VIEW");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        setUpReceiver();
+    }
+
+    private void setUpReceiver(){
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin,new IntentFilter(mAdvert.getPushRefInAdminConsole()));
+    }
+
+    private void removeReceiver(){
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
     }
 
     private void shareAd() {
@@ -188,9 +201,13 @@ public class SavedAdsCard {
 
     private void unPin(){
         String id = mAdvert.getPushId();
-        mPlaceHolderView.removeView(this);
+        try{
+            mPlaceHolderView.removeView(this);
+        }catch (Exception e){
+            Toast.makeText(mContext,"Something went wrong while unpinning that.",Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
         Log.d("SAVED_ADS_CARD--","Removing pinned ad"+id);
-
         String uid = User.getUid();
 
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST).child(id);
