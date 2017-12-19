@@ -53,7 +53,7 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
  * Created by bryon on 6/11/2017.
  */
 
-@Animate(Animation.CARD_RIGHT_IN_DESC)
+//@Animate(Animation.CARD_RIGHT_IN_DESC)
 @Layout(R.layout.ad_card_view)
 public class AdvertCard{
     @View(R.id.profileImageView) private ImageView profileImageView;

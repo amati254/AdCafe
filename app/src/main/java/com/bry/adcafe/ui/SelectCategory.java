@@ -153,6 +153,10 @@ public class SelectCategory extends AppCompatActivity implements View.OnClickLis
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
         User.setUid(uid);
+        Variables.setCurrentSubscriptionIndex(0);
+        Variables.setCurrentAdInSubscription(0);
+        Variables.setAdTotal(0,"");
+        Variables.setMonthAdTotals("",0);
         Variables.isStartFromLogin = true;
         loadingLayout.setVisibility(View.GONE);
         Intent intent = new Intent(SelectCategory.this, MainActivity.class);

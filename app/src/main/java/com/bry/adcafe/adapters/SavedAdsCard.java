@@ -110,6 +110,7 @@ public class SavedAdsCard {
 
     @LongClick(R.id.SavedImageView)
     private void onLongClick(){
+//        promptUserIfSureToUnpinAd();
         unPin();
     }
 
@@ -130,6 +131,13 @@ public class SavedAdsCard {
         }, 1000);
     }
 
+    private void promptUserIfSureToUnpinAd(){
+        Variables.adToBeViewed = mAdvert;
+        Intent intent = new Intent("ARE_YOU_SURE2");
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        setUpReceiver();
+    }
+
     private void viewAd() {
         Log.d("SavedAdsCard","Setting the ad to be viewed.");
         Variables.adToBeViewed = mAdvert;
@@ -139,7 +147,8 @@ public class SavedAdsCard {
     }
 
     private void setUpReceiver(){
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin,new IntentFilter(mAdvert.getPushRefInAdminConsole()));
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin
+                ,new IntentFilter(mAdvert.getPushRefInAdminConsole()));
     }
 
     private void removeReceiver(){

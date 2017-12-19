@@ -366,13 +366,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : " + getSubscriptionValue(Variables.getCurrentSubscriptionIndex())+ " : " + getClusterValue(Variables.getCurrentSubscriptionIndex()));
         dbRef = query.getRef();
 
-        if (Variables.getAdTotal(mKey) == 0) {
-            Log.d(TAG, "User adTotal is 0, so is starting at 1");
-            dbRef.orderByKey().startAt(Integer.toString(1)).limitToFirst(5).addValueEventListener(val2);
+        if (Variables.getCurrentAdInSubscription() == 0) {
+            Log.d(TAG, "User current ad in subscription is 0, so is starting at 1");
+            dbRef.orderByKey().startAt(Integer.toString(1)).limitToFirst(5).addValueEventListener(val);
         } else {
-            Log.d(TAG, "User adTotal is not 0, so starting at " + Variables.getCurrentAdInSubscription());
+            Log.d(TAG, "User current ad in subscription is not 0, so starting at " + Variables.getCurrentAdInSubscription());
             dbRef.orderByKey().startAt(Integer.toString(Variables.getCurrentAdInSubscription()))
-                    .limitToFirst(5).addListenerForSingleValueEvent(val2);
+                    .limitToFirst(5).addListenerForSingleValueEvent(val);
         }
 
     }
@@ -381,32 +381,109 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             if (dataSnapshot.hasChildren()) {
-                Variables.clearAllAdsFromAdList();
-                Log.d(TAG, "---Children in dataSnapshot from firebase exist");
-                for (DataSnapshot snap : dataSnapshot.getChildren()) {
-                    Advert ad = snap.getValue(Advert.class);
-                    mAdList.add(ad);
+                if(dataSnapshot.getChildrenCount()==1){
+                    //if only one ad has loaded.
+                    Log.d(TAG,"Only one ad has loaded.");
+                    for (DataSnapshot snap : dataSnapshot.getChildren()) {
+                        Advert ad = snap.getValue(Advert.class);
+                        DataSnapshot snpsht = snap.child("pushId");
+                        String pushID = snpsht.getValue(String.class);
+                        ad.setPushId(pushID);
+                        if(!ad.isFlagged()) mAdList.add(ad);
+                    }
+                    if(mAdList.size()!=0){
+                        Log.d(TAG,"The one ad was not flagged so its in the adlist");
+                        if(Variables.getCurrentAdInSubscription()!=Integer.parseInt(mAdList.get(0).getPushId())){
+                            //user hasn't seen the one ad that has been loaded
+                            Log.d(TAG,"The user hasnt seen the one ad in the adlist.");
+                            mChildToStartFrom = Variables.getCurrentAdInSubscription()+ mAdList.size();
+                            Log.d(TAG,"The child set to start from is : "+mChildToStartFrom);
+                            Variables.setCurrentAdNumberForAllAdsList(0);
+                            mAvi.setVisibility(View.GONE);
+                            mLoadingText.setVisibility(View.GONE);
+                            mLinearLayout.setVisibility(View.VISIBLE);
+                            loadAdsIntoAdvertCard();
+                        }else{
+                            //user has seen the one ad that has been loaded.
+                            Log.d(TAG,"User has seen the one ad that has been loaded so going to the next subscription");
+                            if (Variables.getCurrentSubscriptionIndex()+1 < Variables.Subscriptions.size()) {
+                                Log.d(TAG,"Trying the next subscription.");
+                                Variables.setNextSubscriptionIndex();
+                                Variables.setCurrentAdInSubscription(0);
+                                getGetAdsFromFirebase();
+                            } else {
+                                Log.d(TAG, "---There are no ads in any of the subscriptions");
+                                mAvi.setVisibility(View.GONE);
+                                mLoadingText.setVisibility(View.GONE);
+                                mLinearLayout.setVisibility(View.VISIBLE);
+                                loadAdsIntoAdvertCard();
+                            }
+                        }
+                    }else{
+                        //the one ad may have been flagged so moving on to the next subscription
+                        Log.d(TAG,"the one ad may have been flagged so moving on to the next subscription");
+                        if (Variables.getCurrentSubscriptionIndex()+1 < Variables.Subscriptions.size()) {
+                            Log.d(TAG,"Trying the next subscription.");
+                            Variables.setNextSubscriptionIndex();
+                            Variables.setCurrentAdInSubscription(0);
+                            getGetAdsFromFirebase();
+                        } else {
+                            Log.d(TAG, "---There are no ads in any of the subscriptions");
+                            mAvi.setVisibility(View.GONE);
+                            mLoadingText.setVisibility(View.GONE);
+                            mLinearLayout.setVisibility(View.VISIBLE);
+                            loadAdsIntoAdvertCard();
+                        }
+                    }
+
+                }else{
+                    //if multiple ads have loaded.
+                    Log.d(TAG,"More than one ad has been loaded from firebase");
+                    for (DataSnapshot snap : dataSnapshot.getChildren()) {
+                            Advert ad = snap.getValue(Advert.class);
+                            DataSnapshot snpsht = snap.child("pushId");
+                            String pushID = snpsht.getValue(String.class);
+                            ad.setPushId(pushID);
+                            if(!ad.isFlagged()) mAdList.add(ad);
+                    }
+                    if(mAdList.size()==0){
+                        //all the ads loaded may have been flagged so loading the next ads after those ones.
+                        Log.d(TAG,"All the ads loaded have been flagged so loading the next batch");
+                        Variables.setCurrentAdInSubscription(Variables.getCurrentAdInSubscription()+
+                                (int)dataSnapshot.getChildrenCount());
+                        getGetAdsFromFirebase();
+                    }else{
+                        Variables.setCurrentAdNumberForAllAdsList(0);
+                        //removing the first ad if the user has seen it.
+                        Log.d(TAG,"removing the first ad if the user has seen it.");
+                        if(Variables.getCurrentAdInSubscription()==Integer.parseInt(mAdList.get(0).getPushId())) {
+                            mAdList.remove(0);
+                            Log.d(TAG,"First ad has been removed because it has been seen");
+                        }
+                        mChildToStartFrom = Variables.getCurrentAdInSubscription()+mAdList.size();
+                        Log.d(TAG, "Child set to start from is -- " + mChildToStartFrom);
+                        Log.d(TAG, "---All the ads have been handled.Total is " + mAdList.size());
+                        mAvi.setVisibility(View.GONE);
+                        mLoadingText.setVisibility(View.GONE);
+                        mLinearLayout.setVisibility(View.VISIBLE);
+                        loadAdsIntoAdvertCard();
+                    }
                 }
-                if (Variables.getAdTotal(mKey) != 0) {
-                    if (mAdList.size() > 1) mAdList.remove(0);
-                    mChildToStartFrom = Variables.getAdTotal(mKey) + (int) dataSnapshot.getChildrenCount() - 1;
-                } else {
-                    mChildToStartFrom = Variables.getAdTotal(mKey) + (int) dataSnapshot.getChildrenCount();
-                }
-                Variables.setCurrentAdNumberForAllAdsList(0);
-                Log.d(TAG, "Child set to start from is -- " + mChildToStartFrom);
-                Log.d(TAG, "---All the ads have been handled.Total is " + mAdList.size());
-            } else {
-                if (Variables.getCurrentSubscriptionIndex() < Variables.Subscriptions.size()) {
+
+            }else{
+                if (Variables.getCurrentSubscriptionIndex()+1 < Variables.Subscriptions.size()) {
+                    Log.d(TAG, "---There are no ads in subscription : " + getSubscriptionValue(Variables.getCurrentSubscriptionIndex()) + ". Retrying in the next category");
                     Variables.setNextSubscriptionIndex();
                     Variables.setCurrentAdInSubscription(0);
                     getGetAdsFromFirebase();
+                } else {
+                    Log.d(TAG, "---There are no ads in any of the subscriptions");
+                    mAvi.setVisibility(View.GONE);
+                    mLoadingText.setVisibility(View.GONE);
+                    mLinearLayout.setVisibility(View.VISIBLE);
+                    loadAdsIntoAdvertCard();
                 }
             }
-            mAvi.setVisibility(View.GONE);
-            mLoadingText.setVisibility(View.GONE);
-            mLinearLayout.setVisibility(View.VISIBLE);
-            loadAdsIntoAdvertCard();
         }
 
         @Override
@@ -451,9 +528,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //setting the child to start from to the number of children gotten to current ad in sub + children count minus one.
                         //this is because snapshot contains child that has been seen by user.
                         mChildToStartFrom = Variables.getCurrentAdInSubscription() + (int) dataSnapshot.getChildrenCount() - 1;
+                        Log.d(TAG,"user has seen some of the ads from current subscription index.");
+
                     } else {
                         //this means that user has not seen any ad in current subscription index.
                         mChildToStartFrom = (int) dataSnapshot.getChildrenCount();
+                        Log.d(TAG,"User has seen none of the ads gotten from current subscription index.");
                         //setting the child to start from to number of children gotten.
                     }
                     Variables.setCurrentAdNumberForAllAdsList(0);

@@ -3,6 +3,7 @@ package com.bry.adcafe.ui;
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -16,6 +17,7 @@ import android.os.Vibrator;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -99,6 +101,8 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForReceivingUnableToPinAd);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForSharingAd);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForViewingAd);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowingAreYouSureText);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowingAreYouSureText2);
 
         Intent intent = new Intent("UNREGISTER");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -109,6 +113,9 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForReceivingUnableToPinAd,new IntentFilter(Constants.UNABLE_TO_REMOVE_PINNED_AD));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForSharingAd,new IntentFilter("SHARE"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForViewingAd,new IntentFilter("VIEW"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText,new IntentFilter("ARE_YOU_SURE_INTENT"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText2,new IntentFilter("ARE_YOU_SURE2"));
+
     }
 
 
@@ -203,6 +210,60 @@ public class Bookmarks extends AppCompatActivity {
             loadAdFragment();
         }
     };
+
+    private BroadcastReceiver mMessageReceiverForShowingAreYouSureText = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BOOKMARKS--","Received message to prompt user if they're sure they want to delete.");
+            promptUserIfTheyAreSureIfTheyWantToDeleteAd();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForShowingAreYouSureText2 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BOOKMARKS--","Received message to prompt user if they're sure they want to delete.");
+            promptUserIfTheyAreSureIfTheyWantToDeleteAd2();
+        }
+    };
+
+    private void promptUserIfTheyAreSureIfTheyWantToDeleteAd2() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you really want to unpin that?")
+                .setCancelable(true)
+                .setPositiveButton("Yes.", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Variables.adToBeViewed.getPushRefInAdminConsole());
+                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                    }
+                })
+                .setNegativeButton("No!!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                }).show();
+    }
+
+    private void promptUserIfTheyAreSureIfTheyWantToDeleteAd() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to unpin that?")
+                .setCancelable(true)
+                .setPositiveButton("Yes.", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent("DELETE_PINNED_AD");
+                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                    }
+                })
+                .setNegativeButton("No!!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                }).show();
+    }
 
     private void loadAdFragment() {
         FragmentManager fm = getFragmentManager();

@@ -1,8 +1,10 @@
 package com.bry.adcafe.fragments;
 
 import android.app.DialogFragment;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -89,11 +91,19 @@ public class ViewImageFragment extends DialogFragment {
         mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(mAdvert.getPushRefInAdminConsole());
+                Intent intent = new Intent("ARE_YOU_SURE_INTENT");
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-                dismiss();
             }
         });
+
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Intent intent2 = new Intent(mAdvert.getPushRefInAdminConsole());
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
+                dismiss();
+            }
+        },new IntentFilter("DELETE_PINNED_AD"));
 
         return rootView;
     }
