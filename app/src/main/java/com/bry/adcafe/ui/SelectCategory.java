@@ -66,7 +66,8 @@ public class SelectCategory extends AppCompatActivity implements View.OnClickLis
             mainView.setVisibility(View.GONE);
             failedToLoadLayout.setVisibility(View.VISIBLE);
         }
-        findViewById(R.id.submitCategoriesButton).setOnClickListener(this);
+        mSubmitButton.setOnClickListener(this);
+        retryLoadingButton.setOnClickListener(this);
     }
 
     private void loadCategoriesFromFirebase() {

@@ -2,6 +2,8 @@ package com.bry.adcafe.fragments;
 
 import android.app.DialogFragment;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -57,9 +59,13 @@ public class FeedbackFragment extends DialogFragment implements View.OnClickList
         if(v == cancelButton){
             dismiss();
         }else if(v == submitButton){
-            String feedback = editText.getText().toString();
-            String feedbackType = spinner.getSelectedItem().toString();
-            uploadFeedBackToDatabase(feedback,feedbackType);
+            if(isNetworkConnected(mContext)){
+                String feedback = editText.getText().toString();
+                String feedbackType = spinner.getSelectedItem().toString();
+                uploadFeedBackToDatabase(feedback,feedbackType);
+            }else{
+                Toast.makeText(mContext,"You need to be connected to the internet to send your feedback",Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -75,5 +81,11 @@ public class FeedbackFragment extends DialogFragment implements View.OnClickList
 //        dbRef.setValue(message);
         Toast.makeText(mContext,"Feedback received.",Toast.LENGTH_SHORT).show();
         dismiss();
+    }
+
+    private boolean isNetworkConnected(Context context){
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return (netInfo != null && netInfo.isConnected());
     }
 }

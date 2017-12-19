@@ -1,6 +1,7 @@
 package com.bry.adcafe.ui;
 
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -68,6 +69,7 @@ public class Bookmarks extends AppCompatActivity {
     private AVLoadingIndicatorView mAvi;
     private TextView loadingText;
     private TextView noAdsText;
+    private ProgressDialog mAuthProgressDialog;
 
 
     @Override
@@ -78,6 +80,7 @@ public class Bookmarks extends AppCompatActivity {
 
         loadPlaceHolderViews();
         registerReceivers();
+        createProgressDialog();
 
         if(isNetworkConnected(mContext)){
             loadAdsFromThread();
@@ -183,6 +186,7 @@ public class Bookmarks extends AppCompatActivity {
             Log.d("BOOKMARKS--","Message received to show toast for unpin action");
             Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.unpinned,
                     Snackbar.LENGTH_SHORT).show();
+            mAuthProgressDialog.dismiss();
         }
     };
 
@@ -192,6 +196,7 @@ public class Bookmarks extends AppCompatActivity {
             Log.d("BOOKMARKS--","Unable to unpin ad.");
             Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.failedUnpinned,
                     Snackbar.LENGTH_SHORT).show();
+            mAuthProgressDialog.dismiss();
         }
     };
 
@@ -234,8 +239,9 @@ public class Bookmarks extends AppCompatActivity {
                 .setPositiveButton("Yes.", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Variables.adToBeViewed.getPushRefInAdminConsole());
+                        Intent intent = new Intent(Variables.adToBeUnpinned.getPushRefInAdminConsole());
                         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                        mAuthProgressDialog.show();
                     }
                 })
                 .setNegativeButton("No!!", new DialogInterface.OnClickListener() {
@@ -270,6 +276,13 @@ public class Bookmarks extends AppCompatActivity {
         ViewImageFragment imageFragment = new ViewImageFragment();
         imageFragment.show(fm, "View image.");
         imageFragment.setfragcontext(mContext);
+    }
+
+    private void createProgressDialog(){
+        mAuthProgressDialog = new ProgressDialog(this);
+        mAuthProgressDialog.setTitle("AdCafe.");
+        mAuthProgressDialog.setMessage("Updating your preferences...");
+        mAuthProgressDialog.setCancelable(false);
     }
 
 

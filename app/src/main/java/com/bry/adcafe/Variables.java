@@ -32,6 +32,7 @@ public class Variables {
     public static boolean hasTimerStarted = false;
     public static Advert adToBeShared;
     public static Advert adToBeViewed;
+    public static Advert adToBeUnpinned;
     public static boolean isInfo = false;
     private static List<Advert> allAdsList = new ArrayList<>();
 

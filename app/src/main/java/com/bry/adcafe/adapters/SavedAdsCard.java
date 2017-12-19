@@ -108,10 +108,19 @@ public class SavedAdsCard {
         }
     };
 
+    private BroadcastReceiver mMessageReceiverForUnpin2 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("ADVERT_CARD--","Received broadcast to Unpin ad");
+            unPin();
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+        }
+    };
+
     @LongClick(R.id.SavedImageView)
     private void onLongClick(){
-//        promptUserIfSureToUnpinAd();
-        unPin();
+        promptUserIfSureToUnpinAd();
+//        unPin();
     }
 
     @Click(R.id.SavedImageView)
@@ -132,10 +141,11 @@ public class SavedAdsCard {
     }
 
     private void promptUserIfSureToUnpinAd(){
-        Variables.adToBeViewed = mAdvert;
+        Variables.adToBeUnpinned = mAdvert;
         Intent intent = new Intent("ARE_YOU_SURE2");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-        setUpReceiver();
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin2
+                ,new IntentFilter(mAdvert.getPushRefInAdminConsole()));
     }
 
     private void viewAd() {
@@ -210,12 +220,7 @@ public class SavedAdsCard {
 
     private void unPin(){
         String id = mAdvert.getPushId();
-        try{
-            mPlaceHolderView.removeView(this);
-        }catch (Exception e){
-            Toast.makeText(mContext,"Something went wrong while unpinning that.",Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
+
         Log.d("SAVED_ADS_CARD--","Removing pinned ad"+id);
         String uid = User.getUid();
 
@@ -226,6 +231,7 @@ public class SavedAdsCard {
                 dataSnapshot.getRef().removeValue();
                 Intent intent = new Intent(Constants.REMOVE_PINNED_AD);
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                mPlaceHolderView.removeView(this);
             }
 
             @Override

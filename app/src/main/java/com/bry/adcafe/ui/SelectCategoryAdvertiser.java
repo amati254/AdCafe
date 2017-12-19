@@ -50,7 +50,7 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
             mainView.setVisibility(View.GONE);
             failedToLoadLayout.setVisibility(View.VISIBLE);
         }
-
+        retryLoadingButton.setOnClickListener(this);
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForSelectingCategory,
                 new IntentFilter("SELECTED_CATEGORY"));
 

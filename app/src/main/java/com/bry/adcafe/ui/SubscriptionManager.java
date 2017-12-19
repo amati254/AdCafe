@@ -53,6 +53,7 @@ public class SubscriptionManager extends AppCompatActivity implements View.OnCli
         ButterKnife.bind(this);
         createProgressDialog();
         registerAllReceivers();
+        retryLoadingButton.setOnClickListener(this);
         if (isOnline(mContext)) loadCategoriesFromFirebase();
         else{
             mainView.setVisibility(View.GONE);
