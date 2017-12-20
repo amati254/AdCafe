@@ -71,6 +71,7 @@ public class SavedAdsCard {
     private ProgressDialog mAuthProgressDialog;
     private boolean hasMessageBeenSeen = false;
     private boolean onDoublePressed = false;
+    private boolean isBeingShared = false;
 
 
 
@@ -137,7 +138,7 @@ public class SavedAdsCard {
             public void run() {
                 onDoublePressed=false;
             }
-        }, 1000);
+        }, 300);
     }
 
     private void promptUserIfSureToUnpinAd(){
@@ -149,11 +150,25 @@ public class SavedAdsCard {
     }
 
     private void viewAd() {
-        Log.d("SavedAdsCard","Setting the ad to be viewed.");
-        Variables.adToBeViewed = mAdvert;
-        Intent intent = new Intent("VIEW");
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-        setUpReceiver();
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                if(!isBeingShared) {
+                    Log.d("SavedAdsCard", "Setting the ad to be viewed.");
+                    Variables.adToBeViewed = mAdvert;
+                    Intent intent = new Intent("VIEW");
+                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                    setUpReceiver();
+                }
+                isBeingShared = false;
+            }
+        }, 330);
+//        Log.d("SavedAdsCard","Setting the ad to be viewed.");
+//        Variables.adToBeViewed = mAdvert;
+//        Intent intent = new Intent("VIEW");
+//        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+//        setUpReceiver();
     }
 
     private void setUpReceiver(){
@@ -166,6 +181,7 @@ public class SavedAdsCard {
     }
 
     private void shareAd() {
+        isBeingShared = true;
         Log.d("SavedAdsCard","Setting the ad to be shared.");
         Variables.adToBeShared = mAdvert;
         Intent intent = new Intent("SHARE");
@@ -220,7 +236,7 @@ public class SavedAdsCard {
 
     private void unPin(){
         String id = mAdvert.getPushId();
-
+        mPlaceHolderView.removeView(this);
         Log.d("SAVED_ADS_CARD--","Removing pinned ad"+id);
         String uid = User.getUid();
 
@@ -231,7 +247,7 @@ public class SavedAdsCard {
                 dataSnapshot.getRef().removeValue();
                 Intent intent = new Intent(Constants.REMOVE_PINNED_AD);
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-                mPlaceHolderView.removeView(this);
+
             }
 
             @Override

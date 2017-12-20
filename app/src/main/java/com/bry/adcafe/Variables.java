@@ -23,7 +23,7 @@ public class Variables {
     private static Advert currentAdvert;
 
     public static String mIsLastOrNotLast;
-    public static boolean hasBeenPinned;
+    public static boolean hasBeenPinned = false;
     public static boolean isMainActivityOnline;
     public static boolean isDashboardActivityOnline;
 

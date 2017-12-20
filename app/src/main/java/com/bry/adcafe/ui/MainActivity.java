@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String igsNein = "none";
     private boolean isLoadingMoreAds = false;
     private boolean mDoublePressedToPin = false;
+    private Advert lastAdSeen = null;
 
 
     @Override
@@ -237,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setLastUsedDateInFirebaseDate(User.getUid());
         unregisterAllReceivers();
         removeAllViews();
+        Variables.clearAllAdsFromAdList();
         if (!Variables.isDashboardActivityOnline) Variables.clearAdTotal();
         if (networkStateReceiver != null) {
             networkStateReceiver.removeListener(this);
@@ -374,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             dbRef.orderByKey().startAt(Integer.toString(Variables.getCurrentAdInSubscription()))
                     .limitToFirst(5).addListenerForSingleValueEvent(val);
         }
-
+        if(!mAdList.isEmpty()) mAdList.clear();
     }
 
     ValueEventListener val = new ValueEventListener() {
@@ -395,7 +397,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d(TAG,"The one ad was not flagged so its in the adlist");
                         if(Variables.getCurrentAdInSubscription()!=Integer.parseInt(mAdList.get(0).getPushId())){
                             //user hasn't seen the one ad that has been loaded
-                            Log.d(TAG,"The user hasnt seen the one ad in the adlist.");
+                            Log.d(TAG,"The user hasn't seen the one ad in the adlist.");
+                            Log.d(TAG,"Since the currentAdInSubscription is : "+Variables.getCurrentAdInSubscription()+" and " +
+                                    "the ad's pushID is : "+(mAdList.get(0).getPushId()));
                             mChildToStartFrom = Variables.getCurrentAdInSubscription()+ mAdList.size();
                             Log.d(TAG,"The child set to start from is : "+mChildToStartFrom);
                             Variables.setCurrentAdNumberForAllAdsList(0);
@@ -406,6 +410,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }else{
                             //user has seen the one ad that has been loaded.
                             Log.d(TAG,"User has seen the one ad that has been loaded so going to the next subscription");
+                            Log.d(TAG,"Since the currentAdInSubscription is : "+Variables.getCurrentAdInSubscription()+" and " +
+                                    "the ad's pushID is : "+(mAdList.get(0).getPushId()));
+                            lastAdSeen = mAdList.get(0);
                             if (Variables.getCurrentSubscriptionIndex()+1 < Variables.Subscriptions.size()) {
                                 Log.d(TAG,"Trying the next subscription.");
                                 Variables.setNextSubscriptionIndex();
@@ -682,6 +689,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else {
                 if (mAdList.size() == 1 && Variables.getCurrentSubscriptionIndex() + 1 < Variables.Subscriptions.size()) {
                     Variables.nextSubscriptionIndex = Variables.getCurrentSubscriptionIndex() + 1;
+                    mChildToStartFrom = 0;
                     loadMoreAds = true;
 //                    loadMoreAds();
                 }
@@ -693,16 +701,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
             mAdList.clear();
+            Log.d(TAG,"cleared the adlist");
         } else {
-            Advert noAds = new Advert();
-            noAds.setWebsiteLink(igsNein);
-            mSwipeView.addView(new AdvertCard(mContext, noAds, mSwipeView, Constants.NO_ADS));
-            Variables.adToVariablesAdList(noAds);
-            Variables.setIsLastOrNotLast(Constants.NO_ADS);
-            findViewById(R.id.WebsiteIcon).setAlpha(0.4f);
-            findViewById(R.id.websiteText).setAlpha(0.4f);
-            findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
-            loadAnyAnnouncements();
+            if(lastAdSeen!=null){
+                Log.d(TAG, "---Loading only last ad from lastAdSeen that was initialised...");
+                mSwipeView.lockViews();
+                mSwipeView.addView(new AdvertCard(mContext, lastAdSeen, mSwipeView, Constants.LAST));
+                Variables.adToVariablesAdList(lastAdSeen);
+                Variables.setIsLastOrNotLast(Constants.LAST);
+                Variables.setCurrentAdvert(lastAdSeen);
+                if(lastAdSeen.isFlagged())lastAdSeen.setWebsiteLink(igsNein);
+                if(lastAdSeen.getWebsiteLink().equals(igsNein)){
+                    findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
+                }else{
+                    findViewById(R.id.smallDot).setVisibility(View.VISIBLE);
+                }
+                isLastAd = true;
+            }else {
+                Advert noAds = new Advert();
+                noAds.setWebsiteLink(igsNein);
+                mSwipeView.addView(new AdvertCard(mContext, noAds, mSwipeView, Constants.NO_ADS));
+                Variables.adToVariablesAdList(noAds);
+                Variables.setIsLastOrNotLast(Constants.NO_ADS);
+                findViewById(R.id.WebsiteIcon).setAlpha(0.4f);
+                findViewById(R.id.websiteText).setAlpha(0.4f);
+                findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
+                loadAnyAnnouncements();
+            }
         }
         Log.d(TAG, "---Setting up On click listeners...");
         onclicks();
@@ -981,7 +1006,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!mIsBeingReset && !isLoadingMoreAds && Variables.nextSubscriptionIndex + 1 < Variables.Subscriptions.size()) {
-                Variables.nextSubscriptionIndex += 1;
+//                Variables.nextSubscriptionIndex += 1;
                 loadMoreAds();
             }
         }
@@ -997,8 +1022,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
                 .child(getSubscriptionValue(Variables.nextSubscriptionIndex))
                 .child(Integer.toString(getClusterValue(Variables.nextSubscriptionIndex)));
-        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : " + getSubscriptionValue(Variables.nextSubscriptionIndex)+Integer.toString(getClusterValue(Variables.getCurrentSubscriptionIndex())));
+
+
+        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : "
+                + getSubscriptionValue(Variables.nextSubscriptionIndex)
+                + " : "
+                + Integer.toString(getClusterValue(Variables.nextSubscriptionIndex)));
+
+
         dbRef = query.getRef();
+        Log.d(TAG,"Dbref starts at "+(mChildToStartFrom + 1));
         dbRef.orderByKey().startAt(Integer.toString(mChildToStartFrom + 1))
                 .limitToFirst(5).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -1011,7 +1044,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         String pushID = snpsht.getValue(String.class);
                         ad.setPushId(pushID);
                         Log.d(TAG,"setting push id to : "+ ad.getPushId());
-                        if(!ad.isFlagged()) mAdList.add(ad);
+                        if(!ad.isFlagged()) {
+                            mAdList.add(ad);
+                            Log.d(TAG,"Loaded ad : "+ad.getPushRefInAdminConsole());
+                        }
                     }
                     Log.d(TAG, "---All the new ads have been handled.Total is " + mAdList.size());
                     if(mAdList.size()!=0){
@@ -1029,12 +1065,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             isLoadingMoreAds = false;
                         }
                     }
+
                     if(Variables.isLockedBecauseOfFlagedAds){
                         mSwipeView.unlockViews();
                         Variables.isLockedBecauseOfFlagedAds = false;
                     }
                 } else {
-                    Log.d(TAG, "----No ads are available in subscription index "+Variables.nextSubscriptionIndex);
+                    //no ads were found in the subscription
+                    Log.d(TAG, "----No ads are available in subscription: "+getSubscriptionValue(Variables.nextSubscriptionIndex));
                     if(Variables.nextSubscriptionIndex+1<Variables.Subscriptions.size()){
                         mChildToStartFrom=0;
                         Variables.nextSubscriptionIndex+=1;
