@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content">
+
+
+    <android.support.v7.widget.CardView
+        android:layout_width="160dp"
+        android:layout_height="300dp"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="2dp"
+        android:layout_weight="0.15">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="100dp"
+                android:id="@+id/adImage"
+                android:scaleType="fitXY"
+                android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="20dp"
+                android:layout_height="100dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:textSize="11sp"
+                android:layout_marginBottom="10dp"
+                android:id="@+id/EmailText"
+                android:layout_marginTop="5dp"
+                android:textAlignment="center"
+                android:text="Uploaded by : user@example.com"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:textSize="11sp"
+                android:id="@+id/TargetedNumber"
+                android:layout_marginTop="5dp"
+                android:textAlignment="center"
+                android:text="No. of users targeted : 5000"
+                android:layout_height="wrap_content" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_marginTop="5dp"
+                android:textSize="11sp"
+                android:id="@+id/AmountToReimburse"
+                android:textAlignment="center"
+                android:text="Reimbursing amount : 2800Ksh"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Category : food"
+                android:textAlignment="center"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/isFlagged"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Is Flagged : false"
+                android:textAlignment="center"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/takeDownButton"
+                android:layout_width="86dp"
+                android:layout_gravity="center"
+                android:layout_height="32dp"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/white"
+                android:background="@color/colorPrimaryDark"
+                android:text="take down"
+                android:textSize="10dp" />
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

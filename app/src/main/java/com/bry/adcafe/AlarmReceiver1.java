@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
@@ -37,8 +38,11 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
 
+import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.NOTIFICATION_SERVICE;
 
 /**
@@ -56,6 +60,8 @@ public class AlarmReceiver1 extends BroadcastReceiver {
     private int numberOfSubsFromFirebase = 0;
     private int iterations = 0;
     private int numberOfAdsInTotal = 0;
+    private LinkedHashMap<String,Integer> Subscriptions  = new LinkedHashMap<>();
+
 
 
     @Override
@@ -64,13 +70,13 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         mContext = context;
         Intent service1 = new Intent(context, NotificationService1.class);
         service1.setData((Uri.parse("custom://"+System.currentTimeMillis())));
-        checkIfUserWasLastOnlineToday();
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                cancelAlarm();
-            }
-        },new IntentFilter("CANCEL_ALARM"));
+        if(isUserLoggedIn()) checkIfUserWasLastOnlineToday();
+//        LocalBroadcastManager.getInstance(mContext).registerReceiver(new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                cancelAlarm();
+//            }
+//        },new IntentFilter("CANCEL_ALARM"));
     }
 
     private void checkIfUserWasLastOnlineToday(){
@@ -98,7 +104,6 @@ public class AlarmReceiver1 extends BroadcastReceiver {
 
     private void loadSubscriptionsThenCheckForAds(){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        User.setUid(uid);
         Log.d(TAG,"Starting to load users data to check if there are ads");
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.SUBSCRIPTION_lIST);
@@ -110,8 +115,10 @@ public class AlarmReceiver1 extends BroadcastReceiver {
                     String category = snap.getKey();
                     Integer cluster = snap.getValue(Integer.class);
                     Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
-                    checkInForEachCategory(category,cluster);
+                    Subscriptions.put(category,cluster);
+//                    checkInForEachCategory(category,cluster);
                 }
+                checkNumberForEach();
             }
 
             @Override
@@ -121,6 +128,12 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         });
     }
 
+    private void checkNumberForEach(){
+        int currentClusterToBeChecked = getClusterValue(iterations);
+        String Subscription = getSubscriptionValue(iterations);
+        checkInForEachCategory(Subscription,currentClusterToBeChecked);
+    }
+
     private void checkInForEachCategory(String category,int cluster){
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate())
                 .child(category).child(Integer.toString(cluster));
@@ -128,15 +141,21 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                iterations++;
                 if(dataSnapshot.hasChildren()){
                     int numberOfAds = (int)dataSnapshot.getChildrenCount();
                     Log.d(TAG,"adding "+numberOfAds+" to number of ada list.");
                     numberOfAdsInTotal+=numberOfAds;
-                    if(iterations==numberOfSubsFromFirebase){
-                        Log.d(TAG,"All the categories have been handled, total is : "+numberOfAdsInTotal);
-                        if(numberOfAds>0) handleEverything(numberOfAdsInTotal);
-                    }
+//                    if(iterations==numberOfSubsFromFirebase){
+//                        Log.d(TAG,"All the categories have been handled, total is : "+numberOfAdsInTotal);
+//                        if(numberOfAds>0) handleEverything(numberOfAdsInTotal);
+//                    }
+                }
+                if(iterations<numberOfSubsFromFirebase){
+                    iterations++;
+                    checkNumberForEach();
+                }else{
+                    Log.d(TAG,"All the categories have been handled, total is : "+numberOfAdsInTotal);
+                    if(numberOfAdsInTotal>0) handleEverything(numberOfAdsInTotal);
                 }
             }
 
@@ -223,4 +242,24 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         if(notificationManager!=null)
         notificationManager.cancelAll();
     }
+
+    private int getClusterValue(int index) {
+        LinkedHashMap map = Subscriptions;
+        int cluster = (new ArrayList<Integer>(map.values())).get(index);
+        Log.d(TAG, "Cluster gotten from current subscription is : " + cluster);
+        return cluster;
+    }
+
+    private String getSubscriptionValue(int index) {
+        LinkedHashMap map = Subscriptions;
+        String Sub = (new ArrayList<String>(map.keySet())).get(index);
+        Log.d(TAG, "Subscription gotten from getCurrent Subscription method is :" + Sub);
+        return Sub;
+    }
+
+    private boolean isUserLoggedIn(){
+        SharedPreferences prefs4 = mContext.getSharedPreferences("IsSignedIn", MODE_PRIVATE);
+        return prefs4.getBoolean("isSignedIn", false);
+    }
+
 }

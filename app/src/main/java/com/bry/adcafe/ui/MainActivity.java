@@ -131,8 +131,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
+        setIsUserLoggedOnInSharedPrefs(true);
     }
-
 
     @Override
     protected void onResume() {
@@ -913,6 +913,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void setIsUserLoggedOnInSharedPrefs(boolean bol){
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("IsSignedIn", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("isSignedIn",bol);
+        editor.apply();
+    }
+
+
     private void logoutUser() {
         setLastUsedDateInFirebaseDate(User.getUid());
         if (dbRef != null) {
@@ -923,6 +931,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (FirebaseAuth.getInstance() != null) {
             FirebaseAuth.getInstance().signOut();
         }
+        setIsUserLoggedOnInSharedPrefs(false);
+
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

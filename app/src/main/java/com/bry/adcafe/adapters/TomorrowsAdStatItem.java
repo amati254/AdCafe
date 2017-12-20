@@ -35,16 +35,16 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /**
- * Created by bryon on 15/12/2017.
+ * Created by bryon on 20/12/2017.
  */
 
 @NonReusable
-@Layout(R.layout.admin_ads_item)
-public class AdminAdsItem {
+@Layout(R.layout.tomorrows_ads_item)
+public class TomorrowsAdStatItem {
     @View(R.id.adImage) private ImageView mImage;
     @View(R.id.EmailText) private TextView mEmail;
     @View(R.id.TargetedNumber) private TextView mTargetedNumber;
-    @View(R.id.ammountPaid) private TextView mAmountToReimburse;
+    @View(R.id.AmountToReimburse) private TextView mAmountToReimburse;
     @View(R.id.category) private TextView mCategory;
     @View(R.id.isFlagged) private TextView mFlagged;
     @View(R.id.takeDownButton) private Button mTakeDown;
@@ -53,7 +53,7 @@ public class AdminAdsItem {
     private PlaceHolderView mPlaceHolderView;
     private Advert mAdvert;
 
-    public AdminAdsItem(Context Context, PlaceHolderView PlaceHolderView, Advert Advert){
+    public TomorrowsAdStatItem(Context Context, PlaceHolderView PlaceHolderView, Advert Advert){
         this.mContext = Context;
         this.mPlaceHolderView = PlaceHolderView;
         this.mAdvert = Advert;
@@ -64,11 +64,15 @@ public class AdminAdsItem {
         mEmail.setText("Uploaded by : "+mAdvert.getUserEmail());
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
         mCategory.setText("Category : "+mAdvert.getCategory());
-        mFlagged.setText("Is Flagged : "+mAdvert.isFlagged());
-        String ammount = Integer.toString(mAdvert.getNumberOfUsersToReach()*4);
-        mAmountToReimburse.setText(String.format("Reimbursing amount : %s", ammount));
-        if(mAdvert.isFlagged()) mTakeDown.setText("Put Up.");
-        else mTakeDown.setText("Take Down.");
+        String amount = Integer.toString(mAdvert.getNumberOfUsersToReach()*4);
+        mAmountToReimburse.setText(String.format("Paid amount : %s", amount));
+        if(mAdvert.isFlagged()) {
+            mTakeDown.setText("Put Up.");
+            mFlagged.setText("Status : Taken Down.");
+        } else {
+            mTakeDown.setText("Take Down.");
+            mFlagged.setText("Status : Put Up.");
+        }
 
         try {
             Glide.with(mContext).load(bitmapToByte(getResizedBitmap(decodeFromFirebaseBase64(mAdvert.getImageUrl()),400)))
@@ -93,13 +97,17 @@ public class AdminAdsItem {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.d("MY_AD_STAT_ITEM","Listener from firebase has responded. Updating data.");
+                Log.d("TOMORROWS_AD_STAT_ITEM","Listener from firebase has responded. Updating data.");
                 boolean newValue = dataSnapshot.getValue(boolean.class);
-                Log.d("MY_AD_STAT_ITEM","New value gotten from firebase --"+newValue);
-                mFlagged.setText("Is Flagged : "+newValue);
+                Log.d("TOMORROWS_AD_STAT_ITEM","New value gotten from firebase --"+newValue);
                 mAdvert.setFlagged(newValue);
-                if(newValue) mTakeDown.setText("Put Up.");
-                else mTakeDown.setText("Take Down.");
+                if(mAdvert.isFlagged()) {
+                    mTakeDown.setText("Put Up.");
+                    mFlagged.setText("Status : Taken Down.");
+                } else {
+                    mTakeDown.setText("Take Down.");
+                    mFlagged.setText("Status : Put Up.");
+                }
             }
 
             @Override
@@ -124,6 +132,11 @@ public class AdminAdsItem {
         Variables.adToBeFlagged = mAdvert;
         Intent intent = new Intent("TAKE_DOWN");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        if(!mAdvert.isFlagged()) {
+            Variables.areYouSureTakeDownText = "Are you sure you want to take down your ad?";
+        }else{
+            Variables.areYouSureTakeDownText = "Are you sure you want to put back up your ad?";
+        }
     }
 
     private String getNextDay(){
@@ -167,4 +180,5 @@ public class AdminAdsItem {
 
         return Bitmap.createScaledBitmap(image, width, height, true);
     }
+
 }

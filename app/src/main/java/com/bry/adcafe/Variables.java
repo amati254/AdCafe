@@ -48,6 +48,7 @@ public class Variables {
     public static boolean isLockedBecauseOfNoMoreAds = false;
     public static String areYouSureText;
     public static Advert adToBeFlagged;
+    public static String areYouSureTakeDownText;
 
 
 
