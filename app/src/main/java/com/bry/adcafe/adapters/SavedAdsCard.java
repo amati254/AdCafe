@@ -138,7 +138,7 @@ public class SavedAdsCard {
             public void run() {
                 onDoublePressed=false;
             }
-        }, 300);
+        }, 200);
     }
 
     private void promptUserIfSureToUnpinAd(){
@@ -163,7 +163,7 @@ public class SavedAdsCard {
                 }
                 isBeingShared = false;
             }
-        }, 330);
+        }, 230);
 //        Log.d("SavedAdsCard","Setting the ad to be viewed.");
 //        Variables.adToBeViewed = mAdvert;
 //        Intent intent = new Intent("VIEW");
