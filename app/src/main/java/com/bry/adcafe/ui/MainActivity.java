@@ -391,6 +391,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         DataSnapshot snpsht = snap.child("pushId");
                         String pushID = snpsht.getValue(String.class);
                         ad.setPushId(pushID);
+                        ad.setPushIdNumber(Integer.parseInt(pushID));
                         if(!ad.isFlagged()) mAdList.add(ad);
                     }
                     if(mAdList.size()!=0){
@@ -451,6 +452,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             DataSnapshot snpsht = snap.child("pushId");
                             String pushID = snpsht.getValue(String.class);
                             ad.setPushId(pushID);
+                            ad.setPushIdNumber(Integer.parseInt(pushID));
                             if(!ad.isFlagged()) mAdList.add(ad);
                     }
                     if(mAdList.size()==0){
@@ -944,11 +946,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         addToSharedPreferences();
         adDayAndMonthTotalsToFirebase();
         onclicks();
-        getNumberOfTimesAndSetNewNumberOfTimes();
 
+        getNumberOfTimesAndSetNewNumberOfTimes();
         getAndSetAllAdsThatHaveBeenSeenEver();
 
-        Variables.setCurrentAdInSubscription(Integer.parseInt(Variables.getCurrentAdvert().getPushId()));
+        try{
+            Variables.setCurrentAdInSubscription(Integer.parseInt(Variables.getCurrentAdvert().getPushId()));
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.d(TAG,"Something went wrong setting the current ad in subscription");
+            Log.d(TAG,"Setting using the getPushIdNumber instead. Number is : "+Variables.getCurrentAdvert().getPushIdNumber());
+            Variables.setCurrentAdInSubscription(Variables.getCurrentAdvert().getPushIdNumber());
+        }
         Variables.setCurrentSubscriptionIndex(getPositionOf(Variables.getCurrentAdvert().getCategory()));
         Log.d(TAG, "Setting current subscription to : " + getPositionOf(Variables.getCurrentAdvert().getCategory()));
         Log.d(TAG, "Setting Current ad in subscription to : " + Variables.getCurrentAdvert().getPushId());
@@ -1043,6 +1052,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         DataSnapshot snpsht = snap.child("pushId");
                         String pushID = snpsht.getValue(String.class);
                         ad.setPushId(pushID);
+                        ad.setPushIdNumber(Integer.parseInt(pushID));
                         Log.d(TAG,"setting push id to : "+ ad.getPushId());
                         if(!ad.isFlagged()) {
                             mAdList.add(ad);

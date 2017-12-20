@@ -21,6 +21,7 @@ public class Advert {
 
     private int numberOfAds = 0 ;
     private String pushId;
+    private int pushIdNumber;
     private Bitmap imageBitmap;
     private int numberOfTimesSeen;
     private int numberOfUsersToReach;
@@ -147,4 +148,11 @@ public class Advert {
         isFlagged = flagged;
     }
 
+    public int getPushIdNumber() {
+        return pushIdNumber;
+    }
+
+    public void setPushIdNumber(int pushIdNumber) {
+        this.pushIdNumber = pushIdNumber;
+    }
 }
