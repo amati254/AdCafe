@@ -38,7 +38,7 @@ public class AdminStatItem {
         mTargetedNumber.setText("Targeted : "+mAdvert.getNumberOfUsersToReach()+" users");
         mNumberReached.setText("Number Reached : "+mAdvert.getNumberOfTimesSeen()+" users.");
 
-        int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
+        int numberOfUsersWhoDidntSeeAd = (mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen())*4;
         String number = Integer.toString(numberOfUsersWhoDidntSeeAd);
         mAmountToReimburse.setText("Amount to reimburse : "+number+" Ksh.");
     }

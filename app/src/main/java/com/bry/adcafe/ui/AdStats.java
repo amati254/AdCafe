@@ -440,7 +440,7 @@ public class AdStats extends AppCompatActivity {
     private void createProgressDialog(){
         mAuthProgressDialog = new ProgressDialog(this);
         mAuthProgressDialog.setTitle("AdCafe.");
-        mAuthProgressDialog.setMessage("Just a moment...");
+        mAuthProgressDialog.setMessage("Taking down the ad...");
         mAuthProgressDialog.setCancelable(false);
     }
 
@@ -472,6 +472,7 @@ public class AdStats extends AppCompatActivity {
     private void takeDownAd() {
         mAuthProgressDialog.show();
         Advert ad = Variables.adToBeFlagged;
+        if(ad.isFlagged())mAuthProgressDialog.setMessage("Restoring the ad...");
         boolean bol = ad.isFlagged() ? false : true;
 
         DatabaseReference  mRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)

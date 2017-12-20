@@ -50,16 +50,36 @@ public class Splash extends AppCompatActivity {
     }
 
     private void goToNextActivity(){
-        myPrefManager = new SliderPrefManager(getApplicationContext());
-        if (myPrefManager.isFirstTimeLaunch()){
-            Intent intent = new Intent(Splash.this,TutorialActivity.class);
-            startActivity(intent);
-            finish();
-        }else{
-            Intent intent = new Intent(Splash.this,LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
+        startNextActivity();
+//        myPrefManager = new SliderPrefManager(getApplicationContext());
+//        if (myPrefManager.isFirstTimeLaunch()){
+//            Intent intent = new Intent(Splash.this,TutorialActivity.class);
+//            startActivity(intent);
+//            finish();
+//        }else{
+//            Intent intent = new Intent(Splash.this,LoginActivity.class);
+//            startActivity(intent);
+//            finish();
+//        }
+    }
+
+    private void startNextActivity(){
+        findViewById(R.id.pageID).setBackgroundResource(R.color.colorPrimary);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                myPrefManager = new SliderPrefManager(getApplicationContext());
+                if (myPrefManager.isFirstTimeLaunch()){
+                    Intent intent = new Intent(Splash.this,TutorialActivity.class);
+                    startActivity(intent);
+                    finish();
+                }else{
+                    Intent intent = new Intent(Splash.this,LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        },200);
     }
 
     private void hideNavBars() {
