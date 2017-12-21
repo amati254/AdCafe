@@ -19,7 +19,7 @@ import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 
 public class Splash extends AppCompatActivity {
-    private final int SPLASH_DISPLAY_LENGTH = 2500;
+    private final int SPLASH_DISPLAY_LENGTH = 3021;
     private SliderPrefManager myPrefManager;
     private boolean isUserSeeingAcivity;
     private boolean isClearToMoveToNextActivity;
@@ -62,8 +62,8 @@ public class Splash extends AppCompatActivity {
                 , "backgroundColor" /*view attribute name*/,
                 new ArgbEvaluator(),
                 getApplicationContext().getResources().getColor(R.color.colorPrimaryDark) /*from color*/
-                , getApplicationContext().getResources().getColor(R.color.colorPrimaryDark2) /*to color*/);
-        colorFade.setDuration(1100);
+                , getApplicationContext().getResources().getColor(R.color.white) /*to color*/);
+        colorFade.setDuration(600);
         colorFade.start();
 
         startNextActivity();
@@ -85,7 +85,7 @@ public class Splash extends AppCompatActivity {
                     finish();
                 }
             }
-        },1110);
+        },590);
 
     }
 
