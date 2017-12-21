@@ -29,6 +29,7 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_marginTop="8dp"
+            android:alpha="0.8"
             android:layout_height="wrap_content"
             android:textAlignment="center"
             android:textColor="@color/white"

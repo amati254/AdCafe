@@ -76,22 +76,27 @@
     <string name="slide6text">Now the main page will look something like this.
         Don\'t worry, we will go over what everything is and what everything does.</string>
 
-    <string name="slide7text">But advertising, believe it or not, is actually a very interesting activity in some scenarios.
-        Consider when you see a banner for the first time. It often is very interesting, but only the first time, right?</string>
+    <string name="slide7text">The advert banners will be hosted in cards looking like this. The centre to top part is where the banner will
+        be.</string>
 
-    <string name="slide8text">Seeing an ad for the first time is often interesting because it appeals to the overall nature
-        of the human mind\'s constant yearning for new information. This is something that everyone experiences, thanks to the information
-        age.</string>
+    <string name="slide8text">Below the banner are some buttons which enable you to perform some actions on the ad.</string>
 
-    <string name="slide9text">The problem comes when you start seeing the same ads over and over again making the process ineffective and
-        frankly, really annoying. This is because most advertisers often try to reach as many people as they can and this causes them to show
-        the ad repetitively.</string>
+    <string name="slide9text">At the top of the page are two items, a timer (to the left) and an AdCounter (to the right).</string>
+    <string name="timerExplanation">The timer counts down 7 seconds. During this period you cannot move to the next ad, but only
+        after the timer hits 0. Remember that.</string>
+    <string name="adcounterExplanation">The AdCounter simply shows you the number of adverts you\'ve seen in the day.</string>
 
-    <string name="slide10text">Yes. We intend to spark that feeling of interest when you see
-        ads here. We even believe that maybe, just maybe, you might find it quite entertaining.</string>
 
-    <string name="slide11text">We also would like to give back to the community and one
-        way is through our very own monetization programme.</string>
+    <string name="slide10text">Below the AdCards are buttons which can help you do more cool stuff.</string>
+    <string name="logoutbuttonexplanation">Logout Button : You can logout of your account using this button.</string>
+    <string name="pinlisticon">Ad Archive Button : This window is where you can view all your pinned ads.</string>
+    <string name="dashboardexplanation">Dashboard Button : This window is where all the stats concerning the number of ads you\'ve
+        see are stored.</string>
+    <string name="shareappexplanation">Share App Button : This will help you share the app with your friends and mates. Feel free to
+        share ;)</string>
+
+
+    <string name="slide11text">Share and talk about the app with your friends; lets turn this into something big!</string>
 
     <string name="slide12text">No it is optional, meaning you do not have to engage in it if you don\'t want to.</string>
 

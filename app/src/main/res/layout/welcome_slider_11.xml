@@ -14,10 +14,6 @@
         android:gravity="center"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:background="@drawable/mainoutlinejpeg2"
-            android:layout_height="400dp" />
 
         <TextView
             android:id="@+id/textView1"
@@ -28,7 +24,7 @@
             android:gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_height="wrap_content"
-            android:text="The Main Page."
+            android:text="Share Us."
             android:textSize="20sp" />
 
         <TextView
@@ -40,7 +36,7 @@
             android:gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_height="wrap_content"
-            android:text="@string/slide6text"
+            android:text="@string/slide11text"
             android:textSize="16sp" />
 
     </LinearLayout>

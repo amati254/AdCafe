@@ -16,7 +16,7 @@
 
         <ImageView
             android:layout_width="match_parent"
-            android:background="@drawable/bottomcardbuttonsfocus"
+            android:background="@drawable/bottombuttonsfocus"
             android:layout_height="140dp" />
 
         <TextView
@@ -28,7 +28,7 @@
             android:gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_height="wrap_content"
-            android:text="Advert Card Buttons."
+            android:text="Bottom Buttons."
             android:textSize="20sp" />
 
         <TextView
@@ -41,7 +41,7 @@
             android:gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_height="wrap_content"
-            android:text="@string/slide8text"
+            android:text="@string/slide10text"
             android:textSize="16sp" />
 
         <LinearLayout
@@ -54,17 +54,17 @@
             android:paddingStart="10dp">
 
             <ImageButton
-                android:layout_width="42dp"
-                android:layout_height="42dp"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
                 android:layout_marginLeft="10dp"
-                android:background="@drawable/ic_action_flag"/>
+                android:background="@drawable/ic_action_exit"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:textColor="@color/colorPrimary"
                 android:layout_gravity="center"
                 android:textSize="13sp"
                 android:paddingRight="5dp"
-                android:text="Report Button : You can report an ad to us if you feel it offends you in any way."
+                android:text="@string/logoutbuttonexplanation"
                 android:layout_height="wrap_content" />
 
         </LinearLayout>
@@ -82,14 +82,14 @@
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:layout_marginLeft="10dp"
-                android:background="@drawable/ic_action_pin"/>
+                android:background="@drawable/ic_action_pinn_list_icon"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:textColor="@color/colorPrimary"
                 android:layout_gravity="center"
                 android:textSize="13sp"
                 android:paddingRight="5dp"
-                android:text="Pin Button : You can pin an ad if you wish to refer to it in the future."
+                android:text="@string/pinlisticon"
                 android:layout_height="wrap_content" />
 
         </LinearLayout>
@@ -107,14 +107,14 @@
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:layout_marginLeft="10dp"
-                android:background="@drawable/ic_action_website"/>
+                android:background="@drawable/ic_action_dashboard"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:textColor="@color/colorPrimary"
                 android:layout_gravity="center"
                 android:textSize="13sp"
                 android:paddingRight="5dp"
-                android:text="Website Button : You can also visit the website of the advertisers product. However, not all ads will have a link."
+                android:text="@string/dashboardexplanation"
                 android:layout_height="wrap_content" />
 
         </LinearLayout>
@@ -132,14 +132,14 @@
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:layout_marginLeft="10dp"
-                android:background="@drawable/ic_action_share2"/>
+                android:background="@drawable/ic_action_share"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:textColor="@color/colorPrimary"
                 android:layout_gravity="center"
                 android:textSize="13sp"
                 android:paddingRight="5dp"
-                android:text="Share Button : You can share the ad with this button if you find it cool."
+                android:text="@string/shareappexplanation"
                 android:layout_height="wrap_content" />
 
         </LinearLayout>

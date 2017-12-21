@@ -49,11 +49,11 @@ public class TutorialUsers extends AppCompatActivity {
         // layouts of all welcome sliders
         myLayouts = new int[]{
                 R.layout.welcome_slider_6,
-                R.layout.welcome_slider_4,
-                R.layout.welcome_slider_3,
-                R.layout.welcome_slider_2,
-                R.layout.welcome_slider_1,
-                R.layout.welcome_slider_0
+                R.layout.welcome_slider_7,
+                R.layout.welcome_slider_8,
+                R.layout.welcome_slider_9,
+                R.layout.welcome_slider_10,
+                R.layout.welcome_slider_11
         };
         // adding bottom dots
         addBottomDots(0);
