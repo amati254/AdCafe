@@ -152,8 +152,9 @@ public class TutorialUsers extends AppCompatActivity {
 
     @Override
     public void onBackPressed(){
-        super.onBackPressed();
+//        super.onBackPressed();
 //        LaunchNextActivity();
+        myBtnSkip.performClick();
     }
 
 //     Making notification bar transparent

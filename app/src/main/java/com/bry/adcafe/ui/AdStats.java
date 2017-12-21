@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +57,7 @@ public class AdStats extends AppCompatActivity {
     private List<Advert> mUploadedAds3= new ArrayList<>();
 
     private Context mContext;
+    @Bind(R.id.adStatsScrollView) ScrollView mAdStatsScrollView;
     @Bind(R.id.PlaceHolderViewInfo) PlaceHolderView DataListsView;
 
     @Bind(R.id.TomorrowsTitle) TextView TomorrowsAdsTitle;
@@ -84,6 +86,10 @@ public class AdStats extends AppCompatActivity {
             yesterdayPlaceHolderView.setVisibility(View.GONE);
             tomorrowsPlaceHolderView.setVisibility(View.GONE);
 
+            DataListsView.setNestedScrollingEnabled(false);
+            yesterdayPlaceHolderView.setNestedScrollingEnabled(false);
+            tomorrowsPlaceHolderView.setNestedScrollingEnabled(false);
+
             findViewById(R.id.topText).setVisibility(View.GONE);
             YesterdayAdsTitle.setVisibility(View.GONE);
             TomorrowsAdsTitle.setVisibility(View.GONE);
@@ -96,6 +102,8 @@ public class AdStats extends AppCompatActivity {
         }else{
             showNoConnectionView();
         }
+
+        mAdStatsScrollView.setSmoothScrollingEnabled(true);
     }
 
     @Override
