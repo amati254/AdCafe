@@ -640,6 +640,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 advert.setWebsiteLink(mLink);
                 advert.setCategory(mCategory);
                 advert.setFlagged(false);
+                advert.setAdminFlagged(false);
                 advert.setPushRefInAdminConsole(pushrefInAdminConsole);
                 setClusterInAdminAdvert(clusterNumber,Integer.parseInt(pushId));
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -706,6 +707,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 advert.setWebsiteLink(mLink);
                 advert.setCategory(mCategory);
                 advert.setFlagged(false);
+                advert.setAdminFlagged(false);
                 advert.setPushRefInAdminConsole(pushrefInAdminConsole);
                 setClusterInAdminAdvert(number,Integer.parseInt(pushId));
                 mRef3.setValue(advert).addOnSuccessListener(new OnSuccessListener<Void>() {

@@ -49,6 +49,7 @@ public class Variables {
     public static String areYouSureText;
     public static Advert adToBeFlagged;
     public static String areYouSureTakeDownText;
+    public static Advert lastAdSeen;
 
 
 

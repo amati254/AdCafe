@@ -71,7 +71,7 @@ public class TomorrowsAdStatItem {
             mFlagged.setText("Status : Taken Down.");
         } else {
             mTakeDown.setText("Take Down.");
-            mFlagged.setText("Status : Put Up.");
+            mFlagged.setText("Status : Uploaded.");
         }
 
         try {
@@ -106,7 +106,7 @@ public class TomorrowsAdStatItem {
                     mFlagged.setText("Status : Taken Down.");
                 } else {
                     mTakeDown.setText("Take Down.");
-                    mFlagged.setText("Status : Put Up.");
+                    mFlagged.setText("Status : Uploaded.");
                 }
             }
 
@@ -129,13 +129,17 @@ public class TomorrowsAdStatItem {
 
     @Click(R.id.takeDownButton)
     private void onClick(){
-        Variables.adToBeFlagged = mAdvert;
-        Intent intent = new Intent("TAKE_DOWN");
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-        if(!mAdvert.isFlagged()) {
-            Variables.areYouSureTakeDownText = "Are you sure you want to take down your ad?";
+        if(!mAdvert.isAdminFlagged()) {
+            Variables.adToBeFlagged = mAdvert;
+            Intent intent = new Intent("TAKE_DOWN");
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            if (!mAdvert.isFlagged()) {
+                Variables.areYouSureTakeDownText = "Are you sure you want to take down your ad?";
+            } else {
+                Variables.areYouSureTakeDownText = "Are you sure you want to put back up your ad?";
+            }
         }else{
-            Variables.areYouSureTakeDownText = "Are you sure you want to put back up your ad?";
+            Toast.makeText(mContext,"You can't put back up your ad, it was taken down by the admin.",Toast.LENGTH_SHORT).show();
         }
     }
 

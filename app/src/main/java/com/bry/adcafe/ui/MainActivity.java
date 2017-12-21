@@ -132,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onStart() {
         super.onStart();
         setIsUserLoggedOnInSharedPrefs(true);
+        lastAdSeen = Variables.lastAdSeen;
     }
 
     @Override
@@ -183,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         setUserDataInSharedPrefs();
         setAlarmForNotifications();
+        Variables.lastAdSeen = lastAdSeen;
         Log.d(TAG, "---removing callback for checking time of day.");
     }
 

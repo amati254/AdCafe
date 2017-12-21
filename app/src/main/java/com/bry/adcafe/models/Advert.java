@@ -30,6 +30,7 @@ public class Advert {
     private String websiteLink;
     private String category;
     private boolean isFlagged = false;
+    private boolean isAdminFlagged = false;
     public LinkedHashMap<Integer,Integer> clusters  = new LinkedHashMap<>();
 
     public Advert(String ImageUrl){
@@ -154,5 +155,13 @@ public class Advert {
 
     public void setPushIdNumber(int pushIdNumber) {
         this.pushIdNumber = pushIdNumber;
+    }
+
+    public boolean isAdminFlagged() {
+        return isAdminFlagged;
+    }
+
+    public void setAdminFlagged(boolean adminFlagged) {
+        isAdminFlagged = adminFlagged;
     }
 }

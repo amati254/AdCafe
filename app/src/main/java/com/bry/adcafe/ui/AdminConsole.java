@@ -269,9 +269,9 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
 
         DatabaseReference  mRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
                 .child(getNextDay())
-                .child(ad.getPushRefInAdminConsole())
-                .child("flagged");
-        mRef.setValue(bol);
+                .child(ad.getPushRefInAdminConsole());
+        mRef.child("flagged").setValue(bol);
+        mRef.child("adminFlagged").setValue(bol);
 
         Log.d(TAG,"Flagging ad : "+ad.getPushRefInAdminConsole());
          numberOfClusters = ad.clusters.size();
