@@ -150,8 +150,8 @@ public class AlarmReceiver1 extends BroadcastReceiver {
 //                        if(numberOfAds>0) handleEverything(numberOfAdsInTotal);
 //                    }
                 }
+                iterations++;
                 if(iterations<numberOfSubsFromFirebase){
-                    iterations++;
                     checkNumberForEach();
                 }else{
                     Log.d(TAG,"All the categories have been handled, total is : "+numberOfAdsInTotal);

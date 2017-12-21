@@ -64,7 +64,7 @@ public class Splash extends AppCompatActivity {
     }
 
     private void startNextActivity(){
-        findViewById(R.id.pageID).setBackgroundResource(R.color.colorPrimary);
+        findViewById(R.id.pageID).setBackgroundResource(R.color.colorPrimaryDark2);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {

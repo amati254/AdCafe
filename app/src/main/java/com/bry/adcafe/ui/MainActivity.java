@@ -1589,8 +1589,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Calendar alarmStartTime = Calendar.getInstance();
         Calendar now = Calendar.getInstance();
-        alarmStartTime.set(Calendar.HOUR_OF_DAY, 04);
-        alarmStartTime.set(Calendar.MINUTE, 21);
+        alarmStartTime.set(Calendar.HOUR_OF_DAY, 12);
+        alarmStartTime.set(Calendar.MINUTE, 10);
         alarmStartTime.set(Calendar.SECOND, 0);
         if (now.after(alarmStartTime)) {
             Log.d(TAG, "Setting alarm to tomorrow morning.");
