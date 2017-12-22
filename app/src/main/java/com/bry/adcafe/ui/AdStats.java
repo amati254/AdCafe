@@ -187,10 +187,10 @@ public class AdStats extends AppCompatActivity {
                         }
                         Log.d(TAG, "Gotten one ad from firebase. : " + adUploadedByUser.getPushRefInAdminConsole());
                         mUploadedAds3.add(adUploadedByUser);
-                        if (cycleCount3 == mAdList3.size()) {
-                            Log.d(TAG, "All the ads have been handled.");
-                            loadStats3();
-                        }
+                    }
+                    if (cycleCount3 == mAdList3.size()) {
+                        Log.d(TAG, "All the ads have been handled.");
+                        loadStats3();
                     }
                 }
 
@@ -256,10 +256,10 @@ public class AdStats extends AppCompatActivity {
                         Advert adUploadedByUser = dataSnapshot.getValue(Advert.class);
                         Log.d(TAG, "Gotten one ad from firebase. : " + adUploadedByUser.getPushRefInAdminConsole());
                         mUploadedAds.add(adUploadedByUser);
-                        if (cycleCount == mAdList.size()) {
-                            Log.d(TAG, "All the ads have been handled.");
-                            loadStats();
-                        }
+                    }
+                    if (cycleCount == mAdList.size()) {
+                        Log.d(TAG, "All the ads have been handled.");
+                        loadStats();
                     }
                 }
 
@@ -353,10 +353,10 @@ public class AdStats extends AppCompatActivity {
                         Advert adUploadedByUser = dataSnapshot.getValue(Advert.class);
                         Log.d(TAG, "Gotten one ad from firebase. : " + adUploadedByUser.getPushRefInAdminConsole());
                         mUploadedAds2.add(adUploadedByUser);
-                        if (cycleCount2 == mAdList2.size()) {
-                            Log.d(TAG, "All the ads have been handled.");
-                            loadStats2();
-                        }
+                    }
+                    if (cycleCount2 == mAdList2.size()) {
+                        Log.d(TAG, "All the ads have been handled.");
+                        loadStats2();
                     }
                 }
 
@@ -475,7 +475,7 @@ public class AdStats extends AppCompatActivity {
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        takeDownAd();
+                        takeDownAd2();
                     }
                 })
                 .setNegativeButton("No.", new DialogInterface.OnClickListener() {
