@@ -79,7 +79,7 @@ public class FeedbackFragment extends DialogFragment implements View.OnClickList
         dbRef.child("message").setValue(feedback);
         dbRef.child("user").setValue(user);
 //        dbRef.setValue(message);
-        Toast.makeText(mContext,"Feedback received.",Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext,"Feedback sent.",Toast.LENGTH_SHORT).show();
         dismiss();
     }
 

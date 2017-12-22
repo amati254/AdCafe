@@ -102,6 +102,7 @@ public class Dashboard extends AppCompatActivity {
                 FragmentManager fm = getFragmentManager();
                 Log.d("DASHBOARD","Setting up fragment");
                 FeedbackFragment reportDialogFragment = new FeedbackFragment();
+                reportDialogFragment.setMenuVisibility(false);
                 reportDialogFragment.show(fm, "Feedback.");
                 reportDialogFragment.setfragContext(mContext);
             }

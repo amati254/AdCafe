@@ -127,7 +127,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         }else{
             mAvi.setVisibility(View.VISIBLE);
             mLoadingText.setVisibility(View.VISIBLE);
-            mRelative.setAlpha(0.0f);
+            mRelative.setVisibility(View.GONE);
             mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -135,8 +135,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                         Log.d(TAG,"authentication successful");
                         createFirebaseUserProfile(task.getResult().getUser());
                     }else {
-//                        mRelative.setVisibility(View.VISIBLE);
-                        mRelative.setAlpha(1.0f);
+                        mRelative.setVisibility(View.VISIBLE);
                         mAvi.setVisibility(View.GONE);
                         mLoadingText.setVisibility(View.GONE);
                         Toast.makeText(CreateAccountActivity.this, "Sign Up has failed.Another user with your info may exist.", Toast.LENGTH_SHORT).show();
@@ -494,19 +493,11 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     }
 
     private void setUpUserSpace(){
-        mRelative.setAlpha(0.0f);
+        mRelative.setVisibility(View.GONE);
         DatabaseManager dbManager = new DatabaseManager();
         dbManager.createUserSpace(mContext);
     }
 
-    private void SetUpSubs(){
-        DatabaseManager dmManager = new DatabaseManager();
-        List<String> interests = new ArrayList<>();
-        interests.add("technology");
-        interests.add("food");
-        interests.add("lifestyle");
-        dmManager.setUpUserSubscriptions(interests);
-    }
 
 }
 

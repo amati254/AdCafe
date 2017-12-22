@@ -102,7 +102,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     Log.d(TAG,"A user exists."+firebaseAuth.getCurrentUser().getUid());
                     if(isOnline(mContext)){
                         Log.d(TAG,"user is online, setting up everything normally");
-                        mRelative.setAlpha(0.0f);
+                        mRelative.setVisibility(View.GONE);
                         mAvi.setVisibility(View.VISIBLE);
                         mLoadingMessage.setVisibility(View.VISIBLE);
                         mIsLoggingIn = false;
@@ -120,7 +120,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private  void setNoInternetView(){
         Log.d(TAG,"There is no internet connection,showing no internet dialog");
-        mRelative.setAlpha(0.01f);
+        mRelative.setVisibility(View.GONE);
         mNoConnectionLayout.setVisibility(View.VISIBLE);
         mRetryButton.setOnClickListener(this);
     }
@@ -135,189 +135,189 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mRetryLoadingButton.setOnClickListener(this);
     }
 
-    private void lastUsed(){
-        Log.d(TAG,"---Loading date from when last used from firebase.");
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-
-        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
-        mRef4 = query.getRef();
-        mRef4.addListenerForSingleValueEvent(val4);
-    }
-
-    private void getMonthAdTotalFromFirebase() {
-        Log.d(TAG,"---Loading Month AdTotals from firebase.");
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-
-        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
-        mRef = query.getRef();
-        mRef.addListenerForSingleValueEvent(val);
-
-    }
-
-    private void loadTodayAdTotalsFromFirebase(){
-        Log.d("LOGIN_ACTIVITY--","Ad totals from today have been loaded from firebase.");
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-
-        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
-        mRef2 = query.getRef();
-        mRef2.addListenerForSingleValueEvent(val2);
-    }
-
-    private void loadUserIDFromFirebase() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-        Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
-                .child(uid).child(Constants.SUBSCRIPTION_lIST);
-        mRef3 = query.getRef();
-        mRef3.addListenerForSingleValueEvent(val3);
-    }
-
-    private void loadLastSeenAd() {
-        Log.d(TAG,"Loading the last seen ad from firebase...");
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-
-        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.LAST_AD_SEEN);
-        mRef5 = query.getRef();
-        mRef5.addListenerForSingleValueEvent(val5);
-    }
-
-    ValueEventListener val = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            int number = dataSnapshot.getValue(int.class);
-            Log.d(TAG,"---Month ad totals is--"+number);
-            Variables.setMonthAdTotals(mKey,number);
-//            mHasLoadingMonthTotalsFailed = false;
-            loadTodayAdTotalsFromFirebase();
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            Log.d(TAG,"---Failed to load Month AdTotals from firebase.");
-//            mHasLoadingMonthTotalsFailed = true;
-            setFailedToLoadView();
-//            loadFromSharedPreferences();
+//    private void lastUsed(){
+//        Log.d(TAG,"---Loading date from when last used from firebase.");
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        String uid = user.getUid();
+//
+//        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
+//        mRef4 = query.getRef();
+//        mRef4.addListenerForSingleValueEvent(val4);
+//    }
+//
+//    private void getMonthAdTotalFromFirebase() {
+//        Log.d(TAG,"---Loading Month AdTotals from firebase.");
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        String uid = user.getUid();
+//
+//        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
+//        mRef = query.getRef();
+//        mRef.addListenerForSingleValueEvent(val);
+//
+//    }
+//
+//    private void loadTodayAdTotalsFromFirebase(){
+//        Log.d("LOGIN_ACTIVITY--","Ad totals from today have been loaded from firebase.");
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        String uid = user.getUid();
+//
+//        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+//        mRef2 = query.getRef();
+//        mRef2.addListenerForSingleValueEvent(val2);
+//    }
+//
+//    private void loadUserIDFromFirebase() {
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        String uid = user.getUid();
+//        Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+//                .child(uid).child(Constants.SUBSCRIPTION_lIST);
+//        mRef3 = query.getRef();
+//        mRef3.addListenerForSingleValueEvent(val3);
+//    }
+//
+//    private void loadLastSeenAd() {
+//        Log.d(TAG,"Loading the last seen ad from firebase...");
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        String uid = user.getUid();
+//
+//        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.LAST_AD_SEEN);
+//        mRef5 = query.getRef();
+//        mRef5.addListenerForSingleValueEvent(val5);
+//    }
+//
+//    ValueEventListener val = new ValueEventListener() {
+//        @Override
+//        public void onDataChange(DataSnapshot dataSnapshot) {
+//            int number = dataSnapshot.getValue(int.class);
+//            Log.d(TAG,"---Month ad totals is--"+number);
+//            Variables.setMonthAdTotals(mKey,number);
+////            mHasLoadingMonthTotalsFailed = false;
 //            loadTodayAdTotalsFromFirebase();
-        }
-    };
-
-    ValueEventListener val2 = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            int number = dataSnapshot.getValue(int.class);
-            if(mIsLastOnlineToday) {
-                Variables.setAdTotal(number,mKey);
-                Log.d(TAG,"User was last online today,thus will set adtotals normally");
-                Log.d("LOGIN_ACTIVITY--","Ad totals set from firebase is --"+number);
-            } else {
-                Variables.setAdTotal(0,mKey);
-                Log.d(TAG,"User was not last online today,thus will set ad totals to 0");
-                setLastUsedDateInFirebaseDate();
-                resetAdTotalsInFirebase();
-            }
-
-            loadUserIDFromFirebase();
-//            mHasLoadingDayTotalsFailed = false;
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            Log.d("LOGIN_ACTIVITY--","Failed to load todays ad totals from firebase.");
-//            mHasLoadingDayTotalsFailed = true;
-            setFailedToLoadView();
-//            loadFromSharedPreferences();
-        }
-    };
-
-    ValueEventListener val3 = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            for(DataSnapshot snap: dataSnapshot.getChildren()){
-                String category = snap.getKey();
-                Integer cluster = snap.getValue(Integer.class);
-                Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
-                Variables.Subscriptions.put(category,cluster);
-            }
-
-
-//            int clusterID = dataSnapshot.getValue(int.class);
-//            User.setID(clusterID,mKey);
-            hasEverythingLoaded = true;
-            loadLastSeenAd();
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            mAvi.setVisibility(View.GONE);
-            mLoadingMessage.setVisibility(View.GONE);
-            setFailedToLoadView();
-        }
-    };
-
-    ValueEventListener val4 = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            if(dataSnapshot.getValue()!=null){
-                String dateInFirebase = dataSnapshot.getValue(String.class);
-                Log.d(TAG,"Date gotten from firebase is : "+dateInFirebase);
-                String currentDate = getDate();
-                if(dateInFirebase.equals(currentDate)){
-                    mIsLastOnlineToday = true;
-                    Log.d(TAG,"---Date in firebase matches date in system,thus User was last online today");
-                }else{
-                    Log.d(TAG,"---Date in firebase  does not match date in system , thus User was not online last today");
-                    Log.d(TAG,"---Date from firebase is--"+dateInFirebase+"--while date in system is "+currentDate);
-                    mIsLastOnlineToday = false;
-                }
-            }else{
-                setLastUsedDateInFirebaseDate();
-                mIsLastOnlineToday = false;
-            }
-            getMonthAdTotalFromFirebase();
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            setFailedToLoadView();
-        }
-    };
-
-    ValueEventListener val5 = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            if(dataSnapshot.getValue(String.class)!=null){
-                String lastSeenAd = dataSnapshot.getValue(String.class);
-                Variables.setLastSeenAd(lastSeenAd);
-            }
-            startMainActivity();
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            mAvi.setVisibility(View.GONE);
-            mLoadingMessage.setVisibility(View.GONE);
-            setFailedToLoadView();
-        }
-    };
-
-    private void setLastUsedDateInFirebaseDate() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-        adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
-        adRef.setValue(getDate());
-    }
-
-    private void resetAdTotalsInFirebase() {
-        Log.d(TAG,"---Resetting ad total in firebase to 0 due to it being a new day.");
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
-        adRef.setValue(0);
-    }
+//        }
+//
+//        @Override
+//        public void onCancelled(DatabaseError databaseError) {
+//            Log.d(TAG,"---Failed to load Month AdTotals from firebase.");
+////            mHasLoadingMonthTotalsFailed = true;
+//            setFailedToLoadView();
+////            loadFromSharedPreferences();
+////            loadTodayAdTotalsFromFirebase();
+//        }
+//    };
+//
+//    ValueEventListener val2 = new ValueEventListener() {
+//        @Override
+//        public void onDataChange(DataSnapshot dataSnapshot) {
+//            int number = dataSnapshot.getValue(int.class);
+//            if(mIsLastOnlineToday) {
+//                Variables.setAdTotal(number,mKey);
+//                Log.d(TAG,"User was last online today,thus will set adtotals normally");
+//                Log.d("LOGIN_ACTIVITY--","Ad totals set from firebase is --"+number);
+//            } else {
+//                Variables.setAdTotal(0,mKey);
+//                Log.d(TAG,"User was not last online today,thus will set ad totals to 0");
+//                setLastUsedDateInFirebaseDate();
+//                resetAdTotalsInFirebase();
+//            }
+//
+//            loadUserIDFromFirebase();
+////            mHasLoadingDayTotalsFailed = false;
+//        }
+//
+//        @Override
+//        public void onCancelled(DatabaseError databaseError) {
+//            Log.d("LOGIN_ACTIVITY--","Failed to load todays ad totals from firebase.");
+////            mHasLoadingDayTotalsFailed = true;
+//            setFailedToLoadView();
+////            loadFromSharedPreferences();
+//        }
+//    };
+//
+//    ValueEventListener val3 = new ValueEventListener() {
+//        @Override
+//        public void onDataChange(DataSnapshot dataSnapshot) {
+//            for(DataSnapshot snap: dataSnapshot.getChildren()){
+//                String category = snap.getKey();
+//                Integer cluster = snap.getValue(Integer.class);
+//                Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
+//                Variables.Subscriptions.put(category,cluster);
+//            }
+//
+//
+////            int clusterID = dataSnapshot.getValue(int.class);
+////            User.setID(clusterID,mKey);
+//            hasEverythingLoaded = true;
+//            loadLastSeenAd();
+//        }
+//
+//        @Override
+//        public void onCancelled(DatabaseError databaseError) {
+//            mAvi.setVisibility(View.GONE);
+//            mLoadingMessage.setVisibility(View.GONE);
+//            setFailedToLoadView();
+//        }
+//    };
+//
+//    ValueEventListener val4 = new ValueEventListener() {
+//        @Override
+//        public void onDataChange(DataSnapshot dataSnapshot) {
+//            if(dataSnapshot.getValue()!=null){
+//                String dateInFirebase = dataSnapshot.getValue(String.class);
+//                Log.d(TAG,"Date gotten from firebase is : "+dateInFirebase);
+//                String currentDate = getDate();
+//                if(dateInFirebase.equals(currentDate)){
+//                    mIsLastOnlineToday = true;
+//                    Log.d(TAG,"---Date in firebase matches date in system,thus User was last online today");
+//                }else{
+//                    Log.d(TAG,"---Date in firebase  does not match date in system , thus User was not online last today");
+//                    Log.d(TAG,"---Date from firebase is--"+dateInFirebase+"--while date in system is "+currentDate);
+//                    mIsLastOnlineToday = false;
+//                }
+//            }else{
+//                setLastUsedDateInFirebaseDate();
+//                mIsLastOnlineToday = false;
+//            }
+//            getMonthAdTotalFromFirebase();
+//        }
+//
+//        @Override
+//        public void onCancelled(DatabaseError databaseError) {
+//            setFailedToLoadView();
+//        }
+//    };
+//
+//    ValueEventListener val5 = new ValueEventListener() {
+//        @Override
+//        public void onDataChange(DataSnapshot dataSnapshot) {
+//            if(dataSnapshot.getValue(String.class)!=null){
+//                String lastSeenAd = dataSnapshot.getValue(String.class);
+//                Variables.setLastSeenAd(lastSeenAd);
+//            }
+//            startMainActivity();
+//        }
+//
+//        @Override
+//        public void onCancelled(DatabaseError databaseError) {
+//            mAvi.setVisibility(View.GONE);
+//            mLoadingMessage.setVisibility(View.GONE);
+//            setFailedToLoadView();
+//        }
+//    };
+//
+//    private void setLastUsedDateInFirebaseDate() {
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        String uid = user.getUid();
+//        adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.DATE_IN_FIREBASE);
+//        adRef.setValue(getDate());
+//    }
+//
+//    private void resetAdTotalsInFirebase() {
+//        Log.d(TAG,"---Resetting ad total in firebase to 0 due to it being a new day.");
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        String uid = user.getUid();
+//        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
+//        adRef.setValue(0);
+//    }
 
 
     private void startMainActivity(){
@@ -397,13 +397,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mAuth.removeAuthStateListener(mAuthListener);
         }
         if(mRef!=null){
-            mRef.removeEventListener(val);
+//            mRef.removeEventListener(val);
         }
         if(mRef2!=null){
-            mRef2.removeEventListener(val2);
+//            mRef2.removeEventListener(val2);
         }
         if(mRef3!=null){
-            mRef3.removeEventListener(val3);
+//            mRef3.removeEventListener(val3);
         }
     }
 
@@ -435,7 +435,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if(v == mRetryButton){
             if(isOnline(mContext)){
                 mNoConnectionLayout.setVisibility(View.GONE);
-                mRelative.setAlpha(0.0f);
+                mRelative.setVisibility(View.GONE);
                 mAvi.setVisibility(View.VISIBLE);
                 mLoadingMessage.setVisibility(View.VISIBLE);
                 Variables.Subscriptions.clear();
@@ -448,12 +448,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         }
         if(v== mRetryLoadingButton){
-            mRelative.setAlpha(0.0f);
+            mRelative.setVisibility(View.GONE);
             mFailedLoadLayout.setVisibility(View.GONE);
             mAvi.setVisibility(View.VISIBLE);
             mLoadingMessage.setVisibility(View.VISIBLE);
             Toast.makeText(mContext,"Retrying...",Toast.LENGTH_SHORT).show();
-            lastUsed();
+//            lastUsed();
+            Variables.Subscriptions.clear();
+            DatabaseManager dbMan = new DatabaseManager();
+            dbMan.loadUserData(mContext);
         }
     }
 
@@ -477,7 +480,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }else{
             mAvi.setVisibility(View.VISIBLE);
             mLoadingMessage.setVisibility(View.VISIBLE);
-            mRelative.setAlpha(0.0f);
+            mRelative.setVisibility(View.GONE);
             mIsLoggingIn = true;
 //            mRelative.setVisibility(View.GONE);
             Log.d(TAG,"--Logging in user with username and password...");
@@ -491,7 +494,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             if(!task.isSuccessful()){
                                 Log.w(TAG,"SignInWithEmail",task.getException());
 //                                mRelative.setVisibility(View.VISIBLE);
-                                mRelative.setAlpha(1.0f);
+                                mRelative.setVisibility(View.VISIBLE);
                                 mAvi.setVisibility(View.GONE);
                                 mLoadingMessage.setVisibility(View.GONE);
                                 mIsLoggingIn = false;

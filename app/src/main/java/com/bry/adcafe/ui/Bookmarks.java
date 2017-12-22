@@ -274,6 +274,7 @@ public class Bookmarks extends AppCompatActivity {
     private void loadAdFragment() {
         FragmentManager fm = getFragmentManager();
         ViewImageFragment imageFragment = new ViewImageFragment();
+        imageFragment.setMenuVisibility(false);
         imageFragment.show(fm, "View image.");
         imageFragment.setfragcontext(mContext);
     }

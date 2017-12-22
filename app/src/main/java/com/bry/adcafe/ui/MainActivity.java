@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -31,6 +32,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -94,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Runnable mViewRunnable;
     private LinearLayout mLinearLayout;
     private AVLoadingIndicatorView mAvi;
+    private AVLoadingIndicatorView mAviLoadingMoreAds;
+    private ProgressBar spinner;
     private TextView mLoadingText;
     private boolean mIsBeingReset = false;
 
@@ -125,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loadAdsFromThread();
         logUser();
         new DatabaseManager().setLastSeenDateInFirebase();
+        mAviLoadingMoreAds.hide();
     }
 
 
@@ -138,6 +143,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         Variables.isMainActivityOnline = true;
+        try{
+            onclicks();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         super.onResume();
         if (!getCurrentDateInSharedPreferences().equals("0") && !getCurrentDateInSharedPreferences().equals(getDate())) {
             Log.d(TAG, "---Date in shared preferences does not match current date,therefore resetting everything.");
@@ -416,6 +426,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Log.d(TAG,"Since the currentAdInSubscription is : "+Variables.getCurrentAdInSubscription()+" and " +
                                     "the ad's pushID is : "+(mAdList.get(0).getPushId()));
                             lastAdSeen = mAdList.get(0);
+                            mChildToStartFrom = Integer.parseInt(lastAdSeen.getPushId());
                             if (Variables.getCurrentSubscriptionIndex()+1 < Variables.Subscriptions.size()) {
                                 Log.d(TAG,"Trying the next subscription.");
                                 Variables.setNextSubscriptionIndex();
@@ -614,7 +625,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setUpSwipeView() {
         mSwipeView = (SwipePlaceHolderView) findViewById(R.id.swipeView);
         mLinearLayout = (LinearLayout) findViewById(R.id.bottomNavButtons);
+
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.mainActivityAvi);
+        mAviLoadingMoreAds = (AVLoadingIndicatorView) findViewById(R.id.aviLoadingNextAds);
+        spinner = (ProgressBar)findViewById(R.id.progressBar1);
+
         mLoadingText = (TextView) findViewById(R.id.loadingAdsMessage);
         mFailedToLoadLayout = (LinearLayout) findViewById(R.id.failedLoadAdsLayout);
         mRetryButton = (Button) findViewById(R.id.retryLoadingAds);
@@ -824,6 +839,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     } else {
                         FragmentManager fm = getFragmentManager();
                         ReportDialogFragment reportDialogFragment = new ReportDialogFragment();
+                        reportDialogFragment.setMenuVisibility(false);
                         reportDialogFragment.show(fm, "Report dialog fragment.");
                         reportDialogFragment.setfragcontext(mContext);
                     }
@@ -1036,6 +1052,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void loadMoreAds() {
         isLoadingMoreAds = true;
+        mAviLoadingMoreAds.show();
+//        spinner.setVisibility(View.VISIBLE);
         Log.d("MAIN-ACTIVITY---", "Loading more ads since user has seen almost all....");
         String date;
         date = isAlmostMidNight() ? getNextDay() : getDate();
@@ -1076,6 +1094,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         loadMoreAdsIntoAdvertCard();
                         mChildToStartFrom += (int) dataSnapshot.getChildrenCount();
                         isLoadingMoreAds = false;
+                        mAviLoadingMoreAds.hide();
+//                        spinner.setVisibility(View.VISIBLE);
                     }else{
                         Log.d(TAG,"Loaded no ad, loading more ads...");
                         if(Variables.nextSubscriptionIndex+1<Variables.Subscriptions.size()){
@@ -1085,6 +1105,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }else{
                             Log.d(TAG,"No more ads are available from the rest of the subscriptions");
                             isLoadingMoreAds = false;
+                            mAviLoadingMoreAds.hide();
+//                            spinner.setVisibility(View.VISIBLE);
                         }
                     }
 
@@ -1102,6 +1124,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }else{
                         Log.d(TAG,"No more ads are available from the rest of the subscriptions");
                         isLoadingMoreAds = false;
+                        mAviLoadingMoreAds.hide();
+//                        spinner.setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -1585,20 +1609,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmIntent.setData((Uri.parse("custom://" + System.currentTimeMillis())));
-        alarmManager.cancel(pendingIntent);
+        try{
+            alarmManager.cancel(pendingIntent);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
 
         Calendar alarmStartTime = Calendar.getInstance();
         Calendar now = Calendar.getInstance();
-        alarmStartTime.set(Calendar.HOUR_OF_DAY, 12);
-        alarmStartTime.set(Calendar.MINUTE, 10);
+        alarmStartTime.set(Calendar.HOUR_OF_DAY, 4);
+        alarmStartTime.set(Calendar.MINUTE, 21);
         alarmStartTime.set(Calendar.SECOND, 0);
         if (now.after(alarmStartTime)) {
             Log.d(TAG, "Setting alarm to tomorrow morning.");
             alarmStartTime.add(Calendar.DATE, 1);
         }
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmStartTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-        Log.w("Alarm", "Alarms set for everyday 04:15 hrs.");
-
+        try {
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmStartTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+            Log.w("Alarm", "Alarms set for everyday 04:15 hrs.");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
     }
 

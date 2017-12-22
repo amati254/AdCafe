@@ -96,7 +96,9 @@
         share ;)</string>
 
 
-    <string name="slide11text">Share and talk about the app with your friends; lets turn this into something big!</string>
+    <string name="slide11text">Share! and if you have any questions comments or
+        suggestions, contact us through feedback (in the dashboard);
+        lets turn this into something big!</string>
 
     <string name="slide12text">No it is optional, meaning you do not have to engage in it if you don\'t want to.</string>
 
@@ -108,6 +110,7 @@
     <string name="feedbacktype2">Gripe</string>
     <string name="feedbacktype3">Suggestion</string>
     <string name="feedbacktype4">Bug</string>
+    <string name="feedbacktype5">Question</string>
 
 
 </resources>

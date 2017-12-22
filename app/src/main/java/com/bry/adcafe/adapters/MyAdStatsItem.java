@@ -61,9 +61,14 @@ public class MyAdStatsItem {
     @Resolve
     public void onResolved(){
         loadImage();
-        mEmail.setText("Uploaded by : "+mAdvert.getUserEmail());
-        mTargetedNumber.setText("No. of users targeted : "+mAdvert.getNumberOfUsersToReach());
-        mUsersReachedSoFar.setText("Users reached so far : "+mAdvert.getNumberOfTimesSeen());
+        mEmail.setText(String.format("Uploaded by : %s", mAdvert.getUserEmail()));
+        mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
+
+        if(!mAdvert.isFlagged()){
+            mUsersReachedSoFar.setText("Users reached : "+mAdvert.getNumberOfTimesSeen());
+        }else{
+            mUsersReachedSoFar.setText("No users to be reached.");
+        }
 
 
         int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();

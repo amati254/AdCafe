@@ -40,6 +40,7 @@ import com.mindorks.placeholderview.PlaceHolderView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import butterknife.Bind;
@@ -466,7 +467,7 @@ public class AdStats extends AppCompatActivity {
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        takeDownAd();
+                        takeDownAd2();
                     }
                 })
                 .setNegativeButton("No.", new DialogInterface.OnClickListener() {
@@ -481,7 +482,7 @@ public class AdStats extends AppCompatActivity {
         mAuthProgressDialog.show();
         Advert ad = Variables.adToBeFlagged;
         if(ad.isFlagged())mAuthProgressDialog.setMessage("Restoring the ad...");
-        boolean bol = ad.isFlagged() ? false : true;
+        boolean bol = !ad.isFlagged();
 
         DatabaseReference  mRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
                 .child(getNextDay())
@@ -511,6 +512,63 @@ public class AdStats extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void takeDownAd2(){
+        mAuthProgressDialog.show();
+        Advert ad = Variables.adToBeFlagged;
+        if(ad.isFlagged())mAuthProgressDialog.setMessage("Restoring the ad...");
+        boolean bol = !ad.isFlagged();
+
+        DatabaseReference  mRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
+                .child(getNextDay())
+                .child(ad.getPushRefInAdminConsole())
+                .child("flagged");
+        mRef.setValue(bol);
+
+        Log.d(TAG,"Flagging ad : "+ad.getPushRefInAdminConsole());
+        numberOfClusters = ad.clusters.size();
+        int nextCluster = getClusterValue(runCount,ad);
+        int nextPushId = getPushIdValue(runCount,ad);
+        flagSpecific(nextCluster,nextPushId,ad,bol);
+    }
+
+    private void flagSpecific(int cluster, int pushId, final Advert ad, final boolean bol){
+        DatabaseReference  mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
+                .child(getNextDay())
+                .child(ad.getCategory())
+                .child(Integer.toString(cluster))
+                .child(Integer.toString(pushId))
+                .child("flagged");
+        mRef3.setValue(bol).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                runCount++;
+                if(runCount<numberOfClusters){
+                    int nextCluster = getClusterValue(runCount,ad);
+                    int nextPushId = getPushIdValue(runCount,ad);
+                    flagSpecific(nextCluster,nextPushId,ad,bol);
+                }else{
+                    runCount = 0;
+                    numberOfClusters = 0;
+                    mAuthProgressDialog.dismiss();
+                }
+            }
+        });
+    }
+
+    private int getClusterValue(int index,Advert ad) {
+        LinkedHashMap map = ad.clusters;
+        int cluster = (new ArrayList<Integer>(map.keySet())).get(index);
+        Log.d(TAG, "Cluster gotten from ad is : " + cluster);
+        return cluster;
+    }
+
+    private int getPushIdValue(int index,Advert ad) {
+        LinkedHashMap map = ad.clusters;
+        int cluster = (new ArrayList<Integer>(map.values())).get(index);
+        Log.d(TAG, "Cluster gotten from ad is : " + cluster);
+        return cluster;
     }
 
 }

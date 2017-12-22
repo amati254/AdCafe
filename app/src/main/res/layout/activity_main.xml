@@ -107,6 +107,35 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:gravity="right"
+        android:orientation="horizontal"
+        android:layout_gravity="end"
+        android:layout_height="40dp">
+
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/aviLoadingNextAds"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="13dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            style="@style/AVLoadingIndicatorView"
+            android:visibility="visible"
+            app:indicatorName="BallPulseIndicator"
+            app:indicatorColor="@color/colorPrimaryDark" />
+
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            style="?android:attr/progressBarStyleSmallInverse"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="13dp"
+            android:layout_width="20dp"
+            android:visibility="gone"
+            android:layout_height="20dp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:gravity="center"
         android:id="@+id/failedLoadAdsLayout"
         android:visibility="gone"

@@ -69,6 +69,10 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
         adsWhichHaveBeenSeenLess.setOnClickListener(this);
         mLoadTomorrowsAdsButton.setOnClickListener(this);
         mLoadFeedbackButton.setOnClickListener(this);
+
+        DataListsView.setNestedScrollingEnabled(false);
+        TomorrowsAdsListView.setNestedScrollingEnabled(false);
+        FeedbackView.setNestedScrollingEnabled(false);
         registerReceivers();
         createProgressDialog();
     }
