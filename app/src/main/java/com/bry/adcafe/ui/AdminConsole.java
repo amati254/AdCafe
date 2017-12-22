@@ -70,9 +70,10 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
         mLoadTomorrowsAdsButton.setOnClickListener(this);
         mLoadFeedbackButton.setOnClickListener(this);
 
-        DataListsView.setNestedScrollingEnabled(false);
-        TomorrowsAdsListView.setNestedScrollingEnabled(false);
-        FeedbackView.setNestedScrollingEnabled(false);
+//        DataListsView.setNestedScrollingEnabled(false);
+//        TomorrowsAdsListView.setNestedScrollingEnabled(false);
+//        FeedbackView.setNestedScrollingEnabled(false);
+
         registerReceivers();
         createProgressDialog();
     }
@@ -88,6 +89,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
         DataListsView.removeAllViews();
         TomorrowsAdsListView.removeAllViews();
         FeedbackView.removeAllViews();
+
         if(v == adsWhichHaveBeenSeenLess){
 //            DataListsView.removeAllViews();
             loadAdsWhichHaveBeenSeenLess();
@@ -152,6 +154,8 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren()){
+                    Log.d(TAG,"Number of tomorrows ads is : "+dataSnapshot.getChildrenCount());
+                    List<Advert> adLists = new ArrayList<>();
                     for(DataSnapshot snap:dataSnapshot.getChildren()) {
                         Advert ad = snap.getValue(Advert.class);
                         DataSnapshot clusters = snap.child("clustersToUpLoadTo");
@@ -160,10 +164,15 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
                             int pushId = clusterSnap.getValue(int.class);
                             ad.clusters.put(cluster,pushId);
                         }
-                        TomorrowsAdsListView.addView(new AdminAdsItem(mContext,TomorrowsAdsListView,ad));
+                        adLists.add(ad);
+//                        TomorrowsAdsListView.addView(new AdminAdsItem(mContext,TomorrowsAdsListView,ad));
+//                        Log.d(TAG,"Added ad : "+ad.getPushRefInAdminConsole());
                     }
+                    loadTomorrowsAdsIntoViews(adLists);
+                }else{
+                    Toast.makeText(mContext,"There are no ads for tomorrow",Toast.LENGTH_SHORT).show();
                 }
-                mAuthProgressDialog.dismiss();
+//                mAuthProgressDialog.dismiss();
             }
 
             @Override
@@ -172,6 +181,14 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG,"Something went wrong loading the ads"+databaseError.getMessage());
             }
         });
+    }
+
+    private void loadTomorrowsAdsIntoViews(List<Advert> adList){
+        for(Advert ad : adList){
+            TomorrowsAdsListView.addView(new AdminAdsItem(mContext,TomorrowsAdsListView,ad));
+            Log.d(TAG,"Added ad : "+ad.getPushRefInAdminConsole());
+        }
+        mAuthProgressDialog.dismiss();
     }
 
     private void loadAdsWhichHaveBeenSeenLess() {

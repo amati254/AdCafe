@@ -384,7 +384,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "User current ad in subscription is 0, so is starting at 1");
             dbRef.orderByKey().startAt(Integer.toString(1)).limitToFirst(5).addValueEventListener(val);
         } else {
-            Log.d(TAG, "User current ad in subscription is not 0, so starting at " + Variables.getCurrentAdInSubscription());
+            Log.d(TAG, "User current ad in subscription is not 0, so starting at its value : " + Variables.getCurrentAdInSubscription());
             dbRef.orderByKey().startAt(Integer.toString(Variables.getCurrentAdInSubscription()))
                     .limitToFirst(5).addListenerForSingleValueEvent(val);
         }

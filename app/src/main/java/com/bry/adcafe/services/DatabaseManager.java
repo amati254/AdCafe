@@ -2,6 +2,7 @@ package com.bry.adcafe.services;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -9,6 +10,7 @@ import android.util.Log;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.User;
+import com.bry.adcafe.ui.LoginActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -27,6 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by bryon on 24/11/2017.
@@ -78,7 +82,6 @@ public class DatabaseManager {
             }
         });
     }
-
 
 
 
@@ -287,6 +290,7 @@ public class DatabaseManager {
                 DataSnapshot dateSnap = dataSnapshot.child(Constants.DATE_IN_FIREBASE);
                 String date = dateSnap.getValue(String.class);
                 Log.d(TAG,"Date gotten from firebase is : "+date);
+                setDateInSharedPrefs(date,mContext);
 
                 if(date.equals(getDate())){
                     Log.d(TAG,"---Date in firebase matches date in system,thus User was last online today");
@@ -361,6 +365,13 @@ public class DatabaseManager {
 
     ////load user data methods.//////////////////////////////////////////////////////////////////////////
 
+    private void setDateInSharedPrefs(String date,Context context){
+        Log.d(TAG, "---Setting current date in shared preferences.");
+        SharedPreferences prefs = context.getSharedPreferences(Constants.DATE, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("date", date);
+        editor.apply();
+    }
 
     private String getDate(){
         long date = System.currentTimeMillis();

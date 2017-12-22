@@ -1,7 +1,9 @@
 package com.bry.adcafe.adapters;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.content.LocalBroadcastManager;
@@ -51,6 +53,7 @@ public class MyAdStatsItem {
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
     private Advert mAdvert;
+    private DatabaseReference dbRef;
 
     public MyAdStatsItem(Context Context, PlaceHolderView PlaceHolderView, Advert Advert){
         this.mContext = Context;
@@ -69,7 +72,6 @@ public class MyAdStatsItem {
         }else{
             mUsersReachedSoFar.setText("No users to be reached.");
         }
-
 
         int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
         String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
@@ -93,43 +95,57 @@ public class MyAdStatsItem {
     private void loadListeners() {
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE)
                 .child(getDate()).child(mAdvert.getPushRefInAdminConsole());
-        DatabaseReference dbRef = query.getRef();
-        dbRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        dbRef = query.getRef();
+        dbRef.addChildEventListener(chil);
 
-            }
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForRemovingEventListeners
+                ,new IntentFilter("REMOVE-LISTENERS"));
+    }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.d("MY_AD_STAT_ITEM","Listener from firebase has responded.Updating users reached so far");
+    ChildEventListener chil = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            Log.d("MY_AD_STAT_ITEM","Listener from firebase has responded.Updating users reached so far");
 //                Advert refreshedAd = dataSnapshot.getValue(Advert.class);
 //                int newValue = refreshedAd.getNumberOfTimesSeen();
-                int newValue = dataSnapshot.getValue(int.class);
-                Log.d("MY_AD_STAT_ITEM","New value gotten from firebase --"+newValue);
-                mUsersReachedSoFar.setText("Users reached so far : "+newValue);
+            int newValue = dataSnapshot.getValue(int.class);
+            Log.d("MY_AD_STAT_ITEM","New value gotten from firebase --"+newValue);
+            mUsersReachedSoFar.setText("Users reached so far : "+newValue);
 
-                int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- newValue;
-                String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
-                mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
-            }
+            int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- newValue;
+            String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+            mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
+        }
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-            }
+        }
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-            }
+        }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
-    }
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForRemovingEventListeners = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          dbRef.removeEventListener(chil);
+          LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+        }
+    };
+
 
     private String getDate(){
         long date = System.currentTimeMillis();

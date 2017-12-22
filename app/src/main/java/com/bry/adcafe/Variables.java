@@ -1,5 +1,7 @@
 package com.bry.adcafe;
 
+import android.util.Log;
+
 import com.bry.adcafe.models.Advert;
 
 import java.util.ArrayList;
@@ -191,6 +193,7 @@ public class Variables {
 
     public static void setCurrentAdInSubscription(int currentAdInSubscription) {
         Variables.currentAdInSubscription = currentAdInSubscription;
+        Log.d("Variables","Set CurrentAdInSubscription to : "+currentAdInSubscription);
     }
 
     public static void adOneToCurrentAdInSubscription(){

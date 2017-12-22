@@ -121,6 +121,8 @@ public class AdStats extends AppCompatActivity {
 
     private void unregisterReceivers(){
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForTakeDownAd);
+        Intent intent = new Intent("REMOVE-LISTENERS");
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     private void showNoConnectionView() {
