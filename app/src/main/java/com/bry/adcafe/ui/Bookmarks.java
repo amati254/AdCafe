@@ -32,6 +32,7 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.Manifest;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.adapters.DateItem;
 import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.fragments.ViewImageFragment;
 import com.bry.adcafe.models.Advert;
@@ -52,7 +53,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import com.wang.avi.AVLoadingIndicatorView;
@@ -148,7 +152,7 @@ public class Bookmarks extends AppCompatActivity {
     private void getAds() {
         try{
             mSavedAds = new ArrayList<>();
-            loadAdsFromFirebase();
+            loadAdsFromFirebase2();
 
             Thread.sleep(50);
             Log.i("ARRAY", ""+ mSavedAds.size());
@@ -312,6 +316,57 @@ public class Bookmarks extends AppCompatActivity {
         });
     }
 
+    private void loadAdsFromFirebase2(){
+        if(!mSavedAds.isEmpty()) mSavedAds.clear();
+        String uid = User.getUid();
+        Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.PINNED_AD_LIST);
+        DatabaseReference mRef = query.getRef();
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()){
+                    mAvi.setVisibility(View.GONE);
+                    loadingText.setVisibility(View.GONE);
+
+                    for (DataSnapshot snap: dataSnapshot.getChildren()){
+                        long noOfDays = Long.parseLong(snap.getKey());
+                        List<Advert> AdList = new ArrayList<>();
+
+                        for(DataSnapshot adSnap: snap.getChildren()){
+                            Advert advert = adSnap.getValue(Advert.class);
+                            AdList.add(advert);
+                            Log.d("BOOKMARKS"," --Loaded ads from firebase.--"+advert.getPushId());
+                        }
+                        loadDaysAdsIntoViews(AdList,noOfDays);
+                    }
+                }else{
+                    Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_LONG).show();
+                    noAdsText.setVisibility(View.VISIBLE);
+                    mAvi.setVisibility(View.GONE);
+                    loadingText.setVisibility(View.GONE);
+
+//                    loadBookmarkedAdsIntoCards();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("Bookmarks","Failed to load ads from firebase.");
+            }
+        });
+    }
+
+    private void loadDaysAdsIntoViews(List<Advert> adList, long noOfDays) {
+        if(mPlaceHolderView == null){
+            loadPlaceHolderViews();
+        }
+        mPlaceHolderView.addView(new DateItem(mContext,mPlaceHolderView,noOfDays,getDateFromDays(noOfDays)));
+        for(int i = 0; i<adList.size();i++){
+            mPlaceHolderView.addView(new SavedAdsCard(adList.get(i),mContext,mPlaceHolderView,adList.get(i).getPushId()));
+        }
+    }
+
     private void loadBookmarkedAdsIntoCards() {
         if(mPlaceHolderView == null){
             loadPlaceHolderViews();
@@ -384,5 +439,37 @@ public class Bookmarks extends AppCompatActivity {
             //resume tasks needing this permission
             shareImage(Variables.adToBeShared.getImageBitmap());
         }
+    }
+
+    private String getDateFromDays(long days){
+        long currentTimeInMills = days*(1000*60*60*24);
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(currentTimeInMills);
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+        int monthOfYear = cal.get(Calendar.MONTH);
+        int year = cal.get(Calendar.YEAR);
+
+        String monthName = new DateFormatSymbols().getMonths()[monthOfYear];
+
+        Log.d("Splash","Date gotten is : "+dayOfMonth+" "+monthName+" "+year);
+
+        Calendar cal2 = Calendar.getInstance();
+        int year2 = cal2.get(Calendar.YEAR);
+        String yearName;
+
+        if(year == year2){
+            Log.d(TAG,"Ad was pined this year...");
+            yearName = "this year.";
+        }else if(year2 == year+1){
+            Log.d(TAG,"Ad was pined last year...");
+            yearName = "last year.";
+        }else{
+            yearName = Integer.toString(year);
+        }
+
+        String date = dayOfMonth+" "+monthName+", "+yearName;
+
+        return date;
     }
 }

@@ -1300,6 +1300,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return todaysDate;
     }
 
+
     private void resetAdTotalSharedPreferencesAndDayAdTotals() {
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -1429,7 +1430,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Advert ad = Variables.getCurrentAdvert();
         String uid = User.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
-                .child(uid).child(Constants.PINNED_AD_LIST);
+                .child(uid).child(Constants.PINNED_AD_LIST).child(getDateInDays());
         DatabaseReference pushRef = adRef.push();
         String pushId = pushRef.getKey();
 
@@ -1663,5 +1664,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return indexes.indexOf(subscription);
     }
 
+    private String getDateInDays(){
+        long currentTimeMillis = System.currentTimeMillis();
+        long extraTimeFromMidnight = currentTimeMillis%(1000*60*60*24);
+        long currentDay = (currentTimeMillis-extraTimeFromMidnight)/(1000*60*60*24);
+        Log.d(TAG,"The current day is : "+currentDay);
+        return Long.toString(currentDay);
+    }
 
 }
