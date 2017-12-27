@@ -84,6 +84,7 @@ public class SelectCategory extends AppCompatActivity implements View.OnClickLis
                     String details = snap.getValue(String.class);
                     placeHolderView.addView(new SelectCategoryItem(mContext,placeHolderView,category,details,false));
                 }
+                new DatabaseManager().setNumberOfSubscriptionsUserKnowsAbout((int)dataSnapshot.getChildrenCount());
                 loadingLayout.setVisibility(View.GONE);
                 mainView.setVisibility(View.VISIBLE);
             }

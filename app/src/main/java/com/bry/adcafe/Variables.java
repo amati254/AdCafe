@@ -53,6 +53,9 @@ public class Variables {
     public static String areYouSureTakeDownText;
     public static Advert lastAdSeen;
 
+    public static boolean didAdCafeRemoveCategory = false;
+    public static boolean didAdCafeAddNewCategory = false;
+
 
 
 

@@ -79,4 +79,6 @@ public class Constants {
     public static String CONFIRM_START = "ConfirmStart";
     public static String ALL_CLEAR = "AllClear";
     public static String CANCELLED = "canceled";
+
+    public static String NO_OF_CATEGORIES_KNOWN = "NoOfCategoriesKnown";
 }

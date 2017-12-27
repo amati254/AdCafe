@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.Variables;
@@ -23,6 +24,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,6 +44,7 @@ public class DatabaseManager {
     private int numberOfSubs = 0;
     private int iterations = 0;
     private Context context;
+    private List<String> categoryList = new ArrayList<>();
 
     ////Create user methods////////////////////////////////////////
 
@@ -259,11 +262,38 @@ public class DatabaseManager {
 
     }
 
+    public void setNumberOfSubscriptionsUserKnowsAbout(int number){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.NO_OF_CATEGORIES_KNOWN);
+        adRef.setValue(number);
+    }
+
     ////create User Methods.//////////////////////////////////////////////////////////////////////
 
     ////Load users data methods.////////////////////////////////////////
 
     public void loadUserData(final Context mContext){
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CATEGORY_LIST);
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snap:dataSnapshot.getChildren()) {
+                    String category = snap.getKey();
+                    categoryList.add(category);
+                }
+                loadUserDataNow(mContext);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(mContext,"Please check your internet connection.",Toast.LENGTH_LONG).show();
+                Log.d(TAG,"There was a database error "+databaseError.getMessage());
+            }
+        });
+    }
+
+    public void loadUserDataNow(final Context mContext){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         User.setUid(uid);
         Log.d(TAG,"Starting to load users data");
@@ -277,13 +307,27 @@ public class DatabaseManager {
                 Variables.setMonthAdTotals(mKey,monthTotal);
                 Log.d(TAG,"Setting month total to : "+monthTotal);
 
+                //this loads the users no Of Categories known
+                DataSnapshot subNoKnown = dataSnapshot.child(Constants.NO_OF_CATEGORIES_KNOWN);
+                int subNumberKnown = subNoKnown.getValue(int.class);
+                if(subNumberKnown<categoryList.size()){
+                    Variables.didAdCafeAddNewCategory = true;
+                    setNumberOfSubscriptionsUserKnowsAbout(categoryList.size());
+                }
+
                 //this loads the users subscription list
                 DataSnapshot subscriptionListSnap = dataSnapshot.child(Constants.SUBSCRIPTION_lIST);
                 for(DataSnapshot snap: subscriptionListSnap.getChildren()){
                     String category = snap.getKey();
                     Integer cluster = snap.getValue(Integer.class);
                     Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
-                    Variables.Subscriptions.put(category,cluster);
+                    if(categoryList.contains(category)){
+                        Variables.Subscriptions.put(category,cluster);
+                    }else{
+                        unSubscribeUserFormAdvertCategory(category,cluster);
+                        Variables.didAdCafeRemoveCategory = true;
+                        setNumberOfSubscriptionsUserKnowsAbout(categoryList.size());
+                    }
                 }
 
                 //this loads the last seen date from firebase

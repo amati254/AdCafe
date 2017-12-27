@@ -322,7 +322,7 @@ public class Bookmarks extends AppCompatActivity {
         Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.PINNED_AD_LIST);
         DatabaseReference mRef = query.getRef();
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        mRef.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren()){

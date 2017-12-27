@@ -704,6 +704,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }else{
                     findViewById(R.id.smallDot).setVisibility(View.VISIBLE);
                 }
+
+                if(Variables.didAdCafeRemoveCategory)informUserOfSubscriptionChanges();
+                if(Variables.didAdCafeAddNewCategory) tellUserOfNewSubscription();
+
                 isLastAd = true;
             } else {
                 if (mAdList.size() == 1 && Variables.getCurrentSubscriptionIndex() + 1 < Variables.Subscriptions.size()) {
@@ -722,6 +726,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mAdList.clear();
             Log.d(TAG,"cleared the adlist");
         } else {
+            if(Variables.didAdCafeRemoveCategory)informUserOfSubscriptionChanges();
+            if(Variables.didAdCafeAddNewCategory) tellUserOfNewSubscription();
+
             if(lastAdSeen!=null){
                 Log.d(TAG, "---Loading only last ad from lastAdSeen that was initialised...");
                 mSwipeView.lockViews();
@@ -990,6 +997,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG, "Setting current subscription to : " + getPositionOf(Variables.getCurrentAdvert().getCategory()));
         Log.d(TAG, "Setting Current ad in subscription to : " + Variables.getCurrentAdvert().getPushId());
         setCurrentAdInSubscriptionAndCurrentSubscriptionIndexInFireBase();
+
+        if(Variables.didAdCafeRemoveCategory)informUserOfSubscriptionChanges();
+        if(Variables.didAdCafeAddNewCategory) tellUserOfNewSubscription();
     }
 
 
@@ -1670,6 +1680,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         long currentDay = (currentTimeMillis-extraTimeFromMidnight)/(1000*60*60*24);
         Log.d(TAG,"The current day is : "+currentDay);
         return Long.toString(currentDay);
+    }
+
+    private void informUserOfSubscriptionChanges(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("We removed one or more of your interests that we no longer support.")
+                .setCancelable(true)
+                .setPositiveButton("Cool.", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Variables.didAdCafeRemoveCategory = false;
+                        dialog.cancel();
+                    }
+                }).show();
+    }
+
+    private void tellUserOfNewSubscription(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("We now support a couple more ad categories you may be interested in.")
+                .setCancelable(true)
+                .setPositiveButton("Cool.", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Variables.didAdCafeAddNewCategory = false;
+                        dialog.cancel();
+                    }
+                }).show();
     }
 
 }
