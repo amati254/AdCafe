@@ -1679,7 +1679,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         long extraTimeFromMidnight = currentTimeMillis%(1000*60*60*24);
         long currentDay = (currentTimeMillis-extraTimeFromMidnight)/(1000*60*60*24);
         Log.d(TAG,"The current day is : "+currentDay);
-        return Long.toString(currentDay);
+        return Long.toString(-currentDay);
     }
 
     private void informUserOfSubscriptionChanges(){

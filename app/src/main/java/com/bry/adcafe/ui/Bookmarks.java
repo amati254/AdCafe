@@ -337,7 +337,6 @@ public class Bookmarks extends AppCompatActivity {
                 if(dataSnapshot.hasChildren()){
                     mAvi.setVisibility(View.GONE);
                     loadingText.setVisibility(View.GONE);
-
                     for (DataSnapshot snap: dataSnapshot.getChildren()){
                         long noOfDays = Long.parseLong(snap.getKey());
                         List<Advert> AdList = new ArrayList<>();
@@ -457,7 +456,7 @@ public class Bookmarks extends AppCompatActivity {
     }
 
     private String getDateFromDays(long days){
-        long currentTimeInMills = days*(1000*60*60*24);
+        long currentTimeInMills = -days*(1000*60*60*24);
 
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(currentTimeInMills);
