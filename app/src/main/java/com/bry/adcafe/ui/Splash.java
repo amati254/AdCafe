@@ -114,6 +114,42 @@ public class Splash extends AppCompatActivity {
     }
 
     private void startNextActivity(){
+        //for the line
+        long duration = 200;
+        ObjectAnimator colorFade2 = ObjectAnimator.ofObject(findViewById(R.id.lineView)
+                , "backgroundColor" /*view attribute name*/,
+                new ArgbEvaluator(),
+                getApplicationContext().getResources().getColor(R.color.colorPrimaryDark2) /*from color*/
+                , getApplicationContext().getResources().getColor(R.color.white) /*to color*/);
+        colorFade2.setDuration(duration);
+        colorFade2.setStartDelay(600);
+
+        //for the bottom text
+        ObjectAnimator colorFade3 = ObjectAnimator.ofObject(LSEText
+                , "textColor" /*view attribute name*/,
+                new ArgbEvaluator(),
+                getApplicationContext().getResources().getColor(R.color.colorPrimaryDark2) /*from color*/
+                , getApplicationContext().getResources().getColor(R.color.white) /*to color*/);
+        colorFade3.setDuration(duration);
+        colorFade3.setStartDelay(600);
+
+        //for the logotext
+        ObjectAnimator colorFade4 = ObjectAnimator.ofObject(LogoText
+                , "textColor" /*view attribute name*/,
+                new ArgbEvaluator(),
+                getApplicationContext().getResources().getColor(R.color.colorPrimaryDark2) /*from color*/
+                , getApplicationContext().getResources().getColor(R.color.white) /*to color*/);
+        colorFade4.setDuration(duration);
+        colorFade4.setStartDelay(600);
+
+        colorFade2.start();
+        colorFade3.start();
+        colorFade4.start();
+
+        NowReallyStartNextActivity();
+    }
+
+    private void NowReallyStartNextActivity(){
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -128,8 +164,7 @@ public class Splash extends AppCompatActivity {
                     finish();
                 }
             }
-        },590);
-
+        },1290);
     }
 
     private void hideNavBars() {
