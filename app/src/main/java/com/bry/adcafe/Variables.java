@@ -3,6 +3,7 @@ package com.bry.adcafe;
 import android.util.Log;
 
 import com.bry.adcafe.models.Advert;
+import com.mindorks.placeholderview.PlaceHolderView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +56,8 @@ public class Variables {
 
     public static boolean didAdCafeRemoveCategory = false;
     public static boolean didAdCafeAddNewCategory = false;
+    public static PlaceHolderView placeHolderView;
+    public static long noOfDays;
 
 
 

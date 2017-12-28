@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -50,6 +52,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.text.DateFormatSymbols;
+import java.util.Calendar;
 
 import butterknife.OnItemLongClick;
 
@@ -73,12 +77,15 @@ public class SavedAdsCard {
     private boolean onDoublePressed = false;
     private boolean isBeingShared = false;
 
+    private long noOfDaysDate;
 
 
-    public SavedAdsCard(Advert advert, Context context, PlaceHolderView placeHolderView,String pinID) {
+
+    public SavedAdsCard(Advert advert, Context context, PlaceHolderView placeHolderView,String pinID,long noOfDays) {
         mAdvert = advert;
         mContext = context;
         mPlaceHolderView = placeHolderView;
+        noOfDaysDate = noOfDays;
     }
 
     @Resolve
@@ -142,11 +149,18 @@ public class SavedAdsCard {
     }
 
     private void promptUserIfSureToUnpinAd(){
-        Variables.adToBeUnpinned = mAdvert;
-        Intent intent = new Intent("ARE_YOU_SURE2");
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin2
-                ,new IntentFilter(mAdvert.getPushRefInAdminConsole()));
+        if(isNetworkConnected(mContext)){
+            Variables.adToBeUnpinned = mAdvert;
+            Variables.noOfDays = noOfDaysDate;
+            Variables.placeHolderView = mPlaceHolderView;
+            Intent intent = new Intent("ARE_YOU_SURE2");
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin2
+                    ,new IntentFilter(mAdvert.getPushRefInAdminConsole()));
+        }else{
+            Toast.makeText(mContext,"You need an internet connection to unpin that.",Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     private void viewAd() {
@@ -157,6 +171,8 @@ public class SavedAdsCard {
                 if(!isBeingShared) {
                     Log.d("SavedAdsCard", "Setting the ad to be viewed.");
                     Variables.adToBeViewed = mAdvert;
+                    Variables.noOfDays = noOfDaysDate;
+                    Variables.placeHolderView = mPlaceHolderView;
                     Intent intent = new Intent("VIEW");
                     LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                     setUpReceiver();
@@ -235,12 +251,27 @@ public class SavedAdsCard {
 
 
     private void unPin(){
-        String id = mAdvert.getPushId();
-        mPlaceHolderView.removeView(this);
+        String id;
+        try{
+            id = mAdvert.getPushId();
+        }catch (Exception e){
+            e.printStackTrace();
+            id = Variables.adToBeViewed.getPushId();
+        }
+
+        try{
+            mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,""));
+            mPlaceHolderView.removeView(this);
+        }catch (Exception e){
+            e.printStackTrace();
+            Variables.placeHolderView.addView(new BlankItem(mContext,Variables.placeHolderView,noOfDaysDate,""));
+            Variables.placeHolderView.removeView(this);
+        }
+
         Log.d("SAVED_ADS_CARD--","Removing pinned ad"+id);
         String uid = User.getUid();
-
-        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.PINNED_AD_LIST).child(id);
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.PINNED_AD_LIST).child(Long.toString(noOfDaysDate)).child(id);
         adRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -289,5 +320,10 @@ public class SavedAdsCard {
         return Bitmap.createScaledBitmap(image, width, height, true);
     }
 
+    private boolean isNetworkConnected(Context context){
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return (netInfo != null && netInfo.isConnected());
+    }
 }
 

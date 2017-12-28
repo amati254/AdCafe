@@ -22,9 +22,11 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +34,7 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.Manifest;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.adapters.BlankItem;
 import com.bry.adcafe.adapters.DateItem;
 import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.fragments.ViewImageFragment;
@@ -65,6 +68,9 @@ public class Bookmarks extends AppCompatActivity {
     private static final String TAG = "Bookmarks";
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
+
+    private ScrollView mScroll;
+
     private ChildEventListener mChildEventListener;
     private DatabaseReference mRef;
 
@@ -92,6 +98,7 @@ public class Bookmarks extends AppCompatActivity {
             Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.connectionDropped,
                     Snackbar.LENGTH_INDEFINITE).show();
         }
+
     }
 
 
@@ -175,7 +182,9 @@ public class Bookmarks extends AppCompatActivity {
         mPlaceHolderView = (PlaceHolderView) findViewById(R.id.PlaceHolderView);
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.avi);
         loadingText = (TextView) findViewById(R.id.loadingPinnedAdsMessage);
+
         mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,3));
+
         noAdsText = (TextView) findViewById(R.id.noPins);
     }
 
@@ -341,7 +350,7 @@ public class Bookmarks extends AppCompatActivity {
                         loadDaysAdsIntoViews(AdList,noOfDays);
                     }
                 }else{
-                    Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_SHORT).show();
                     noAdsText.setVisibility(View.VISIBLE);
                     mAvi.setVisibility(View.GONE);
                     loadingText.setVisibility(View.GONE);
@@ -361,9 +370,15 @@ public class Bookmarks extends AppCompatActivity {
         if(mPlaceHolderView == null){
             loadPlaceHolderViews();
         }
-        mPlaceHolderView.addView(new DateItem(mContext,mPlaceHolderView,noOfDays,getDateFromDays(noOfDays)));
+        mPlaceHolderView.addView(new DateItem(mContext,mPlaceHolderView,noOfDays,getDateFromDays(noOfDays),false));
+        mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,""));
+        mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,""));
+
         for(int i = 0; i<adList.size();i++){
-            mPlaceHolderView.addView(new SavedAdsCard(adList.get(i),mContext,mPlaceHolderView,adList.get(i).getPushId()));
+            mPlaceHolderView.addView(new SavedAdsCard(adList.get(i),mContext,mPlaceHolderView,adList.get(i).getPushId(),noOfDays));
+        }
+        for(int i = 0;i<getNumber(adList.size());i++){
+            mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,""));
         }
     }
 
@@ -373,7 +388,7 @@ public class Bookmarks extends AppCompatActivity {
         }
         if(mSavedAds!=null && mSavedAds.size()>0){
             for(int i = 0; i<mSavedAds.size();i++){
-                mPlaceHolderView.addView(new SavedAdsCard(mSavedAds.get(i),mContext,mPlaceHolderView,mSavedAds.get(i).getPushId()));
+//                mPlaceHolderView.addView(new SavedAdsCard(mSavedAds.get(i),mContext,mPlaceHolderView,mSavedAds.get(i).getPushId()));
             }
         }else{
             Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_LONG).show();
@@ -460,16 +475,27 @@ public class Bookmarks extends AppCompatActivity {
 
         if(year == year2){
             Log.d(TAG,"Ad was pined this year...");
-            yearName = "this year.";
+            yearName = "";
         }else if(year2 == year+1){
             Log.d(TAG,"Ad was pined last year...");
-            yearName = "last year.";
+            yearName = ", last year.";
         }else{
             yearName = Integer.toString(year);
         }
 
-        String date = dayOfMonth+" "+monthName+", "+yearName;
+        String date = dayOfMonth+" "+monthName+yearName;
 
         return date;
+    }
+
+    private int getNumber(int size){
+        int newSize = size;
+        int number = 0;
+        while (newSize%3!=0){
+            newSize++;
+            number++;
+        }
+
+        return number;
     }
 }
