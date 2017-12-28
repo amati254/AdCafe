@@ -190,9 +190,6 @@ public class Bookmarks extends AppCompatActivity {
 
 
 
-
-
-
     private BroadcastReceiver mMessageReceiverForUnpinned = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

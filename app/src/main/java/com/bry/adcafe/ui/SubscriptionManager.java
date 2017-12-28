@@ -23,12 +23,17 @@ import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.adapters.SelectCategoryItem;
 import com.bry.adcafe.adapters.SubscriptionManagerItem;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mindorks.placeholderview.PlaceHolderView;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -202,4 +207,26 @@ public class SubscriptionManager extends AppCompatActivity implements View.OnCli
         mAuthProgressDialog.setMessage("Updating your preferences...");
         mAuthProgressDialog.setCancelable(false);
     }
+
+    private String getSubscriptionValue(int index) {
+        LinkedHashMap map = Variables.Subscriptions;
+        String Sub = (new ArrayList<String>(map.keySet())).get(index);
+        Log.d("SubscriptionManagerItem", "Subscription gotten from getCurrent Subscription method is :" + Sub);
+        return Sub;
+    }
+
+    private int getPositionOf(String subscription) {
+        LinkedHashMap map = Variables.Subscriptions;
+        List<String> indexes = new ArrayList<String>(map.keySet());
+        return indexes.indexOf(subscription);
+    }
+
+    private void updateCurrentSubIndex(){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.CURRENT_SUBSCRIPTION_INDEX);
+        Log.d(TAG,"Setting current subscription index in firebase to :"+Variables.getCurrentSubscriptionIndex());
+        adRef3.setValue(Variables.getCurrentSubscriptionIndex());
+    }
+
 }

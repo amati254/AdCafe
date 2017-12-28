@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.bry.adcafe.R;
+import com.bry.adcafe.Variables;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.NonReusable;
@@ -42,8 +43,16 @@ public class BlankItem {
     }
 
     private void listenForRemoveViewBroadcast(){
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForRemoveBlank,
-                new IntentFilter("REMOVE_BLANK_ITEMS"));
+
+        try{
+            LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForRemoveBlank,
+                    new IntentFilter("REMOVE_BLANK_ITEMS"+dateInDays));
+        }catch (Exception e){
+            e.printStackTrace();
+            LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForRemoveBlank,
+                    new IntentFilter("REMOVE_BLANK_ITEMS"+ Variables.noOfDays));
+        }
+
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
                 new IntentFilter("UNREGISTER"));
     }

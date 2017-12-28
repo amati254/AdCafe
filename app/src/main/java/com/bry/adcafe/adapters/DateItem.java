@@ -55,7 +55,7 @@ public class DateItem {
     private void onResolved(){
         mDateTextView.setText(mDateText);
         loadListeners();
-        loadBroadcastListeners();
+//        loadBroadcastListeners();
         di = this;
     }
 
@@ -97,9 +97,11 @@ public class DateItem {
         Long days;
         try {
             days = dateInDays;
+            String test = Long.toString(days);
         }catch (Exception e){
             e.printStackTrace();
             days = Variables.noOfDays;
+            dateInDays = Variables.noOfDays;
         }
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
@@ -110,6 +112,7 @@ public class DateItem {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(!dataSnapshot.hasChildren()){
                     removeThisView();
+                    removeItem();
                     Log.d("DateItem -- ","Removing date since no ads are in date :"+mDateText);
                 }
             }
@@ -122,39 +125,39 @@ public class DateItem {
     }
 
     private void removeThisView() {
-        Intent intent = new Intent("REMOVE_BLANK_ITEMS");
+        Intent intent = new Intent("REMOVE_BLANK_ITEMS"+dateInDays);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
 
     }
 
-    private void loadBroadcastListeners() {
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForRemoveBlank,
-                new IntentFilter("REMOVE_BLANK_ITEMS"));
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
-                new IntentFilter("UNREGISTER"));
-    }
-
-    private BroadcastReceiver mMessageReceiverForRemoveBlank = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("DateItemBlank","Received broadcast to Remove blank");
-            removeItem();
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
-
-        }
-    };
-
-    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("DateItemBlank-","Received broadcast to Unregister all receivers");
-
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForRemoveBlank);
-
-        }
-    };
+//    private void loadBroadcastListeners() {
+//        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForRemoveBlank,
+//                new IntentFilter("REMOVE_BLANK_ITEMS"));
+//        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
+//                new IntentFilter("UNREGISTER"));
+//    }
+//
+//    private BroadcastReceiver mMessageReceiverForRemoveBlank = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            Log.d("DateItemBlank","Received broadcast to Remove blank");
+//            removeItem();
+//            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+//            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
+//
+//        }
+//    };
+//
+//    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            Log.d("DateItemBlank-","Received broadcast to Unregister all receivers");
+//
+//            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+//            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForRemoveBlank);
+//
+//        }
+//    };
 
     private void removeItem(){
         mPlaceHolderView.removeView(di);

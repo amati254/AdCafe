@@ -1644,6 +1644,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+
+
+
     private void RateAppIntent() {
         try {
             Intent rateIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + mContext.getPackageName()));
@@ -1667,6 +1670,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG, "Subscription gotten from getCurrent Subscription method is :" + Sub);
         return Sub;
     }
+
+
+
 
     private int getPositionOf(String subscription) {
         LinkedHashMap map = Variables.Subscriptions;

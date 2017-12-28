@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +46,7 @@ public class DatabaseManager {
     private int iterations = 0;
     private Context context;
     private List<String> categoryList = new ArrayList<>();
+    private boolean isUserAddingANewCategory = false;
 
     ////Create user methods////////////////////////////////////////
 
@@ -118,7 +120,16 @@ public class DatabaseManager {
         dbRefUser.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+                String categoryBeingViewed = getSubscriptionValue(Variables.getCurrentSubscriptionIndex());
+                Log.d(TAG,"the current category being removed is "+categoryBeingViewed);
                 Variables.Subscriptions.remove(AdvertCategory);
+
+                int newIndex = getPositionOf(categoryBeingViewed);
+                Log.d(TAG,"Its new index position is : "+newIndex);
+                Variables.setCurrentSubscriptionIndex(newIndex);
+
+                updateCurrentSubIndex();
+
                 Intent intent = new Intent(Constants.FINISHED_UNSUBSCRIBING);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
@@ -131,11 +142,13 @@ public class DatabaseManager {
 
     public void subscribeUserToSpecificCategory(String AdvertCategory){
         numberOfSubs = 1;
+        isUserAddingANewCategory = true;
         generateClusterIDFromCategoryFlaggedClusters(AdvertCategory);
     }
 
     public void setUpUserSubscriptions(List<String> subscriptions){
         numberOfSubs = subscriptions.size();
+        Variables.setCurrentSubscriptionIndex(0);
         for(String sub:subscriptions){
             generateClusterIDFromCategoryFlaggedClusters(sub);
         }
@@ -236,7 +249,7 @@ public class DatabaseManager {
         });
     }
 
-    public void subscribeUserToAdvertCategoryAndAddCategoryToUserList(String AdvertCategory,int Cluster){
+    public void subscribeUserToAdvertCategoryAndAddCategoryToUserList(final String AdvertCategory, final int Cluster){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         //this subscribes user to Cluster in Advert Category
@@ -252,13 +265,17 @@ public class DatabaseManager {
             public void onComplete(@NonNull Task<Void> task) {
                 iterations++;
                 if(iterations == numberOfSubs){
-                    Intent intent = new Intent(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    if(isUserAddingANewCategory){
+                        loadNewSubList();
+                        isUserAddingANewCategory = false;
+                    }else{
+                        Variables.Subscriptions.put(AdvertCategory,Cluster);
+                        Intent intent = new Intent(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    }
                 }
             }
         });
-
-        Variables.Subscriptions.put(AdvertCategory,Cluster);
 
     }
 
@@ -436,6 +453,62 @@ public class DatabaseManager {
         String todaysDate = (dd+":"+mm+":"+yy);
 
         return todaysDate;
+    }
+
+    private String getSubscriptionValue(int index) {
+        LinkedHashMap map = Variables.Subscriptions;
+        String Sub = (new ArrayList<String>(map.keySet())).get(index);
+        Log.d("SubscriptionManagerItem", "Subscription gotten from getCurrent Subscription method is :" + Sub);
+        return Sub;
+    }
+
+    private int getPositionOf(String subscription) {
+        LinkedHashMap map = Variables.Subscriptions;
+        List<String> indexes = new ArrayList<String>(map.keySet());
+        return indexes.indexOf(subscription);
+    }
+
+    private void updateCurrentSubIndex(){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.CURRENT_SUBSCRIPTION_INDEX);
+        Log.d(TAG,"Setting current subscription index in firebase to :"+Variables.getCurrentSubscriptionIndex());
+        adRef3.setValue(Variables.getCurrentSubscriptionIndex());
+    }
+
+    private void loadNewSubList(){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        User.setUid(uid);
+        Log.d(TAG,"Starting to load users data");
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.SUBSCRIPTION_lIST);
+        adRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String categoryBeingViewed = getSubscriptionValue(Variables.getCurrentSubscriptionIndex());
+                Log.d(TAG,"the current category being added is "+categoryBeingViewed);
+                Log.d(TAG,"its index position is : "+getPositionOf(categoryBeingViewed));
+                Variables.Subscriptions.clear();
+                for(DataSnapshot snap: dataSnapshot.getChildren()){
+                    String category = snap.getKey();
+                    Integer cluster = snap.getValue(Integer.class);
+                    Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
+                    Variables.Subscriptions.put(category,cluster);
+                }
+                int newIndex = getPositionOf(categoryBeingViewed);
+                Log.d(TAG,"Its new index position is : "+newIndex);
+                Variables.setCurrentSubscriptionIndex(newIndex);
+                updateCurrentSubIndex();
+
+                Intent intent = new Intent(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
 }

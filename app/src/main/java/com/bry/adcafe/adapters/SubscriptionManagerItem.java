@@ -24,6 +24,10 @@ import com.mindorks.placeholderview.annotations.NonReusable;
 import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 /**
  * Created by bryon on 29/11/2017.
  */
@@ -67,15 +71,25 @@ public class SubscriptionManagerItem {
         if(isChecked){
             if(isOnline(mContext)) {
                 if(Variables.Subscriptions.size()>1){
-                    removeSubscription();
+                    if(!category.equals(getSubscriptionValue(Variables.getCurrentSubscriptionIndex()))) {
+                        Log.d("SubscriptionManagerItem","The category being viewed is not being removed");
+                        Log.d("SubscriptionManagerItem","The category being viewed is "+
+                                getSubscriptionValue(Variables.getCurrentSubscriptionIndex())
+                                +" while the categories being removed is "+category);
+                        removeSubscription();
+                    } else {
+                        checkBox.setChecked(true);
+                        Toast.makeText(mContext, "You cannot remove that because your currently viewing ads of it.", Toast.LENGTH_SHORT).show();
+                    }
                 }else{
                     Toast.makeText(mContext,"You have to have at least one category!",Toast.LENGTH_LONG).show();
                     checkBox.setChecked(true);
                 }
             } else Toast.makeText(mContext, "You might need an internet connection to un-subscribe.", Toast.LENGTH_SHORT).show();
         }else{
-            if(isOnline(mContext)) addSubscription();
-            else Toast.makeText(mContext, "You might need an internet connection to subscribe.", Toast.LENGTH_SHORT).show();
+            if(isOnline(mContext)) {
+                addSubscription();
+            } else Toast.makeText(mContext, "You might need an internet connection to subscribe.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -174,6 +188,19 @@ public class SubscriptionManagerItem {
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         //should check null because in airplane mode it will be null
         return (netInfo != null && netInfo.isConnected());
+    }
+
+    private String getSubscriptionValue(int index) {
+        LinkedHashMap map = Variables.Subscriptions;
+        String Sub = (new ArrayList<String>(map.keySet())).get(index);
+        Log.d("SubscriptionManagerItem", "Subscription gotten from getCurrent Subscription method is :" + Sub);
+        return Sub;
+    }
+
+    private int getPositionOf(String subscription) {
+        LinkedHashMap map = Variables.Subscriptions;
+        List<String> indexes = new ArrayList<String>(map.keySet());
+        return indexes.indexOf(subscription);
     }
 
 }
