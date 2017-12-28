@@ -148,7 +148,7 @@ public class DatabaseManager {
 
     public void setUpUserSubscriptions(List<String> subscriptions){
         numberOfSubs = subscriptions.size();
-        Variables.setCurrentSubscriptionIndex(0);
+        Variables.Subscriptions.clear();
         for(String sub:subscriptions){
             generateClusterIDFromCategoryFlaggedClusters(sub);
         }
@@ -269,13 +269,14 @@ public class DatabaseManager {
                         loadNewSubList();
                         isUserAddingANewCategory = false;
                     }else{
-                        Variables.Subscriptions.put(AdvertCategory,Cluster);
                         Intent intent = new Intent(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
                         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     }
                 }
             }
         });
+
+        if(!isUserAddingANewCategory) Variables.Subscriptions.put(AdvertCategory,Cluster);
 
     }
 
@@ -334,6 +335,7 @@ public class DatabaseManager {
 
                 //this loads the users subscription list
                 DataSnapshot subscriptionListSnap = dataSnapshot.child(Constants.SUBSCRIPTION_lIST);
+                Variables.Subscriptions.clear();
                 for(DataSnapshot snap: subscriptionListSnap.getChildren()){
                     String category = snap.getKey();
                     Integer cluster = snap.getValue(Integer.class);
