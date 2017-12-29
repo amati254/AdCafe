@@ -374,7 +374,7 @@ public class Bookmarks extends AppCompatActivity {
             mPlaceHolderView.addView(new SavedAdsCard(adList.get(i),mContext,mPlaceHolderView,adList.get(i).getPushId(),noOfDays));
         }
         for(int i = 0;i<getNumber(adList.size());i++){
-            mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,""));
+            mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,"pineapples"));
         }
     }
 

@@ -260,11 +260,15 @@ public class SavedAdsCard {
         }
 
         try{
-            mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,""));
+            int position =  mPlaceHolderView.getViewResolverPosition(this);
+            mPlaceHolderView.addView(position,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
+//            mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,""));
+//            mPlaceHolderView.
             mPlaceHolderView.removeView(this);
         }catch (Exception e){
             e.printStackTrace();
-            Variables.placeHolderView.addView(new BlankItem(mContext,Variables.placeHolderView,noOfDaysDate,""));
+            int position =  Variables.placeHolderView.getViewResolverPosition(this);
+            Variables.placeHolderView.addView(position,new BlankItem(mContext,Variables.placeHolderView,noOfDaysDate,"pineapple"));
             Variables.placeHolderView.removeView(this);
         }
 

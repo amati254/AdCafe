@@ -114,6 +114,11 @@ public class DateItem {
                     removeThisView();
                     removeItem();
                     Log.d("DateItem -- ","Removing date since no ads are in date :"+mDateText);
+                }else{
+                    if(dataSnapshot.getChildrenCount()%3==0){
+                        Intent intent = new Intent("REMOVE_PLACEHOLDER_BLANK_ITEM"+dateInDays);
+                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                    }
                 }
             }
 

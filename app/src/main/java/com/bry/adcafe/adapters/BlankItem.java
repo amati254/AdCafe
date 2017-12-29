@@ -40,6 +40,20 @@ public class BlankItem {
     private void onResolved(){
         listenForRemoveViewBroadcast();
         bl = this;
+        if(mDateText.equals("pineapples")){
+            listenForRemoveSelf();
+        }
+    }
+
+    private void listenForRemoveSelf() {
+        try{
+            LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToRemoveSelf,
+                    new IntentFilter("REMOVE_PLACEHOLDER_BLANK_ITEM"+dateInDays));
+        }catch (Exception e){
+            e.printStackTrace();
+            LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToRemoveSelf,
+                    new IntentFilter("REMOVE_PLACEHOLDER_BLANK_ITEM"+ Variables.noOfDays));
+        }
     }
 
     private void listenForRemoveViewBroadcast(){
@@ -74,6 +88,17 @@ public class BlankItem {
             Log.d("BlankItem-","Received broadcast to Unregister all receivers");
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForRemoveBlank);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToRemoveSelf);
+
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverToRemoveSelf = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BlankItem-","Received broadcast to remove self because of multiple");
+            removeItem();
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
 
         }
     };

@@ -60,6 +60,10 @@ public class DatabaseManager {
                 .child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
         adRef.setValue(0);
 
+        //Creates node for indicating users email.
+        DatabaseReference adRef8 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child("Email");
+        adRef8.setValue(user.getEmail());
 
         //Creates nodes for totals seen all month and sets them to 0;
         DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
