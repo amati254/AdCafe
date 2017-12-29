@@ -165,7 +165,13 @@ public class DateItem {
 //    };
 
     private void removeItem(){
-        mPlaceHolderView.removeView(di);
+        try{
+            mPlaceHolderView.removeView(di);
+        }catch (Exception e){
+            e.printStackTrace();
+            Variables.placeHolderView.removeView(di);
+        }
+
     }
 
 }

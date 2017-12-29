@@ -652,7 +652,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setViewGravity(Gravity.TOP)
                         .setPaddingTop(15)
                         .setRelativeScale(relativeScale));
-//        mSwipeView.s;
     }
 
     private void removeAllViews() {

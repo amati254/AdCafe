@@ -104,7 +104,13 @@ public class BlankItem {
     };
 
     private void removeItem(){
-        mPlaceHolderView.removeView(bl);
+        try{
+            mPlaceHolderView.removeView(bl);
+        }catch (Exception e){
+            e.printStackTrace();
+            Variables.placeHolderView.removeView(bl);
+        }
+
     }
 
 }

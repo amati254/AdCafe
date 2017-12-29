@@ -206,6 +206,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                 final FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(user != null){
                     setUpUserSpace();
+                    user.sendEmailVerification();
 //                    sendVerificationEmail();
                 }
             }
