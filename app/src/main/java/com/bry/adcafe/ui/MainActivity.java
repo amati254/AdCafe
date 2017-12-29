@@ -707,7 +707,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if(Variables.didAdCafeRemoveCategory)informUserOfSubscriptionChanges();
                 if(Variables.didAdCafeAddNewCategory) tellUserOfNewSubscription();
-
+                Toast.makeText(mContext, "We've got no more stuff for you today.", Toast.LENGTH_SHORT).show();
                 isLastAd = true;
             } else {
                 if (mAdList.size() == 1 && Variables.getCurrentSubscriptionIndex() + 1 < Variables.Subscriptions.size()) {
@@ -742,6 +742,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }else{
                     findViewById(R.id.smallDot).setVisibility(View.VISIBLE);
                 }
+                Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
                 isLastAd = true;
             }else {
                 Advert noAds = new Advert();
@@ -1022,8 +1023,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private BroadcastReceiver mMessageReceiverForLastAd = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
-            loadAnyAnnouncements();
+            if (!mIsBeingReset && !isLoadingMoreAds && Variables.nextSubscriptionIndex + 1 == Variables.Subscriptions.size()) {
+                Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
+                loadAnyAnnouncements();
+            }
         }
     };
 
@@ -1106,6 +1109,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         isLoadingMoreAds = false;
                         mAviLoadingMoreAds.hide();
 //                        spinner.setVisibility(View.VISIBLE);
+                        if(Variables.isLockedBecauseOfFlagedAds){
+                            mSwipeView.unlockViews();
+                            Variables.isLockedBecauseOfFlagedAds = false;
+                        }
                     }else{
                         Log.d(TAG,"Loaded no ad, loading more ads...");
                         if(Variables.nextSubscriptionIndex+1<Variables.Subscriptions.size()){
@@ -1119,11 +1126,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                            spinner.setVisibility(View.VISIBLE);
                         }
                     }
-
-                    if(Variables.isLockedBecauseOfFlagedAds){
-                        mSwipeView.unlockViews();
-                        Variables.isLockedBecauseOfFlagedAds = false;
-                    }
                 } else {
                     //no ads were found in the subscription
                     Log.d(TAG, "----No ads are available in subscription: "+getSubscriptionValue(Variables.nextSubscriptionIndex));
@@ -1135,6 +1137,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d(TAG,"No more ads are available from the rest of the subscriptions");
                         isLoadingMoreAds = false;
                         mAviLoadingMoreAds.hide();
+                        if(Variables.isLockedBecauseOfNoMoreAds){
+                            Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
+                            loadAnyAnnouncements();
+                        }
 //                        spinner.setVisibility(View.VISIBLE);
                     }
                 }
@@ -1184,7 +1190,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         ad.setImageUrl(igsNein);
                         mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.ANNOUNCEMENTS));
                     }
-                    Toast.makeText(mContext, "Before you leave though, a few messages from the dev team...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Before you leave, we have a few messages for you...", Toast.LENGTH_SHORT).show();
                     mSwipeView.unlockViews();
                     findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
                     findViewById(R.id.reportBtn).setAlpha(0.3f);

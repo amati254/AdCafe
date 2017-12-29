@@ -204,7 +204,7 @@ public class AdvertCard{
             webIcon.setAlpha(1.0f);
             webText.setAlpha(1.0f);
         }
-        sendBroadcast(Constants.LAST);
+//        sendBroadcast(Constants.LAST);
     }
 
     @Click(R.id.profileImageView)

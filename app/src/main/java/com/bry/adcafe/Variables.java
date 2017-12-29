@@ -58,6 +58,7 @@ public class Variables {
     public static boolean didAdCafeAddNewCategory = false;
     public static PlaceHolderView placeHolderView;
     public static long noOfDays;
+    public static int position;
 
 
 

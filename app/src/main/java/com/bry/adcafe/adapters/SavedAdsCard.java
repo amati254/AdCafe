@@ -153,6 +153,7 @@ public class SavedAdsCard {
             Variables.adToBeUnpinned = mAdvert;
             Variables.noOfDays = noOfDaysDate;
             Variables.placeHolderView = mPlaceHolderView;
+            Variables.position = mPlaceHolderView.getViewResolverPosition(this);
             Intent intent = new Intent("ARE_YOU_SURE2");
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin2
@@ -173,6 +174,7 @@ public class SavedAdsCard {
                     Variables.adToBeViewed = mAdvert;
                     Variables.noOfDays = noOfDaysDate;
                     Variables.placeHolderView = mPlaceHolderView;
+                    Variables.position = mPlaceHolderView.getViewResolverPosition(this);
                     Intent intent = new Intent("VIEW");
                     LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                     setUpReceiver();
@@ -261,14 +263,11 @@ public class SavedAdsCard {
 
         try{
             int position =  mPlaceHolderView.getViewResolverPosition(this);
-            mPlaceHolderView.addView(position,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
-//            mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,""));
-//            mPlaceHolderView.
+            mPlaceHolderView.addViewAfter(this,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
             mPlaceHolderView.removeView(this);
         }catch (Exception e){
             e.printStackTrace();
-            int position =  Variables.placeHolderView.getViewResolverPosition(this);
-            Variables.placeHolderView.addView(position,new BlankItem(mContext,Variables.placeHolderView,noOfDaysDate,"pineapple"));
+            mPlaceHolderView.addViewAfter(this,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
             Variables.placeHolderView.removeView(this);
         }
 
