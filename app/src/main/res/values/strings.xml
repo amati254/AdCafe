@@ -105,6 +105,41 @@
     <string name="slide13text">Its quite simple really. Essentially you will be monetised based on (and in proportion to) the
         number of ads you see.</string>
 
+    <string name="Advertiserslide1text">Advertising in the AdCafe is one of the most simple and convenient way to
+        advertise, as it offers benefits to help you promote your product.</string>
+
+    <string name="Advertiserslide2text">Essentially, we only advertise by views. When our user sees a banner for 7 seconds,
+        we consider advertising to have taken place.</string>
+
+    <string name="reachabilityexplanation">Advertising here gives you the ability to reach users interested in your
+        type of product in a very short time.</string>
+
+    <string name="affordablilityexplanation">As we only charge 4700Ksh per 1000 views, advertising here is
+        flexible as per your financial ability.</string>
+
+    <string name="reimbursabilityexplanation">In the event your ad doesn\'t reach the number of users you intended,
+        you will be reimbursed the remaining amount.</string>
+
+    <string name="monitorableexplanation">Through the Ad Stats Window, you can find
+        out in real time how many users have seen your ad and the amount to be reimbursed.</string>
+
+    <string name="advertisePageExplaation">The page is designed similar to the main page. This basically will give you a feel of how the
+        banner will look in real time.</string>
+
+    <string name="advertisebuttonstext">Below the mock card are a few buttons which will help you select and upload your ad.</string>
+
+    <string name="selectimagebutton">Select Image button : This button will help you choose an image from your gallery.</string>
+    <string name="selectnumber">Select Number of People button : This is for choosing the number of people you want to reach.</string>
+    <string name="addlinkbutton">Add link button : (Optional) You can ad a link to a relevant website for your advert.</string>
+    <string name="uploadbutton">Upload button : After setting everything, clicking this button will prompt you for your credit/debit card
+        details then after processing the payment, the upload will be carried out.</string>
+
+    <string name="dontuploadsameadtwice">We have a strict policy concerning re-uploading ads. Uploading the same ad more than once is not
+        allowed.</string>
+
+    <string name="contactus">Feel free to contact us if you have any questions or inquiries for us. We will try our best to reply as soon
+        as possible.</string>
+
     <string name="feedbacktype">Feedback Type</string>
     <string name="feedbacktype1">Praise</string>
     <string name="feedbacktype2">Gripe</string>

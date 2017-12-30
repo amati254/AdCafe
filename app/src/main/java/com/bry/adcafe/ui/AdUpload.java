@@ -83,6 +83,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private TextView mNumberOfUsersChosenText;
     @Bind(R.id.numberOfUsersToAdvertiseToLayout) RelativeLayout mNumberOfUsersToAdvertiseTo;
     @Bind(R.id.categoryText)TextView mCategoryText;
+    @Bind(R.id.helpIcon) ImageView mHelpIcon;
 
 
 
@@ -319,6 +320,14 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 }
             });
         }
+
+        mHelpIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(AdUpload.this,TutorialAdvertisers.class);
+                startActivity(intent);
+            }
+        });
 
         if(findViewById(R.id.WebsiteIcon)!=null){
             findViewById(R.id.WebsiteIcon).setOnClickListener(new View.OnClickListener() {
@@ -872,6 +881,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         mUploadText.setVisibility(View.GONE);
         mTopBarPreview.setVisibility(View.GONE);
         mNumberOfUsersToAdvertiseTo.setVisibility(View.INVISIBLE);
+        mHelpIcon.setVisibility(View.GONE);
     }
 
     private void setAllOtherViewsToBeVisible(){
@@ -883,6 +893,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         mSelectText.setVisibility(View.VISIBLE);
         mUploadText.setVisibility(View.VISIBLE);
         mTopBarPreview.setVisibility(View.VISIBLE);
+        mHelpIcon.setVisibility(View.VISIBLE);
     }
 
     public boolean isOnline(Context context) {

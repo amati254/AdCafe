@@ -48,12 +48,13 @@ public class TutorialAdvertisers extends AppCompatActivity {
 
         // layouts of all welcome sliders
         myLayouts = new int[]{
-                R.layout.welcome_slider_2,
-                R.layout.welcome_slider_1,
-                R.layout.welcome_slider_0,
-                R.layout.welcome_slider_3,
-                R.layout.welcome_slider_4,
-                R.layout.welcome_slider_5
+                R.layout.tutorial_advertiser_slider_1,
+                R.layout.tutorial_advertiser_slider_2,
+                R.layout.tutorial_advertiser_slider_3,
+                R.layout.tutorial_advertiser_slider_4,
+                R.layout.tutorial_advertiser_slider_5,
+                R.layout.tutorial_advertiser_slider_6,
+                R.layout.tutorial_advertiser_slider_7
         };
 
         // adding bottom dots
@@ -111,9 +112,14 @@ public class TutorialAdvertisers extends AppCompatActivity {
     }
 
     private void LaunchHomeScreen(){
-        startActivity(new Intent(TutorialAdvertisers.this, SelectCategoryAdvertiser.class));
-        myPrefManager.setIsFirstTimeLaunchInAdvertise(false);
-        finish();
+        if (myPrefManager.isFirstTimeLaunchForAdvertisers()){
+            startActivity(new Intent(TutorialAdvertisers.this, SelectCategoryAdvertiser.class));
+            myPrefManager.setIsFirstTimeLaunchInAdvertise(false);
+            finish();
+        }else{
+          onBackPressed();
+        }
+
     }
 
     //  viewpager change listener
