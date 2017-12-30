@@ -78,7 +78,7 @@ public class SavedAdsCard {
     private boolean isBeingShared = false;
 
     private long noOfDaysDate;
-
+    private SavedAdsCard sac;
 
 
     public SavedAdsCard(Advert advert, Context context, PlaceHolderView placeHolderView,String pinID,long noOfDays) {
@@ -91,26 +91,33 @@ public class SavedAdsCard {
     @Resolve
     private void onResolved() {
        loadImage();
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter("UNREGISTER"));
+       LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
+               new IntentFilter("UNREGISTER"));
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForAddNewBlank,
+                new IntentFilter("ADD_BLANK"+noOfDaysDate+mAdvert.getPushId()));
+       sac = this;
     }
 
     private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
-            try{
-                LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
+            try{LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
             }catch (Exception e){
                 e.printStackTrace();
             }
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
+            try{LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddNewBlank);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
         }
     };
 
     private BroadcastReceiver mMessageReceiverForUnpin = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("ADVERT_CARD--","Received broadcast to Unpin ad");
+            Log.d("SAVED_ADS--","Received broadcast to Unpin ad");
             unPin();
             removeReceiver();
         }
@@ -119,8 +126,17 @@ public class SavedAdsCard {
     private BroadcastReceiver mMessageReceiverForUnpin2 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("ADVERT_CARD--","Received broadcast to Unpin ad");
+            Log.d("SAVED_ADS--","Received broadcast to Unpin ad");
             unPin();
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForAddNewBlank = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("SAVED_ADS--","Received broadcast to ad blank item.");
+            pushBlank();
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
         }
     };
@@ -128,7 +144,6 @@ public class SavedAdsCard {
     @LongClick(R.id.SavedImageView)
     private void onLongClick(){
         promptUserIfSureToUnpinAd();
-//        unPin();
     }
 
     @Click(R.id.SavedImageView)
@@ -260,14 +275,10 @@ public class SavedAdsCard {
             e.printStackTrace();
             id = Variables.adToBeViewed.getPushId();
         }
-
         try{
-            int position =  mPlaceHolderView.getViewResolverPosition(this);
-            mPlaceHolderView.addViewAfter(this,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
             mPlaceHolderView.removeView(this);
         }catch (Exception e){
             e.printStackTrace();
-            mPlaceHolderView.addViewAfter(this,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
             Variables.placeHolderView.removeView(this);
         }
 
@@ -328,5 +339,16 @@ public class SavedAdsCard {
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return (netInfo != null && netInfo.isConnected());
     }
+
+    private void pushBlank(){
+        try{
+            mPlaceHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
+        }catch (Exception e){
+            e.printStackTrace();
+            Variables.placeHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
+        }
+    }
+
+
 }
 

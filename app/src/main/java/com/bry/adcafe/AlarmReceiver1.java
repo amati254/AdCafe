@@ -155,7 +155,7 @@ public class AlarmReceiver1 extends BroadcastReceiver {
                     checkNumberForEach();
                 }else{
                     Log.d(TAG,"All the categories have been handled, total is : "+numberOfAdsInTotal);
-                    if(numberOfAdsInTotal>0) handleEverything(numberOfAdsInTotal);
+                    if(numberOfAdsInTotal>0) beforeHandlingEverything(numberOfAdsInTotal);
                 }
             }
 
@@ -166,6 +166,30 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         });
     }
 
+    private void beforeHandlingEverything(final int number){
+        if(!Variables.isLoginOnline){
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            User.setUid(uid);
+            Log.d(TAG,"Starting to check if user was last online today.");
+            DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                    .child(uid).child(Constants.DATE_IN_FIREBASE);
+            adRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String date = dataSnapshot.getValue(String.class);
+                    if(!date.equals(getDate())){
+                        Log.d(TAG,"User was not last online today, continuing to notify user.");
+                        handleEverything(number);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
 
     private void handleEverything(int number) {
         String message;
@@ -174,6 +198,7 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         Context context = mContext;
         notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         Intent mIntent = new Intent(context, Splash.class);
+        mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         Bundle bundle = new Bundle();
         bundle.putString("Test","test");
         mIntent.putExtras(bundle);

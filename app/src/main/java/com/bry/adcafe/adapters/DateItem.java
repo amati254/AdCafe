@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -26,6 +27,9 @@ import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.NonReusable;
 import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by bryon on 27/12/2017.
@@ -55,7 +59,6 @@ public class DateItem {
     private void onResolved(){
         mDateTextView.setText(mDateText);
         loadListeners();
-//        loadBroadcastListeners();
         di = this;
     }
 
@@ -118,7 +121,19 @@ public class DateItem {
                     if(dataSnapshot.getChildrenCount()%3==0){
                         Intent intent = new Intent("REMOVE_PLACEHOLDER_BLANK_ITEM"+dateInDays);
                         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                    }else{
+                        List<Advert> AdList = new ArrayList<>();
+                        for(DataSnapshot snap: dataSnapshot.getChildren()){
+                            Advert advert = snap.getValue(Advert.class);
+                            AdList.add(advert);
+                        }
+                        Advert adToBeNotified = AdList.get(AdList.size()-1);
+                        Log.d("DateItem","Sending message to ad blank item to ad: "+adToBeNotified.getPushId()+" for date: "+dateInDays);
+                        Intent intent = new Intent("ADD_BLANK"+dateInDays+adToBeNotified.getPushId());
+                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                        AdList.clear();
                     }
+
                 }
             }
 

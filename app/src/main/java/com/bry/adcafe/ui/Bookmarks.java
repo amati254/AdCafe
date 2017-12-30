@@ -182,7 +182,6 @@ public class Bookmarks extends AppCompatActivity {
         mPlaceHolderView = (PlaceHolderView) findViewById(R.id.PlaceHolderView);
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.avi);
         loadingText = (TextView) findViewById(R.id.loadingPinnedAdsMessage);
-
         mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,3));
 
         noAdsText = (TextView) findViewById(R.id.noPins);

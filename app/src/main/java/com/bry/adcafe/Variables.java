@@ -60,6 +60,8 @@ public class Variables {
     public static long noOfDays;
     public static int position;
 
+    public static boolean isLoginOnline = false;
+
 
 
 
