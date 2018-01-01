@@ -236,8 +236,12 @@ public class SavedAdsCard {
         Glide.with(mContext).load(bitmapToByte(getResizedBitmap(mAdvert.getImageBitmap(),170))).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
             public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
-                mAvi.setVisibility(android.view.View.GONE);
-                errorImageView.setVisibility(android.view.View.VISIBLE);
+                try{
+                    mAvi.setVisibility(android.view.View.GONE);
+                    errorImageView.setVisibility(android.view.View.VISIBLE);
+                }catch (Exception e2){
+                    e2.printStackTrace();
+                }
                 Log.d("SavedAdsCard---",e.getMessage());
                 if(!isInternetAvailable()&& !hasMessageBeenSeen){
                     hasMessageBeenSeen = true;
@@ -249,8 +253,12 @@ public class SavedAdsCard {
 
             @Override
             public boolean onResourceReady(GlideDrawable resource, byte[] model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                mAvi.setVisibility(android.view.View.GONE);
-                errorImageView.setVisibility(android.view.View.GONE);
+                try{
+                    mAvi.setVisibility(android.view.View.GONE);
+                    errorImageView.setVisibility(android.view.View.GONE);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 return false;
             }
         }).into(imageView);

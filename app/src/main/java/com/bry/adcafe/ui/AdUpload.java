@@ -378,6 +378,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 //                                mLoadingTextView.setVisibility(View.VISIBLE);
 //                                mLoadingTextView.setText(R.string.uploadMessage);
                                 mAuthProgressDialog.show();
+//                                mAuthProgressDialog.setProgress(0);
                                 setNewValueToStartFrom();
                                 date = getNextDay();
                                 numberOfClustersBeingUploadedTo = clustersToUpLoadTo.size();
@@ -599,6 +600,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         advert.setPushRefInAdminConsole(pushId);
         advert.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
         advert.setWebsiteLink(mLink);
+        advert.setHasBeenReimbursed(false);
 //        advert.setClustersToUpLoadTo(clustersToUpLoadTo);
         advert.setCategory(mCategory);
 
@@ -614,9 +616,11 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private void createProgressDialog(){
         mAuthProgressDialog = new ProgressDialog(this);
         mAuthProgressDialog.setTitle("AdCafe.");
-        mAuthProgressDialog.setMessage("Uploading your advertisement...");
+        mAuthProgressDialog.setMessage("Uploading your ad... "+0+"%");
         mAuthProgressDialog.setCancelable(false);
-        mAuthProgressDialog.setProgress(0);
+        mAuthProgressDialog.setProgress(ProgressDialog.STYLE_SPINNER);
+        mAuthProgressDialog.setIndeterminate(true);
+//        mAuthProgressDialog.setProgress(0);
     }
 
     private void uploadImage(final Bitmap bm) {
@@ -658,6 +662,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                         cycleCount++;
                         clustersToUpLoadTo.remove(clusterNumber);
 //                        mAuthProgressDialog.setProgress((clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100);
+                        int percentage = (clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100;
+                        String message ="Uploading your ad... "+percentage+"%";
+                        mAuthProgressDialog.setMessage(message);
                         if(clustersToUpLoadTo.isEmpty()){
                             if(!failedClustersToUploadTo.isEmpty()){
                                 checkAndNotifyAnyFailed();
@@ -725,6 +732,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                         cycleCount++;
                         clustersToUpLoadTo.remove(number);
 //                        mAuthProgressDialog.setProgress((clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100);
+                        int percentage = (clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100;
+                        String message ="Uploading your ad... "+percentage+"%";
+                        mAuthProgressDialog.setMessage(message);
                         if(clustersToUpLoadTo.isEmpty()){
                             if(!failedClustersToUploadTo.isEmpty()){
                                 checkAndNotifyAnyFailed();

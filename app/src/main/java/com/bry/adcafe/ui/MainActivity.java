@@ -1692,7 +1692,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String getDateInDays(){
         long currentTimeMillis = System.currentTimeMillis();
         long extraTimeFromMidnight = currentTimeMillis%(1000*60*60*24);
-        long currentDay = (currentTimeMillis-extraTimeFromMidnight)/(1000*60*60*24);
+//        long currentDay = (currentTimeMillis-extraTimeFromMidnight)/(1000*60*60*24);
+        long currentDay = (currentTimeMillis)/(1000*60*60*24);
         Log.d(TAG,"The current day is : "+currentDay);
         return Long.toString(-currentDay);
     }

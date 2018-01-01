@@ -65,7 +65,7 @@ public class TomorrowsAdStatItem {
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
         mCategory.setText("Category : "+mAdvert.getCategory());
         String amount = Integer.toString(mAdvert.getNumberOfUsersToReach()*4);
-        mAmountToReimburse.setText(String.format("Paid amount : %s", amount));
+        mAmountToReimburse.setText(String.format("Paid amount : %s Ksh.", amount));
         if(mAdvert.isFlagged()) {
             mTakeDown.setText("Put Up.");
             mFlagged.setText("Status : Taken Down.");

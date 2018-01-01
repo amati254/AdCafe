@@ -143,6 +143,8 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
 
     private void unregisterReceivers(){
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForTakeDownAd);
+        Intent intent = new Intent("REMOVE-LISTENER");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void loadTomorrowsads() {
@@ -261,7 +263,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
     private void showConfirmSubscribeMessage() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("AdCafe.");
-        builder.setMessage("Are you sure you want to take down the ad?")
+        builder.setMessage("Are you sure you want to continue?")
                 .setCancelable(true)
                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override

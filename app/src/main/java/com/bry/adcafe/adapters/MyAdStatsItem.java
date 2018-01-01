@@ -49,6 +49,7 @@ public class MyAdStatsItem {
     @View(R.id.TargetedNumber) private TextView mTargetedNumber;
     @View(R.id.usersReachedSoFar) private TextView mUsersReachedSoFar;
     @View(R.id.AmountToReimburse) private TextView mAmountToReimburse;
+    @View(R.id.hasBeenReimbursed) private TextView mHasBeenReimbursed;
 
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
@@ -70,13 +71,23 @@ public class MyAdStatsItem {
         if(!mAdvert.isFlagged()){
             mUsersReachedSoFar.setText("Users reached : "+mAdvert.getNumberOfTimesSeen());
         }else{
-            mUsersReachedSoFar.setText("No users to be reached.");
+            mUsersReachedSoFar.setText("Taken Down.No users to be reached.");
         }
 
         int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
         String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
         mAmountToReimburse.setText("Reimbursing amount: "+number+" Ksh");
-
+        try{
+            if(mAdvert.isHasBeenReimbursed()) {
+                mHasBeenReimbursed.setText("Status: Reimbursed.");
+                mAmountToReimburse.setText("Reimbursing amount:  0 Ksh");
+            } else {
+                mHasBeenReimbursed.setText("Status: NOT Reimbursed.");
+                mAmountToReimburse.setText("Reimbursing amount: "+number+" Ksh");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         loadListeners();
     }
 
@@ -113,13 +124,38 @@ public class MyAdStatsItem {
             Log.d("MY_AD_STAT_ITEM","Listener from firebase has responded.Updating users reached so far");
 //                Advert refreshedAd = dataSnapshot.getValue(Advert.class);
 //                int newValue = refreshedAd.getNumberOfTimesSeen();
-            int newValue = dataSnapshot.getValue(int.class);
-            Log.d("MY_AD_STAT_ITEM","New value gotten from firebase --"+newValue);
-            mUsersReachedSoFar.setText("Users reached so far : "+newValue);
+            try{
+                int newValue = dataSnapshot.getValue(int.class);
+                Log.d("MY_AD_STAT_ITEM","New value gotten from firebase --"+newValue);
+                mAdvert.setNumberOfTimesSeen(newValue);
+                mUsersReachedSoFar.setText("Users reached so far : "+newValue);
+                int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- newValue;
+                String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+                mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            try{
+                boolean newValue = dataSnapshot.getValue(boolean.class);
+                Log.d("ADMIN_STAT_ITEM","New value gotten from firebase --"+newValue);
+                mAdvert.setHasBeenReimbursed(newValue);
+                try{
+                    if(mAdvert.isHasBeenReimbursed()) {
+                        mHasBeenReimbursed.setText("Status: Reimbursed.");
+                        mAmountToReimburse.setText("Reimbursing amount:  0 Ksh");
+                    }else{
+                        mHasBeenReimbursed.setText("Status: NOT Reimbursed.");
+                        int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
+                        String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+                        mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
 
-            int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- newValue;
-            String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
-            mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
         }
 
         @Override

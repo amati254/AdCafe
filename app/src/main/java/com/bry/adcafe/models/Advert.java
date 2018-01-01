@@ -32,6 +32,7 @@ public class Advert {
     private boolean isFlagged = false;
     private boolean isAdminFlagged = false;
     public LinkedHashMap<Integer,Integer> clusters  = new LinkedHashMap<>();
+    private boolean hasBeenReimbursed;
 
     public Advert(String ImageUrl){
         this.imageUrl = ImageUrl;
@@ -163,5 +164,13 @@ public class Advert {
 
     public void setAdminFlagged(boolean adminFlagged) {
         isAdminFlagged = adminFlagged;
+    }
+
+    public boolean isHasBeenReimbursed() {
+        return hasBeenReimbursed;
+    }
+
+    public void setHasBeenReimbursed(boolean hasBeenReimbursed) {
+        this.hasBeenReimbursed = hasBeenReimbursed;
     }
 }

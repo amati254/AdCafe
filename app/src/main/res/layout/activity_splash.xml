@@ -52,6 +52,7 @@
             android:layout_gravity="bottom"
             android:text="©Copyright 2017, Jayson Amati."
             android:textSize="7sp"
+            android:visibility="invisible"
             android:textAlignment="center"
             android:textColor="@color/white"
             android:layout_height="wrap_content" />

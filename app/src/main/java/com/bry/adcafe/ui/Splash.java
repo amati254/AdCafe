@@ -45,7 +45,7 @@ public class Splash extends AppCompatActivity {
         isClearToMoveToNextActivity = false;
         LSEText = (TextView) findViewById(R.id.LSEText);
         LogoText = (TextView) findViewById(R.id.logoText);
-
+//        getDateInDays();
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -164,7 +164,7 @@ public class Splash extends AppCompatActivity {
                     finish();
                 }
             }
-        },790);
+        },700);
     }
 
     private void hideNavBars() {
@@ -185,6 +185,15 @@ public class Splash extends AppCompatActivity {
         String monthName = new DateFormatSymbols().getMonths()[monthOfYear];
 
         Log.d("Splash","Date is : "+dayOfMonth+" "+monthName+" "+year);
+    }
+
+    private String getDateInDays(){
+        long currentTimeMillis = System.currentTimeMillis();
+        long extraTimeFromMidnight = currentTimeMillis%(1000*60*60*24);
+//        long currentDay = (currentTimeMillis-extraTimeFromMidnight)/(1000*60*60*24);
+        long currentDay = (currentTimeMillis)/(1000*60*60*24);
+        Log.d("Splash","The current day is : "+currentDay);
+        return Long.toString(-currentDay);
     }
 
 

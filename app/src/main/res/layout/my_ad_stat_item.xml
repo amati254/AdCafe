@@ -8,7 +8,7 @@
 
     <android.support.v7.widget.CardView
         android:layout_width="160dp"
-        android:layout_height="240dp"
+        android:layout_height="260dp"
         android:layout_margin="10dp"
         app:cardCornerRadius="4dp"
         app:cardElevation="2dp"
@@ -64,6 +64,15 @@
             android:textAlignment="center"
             android:text="Reimbursing amount : 2800Ksh"
             android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_marginTop="5dp"
+                android:textSize="11sp"
+                android:id="@+id/hasBeenReimbursed"
+                android:textAlignment="center"
+                android:text=""
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
     </android.support.v7.widget.CardView>

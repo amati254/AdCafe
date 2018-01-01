@@ -36,6 +36,20 @@
             android:id="@+id/AmountToReemburse"
             android:text="Amount to reemburse : 1800 Ksh"
             android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:id="@+id/hasBeenReimbursed"
+            android:text="H"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/setReimbursed"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="Set Reimbursed status"
+            android:layout_marginBottom="5dp"
+            android:textSize="10dp" />
     </LinearLayout>
 
 </LinearLayout>
