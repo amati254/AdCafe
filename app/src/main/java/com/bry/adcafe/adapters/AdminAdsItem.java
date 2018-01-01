@@ -96,10 +96,15 @@ public class AdminAdsItem {
                 Log.d("MY_AD_STAT_ITEM","Listener from firebase has responded. Updating data.");
                 boolean newValue = dataSnapshot.getValue(boolean.class);
                 Log.d("MY_AD_STAT_ITEM","New value gotten from firebase --"+newValue);
-                mFlagged.setText("Is Flagged : "+newValue);
-                mAdvert.setFlagged(newValue);
-                if(newValue) mTakeDown.setText("Put Up.");
-                else mTakeDown.setText("Take Down.");
+                try{
+                    mFlagged.setText("Is Flagged : "+newValue);
+                    mAdvert.setFlagged(newValue);
+                    if(newValue) mTakeDown.setText("Put Up.");
+                    else mTakeDown.setText("Take Down.");
+                }catch (Exception e){
+                    e.printStackTrace();
+
+                }
             }
 
             @Override

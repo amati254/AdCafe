@@ -345,7 +345,7 @@ public class SavedAdsCard {
             mPlaceHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
         }catch (Exception e){
             e.printStackTrace();
-            Variables.placeHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
+//            Variables.placeHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples"));
         }
     }
 

@@ -42,7 +42,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginLeft="15dp"
             android:layout_height="wrap_content"
-            android:text="Email : AdCafeTeam@yahoo.com"
+            android:text="Email : adcafeteam@yahoo.com"
             android:textSize="16sp" />
 
     </LinearLayout>

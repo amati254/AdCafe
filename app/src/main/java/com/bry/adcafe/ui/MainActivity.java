@@ -1484,9 +1484,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                int number = dataSnapshot.getValue(int.class);
-                int newNumber = number + 1;
-                setNewNumberOfTimesSeen(newNumber, datte, ad);
+                try {
+                    int number = dataSnapshot.getValue(int.class);
+                    int newNumber = number + 1;
+                    setNewNumberOfTimesSeen(newNumber, datte, ad);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
 
             @Override

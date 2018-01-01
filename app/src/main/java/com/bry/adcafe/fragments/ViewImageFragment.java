@@ -93,17 +93,18 @@ public class ViewImageFragment extends DialogFragment {
             public void onClick(View v) {
                 Intent intent = new Intent("ARE_YOU_SURE_INTENT");
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                dismiss();
             }
         });
 
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Intent intent2 = new Intent(mAdvert.getPushRefInAdminConsole());
-                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
-                dismiss();
-            }
-        },new IntentFilter("DELETE_PINNED_AD"));
+//        LocalBroadcastManager.getInstance(mContext).registerReceiver(new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                Intent intent2 = new Intent(mAdvert.getPushRefInAdminConsole());
+//                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
+//                dismiss();
+//            }
+//        },new IntentFilter("DELETE_PINNED_AD"));
 
         return rootView;
     }

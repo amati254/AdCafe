@@ -268,8 +268,10 @@ public class Bookmarks extends AppCompatActivity {
                 .setPositiveButton("Yes.", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent("DELETE_PINNED_AD");
-                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+//                        Intent intent = new Intent("DELETE_PINNED_AD");
+//                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                        Intent intent2 = new Intent(Variables.adToBeViewed.getPushRefInAdminConsole());
+                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
                     }
                 })
                 .setNegativeButton("No!!", new DialogInterface.OnClickListener() {
@@ -460,7 +462,8 @@ public class Bookmarks extends AppCompatActivity {
         int monthOfYear = cal.get(Calendar.MONTH);
         int year = cal.get(Calendar.YEAR);
 
-        String monthName = new DateFormatSymbols().getMonths()[monthOfYear];
+//        String monthName = new DateFormatSymbols().getMonths()[monthOfYear];
+        String monthName = getMonthName_Abbr(monthOfYear);
 
         Log.d("Splash","Date gotten is : "+dayOfMonth+" "+monthName+" "+year);
 
@@ -473,14 +476,20 @@ public class Bookmarks extends AppCompatActivity {
             yearName = "";
         }else if(year2 == year+1){
             Log.d(TAG,"Ad was pined last year...");
-            yearName = ", last year.";
+            yearName =", "+Integer.toString(year);
         }else{
-            yearName = Integer.toString(year);
+            yearName =", "+ Integer.toString(year);
         }
 
-        String date = dayOfMonth+" "+monthName+yearName;
+        return dayOfMonth+" "+monthName+yearName;
+    }
 
-        return date;
+    public String getMonthName_Abbr(int month) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.MONTH, month);
+        SimpleDateFormat month_date = new SimpleDateFormat("MMM");
+        String month_name = month_date.format(cal.getTime());
+        return month_name;
     }
 
     private int getNumber(int size){
