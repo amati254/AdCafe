@@ -75,7 +75,7 @@ public class TomorrowsAdStatItem {
         }
 
         try {
-            Glide.with(mContext).load(bitmapToByte(getResizedBitmap(decodeFromFirebaseBase64(mAdvert.getImageUrl()),400)))
+            Glide.with(mContext).load(bitmapToByte(getResizedBitmap(decodeFromFirebaseBase64(mAdvert.getImageUrl()),150)))
                     .into(mImage);
             Log.d("AdminAdsItem---","Image has been converted to bitmap and set in model instance.");
         } catch (IOException e) {

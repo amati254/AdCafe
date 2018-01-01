@@ -601,6 +601,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         advert.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
         advert.setWebsiteLink(mLink);
         advert.setHasBeenReimbursed(false);
+        advert.setDateInDays(getDateInDays());
 //        advert.setClustersToUpLoadTo(clustersToUpLoadTo);
         advert.setCategory(mCategory);
 
@@ -974,6 +975,15 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             super.onBackPressed();
         }
 
+    }
+
+    private Long getDateInDays(){
+        long currentTimeMillis = System.currentTimeMillis();
+        long extraTimeFromMidnight = currentTimeMillis%(1000*60*60*24);
+//        long currentDay = (currentTimeMillis-extraTimeFromMidnight)/(1000*60*60*24);
+        long currentDay = (currentTimeMillis)/(1000*60*60*24);
+        Log.d(TAG,"The current day is : "+currentDay);
+        return currentDay;
     }
 
 }

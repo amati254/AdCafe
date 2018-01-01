@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.adapters.DateForAdStats;
 import com.bry.adcafe.adapters.MyAdStatsItem;
 import com.bry.adcafe.adapters.TomorrowsAdStatItem;
 import com.bry.adcafe.models.Advert;
@@ -58,14 +60,7 @@ public class AdStats extends AppCompatActivity {
     private List<Advert> mUploadedAds3= new ArrayList<>();
 
     private Context mContext;
-    @Bind(R.id.adStatsScrollView) ScrollView mAdStatsScrollView;
     @Bind(R.id.PlaceHolderViewInfo) PlaceHolderView DataListsView;
-
-    @Bind(R.id.TomorrowsTitle) TextView TomorrowsAdsTitle;
-    @Bind(R.id.PlaceHolderViewInfoTomorrow) PlaceHolderView tomorrowsPlaceHolderView;
-
-    @Bind(R.id.YesterdaysTitle) TextView YesterdayAdsTitle;
-    @Bind(R.id.PlaceHolderViewInfoPrevious) PlaceHolderView yesterdayPlaceHolderView;
 
     private int cycleCount = 0;
     private int cycleCount2 = 0;
@@ -84,16 +79,7 @@ public class AdStats extends AppCompatActivity {
 
         if(isNetworkConnected(mContext)){
             DataListsView.setVisibility(View.GONE);
-            yesterdayPlaceHolderView.setVisibility(View.GONE);
-            tomorrowsPlaceHolderView.setVisibility(View.GONE);
-
-            DataListsView.setNestedScrollingEnabled(false);
-            yesterdayPlaceHolderView.setNestedScrollingEnabled(false);
-            tomorrowsPlaceHolderView.setNestedScrollingEnabled(false);
-
             findViewById(R.id.topText).setVisibility(View.GONE);
-            YesterdayAdsTitle.setVisibility(View.GONE);
-            TomorrowsAdsTitle.setVisibility(View.GONE);
 
             findViewById(R.id.LoadingViews).setVisibility(View.VISIBLE);
             registerReceivers();
@@ -103,8 +89,7 @@ public class AdStats extends AppCompatActivity {
         }else{
             showNoConnectionView();
         }
-
-        mAdStatsScrollView.setSmoothScrollingEnabled(true);
+        DataListsView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,2));
     }
 
     @Override
@@ -127,12 +112,6 @@ public class AdStats extends AppCompatActivity {
 
     private void showNoConnectionView() {
         DataListsView.setVisibility(View.GONE);
-        yesterdayPlaceHolderView.setVisibility(View.GONE);
-        YesterdayAdsTitle.setVisibility(View.GONE);
-
-        tomorrowsPlaceHolderView.setVisibility(View.GONE);
-        TomorrowsAdsTitle.setVisibility(View.GONE);
-
         findViewById(R.id.topText).setVisibility(View.GONE);
         findViewById(R.id.droppedInternetLayoutForAdStats).setVisibility(View.VISIBLE);
     }
@@ -204,9 +183,13 @@ public class AdStats extends AppCompatActivity {
     }
 
     private void loadStats3() {
-        tomorrowsPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,2));
+        DataListsView.addView(new DateForAdStats(mContext,"Your Tomorrows Ads.",DataListsView));
+        DataListsView.addView(new DateForAdStats(mContext,"",DataListsView));
         for(int i = 0; i<mUploadedAds3.size();i++){
-            tomorrowsPlaceHolderView.addView(new TomorrowsAdStatItem(mContext,tomorrowsPlaceHolderView,mUploadedAds3.get(i)));
+            DataListsView.addView(new TomorrowsAdStatItem(mContext,DataListsView,mUploadedAds3.get(i)));
+        }
+        for(int i = 0;i<getNumber(mUploadedAds3.size());i++){
+            DataListsView.addView(new DateForAdStats(mContext,"",DataListsView));
         }
         loadAdsThatHaveBeenUploaded();
     }
@@ -275,11 +258,14 @@ public class AdStats extends AppCompatActivity {
     }
 
     private void loadStats() {
-        DataListsView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,2));
+        DataListsView.addView(new DateForAdStats(mContext,"Your Todays Ads.",DataListsView));
+        DataListsView.addView(new DateForAdStats(mContext,"",DataListsView));
         for(int i = 0; i<mUploadedAds.size();i++){
             DataListsView.addView(new MyAdStatsItem(mContext,DataListsView,mUploadedAds.get(i)));
         }
-
+        for(int i = 0;i<getNumber(mUploadedAds.size());i++){
+            DataListsView.addView(new DateForAdStats(mContext,"",DataListsView));
+        }
         loadPreviousDaysAds();
     }
 
@@ -305,24 +291,9 @@ public class AdStats extends AppCompatActivity {
                 }else{
                     findViewById(R.id.topText).setVisibility(View.VISIBLE);
                     findViewById(R.id.LoadingViews).setVisibility(View.GONE);
-                    if(mUploadedAds3.size()>0) TomorrowsAdsTitle.setVisibility(View.VISIBLE);
-                    tomorrowsPlaceHolderView.setVisibility(View.VISIBLE);
+
                     DataListsView.setVisibility(View.VISIBLE);
                     findViewById(R.id.noAdsUploadedText).setVisibility(View.GONE);
-//                    if(DataListsView.getChildCount()>0) {
-//                        Log.d(TAG,"User had uploaded ads for today.");
-//                        findViewById(R.id.topText).setVisibility(View.VISIBLE);
-//                        findViewById(R.id.LoadingViews).setVisibility(View.GONE);
-//                        findViewById(R.id.noAdsUploadedText).setVisibility(View.GONE);
-//                        DataListsView.setVisibility(View.VISIBLE);
-//                    }
-//                    if(tomorrowsPlaceHolderView.getChildCount()>0){
-//                        Log.d(TAG,"User had uploaded ads for tomorrow.");
-//                        findViewById(R.id.topText).setVisibility(View.VISIBLE);
-//                        findViewById(R.id.LoadingViews).setVisibility(View.GONE);
-//                        tomorrowsPlaceHolderView.setVisibility(View.VISIBLE);
-//                        TomorrowsAdsTitle.setVisibility(View.VISIBLE);
-//                    }
                     if(mUploadedAds3.size()==0 && mUploadedAds.size()==0){
                         Log.d(TAG,"UUUUser had uploaded no ads.");
                         findViewById(R.id.noAdsUploadedText).setVisibility(View.VISIBLE);
@@ -371,20 +342,25 @@ public class AdStats extends AppCompatActivity {
     }
 
     private void loadStats2() {
-        DataListsView.setVisibility(View.VISIBLE);
-        yesterdayPlaceHolderView.setVisibility(View.VISIBLE);
-        YesterdayAdsTitle.setVisibility(View.VISIBLE);
-
-        tomorrowsPlaceHolderView.setVisibility(View.VISIBLE);
-        if(mUploadedAds3.size()>0) TomorrowsAdsTitle.setVisibility(View.VISIBLE);
-
-        findViewById(R.id.topText).setVisibility(View.VISIBLE);
-        findViewById(R.id.LoadingViews).setVisibility(View.GONE);
-
-        yesterdayPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,2));
+        DataListsView.addView(new DateForAdStats(mContext,"Your Yesterdays Ads.",DataListsView));
+        DataListsView.addView(new DateForAdStats(mContext,"",DataListsView));
         for(int i = 0; i<mUploadedAds2.size();i++){
-            yesterdayPlaceHolderView.addView(new MyAdStatsItem(mContext,yesterdayPlaceHolderView,mUploadedAds2.get(i)));
+            DataListsView.addView(new MyAdStatsItem(mContext,DataListsView,mUploadedAds2.get(i)));
         }
+
+        for(int i = 0;i<getNumber(mUploadedAds2.size());i++){
+            DataListsView.addView(new DateForAdStats(mContext,"",DataListsView));
+        }
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                DataListsView.setVisibility(View.VISIBLE);
+                findViewById(R.id.topText).setVisibility(View.VISIBLE);
+                findViewById(R.id.LoadingViews).setVisibility(View.GONE);
+            }
+        }, 700);
+
     }
 
 
@@ -565,6 +541,8 @@ public class AdStats extends AppCompatActivity {
         });
     }
 
+
+
     private int getClusterValue(int index,Advert ad) {
         LinkedHashMap map = ad.clusters;
         int cluster = (new ArrayList<Integer>(map.keySet())).get(index);
@@ -577,6 +555,17 @@ public class AdStats extends AppCompatActivity {
         int cluster = (new ArrayList<Integer>(map.values())).get(index);
         Log.d(TAG, "Cluster gotten from ad is : " + cluster);
         return cluster;
+    }
+
+    private int getNumber(int size){
+        int newSize = size;
+        int number = 0;
+        while (newSize%2!=0){
+            newSize++;
+            number++;
+        }
+
+        return number;
     }
 
 }

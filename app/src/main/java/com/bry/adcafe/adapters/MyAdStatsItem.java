@@ -50,6 +50,7 @@ public class MyAdStatsItem {
     @View(R.id.usersReachedSoFar) private TextView mUsersReachedSoFar;
     @View(R.id.AmountToReimburse) private TextView mAmountToReimburse;
     @View(R.id.hasBeenReimbursed) private TextView mHasBeenReimbursed;
+    @View(R.id.dateUploaded) private TextView mDateUploaded;
 
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
@@ -67,7 +68,7 @@ public class MyAdStatsItem {
         loadImage();
         mEmail.setText(String.format("Uploaded by : %s", mAdvert.getUserEmail()));
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
-
+        mDateUploaded.setText(String.format("Uploaded on %s", getDateFromDays(mAdvert.getDateInDays())));
         if(!mAdvert.isFlagged()){
             mUsersReachedSoFar.setText("Users reached : "+mAdvert.getNumberOfTimesSeen());
         }else{
@@ -232,5 +233,44 @@ public class MyAdStatsItem {
         }
 
         return Bitmap.createScaledBitmap(image, width, height, true);
+    }
+
+    private String getDateFromDays(long days){
+        long currentTimeInMills = days*(1000*60*60*24);
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(currentTimeInMills);
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+        int monthOfYear = cal.get(Calendar.MONTH);
+        int year = cal.get(Calendar.YEAR);
+
+//        String monthName = new DateFormatSymbols().getMonths()[monthOfYear];
+        String monthName = getMonthName_Abbr(monthOfYear);
+
+        Log.d("Splash","Date gotten is : "+dayOfMonth+" "+monthName+" "+year);
+
+        Calendar cal2 = Calendar.getInstance();
+        int year2 = cal2.get(Calendar.YEAR);
+        String yearName;
+
+        if(year == year2){
+            Log.d("My_ad_stat_item","Ad was pined this year...");
+            yearName = "";
+        }else if(year2 == year+1){
+            Log.d("My_ad_stat_item","Ad was pined last year...");
+            yearName =", "+Integer.toString(year);
+        }else{
+            yearName =", "+ Integer.toString(year);
+        }
+
+        return dayOfMonth+" "+monthName+yearName;
+    }
+
+    private String getMonthName_Abbr(int month) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.MONTH, month);
+        SimpleDateFormat month_date = new SimpleDateFormat("MMM");
+        String month_name = month_date.format(cal.getTime());
+        return month_name;
     }
 }

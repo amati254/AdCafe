@@ -59,9 +59,9 @@ public class AdminStatItem {
 
     @Resolve
     private void onResolved(){
-        mEmail.setText("Advertiser :"+mAdvert.getUserEmail());
-        mTargetedNumber.setText("Targeted : "+mAdvert.getNumberOfUsersToReach()+" users");
-        mNumberReached.setText("Number Reached : "+mAdvert.getNumberOfTimesSeen()+" users.");
+        mEmail.setText(String.format("Advertiser :%s", mAdvert.getUserEmail()));
+        mTargetedNumber.setText(String.format("Targeted : %d users", mAdvert.getNumberOfUsersToReach()));
+        mNumberReached.setText(String.format("Number Reached : %d users.", mAdvert.getNumberOfTimesSeen()));
 
         int numberOfUsersWhoDidntSeeAd = (mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen())*4;
         String number = Integer.toString(numberOfUsersWhoDidntSeeAd);
