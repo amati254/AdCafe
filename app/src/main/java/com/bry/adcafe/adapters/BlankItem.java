@@ -28,12 +28,14 @@ public class BlankItem {
     private Long dateInDays;
     private String mDateText;
     private BlankItem bl;
+    private boolean mIsLastElement;
 
-    public BlankItem(Context context, PlaceHolderView PHView, long dateindays, String datetext){
+    public BlankItem(Context context, PlaceHolderView PHView, long dateindays, String datetext,boolean isLastElement){
         this.mContext = context;
         this.mPlaceHolderView = PHView;
         this.dateInDays = dateindays;
         this.mDateText = datetext;
+        this.mIsLastElement = isLastElement;
     }
 
     @Resolve
@@ -43,6 +45,11 @@ public class BlankItem {
         if(mDateText.equals("pineapples")){
             listenForRemoveSelf();
         }
+        if(mIsLastElement){
+            Intent intent = new Intent("DONE!!");
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        }
+
     }
 
     private void listenForRemoveSelf() {

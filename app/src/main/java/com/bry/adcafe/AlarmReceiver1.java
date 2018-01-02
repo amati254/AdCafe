@@ -53,7 +53,7 @@ public class AlarmReceiver1 extends BroadcastReceiver {
     private static final String TAG = "AlarmReceiver - ";
     private NotificationManager notificationManager;
     private PendingIntent pendingIntent;
-    private static int NOTIFICATION_ID = 1;
+    private static int NOTIFICATION_ID = 1880;
     Notification notification;
     private Context mContext;
     private String mKey;
@@ -224,6 +224,7 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         notification.ledOffMS = 1000;
         notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID,notification);
+
         Log.i("notif","Notification sent");
 
     }

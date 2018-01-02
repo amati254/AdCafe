@@ -61,9 +61,8 @@ public class ReportDialogFragment extends DialogFragment {
     }
 
     private void flagTheAd(String Message) {
-        DatabaseReference mRef3 = FirebaseDatabase.getInstance().getReference(Constants.REPORTED_ADS).child(getDate())
-                .child(Variables.getCurrentAdvert().getCategory())
-                .child(Integer.toString(1))
+        DatabaseReference mRef3 = FirebaseDatabase.getInstance().getReference(Constants.REPORTED_ADS)
+                .child(getDate())
                 .child(Variables.getCurrentAdvert().getPushRefInAdminConsole());
         mRef3.push();
         mRef3.setValue(Message);

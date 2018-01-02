@@ -33,7 +33,7 @@ public class Advert {
     private boolean isAdminFlagged = false;
     public LinkedHashMap<Integer,Integer> clusters  = new LinkedHashMap<>();
     private boolean hasBeenReimbursed;
-    private Long dateInDays;
+    private int dateInDays;
 
     public Advert(String ImageUrl){
         this.imageUrl = ImageUrl;
@@ -180,6 +180,6 @@ public class Advert {
     }
 
     public void setDateInDays(long dateInDays) {
-        this.dateInDays = dateInDays;
+        this.dateInDays = (int) dateInDays;
     }
 }

@@ -164,7 +164,7 @@ public class Splash extends AppCompatActivity {
                     finish();
                 }
             }
-        },700);
+        },800);
     }
 
     private void hideNavBars() {

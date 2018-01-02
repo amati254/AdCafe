@@ -2,6 +2,7 @@ package com.bry.adcafe.ui;
 
 import android.app.AlarmManager;
 import android.app.FragmentManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -115,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isLoadingMoreAds = false;
     private boolean mDoublePressedToPin = false;
     private Advert lastAdSeen = null;
+    private static int NOTIFICATION_ID2 = 1880;
 
 
     @Override
@@ -130,6 +132,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         logUser();
         new DatabaseManager().setLastSeenDateInFirebase();
         mAviLoadingMoreAds.hide();
+        NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
+        try{
+            notificationManager.cancel(NOTIFICATION_ID2);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -389,6 +398,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .limitToFirst(5).addListenerForSingleValueEvent(val);
         }
         if(!mAdList.isEmpty()) mAdList.clear();
+        Variables.clearAllAdsFromAdList();
     }
 
     ValueEventListener val = new ValueEventListener() {

@@ -359,7 +359,7 @@ public class AdStats extends AppCompatActivity {
                 findViewById(R.id.topText).setVisibility(View.VISIBLE);
                 findViewById(R.id.LoadingViews).setVisibility(View.GONE);
             }
-        }, 700);
+        }, 2000);
 
     }
 

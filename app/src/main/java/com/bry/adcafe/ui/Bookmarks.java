@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Vibrator;
@@ -22,16 +23,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
-import com.bry.adcafe.Manifest;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.adapters.BlankItem;
@@ -40,9 +37,6 @@ import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.fragments.ViewImageFragment;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
-import com.bry.adcafe.services.NetworkStateReceiver;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -56,10 +50,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.wang.avi.AVLoadingIndicatorView;
@@ -68,8 +62,6 @@ public class Bookmarks extends AppCompatActivity {
     private static final String TAG = "Bookmarks";
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
-
-    private ScrollView mScroll;
 
     private ChildEventListener mChildEventListener;
     private DatabaseReference mRef;
@@ -80,6 +72,11 @@ public class Bookmarks extends AppCompatActivity {
     private TextView loadingText;
     private TextView noAdsText;
     private ProgressDialog mAuthProgressDialog;
+    private ProgressDialog mProg;
+
+    private int cycleCount = 0;
+    private LinkedHashMap<Long,List> HashOfAds = new LinkedHashMap<>();
+    private boolean isDone = false;
 
 
     @Override
@@ -93,7 +90,8 @@ public class Bookmarks extends AppCompatActivity {
         createProgressDialog();
 
         if(isNetworkConnected(mContext)){
-            loadAdsFromThread();
+//            loadAdsFromFirebase2();
+            new LongOperation().execute("");
         }else{
             Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.connectionDropped,
                     Snackbar.LENGTH_INDEFINITE).show();
@@ -105,7 +103,7 @@ public class Bookmarks extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         mPlaceHolderView.removeAllViews();
-
+        hideProg();
         unregisterAllReceivers();
         super.onDestroy();
     }
@@ -117,6 +115,7 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForViewingAd);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowingAreYouSureText);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowingAreYouSureText2);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForContinue);
 
         Intent intent = new Intent("UNREGISTER");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -129,54 +128,18 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForViewingAd,new IntentFilter("VIEW"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText,new IntentFilter("ARE_YOU_SURE_INTENT"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText2,new IntentFilter("ARE_YOU_SURE2"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForContinue,new IntentFilter("DONE!!"));
 
     }
 
 
-
-    private void loadAdsFromThread(){
-        try{
-            startGetAds();
-        }catch (Exception e) {
-            Log.e("BACKGROUND_PROC", e.getMessage());
-        }
+    private void showProg(){
+        mProg.show();
     }
 
-    private void startGetAds() {
-        mViewRunnable = new Runnable() {
-            @Override
-            public void run() {
-                getAds();
-            }
-        };
-        Thread thread =  new Thread(null, mViewRunnable, "Background");
-        thread.start();
-//        mProgressBar.setVisibility(View.VISIBLE);
-        mAvi.setVisibility(View.VISIBLE);
-        loadingText.setVisibility(View.VISIBLE);
+    private void hideProg(){
+        mProg.hide();
     }
-
-    private void getAds() {
-        try{
-            mSavedAds = new ArrayList<>();
-            loadAdsFromFirebase2();
-
-            Thread.sleep(50);
-            Log.i("ARRAY", ""+ mSavedAds.size());
-        }catch (Exception e) {
-            Log.e("BACKGROUND_PROC", e.getMessage());
-        }
-        runOnUiThread(returnRes);
-    }
-
-
-
-    private Runnable returnRes = new Runnable() {
-        @Override
-        public void run() {
-//            loadBookmarkedAdsIntoCards();
-        }
-    };
 
     private void loadPlaceHolderViews() {
         mPlaceHolderView = (PlaceHolderView) findViewById(R.id.PlaceHolderView);
@@ -241,6 +204,14 @@ public class Bookmarks extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver mMessageReceiverForContinue = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BOOKMARKS--","Received message to continue");
+            startLoadAdsIntoViews();
+        }
+    };
+
     private void promptUserIfTheyAreSureIfTheyWantToDeleteAd2() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Do you really want to unpin that?")
@@ -272,6 +243,7 @@ public class Bookmarks extends AppCompatActivity {
 //                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                         Intent intent2 = new Intent(Variables.adToBeViewed.getPushRefInAdminConsole());
                         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
+                        Variables.placeHolderView = mPlaceHolderView;
                     }
                 })
                 .setNegativeButton("No!!", new DialogInterface.OnClickListener() {
@@ -295,6 +267,11 @@ public class Bookmarks extends AppCompatActivity {
         mAuthProgressDialog.setTitle("AdCafe.");
         mAuthProgressDialog.setMessage("Updating your preferences...");
         mAuthProgressDialog.setCancelable(false);
+
+        mProg = new ProgressDialog(this);
+        mProg.setMessage("Loading your Pins...");
+        mProg.setTitle("AdCafe.");
+        mProg.setCancelable(false);
     }
 
 
@@ -324,35 +301,29 @@ public class Bookmarks extends AppCompatActivity {
     }
 
     private void loadAdsFromFirebase2(){
-        if(!mSavedAds.isEmpty()) mSavedAds.clear();
         String uid = User.getUid();
         Query query = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.PINNED_AD_LIST);
         DatabaseReference mRef = query.getRef();
+
         mRef.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren()){
-                    mAvi.setVisibility(View.GONE);
-                    loadingText.setVisibility(View.GONE);
-                    for (DataSnapshot snap: dataSnapshot.getChildren()){
-                        long noOfDays = Long.parseLong(snap.getKey());
-                        List<Advert> AdList = new ArrayList<>();
+                    for (final DataSnapshot snap: dataSnapshot.getChildren()){
+                        final long noOfDays = Long.parseLong(snap.getKey());
+                        final List<Advert> AdList = new ArrayList<>();
 
                         for(DataSnapshot adSnap: snap.getChildren()){
                             Advert advert = adSnap.getValue(Advert.class);
                             AdList.add(advert);
                             Log.d("BOOKMARKS"," --Loaded ads from firebase.--"+advert.getPushId());
                         }
-                        loadDaysAdsIntoViews(AdList,noOfDays);
+                        HashOfAds.put(noOfDays,AdList);
+                        Log.d(TAG,"Added ads for day : "+noOfDays+" to hashmap.Adlist size is : "+AdList.size());
                     }
-                }else{
-                    Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_SHORT).show();
-                    noAdsText.setVisibility(View.VISIBLE);
-                    mAvi.setVisibility(View.GONE);
-                    loadingText.setVisibility(View.GONE);
-
-//                    loadBookmarkedAdsIntoCards();
+                    isDone = true;
+//                    startLoadAdsIntoViews();
                 }
             }
 
@@ -363,20 +334,47 @@ public class Bookmarks extends AppCompatActivity {
         });
     }
 
-    private void loadDaysAdsIntoViews(List<Advert> adList, long noOfDays) {
-        if(mPlaceHolderView == null){
-            loadPlaceHolderViews();
-        }
-        mPlaceHolderView.addView(new DateItem(mContext,mPlaceHolderView,noOfDays,getDateFromDays(noOfDays),false));
-        mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,""));
-        mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,""));
+    private void startLoadAdsIntoViews(){
+        if(HashOfAds.isEmpty()){
+            Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_SHORT).show();
+            noAdsText.setVisibility(View.VISIBLE);
+            mAvi.setVisibility(View.GONE);
+            loadingText.setVisibility(View.GONE);
+        }else{
+            if(cycleCount+1<HashOfAds.size()) {
+                Long days = getDaysFromHash(cycleCount);
+                List adList = HashOfAds.get(days);
+                loadDaysAdsIntoViews(adList, days);
+            }else{
+                hideProg();
+            }
 
+        }
+    }
+
+    private void loadDaysAdsIntoViews(List<Advert> adList, long noOfDays) {
+        if(mPlaceHolderView == null) loadPlaceHolderViews();
+        mPlaceHolderView.addView(new DateItem(mContext,mPlaceHolderView,noOfDays,getDateFromDays(noOfDays)));
+        mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,"",false));
+        mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,"",false));
+        Log.d(TAG,"Adlist size for "+noOfDays+" is: "+adList.size());
         for(int i = 0; i<adList.size();i++){
-            mPlaceHolderView.addView(new SavedAdsCard(adList.get(i),mContext,mPlaceHolderView,adList.get(i).getPushId(),noOfDays));
+            boolean islst = false;
+            if(adList.size()%3==0 && i+1==adList.size()) {
+                islst = true;
+            }
+            mPlaceHolderView.addView(new SavedAdsCard(adList.get(i),mContext,mPlaceHolderView,adList.get(i).getPushId(),noOfDays,islst));
+            Log.d(TAG,"Loaded ad : "+adList.get(i).getPushId());
         }
         for(int i = 0;i<getNumber(adList.size());i++){
-            mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,"pineapples"));
+            boolean islst = false;
+            if(i+1==getNumber(adList.size())) {
+                islst = true;
+            }
+            mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,"pineapples",islst));
+
         }
+        cycleCount++;
     }
 
     private void loadBookmarkedAdsIntoCards() {
@@ -402,6 +400,9 @@ public class Bookmarks extends AppCompatActivity {
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return (netInfo != null && netInfo.isConnected());
     }
+
+
+
 
     private void shareImage(Bitmap icon){
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -484,6 +485,9 @@ public class Bookmarks extends AppCompatActivity {
         return dayOfMonth+" "+monthName+yearName;
     }
 
+
+
+
     public String getMonthName_Abbr(int month) {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MONTH, month);
@@ -502,4 +506,46 @@ public class Bookmarks extends AppCompatActivity {
 
         return number;
     }
+
+    private Long getDaysFromHash(int pos){
+        LinkedHashMap map = HashOfAds;
+        Long Sub = (new ArrayList<Long>(map.keySet())).get(pos);
+        Log.d(TAG, "Date gotten from getDaysFromHash method is :" + Sub);
+        return Sub;
+    }
+
+    private class LongOperation extends AsyncTask<String, Void, String>{
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try{
+                loadAdsFromFirebase2();
+                while(!isDone){
+                    executeStuff();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return "executed";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            startLoadAdsIntoViews();
+//            hideProg();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showProg();
+        }
+    }
+
+    private void executeStuff() {
+
+    }
+
+
 }

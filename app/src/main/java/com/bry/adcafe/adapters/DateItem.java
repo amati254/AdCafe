@@ -44,15 +44,13 @@ public class DateItem {
     private PlaceHolderView mPlaceHolderView;
     private Long dateInDays;
     private String mDateText;
-    private boolean mIsBlankView;
     private DateItem di;
 
-    public DateItem(Context context, PlaceHolderView PHView, long dateindays, String datetext,boolean isBlankView){
+    public DateItem(Context context, PlaceHolderView PHView, long dateindays, String datetext){
         this.mContext = context;
         this.mPlaceHolderView = PHView;
         this.dateInDays = dateindays;
         this.mDateText = datetext;
-        this.mIsBlankView = isBlankView;
     }
 
     @Resolve
