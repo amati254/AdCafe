@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
@@ -52,6 +53,7 @@ public class TomorrowsAdStatItem {
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
     private Advert mAdvert;
+    private byte[] mImageBytes;
 
     public TomorrowsAdStatItem(Context Context, PlaceHolderView PlaceHolderView, Advert Advert){
         this.mContext = Context;
@@ -61,6 +63,7 @@ public class TomorrowsAdStatItem {
 
     @Resolve
     private void onResolved(){
+        new  LongOperationFI().execute("");
         mEmail.setText("Uploaded by : "+mAdvert.getUserEmail());
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
         mCategory.setText("Category : "+mAdvert.getCategory());
@@ -73,16 +76,18 @@ public class TomorrowsAdStatItem {
             mTakeDown.setText("Take Down.");
             mFlagged.setText("Status : Uploaded.");
         }
+        loadListeners();
+    }
 
+    private void setImage(){
         try {
-            Glide.with(mContext).load(bitmapToByte(getResizedBitmap(decodeFromFirebaseBase64(mAdvert.getImageUrl()),150)))
-                    .into(mImage);
-            Log.d("AdminAdsItem---","Image has been converted to bitmap and set in model instance.");
+            Bitmap bm = getResizedBitmap(decodeFromFirebaseBase64(mAdvert.getImageUrl()),150);
+            Log.d("TomorrowsAdItem---","Image has been converted to bitmap.");
+            mImageBytes = bitmapToByte(bm);
+            mAdvert.setImageBitmap(bm);
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(mContext,"something went wrong"+e.getMessage(),Toast.LENGTH_LONG).show();
         }
-        loadListeners();
     }
 
     private void loadListeners() {
@@ -183,6 +188,30 @@ public class TomorrowsAdStatItem {
         }
 
         return Bitmap.createScaledBitmap(image, width, height, true);
+    }
+
+    private class LongOperationFI extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try{
+                setImage();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return "executed";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            if(mImageBytes!=null) Glide.with(mContext).load(mImageBytes).into(mImage);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
     }
 
 }
