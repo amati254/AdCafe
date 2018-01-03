@@ -71,7 +71,7 @@ public class SubscriptionManagerItem {
         if(isChecked){
             if(isOnline(mContext)) {
                 if(Variables.Subscriptions.size()>1){
-                    if(!category.equals(getSubscriptionValue(Variables.getCurrentSubscriptionIndex()))) {
+                    if(!category.equals(Variables.getCurrentAdvert().getCategory())) {
                         Log.d("SubscriptionManagerItem","The category being viewed is not being removed");
                         Log.d("SubscriptionManagerItem","The category being viewed is "+
                                 getSubscriptionValue(Variables.getCurrentSubscriptionIndex())

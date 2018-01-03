@@ -501,7 +501,13 @@ public class DatabaseManager {
                     Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
                     Variables.Subscriptions.put(category,cluster);
                 }
-                int newIndex = getPositionOf(categoryBeingViewed);
+                int newIndex;
+                if(Variables.mIsLastOrNotLast.equals(Constants.NO_ADS)){
+                    newIndex = Variables.Subscriptions.size()-1;
+                }else{
+                    newIndex = getPositionOf(categoryBeingViewed);
+                }
+
                 Log.d(TAG,"Its new index position is : "+newIndex);
                 Variables.setCurrentSubscriptionIndex(newIndex);
                 updateCurrentSubIndex();

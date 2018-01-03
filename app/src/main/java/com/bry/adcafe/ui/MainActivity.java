@@ -700,6 +700,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Variables.adToVariablesAdList(mAdList.get(0));
                 Variables.setIsLastOrNotLast(Constants.LAST);
                 Variables.setCurrentAdvert(mAdList.get(0));
+                Variables.setCurrentSubscriptionIndex(getPositionOf(mAdList.get(0).getCategory()));
+                try{
+                    Variables.setCurrentAdInSubscription(Integer.parseInt(mAdList.get(0).getPushId()));
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Variables.setCurrentAdInSubscription(mAdList.get(0).getPushIdNumber());
+                }
                 if(mAdList.get(0).isFlagged())mAdList.get(0).setWebsiteLink(igsNein);
                 if(mAdList.get(0).getWebsiteLink().equals(igsNein)){
                     findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
@@ -738,6 +745,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Variables.adToVariablesAdList(lastAdSeen);
                 Variables.setIsLastOrNotLast(Constants.LAST);
                 Variables.setCurrentAdvert(lastAdSeen);
+                Variables.setCurrentSubscriptionIndex(getPositionOf(lastAdSeen.getCategory()));
+                try{
+                    Variables.setCurrentAdInSubscription(Integer.parseInt(lastAdSeen.getPushId()));
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Variables.setCurrentAdInSubscription(lastAdSeen.getPushIdNumber());
+                }
                 if(lastAdSeen.isFlagged())lastAdSeen.setWebsiteLink(igsNein);
                 if(lastAdSeen.getWebsiteLink().equals(igsNein)){
                     findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
@@ -749,6 +763,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }else {
                 Advert noAds = new Advert();
                 noAds.setWebsiteLink(igsNein);
+                noAds.setCategory("NoAds");
                 mSwipeView.addView(new AdvertCard(mContext, noAds, mSwipeView, Constants.NO_ADS));
                 Variables.adToVariablesAdList(noAds);
                 Variables.setIsLastOrNotLast(Constants.NO_ADS);

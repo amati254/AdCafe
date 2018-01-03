@@ -615,7 +615,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
     private void createProgressDialog(){
-        mAuthProgressDialog = new ProgressDialog(this);
+        mAuthProgressDialog = new ProgressDialog(this,R.style.AppCompatAlertDialogStyle);
         mAuthProgressDialog.setTitle("AdCafe.");
         mAuthProgressDialog.setMessage("Uploading your ad... "+0+"%");
         mAuthProgressDialog.setCancelable(false);

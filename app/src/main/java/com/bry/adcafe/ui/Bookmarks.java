@@ -268,7 +268,7 @@ public class Bookmarks extends AppCompatActivity {
         mAuthProgressDialog.setMessage("Updating your preferences...");
         mAuthProgressDialog.setCancelable(false);
 
-        mProg = new ProgressDialog(this);
+        mProg = new ProgressDialog(this,R.style.AppCompatAlertDialogStyle);
         mProg.setMessage("Loading your Pins...");
         mProg.setTitle("AdCafe.");
         mProg.setCancelable(false);

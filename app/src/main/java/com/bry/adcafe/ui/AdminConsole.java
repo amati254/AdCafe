@@ -125,6 +125,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
                 }else{
                     Toast.makeText(mContext,"There are no feedback messages.",Toast.LENGTH_SHORT).show();
                 }
+                mAuthProgressDialog.dismiss();
             }
 
             @Override
@@ -173,6 +174,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
                     loadTomorrowsAdsIntoViews(adLists);
                 }else{
                     Toast.makeText(mContext,"There are no ads for tomorrow",Toast.LENGTH_SHORT).show();
+                    mAuthProgressDialog.dismiss();
                 }
 //                mAuthProgressDialog.dismiss();
             }
@@ -321,7 +323,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
     }
 
     private void createProgressDialog(){
-        mAuthProgressDialog = new ProgressDialog(this);
+        mAuthProgressDialog = new ProgressDialog(this,R.style.AppCompatAlertDialogStyle);
         mAuthProgressDialog.setTitle("AdCafe.");
         mAuthProgressDialog.setMessage("One second...");
         mAuthProgressDialog.setCancelable(false);
