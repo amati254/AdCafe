@@ -30,12 +30,14 @@ public class BlankItem {
     private BlankItem bl;
     private boolean mIsLastElement;
 
-    public BlankItem(Context context, PlaceHolderView PHView, long dateindays, String datetext,boolean isLastElement){
+    public BlankItem(Context context, PlaceHolderView PHView, long dateindays, String datetext,boolean isLastttttElement){
         this.mContext = context;
         this.mPlaceHolderView = PHView;
         this.dateInDays = dateindays;
         this.mDateText = datetext;
-        this.mIsLastElement = isLastElement;
+        this.mIsLastElement = isLastttttElement;
+        Log.d("BlankItem","Blank item is last element is set to : "+isLastttttElement);
+        if(isLastttttElement) onResolved();
     }
 
     @Resolve
@@ -43,14 +45,19 @@ public class BlankItem {
         listenForRemoveViewBroadcast();
         bl = this;
         if(mDateText.equals("pineapples")){
+            Log.d("BlankItem","Blank item is for next to ads. adding listeners for removing self.");
             listenForRemoveSelf();
         }
+        Log.d("BlankItem","Blank item STATUS for last element is : "+mIsLastElement);
         if(mIsLastElement){
+            Log.d("BlankItem","Blank item is last element, sending intent to load next batch");
             Intent intent = new Intent("DONE!!");
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         }
 
     }
+
+
 
     private void listenForRemoveSelf() {
         try{

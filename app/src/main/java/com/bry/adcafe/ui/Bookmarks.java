@@ -360,19 +360,15 @@ public class Bookmarks extends AppCompatActivity {
         Log.d(TAG,"Adlist size for "+noOfDays+" is: "+adList.size());
         for(int i = 0; i<adList.size();i++){
             boolean islst = false;
-            if(adList.size()%3==0 && i+1==adList.size()) {
-                islst = true;
-            }
+            if(i+1==adList.size()) islst = true;
             mPlaceHolderView.addView(new SavedAdsCard(adList.get(i),mContext,mPlaceHolderView,adList.get(i).getPushId(),noOfDays,islst));
             Log.d(TAG,"Loaded ad : "+adList.get(i).getPushId());
         }
         for(int i = 0;i<getNumber(adList.size());i++){
             boolean islst = false;
-            if(i+1==getNumber(adList.size())) {
-                islst = true;
-            }
+            if(i+1==getNumber(adList.size())) islst = false;
             mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,"pineapples",islst));
-
+            Log.d(TAG,"Loaded a blank item for :"+getDateFromDays(noOfDays)+"; isLast item is : "+islst);
         }
         cycleCount++;
     }

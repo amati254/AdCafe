@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
@@ -56,6 +57,7 @@ public class MyAdStatsItem {
     private PlaceHolderView mPlaceHolderView;
     private Advert mAdvert;
     private DatabaseReference dbRef;
+    private byte[] mImageBytes;
 
     public MyAdStatsItem(Context Context, PlaceHolderView PlaceHolderView, Advert Advert){
         this.mContext = Context;
@@ -65,7 +67,8 @@ public class MyAdStatsItem {
 
     @Resolve
     public void onResolved(){
-        loadImage();
+//        loadImage();
+        new LongOperationFI().execute("");
         mEmail.setText(String.format("Uploaded by : %s", mAdvert.getUserEmail()));
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
         mDateUploaded.setText(String.format("Uploaded on %s", getDateFromDays(mAdvert.getDateInDays())));
@@ -90,6 +93,21 @@ public class MyAdStatsItem {
             e.printStackTrace();
         }
         loadListeners();
+    }
+
+    private void setImage() {
+        try {
+            Bitmap bm = getResizedBitmap(decodeFromFirebaseBase64(mAdvert.getImageUrl()),150);
+            Log.d("SavedAdsCard---","Image has been converted to bitmap.");
+            mImageBytes = bitmapToByte(bm);
+            mAdvert.setImageBitmap(bm);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadImage2(){
+        Glide.with(mContext).load(mImageBytes).into(mAdImage);
     }
 
     private void loadImage(){
@@ -272,5 +290,29 @@ public class MyAdStatsItem {
         SimpleDateFormat month_date = new SimpleDateFormat("MMM");
         String month_name = month_date.format(cal.getTime());
         return month_name;
+    }
+
+    private class LongOperationFI extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try{
+                setImage();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return "executed";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            if(mImageBytes!=null) loadImage2();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
     }
 }

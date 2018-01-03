@@ -2,6 +2,7 @@ package com.bry.adcafe.ui;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
@@ -32,7 +33,7 @@ public class Splash extends AppCompatActivity {
     private boolean isClearToMoveToNextActivity;
     private TextView LSEText;
     private TextView LogoText;
-
+    private static int NOTIFICATION_ID2 = 1880;
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,13 @@ public class Splash extends AppCompatActivity {
                 if(isUserSeeingAcivity) goToNextActivity();
             }
         },SPLASH_DISPLAY_LENGTH);
+
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        try{
+            notificationManager.cancel(NOTIFICATION_ID2);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override

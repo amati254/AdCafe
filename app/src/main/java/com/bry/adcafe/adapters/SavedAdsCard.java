@@ -94,8 +94,6 @@ public class SavedAdsCard {
 
     @Resolve
     private void onResolved() {
-//       loadImage();
-//       setImage();
        new LongOperationFI().execute("");
        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
                new IntentFilter("UNREGISTER"));
@@ -292,6 +290,7 @@ public class SavedAdsCard {
                 if(!isBeingShared) {
                     Log.d("SavedAdsCard", "Setting the ad to be viewed.");
                     Variables.adToBeViewed = mAdvert;
+                    Variables.adToBeUnpinned = mAdvert;
                     Variables.noOfDays = noOfDaysDate;
                     Variables.placeHolderView = mPlaceHolderView;
                     Variables.position = mPlaceHolderView.getViewResolverPosition(this);
@@ -346,7 +345,7 @@ public class SavedAdsCard {
             id = mAdvert.getPushId();
         }catch (Exception e){
             e.printStackTrace();
-            id = Variables.adToBeViewed.getPushId();
+            id = Variables.adToBeUnpinned.getPushId();
         }
         try{
             mPlaceHolderView.removeView(this);
@@ -443,6 +442,7 @@ public class SavedAdsCard {
 
         @Override
         protected void onPreExecute() {
+            mAvi.setVisibility(android.view.View.VISIBLE);
             super.onPreExecute();
         }
     }

@@ -116,7 +116,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isLoadingMoreAds = false;
     private boolean mDoublePressedToPin = false;
     private Advert lastAdSeen = null;
-    private static int NOTIFICATION_ID2 = 1880;
 
 
     @Override
@@ -132,12 +131,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         logUser();
         new DatabaseManager().setLastSeenDateInFirebase();
         mAviLoadingMoreAds.hide();
-        NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
-        try{
-            notificationManager.cancel(NOTIFICATION_ID2);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
 
     }
 

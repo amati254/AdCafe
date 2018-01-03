@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -76,8 +77,7 @@ public class AdvertCard{
     private boolean hasBeenSwiped = true;
     private Bitmap bs;
     private String igsNein = "none";
-
-
+    private byte[] mImageBytes;
 
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
@@ -89,16 +89,24 @@ public class AdvertCard{
 
     @Resolve
     private void onResolved(){
-        if(mLastOrNotLast == Constants.LAST){
-            mIsNoAds = false;
-           loadOnlyLastAd();
-        }else if(mLastOrNotLast == Constants.NO_ADS){
+//        if(mLastOrNotLast == Constants.LAST){
+//            mIsNoAds = false;
+//           loadOnlyLastAd();
+//        }else if(mLastOrNotLast == Constants.NO_ADS){
+//            mIsNoAds = true;
+//            loadAdPlaceHolderImage();
+//        }else{
+//            mIsNoAds = false;
+//            loadAllAds();
+//        }
+        if(mLastOrNotLast == Constants.NO_ADS){
             mIsNoAds = true;
             loadAdPlaceHolderImage();
         }else{
             mIsNoAds = false;
-            loadAllAds();
+            new LongOperationFI().execute("");
         }
+
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
         Variables.hasBeenPinned = false;
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
@@ -111,21 +119,35 @@ public class AdvertCard{
         Variables.setCurrentAdvert(mAdvert);
     }
 
-    private void loadAllAds(){
-        Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
-
-        mAvi.setVisibility(android.view.View.VISIBLE);
+    private void setImage() {
         try {
-            if(mAdvert.isFlagged()){
-                bs = BitmapFactory.decodeResource(mContext.getResources(),R.drawable.placeholderimage);
-            }else {
-                bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
-                mAdvert.setImageBitmap(bs);
-            }
+            Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+            Log.d("SavedAdsCard---","Image has been converted to bitmap.");
+            mImageBytes = bitmapToByte(bm);
+            mAdvert.setImageBitmap(bm);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Glide.with(mContext).load(bitmapToByte(mAdvert.getImageBitmap())).listener(new RequestListener<byte[], GlideDrawable>() {
+    }
+
+    private void loadAllAds(){
+        Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
+
+//        mAvi.setVisibility(android.view.View.VISIBLE);
+//        try {
+//            if(mAdvert.isFlagged()){
+//                bs = BitmapFactory.decodeResource(mContext.getResources(),R.drawable.placeholderimage);
+//            }else {
+//                bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+//                mAdvert.setImageBitmap(bs);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        Glide.with(mContext).load(
+//                bitmapToByte(mAdvert.getImageBitmap())
+                mImageBytes
+        ).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
             public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
                 Log.d("ADVERT_CARD--","The image has failed to load due to error."+e.getMessage());
@@ -168,19 +190,22 @@ public class AdvertCard{
 
     private void loadOnlyLastAd(){
         Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
-        mAvi.setVisibility(android.view.View.VISIBLE);
-        try {
-            if(mAdvert.isFlagged()){
-                bs = BitmapFactory.decodeResource(mContext.getResources(),R.drawable.placeholderimage);
-            }else {
-                bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
-                mAdvert.setImageBitmap(bs);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        mAvi.setVisibility(android.view.View.VISIBLE);
+//        try {
+//            if(mAdvert.isFlagged()){
+//                bs = BitmapFactory.decodeResource(mContext.getResources(),R.drawable.placeholderimage);
+//            }else {
+//                bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+//                mAdvert.setImageBitmap(bs);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
-        Glide.with(mContext).load(bitmapToByte(mAdvert.getImageBitmap())).listener(new RequestListener<byte[], GlideDrawable>() {
+        Glide.with(mContext).load(
+//                bitmapToByte(mAdvert.getImageBitmap())
+                mImageBytes
+        ).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
             public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
                 errorImageView.setVisibility(android.view.View.VISIBLE);
@@ -373,5 +398,38 @@ public class AdvertCard{
         }
 
         return inSampleSize;
+    }
+
+    private class LongOperationFI extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try{
+                setImage();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return "executed";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            if(mImageBytes!=null){
+                if(mLastOrNotLast == Constants.LAST){
+                    mIsNoAds = false;
+                    loadOnlyLastAd();
+                }else{
+                    mIsNoAds = false;
+                    loadAllAds();
+                }
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mAvi.setVisibility(android.view.View.VISIBLE);
+            super.onPreExecute();
+        }
     }
 }

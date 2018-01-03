@@ -352,14 +352,11 @@ public class AdStats extends AppCompatActivity {
             DataListsView.addView(new DateForAdStats(mContext,"",DataListsView));
         }
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                DataListsView.setVisibility(View.VISIBLE);
-                findViewById(R.id.topText).setVisibility(View.VISIBLE);
-                findViewById(R.id.LoadingViews).setVisibility(View.GONE);
-            }
-        }, 2000);
+        DataListsView.setVisibility(View.VISIBLE);
+        findViewById(R.id.topText).setVisibility(View.VISIBLE);
+        findViewById(R.id.LoadingViews).setVisibility(View.GONE);
+
+
 
     }
 
