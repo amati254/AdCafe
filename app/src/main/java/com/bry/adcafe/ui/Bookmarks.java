@@ -362,7 +362,7 @@ public class Bookmarks extends AppCompatActivity {
             boolean islst = false;
             if(i+1==adList.size()) islst = true;
             mPlaceHolderView.addView(new SavedAdsCard(adList.get(i),mContext,mPlaceHolderView,adList.get(i).getPushId(),noOfDays,islst));
-            Log.d(TAG,"Loaded ad : "+adList.get(i).getPushId());
+            Log.d(TAG,"Loaded ad : "+adList.get(i).getPushId()+"; isLast item is : "+islst);
         }
         for(int i = 0;i<getNumber(adList.size());i++){
             boolean islst = false;

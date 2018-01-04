@@ -82,6 +82,7 @@ public class SavedAdsCard {
     private SavedAdsCard sac;
     private boolean mIsLastElement;
     private byte[] mImageBytes;
+    private boolean hasLoaded =false;
 
 
     public SavedAdsCard(Advert advert, Context context, PlaceHolderView placeHolderView,String pinID,long noOfDays,boolean isLastElement) {
@@ -123,10 +124,6 @@ public class SavedAdsCard {
                 }catch (Exception e2){
                     e2.printStackTrace();
                 }
-                if(mIsLastElement){
-                    Intent intent = new Intent("DONE!!");
-                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-                }
                 Log.d("SavedAdsCard---",e.getMessage());
                 if(!isInternetAvailable()&& !hasMessageBeenSeen){
                     hasMessageBeenSeen = true;
@@ -144,10 +141,7 @@ public class SavedAdsCard {
                 }catch (Exception e){
                     e.printStackTrace();
                 }
-                if(mIsLastElement){
-                    Intent intent = new Intent("DONE!!");
-                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-                }
+               hasLoaded = true;
                 return false;
             }
         }).into(imageView);
@@ -287,7 +281,7 @@ public class SavedAdsCard {
 
             @Override
             public void run() {
-                if(!isBeingShared) {
+                if(!isBeingShared && hasLoaded) {
                     Log.d("SavedAdsCard", "Setting the ad to be viewed.");
                     Variables.adToBeViewed = mAdvert;
                     Variables.adToBeUnpinned = mAdvert;
@@ -438,6 +432,10 @@ public class SavedAdsCard {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             if(mImageBytes!=null) loadImage2();
+            if(mIsLastElement){
+                Intent intent = new Intent("DONE!!");
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            }
         }
 
         @Override
