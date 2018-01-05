@@ -124,6 +124,9 @@ public class DatabaseManager {
         dbRefUser.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+                if(getPositionOf(AdvertCategory)==Variables.getCurrentSubscriptionIndex()){
+                 Variables.setCurrentSubscriptionIndex(Variables.getCurrentSubscriptionIndex()-1);
+                }
                 String categoryBeingViewed = getSubscriptionValue(Variables.getCurrentSubscriptionIndex());
                 Log.d(TAG,"the current category being removed is "+categoryBeingViewed);
                 Variables.Subscriptions.remove(AdvertCategory);
@@ -501,12 +504,7 @@ public class DatabaseManager {
                     Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
                     Variables.Subscriptions.put(category,cluster);
                 }
-                int newIndex;
-                if(Variables.mIsLastOrNotLast.equals(Constants.NO_ADS)){
-                    newIndex = Variables.Subscriptions.size()-1;
-                }else{
-                    newIndex = getPositionOf(categoryBeingViewed);
-                }
+                int newIndex = getPositionOf(categoryBeingViewed);
 
                 Log.d(TAG,"Its new index position is : "+newIndex);
                 Variables.setCurrentSubscriptionIndex(newIndex);

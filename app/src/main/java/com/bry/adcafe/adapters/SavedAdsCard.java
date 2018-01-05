@@ -105,9 +105,9 @@ public class SavedAdsCard {
 
     private void setImage() {
         try {
-            Bitmap bm = getResizedBitmap(decodeFromFirebaseBase64(mAdvert.getImageUrl()),170);
+            Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
             Log.d("SavedAdsCard---","Image has been converted to bitmap.");
-            mImageBytes = bitmapToByte(bm);
+            mImageBytes = bitmapToByte(getResizedBitmap(bm,170));
             mAdvert.setImageBitmap(bm);
         } catch (IOException e) {
             e.printStackTrace();
