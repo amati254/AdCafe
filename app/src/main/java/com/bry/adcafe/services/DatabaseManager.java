@@ -12,6 +12,7 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.User;
 import com.bry.adcafe.ui.LoginActivity;
+import com.bry.adcafe.ui.MainActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -22,6 +23,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -92,7 +94,9 @@ public class DatabaseManager {
         });
     }
 
-
+    public void setContext(Context context){
+        this.context = context;
+    }
 
     public void unSubscribeUserFormAdvertCategory(String AdvertCategory, int clusterIDInCategory){
         FlagSubscriptionThenUnsubscribeUser(AdvertCategory,clusterIDInCategory);
@@ -136,6 +140,8 @@ public class DatabaseManager {
                 Variables.setCurrentSubscriptionIndex(newIndex);
 
                 updateCurrentSubIndex();
+                setUserDataInSharedPrefs(context);
+                Variables.hasChangesBeenMadeToCategories = true;
 
                 Intent intent = new Intent(Constants.FINISHED_UNSUBSCRIBING);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
@@ -485,6 +491,9 @@ public class DatabaseManager {
         adRef3.setValue(Variables.getCurrentSubscriptionIndex());
     }
 
+
+
+
     private void loadNewSubList(){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         User.setUid(uid);
@@ -512,6 +521,8 @@ public class DatabaseManager {
 
                 Intent intent = new Intent(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                setUserDataInSharedPrefs(context);
+                Variables.hasChangesBeenMadeToCategories = true;
             }
 
             @Override
@@ -519,6 +530,25 @@ public class DatabaseManager {
 
             }
         });
+    }
+
+    private void setUserDataInSharedPrefs(Context context) {
+        SharedPreferences pref5 = context.getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
+        SharedPreferences.Editor editor5 = pref5.edit();
+        editor5.clear();
+        editor5.putInt("CurrentSubIndex", Variables.getCurrentSubscriptionIndex());
+        Log.d("MAIN_ACTIVITY---", "Setting the users current subscription index in shared preferences - " + Variables.getCurrentSubscriptionIndex());
+        editor5.apply();
+
+        setSubsInSharedPrefs(context);
+    }
+
+    private void setSubsInSharedPrefs(Context context) {
+        Gson gson = new Gson();
+        String hashMapString = gson.toJson(Variables.Subscriptions);
+
+        SharedPreferences prefs = context.getSharedPreferences("Subscriptions", MODE_PRIVATE);
+        prefs.edit().putString("hashString", hashMapString).apply();
     }
 
 }

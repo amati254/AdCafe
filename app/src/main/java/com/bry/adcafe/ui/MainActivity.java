@@ -153,15 +153,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
         if (!getCurrentDateInSharedPreferences().equals("0") && !getCurrentDateInSharedPreferences().equals(getDate())) {
             Log.d(TAG, "---Date in shared preferences does not match current date,therefore resetting everything.");
-            resetEverything();
-            sendBroadcastToUnregisterAllReceivers();
-            removeAllViews();
-        }
-        if (isAlmostMidNight() && Variables.isMainActivityOnline) {
             mIsBeingReset = true;
             resetEverything();
             sendBroadcastToUnregisterAllReceivers();
             removeAllViews();
+        }else if (isAlmostMidNight() && Variables.isMainActivityOnline) {
+            mIsBeingReset = true;
+            resetEverything();
+            sendBroadcastToUnregisterAllReceivers();
+            removeAllViews();
+        }else if(Variables.hasChangesBeenMadeToCategories && !mIsBeingReset){
+            sendBroadcastToUnregisterAllReceivers();
+            removeAllViews();
+            loadAdsFromThread();
+            Variables.hasChangesBeenMadeToCategories = false;
         }
         r = new Runnable() {
             @Override
@@ -177,7 +182,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         };
         h.postDelayed(r, 60000);
-//        onclicks();
     }
 
     @Override
@@ -225,14 +229,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SharedPreferences pref5 = mContext.getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
         SharedPreferences.Editor editor5 = pref5.edit();
         editor5.clear();
-        editor5.putInt("CategoryIndex", Variables.getCurrentSubscriptionIndex());
+        editor5.putInt("CurrentSubIndex", Variables.getCurrentSubscriptionIndex());
         Log.d("MAIN_ACTIVITY---", "Setting the users current subscription index in shared preferences - " + Variables.getCurrentSubscriptionIndex());
         editor5.apply();
 
         SharedPreferences pref6 = mContext.getSharedPreferences("CurrentAdInSubscription", MODE_PRIVATE);
         SharedPreferences.Editor editor6 = pref6.edit();
         editor6.clear();
-        editor6.putInt("CurrentAdInsubscription", Variables.getCurrentAdInSubscription());
+        editor6.putInt("CurrentAdInSubscription", Variables.getCurrentAdInSubscription());
         Log.d("MAIN_ACTIVITY---", "Setting the current ad in subscription in shared preferences - " + Variables.getCurrentAdInSubscription());
         editor6.apply();
 
@@ -272,6 +276,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             try {
                 Log.d(TAG, "---Starting the getAds method...");
                 startGetAds();
+                Variables.isStartFromLogin = false;
             } catch (Exception e) {
                 Log.e("BACKGROUND_PROC---", e.getMessage());
             }
@@ -303,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         User.setUid(uid);
 
         SharedPreferences prefs5 = getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
-        int currentSubIndex = prefs5.getInt("CurrentAdInsubscription",0);
+        int currentSubIndex = prefs5.getInt("CurrentSubIndex",0);
         Log.d(TAG, "CURRENT SUBSCRIPTION INDEX NUMBER GOTTEN FROM SHARED PREFERENCES IS - " + currentSubIndex);
         if (mIsBeingReset || !getCurrentDateInSharedPreferences().equals(getDate())) {
             Variables.setCurrentSubscriptionIndex(0);
@@ -312,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         SharedPreferences prefs6 = getSharedPreferences("CurrentAdInSubscription", MODE_PRIVATE);
-        int currentAdInSubscription = prefs6.getInt("CurrentAdInsubscription",0);
+        int currentAdInSubscription = prefs6.getInt("CurrentAdInSubscription",0);
         Log.d(TAG,"CURRENT AD IN SUBSCRIPTION GOTTEN FROM SHARED PREFERENCES IS : "+currentAdInSubscription);
         if (mIsBeingReset || !getCurrentDateInSharedPreferences().equals(getDate())) {
             Variables.setCurrentAdInSubscription(0);
@@ -775,6 +780,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         Log.d(TAG, "---Setting up On click listeners...");
         onclicks();
+        Log.d(TAG,"Todays ad total is : "+Variables.getAdTotal(mKey));
+        Log.d(TAG,"The month Ad Total is : "+Variables.getMonthAdTotals(mKey));
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
@@ -1380,6 +1387,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void resetEverything() {
         resetAdTotalSharedPreferencesAndDayAdTotals();
+        Variables.clearAllAdsFromAdList();
         loadAdsFromThread();
     }
 

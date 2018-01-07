@@ -134,12 +134,18 @@ public class Dashboard extends AppCompatActivity {
     }
 
     private void setValues() {
-        SharedPreferences prefs = getSharedPreferences("TodayTotals", MODE_PRIVATE);
-        int todaysTotals = prefs.getInt("TodaysTotals", 0);
+        int todaysTotals;
+        int monthsTotals;
+        if(Variables.getMonthAdTotals(mKey) ==0) {
+            SharedPreferences prefs = getSharedPreferences("TodayTotals", MODE_PRIVATE);
+            todaysTotals = prefs.getInt("TodaysTotals", 0);
 
-        SharedPreferences prefs2 = getSharedPreferences("MonthTotals", MODE_PRIVATE);
-        int monthsTotals = prefs2.getInt("MonthsTotals", 0);
-
+            SharedPreferences prefs2 = getSharedPreferences("MonthTotals", MODE_PRIVATE);
+            monthsTotals = prefs2.getInt("MonthsTotals", 0);
+        }else{
+            todaysTotals = Variables.getAdTotal(mKey);
+            monthsTotals =Variables.getMonthAdTotals(mKey);
+        }
         mTotalAdsSeenToday.setText(Integer.toString(todaysTotals));
         mTotalAdsSeenAllTime.setText(Integer.toString(monthsTotals));
         int totalAmounts = (int)(monthsTotals*Constants.CONSTANT_AMMOUNT_FOR_USER);

@@ -113,11 +113,15 @@ public class SubscriptionManagerItem {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(isSubscribing){
-                new DatabaseManager().subscribeUserToSpecificCategory(category);
+                DatabaseManager dbm = new DatabaseManager();
+                dbm.setContext(mContext);
+                dbm.subscribeUserToSpecificCategory(category);
                 Log.d("SelectCategoryItem - ", "Adding category - " + category);
             }else{
                 int SubscriptionClusterID = Variables.Subscriptions.get(category);
-                new DatabaseManager().unSubscribeUserFormAdvertCategory(category,SubscriptionClusterID);
+                DatabaseManager dbm = new DatabaseManager();
+                dbm.setContext(mContext);
+                dbm.unSubscribeUserFormAdvertCategory(category,SubscriptionClusterID);
                 Log.d("SelectCategoryItem - ", "Removing category - " + category);
             }
 

@@ -61,6 +61,8 @@ public class Variables {
     public static int position;
 
     public static boolean isLoginOnline = false;
+    public static boolean hasChangesBeenMadeToCategories = false;
+
 
 
 
