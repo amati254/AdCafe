@@ -9,9 +9,9 @@
             android:layout_height="match_parent"
             android:layout_width="match_parent">
             <gradient
-                android:startColor="@color/violet"
-                android:endColor="@color/violet"
-                android:centerColor="@color/violet"
+                android:startColor="@color/colorPrimaryDark2"
+                android:endColor="@color/colorPrimary"
+                android:centerColor="@color/colorPrimaryDark"
                 android:type="sweep" />
         </shape>
     </item>
