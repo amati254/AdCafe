@@ -67,8 +67,7 @@ public class MyAdStatsItem {
 
     @Resolve
     public void onResolved(){
-//        loadImage();
-        new LongOperationFI().execute("");
+        if(mImageBytes==null) new LongOperationFI().execute("");
         mEmail.setText(String.format("Uploaded by : %s", mAdvert.getUserEmail()));
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
         mDateUploaded.setText(String.format("Uploaded on %s", getDateFromDays(mAdvert.getDateInDays())));

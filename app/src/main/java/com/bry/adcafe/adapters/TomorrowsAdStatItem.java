@@ -63,7 +63,7 @@ public class TomorrowsAdStatItem {
 
     @Resolve
     private void onResolved(){
-        new  LongOperationFI().execute("");
+        if(mImageBytes==null) new  LongOperationFI().execute("");
         mEmail.setText("Uploaded by : "+mAdvert.getUserEmail());
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
         mCategory.setText("Category : "+mAdvert.getCategory());

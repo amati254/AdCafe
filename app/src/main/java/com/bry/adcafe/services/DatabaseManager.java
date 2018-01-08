@@ -50,7 +50,7 @@ public class DatabaseManager {
     private List<String> categoryList = new ArrayList<>();
     private boolean isUserAddingANewCategory = false;
 
-    ////Create user methods////////////////////////////////////////
+    ////Create user methods//////
 
     public void createUserSpace(final Context mContext){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -170,7 +170,7 @@ public class DatabaseManager {
 
 
 
-    public void generateClusterIDFromCategoryFlaggedClusters(final String AdvertCategory){
+    private void generateClusterIDFromCategoryFlaggedClusters(final String AdvertCategory){
         Variables.setMonthAdTotals(mKey,0);
         Variables.setAdTotal(0,mKey);
         Log.d(TAG,"--Generating clusterID from flagged ads.");
@@ -201,7 +201,7 @@ public class DatabaseManager {
         });
     }
 
-    public void generateClusterIDFromCategory(final String AdvertCategory){
+    private void generateClusterIDFromCategory(final String AdvertCategory){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
 
@@ -262,7 +262,7 @@ public class DatabaseManager {
         });
     }
 
-    public void subscribeUserToAdvertCategoryAndAddCategoryToUserList(final String AdvertCategory, final int Cluster){
+    private void subscribeUserToAdvertCategoryAndAddCategoryToUserList(final String AdvertCategory, final int Cluster){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         //this subscribes user to Cluster in Advert Category
@@ -302,7 +302,10 @@ public class DatabaseManager {
 
     ////create User Methods.//////////////////////////////////////////////////////////////////////
 
-    ////Load users data methods.////////////////////////////////////////
+
+
+
+    ////Load users data methods.///
 
     public void loadUserData(final Context mContext){
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CATEGORY_LIST);
@@ -324,7 +327,7 @@ public class DatabaseManager {
         });
     }
 
-    public void loadUserDataNow(final Context mContext){
+    private void loadUserDataNow(final Context mContext){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         User.setUid(uid);
         Log.d(TAG,"Starting to load users data");
@@ -400,7 +403,7 @@ public class DatabaseManager {
                     Variables.setCurrentAdInSubscription(0);
                     resetTotalsInFirebase();
                 }
-
+                setUserDataInSharedPrefs(mContext);
                 Intent intent = new Intent(Constants.LOADED_USER_DATA_SUCCESSFULLY);
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             }
@@ -441,12 +444,54 @@ public class DatabaseManager {
 
     ////load user data methods.//////////////////////////////////////////////////////////////////////////
 
+
+    ////Other stuff.///
     private void setDateInSharedPrefs(String date,Context context){
         Log.d(TAG, "---Setting current date in shared preferences.");
         SharedPreferences prefs = context.getSharedPreferences(Constants.DATE, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("date", date);
         editor.apply();
+    }
+
+    private void setUserDataInSharedPrefs(Context context) {
+        SharedPreferences pref5 = context.getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
+        SharedPreferences.Editor editor5 = pref5.edit();
+        editor5.clear();
+        editor5.putInt("CurrentSubIndex", Variables.getCurrentSubscriptionIndex());
+        Log.d("DatabaseManager---", "Setting the users current subscription index in shared preferences - " + Variables.getCurrentSubscriptionIndex());
+        editor5.apply();
+
+        SharedPreferences pref6 = context.getSharedPreferences("CurrentAdInSubscription", MODE_PRIVATE);
+        SharedPreferences.Editor editor6 = pref6.edit();
+        editor6.clear();
+        editor6.putInt("CurrentAdInSubscription", Variables.getCurrentAdInSubscription());
+        Log.d("DatabaseManager---", "Setting the current ad in subscription in shared preferences - " + Variables.getCurrentAdInSubscription());
+        editor6.apply();
+
+        SharedPreferences pref = context.getSharedPreferences("TodayTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.putInt("TodaysTotals", Variables.getAdTotal(mKey));
+        Log.d("DatabaseManager--", "Setting todays ad totals in shared preferences - " + Integer.toString(Variables.getAdTotal(mKey)));
+        editor.apply();
+
+        SharedPreferences pref2 = context.getSharedPreferences("MonthTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = pref2.edit();
+        editor2.clear();
+        editor2.putInt("MonthsTotals", Variables.getMonthAdTotals(mKey));
+        Log.d("DatabaseManager--", "Setting the month totals in shared preferences - " + Integer.toString(Variables.getMonthAdTotals(mKey)));
+        editor2.apply();
+
+        setSubsInSharedPrefs(context);
+    }
+
+    private void setSubsInSharedPrefs(Context context) {
+        Gson gson = new Gson();
+        String hashMapString = gson.toJson(Variables.Subscriptions);
+
+        SharedPreferences prefs = context.getSharedPreferences("Subscriptions", MODE_PRIVATE);
+        prefs.edit().putString("hashString", hashMapString).apply();
     }
 
     private String getDate(){
@@ -470,6 +515,9 @@ public class DatabaseManager {
         return todaysDate;
     }
 
+
+
+
     private String getSubscriptionValue(int index) {
         LinkedHashMap map = Variables.Subscriptions;
         String Sub = (new ArrayList<String>(map.keySet())).get(index);
@@ -490,9 +538,6 @@ public class DatabaseManager {
         Log.d(TAG,"Setting current subscription index in firebase to :"+Variables.getCurrentSubscriptionIndex());
         adRef3.setValue(Variables.getCurrentSubscriptionIndex());
     }
-
-
-
 
     private void loadNewSubList(){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -532,23 +577,7 @@ public class DatabaseManager {
         });
     }
 
-    private void setUserDataInSharedPrefs(Context context) {
-        SharedPreferences pref5 = context.getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
-        SharedPreferences.Editor editor5 = pref5.edit();
-        editor5.clear();
-        editor5.putInt("CurrentSubIndex", Variables.getCurrentSubscriptionIndex());
-        Log.d("MAIN_ACTIVITY---", "Setting the users current subscription index in shared preferences - " + Variables.getCurrentSubscriptionIndex());
-        editor5.apply();
 
-        setSubsInSharedPrefs(context);
-    }
-
-    private void setSubsInSharedPrefs(Context context) {
-        Gson gson = new Gson();
-        String hashMapString = gson.toJson(Variables.Subscriptions);
-
-        SharedPreferences prefs = context.getSharedPreferences("Subscriptions", MODE_PRIVATE);
-        prefs.edit().putString("hashString", hashMapString).apply();
-    }
+    ////Other stuff.////////////////////////////////////////////////////////////////////////////////////////
 
 }
