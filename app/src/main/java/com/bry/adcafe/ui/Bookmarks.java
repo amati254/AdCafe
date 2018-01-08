@@ -208,7 +208,7 @@ public class Bookmarks extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("BOOKMARKS--","Received message to continue");
-            startLoadAdsIntoViews();
+//            startLoadAdsIntoViews();
         }
     };
 
@@ -371,6 +371,7 @@ public class Bookmarks extends AppCompatActivity {
             Log.d(TAG,"Loaded a blank item for :"+getDateFromDays(noOfDays)+"; isLast item is : "+islst);
         }
         cycleCount++;
+        startLoadAdsIntoViews();
     }
 
     private void loadBookmarkedAdsIntoCards() {

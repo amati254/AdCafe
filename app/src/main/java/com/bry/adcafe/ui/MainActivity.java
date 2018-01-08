@@ -1047,7 +1047,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private BroadcastReceiver mMessageReceiverForLastAd = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (!mIsBeingReset && !isLoadingMoreAds && Variables.nextSubscriptionIndex + 1 == Variables.Subscriptions.size()) {
+            if (!mIsBeingReset && !isLoadingMoreAds) {
                 Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
                 loadAnyAnnouncements();
             }
@@ -1133,9 +1133,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         isLoadingMoreAds = false;
                         mAviLoadingMoreAds.hide();
 //                        spinner.setVisibility(View.VISIBLE);
-                        if(Variables.isLockedBecauseOfFlagedAds){
+                        if(Variables.isLockedBecauseOfNoMoreAds){
                             mSwipeView.unlockViews();
-                            Variables.isLockedBecauseOfFlagedAds = false;
+                            Variables.isLockedBecauseOfNoMoreAds = false;
                         }
                     }else{
                         Log.d(TAG,"Loaded no ad, loading more ads...");
@@ -1147,6 +1147,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Log.d(TAG,"No more ads are available from the rest of the subscriptions");
                             isLoadingMoreAds = false;
                             mAviLoadingMoreAds.hide();
+                            if(mSwipeView.getChildCount()==1){
+                                Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
+                                loadAnyAnnouncements();
+                            }
 //                            spinner.setVisibility(View.VISIBLE);
                         }
                     }
@@ -1161,7 +1165,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d(TAG,"No more ads are available from the rest of the subscriptions");
                         isLoadingMoreAds = false;
                         mAviLoadingMoreAds.hide();
-                        if(Variables.isLockedBecauseOfNoMoreAds){
+                        if(mSwipeView.getChildCount()==1){
                             Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
                             loadAnyAnnouncements();
                         }

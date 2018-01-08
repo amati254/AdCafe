@@ -95,7 +95,11 @@ public class SavedAdsCard {
 
     @Resolve
     private void onResolved() {
-       new LongOperationFI().execute("");
+        if(mImageBytes!=null) loadImage2();
+        else new LongOperationFI().execute("");
+
+//        if(mImageBytes==null) new LongOperationFI().execute("");
+
        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
                new IntentFilter("UNREGISTER"));
        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForAddNewBlank,
@@ -433,8 +437,8 @@ public class SavedAdsCard {
             super.onPostExecute(result);
             if(mImageBytes!=null) loadImage2();
             if(mIsLastElement){
-                Intent intent = new Intent("DONE!!");
-                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+//                Intent intent = new Intent("DONE!!");
+//                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             }
         }
 
