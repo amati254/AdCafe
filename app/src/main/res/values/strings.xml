@@ -68,7 +68,7 @@
         effective, interesting and maybe, just maybe, entertaining.</string>
 
     <string name="slide4text">Even better! Among many other benefits, the AdCafe gives you the ability to
-        reach many of its users in a very short period of time.</string>
+        target many of its users in a very short period of time.</string>
 
     <string name="slide5text">Not quite yet! First you\'ll need to know how to use the app and for that we\'ve prepared
         a short tutorial on how you will interact with it.</string>
@@ -89,11 +89,11 @@
 
     <string name="slide10text">Below the AdCards are buttons which can help you do more cool stuff.</string>
     <string name="logoutbuttonexplanation">Logout Button : You can logout of your account using this button.</string>
-    <string name="pinlisticon">Ad Archive Button : This window is where you can view all your pinned ads.</string>
+    <string name="pinlisticon">Ad Archive Button : This will open a window where you can view all your pinned ads.</string>
     <string name="dashboardexplanation">Dashboard Button : This window is where all the stats concerning the number of ads you\'ve
         see are stored.</string>
     <string name="shareappexplanation">Share App Button : This will help you share the app with your friends and mates. Feel free to
-        share ;)</string>
+        do so!</string>
 
 
     <string name="slide11text">Share! and if you have any questions comments or

@@ -176,7 +176,7 @@ public class AdCounterBar {
 
         @Override
         protected void onProgressUpdate(Integer... values) {
-            Log.i("AdCounter-", "onProgressUpdate(): " + String.valueOf(values[0]));
+//            Log.i("AdCounter-", "onProgressUpdate(): " + String.valueOf(values[0]));
             super.onProgressUpdate(values);
             int value = values[0];
             progressBarTimer.incrementProgressBy(-1);

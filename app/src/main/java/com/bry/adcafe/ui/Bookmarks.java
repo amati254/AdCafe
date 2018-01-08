@@ -116,6 +116,7 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowingAreYouSureText);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowingAreYouSureText2);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForContinue);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForEquatePHViews);
 
         Intent intent = new Intent("UNREGISTER");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -129,9 +130,9 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText,new IntentFilter("ARE_YOU_SURE_INTENT"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText2,new IntentFilter("ARE_YOU_SURE2"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForContinue,new IntentFilter("DONE!!"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForEquatePHViews,new IntentFilter("EQUATE_PLACEHOLDER_VIEWS"));
 
     }
-
 
     private void showProg(){
         mProg.show();
@@ -151,6 +152,14 @@ public class Bookmarks extends AppCompatActivity {
     }
 
 
+
+    private BroadcastReceiver mMessageReceiverForEquatePHViews = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BOOKMARKS--","Equating placeholderview");
+            Variables.placeHolderView = mPlaceHolderView;
+        }
+    };
 
     private BroadcastReceiver mMessageReceiverForUnpinned = new BroadcastReceiver() {
         @Override
@@ -336,16 +345,20 @@ public class Bookmarks extends AppCompatActivity {
 
     private void startLoadAdsIntoViews(){
         if(HashOfAds.isEmpty()){
+            Log.d(TAG,"No ads have been loaded, perhaps user doesn't have any pinned ads");
             Toast.makeText(mContext,"You do not have any pinned ads.",Toast.LENGTH_SHORT).show();
             noAdsText.setVisibility(View.VISIBLE);
             mAvi.setVisibility(View.GONE);
             loadingText.setVisibility(View.GONE);
         }else{
-            if(cycleCount+1<HashOfAds.size()) {
+            Log.d(TAG,"Ads have been loaded.");
+            if(cycleCount+1<=HashOfAds.size()) {
                 Long days = getDaysFromHash(cycleCount);
                 List adList = HashOfAds.get(days);
+                Log.d(TAG,"Loading ads : "+days);
                 loadDaysAdsIntoViews(adList, days);
             }else{
+                Log.d(TAG,"Cycle-count plus one is not less than hash of ads size.");
                 hideProg();
             }
 
@@ -529,6 +542,8 @@ public class Bookmarks extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
+            Log.d(TAG,"Starting to load ads into views from onPostExecute");
+            cycleCount=0;
             startLoadAdsIntoViews();
 //            hideProg();
         }

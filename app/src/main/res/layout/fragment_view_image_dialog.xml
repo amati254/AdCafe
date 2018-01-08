@@ -9,9 +9,9 @@
 
     <ImageView
         android:layout_width="wrap_content"
-        android:background="@drawable/owl"
         android:layout_gravity="center"
-        android:layout_margin="0.5dp"
+        android:background="@drawable/owl"
+        android:layout_margin="0.3dp"
         android:id="@+id/theAdImage"
         android:scaleType="fitXY"
         android:layout_height="wrap_content" />

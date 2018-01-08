@@ -45,6 +45,7 @@ public class DateItem {
     private Long dateInDays;
     private String mDateText;
     private DateItem di;
+    private DatabaseReference dbRef;
 
     public DateItem(Context context, PlaceHolderView PHView, long dateindays, String datetext){
         this.mContext = context;
@@ -62,37 +63,80 @@ public class DateItem {
 
     private void loadListeners() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+        dbRef =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.PINNED_AD_LIST).child(Long.toString(dateInDays));
-        DatabaseReference dbRef = query.getRef();
-        dbRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.d("DateItem","OnChildRemoved listener has been called.");
-                checkIfHasChildren();
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        dbRef.addChildEventListener(chil);
+//        dbRef.addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//                Log.d("DateItem","OnChildRemoved listener has been called.");
+//                checkIfHasChildren();
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
+                new IntentFilter("UNREGISTER"));
     }
+
+    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("DateItem--","Received broadcast to Unregister all receivers");
+            try{
+                dbRef.removeEventListener(chil);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+        }
+    };
+
+    ChildEventListener chil = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            Log.d("DateItem","OnChildRemoved listener has been called.");
+            checkIfHasChildren();
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
 
     private void checkIfHasChildren() {
         Long days;
@@ -127,6 +171,7 @@ public class DateItem {
                         }
                         Advert adToBeNotified = AdList.get(AdList.size()-1);
                         Log.d("DateItem","Sending message to ad blank item to ad: "+adToBeNotified.getPushId()+" for date: "+dateInDays);
+//                        if(mPlaceHolderView!=null)Variables.placeHolderView = mPlaceHolderView;
                         Intent intent = new Intent("ADD_BLANK"+dateInDays+adToBeNotified.getPushId());
                         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                         AdList.clear();
@@ -182,7 +227,14 @@ public class DateItem {
             mPlaceHolderView.removeView(di);
         }catch (Exception e){
             e.printStackTrace();
-            Variables.placeHolderView.removeView(di);
+            mPlaceHolderView = Variables.placeHolderView;
+
+            try{
+                mPlaceHolderView.removeView(di);
+            }catch (Exception e2){
+                e2.printStackTrace();
+                Variables.placeHolderView.removeView(di);
+            }
         }
 
     }

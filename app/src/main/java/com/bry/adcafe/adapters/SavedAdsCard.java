@@ -299,11 +299,6 @@ public class SavedAdsCard {
                 isBeingShared = false;
             }
         }, 230);
-//        Log.d("SavedAdsCard","Setting the ad to be viewed.");
-//        Variables.adToBeViewed = mAdvert;
-//        Intent intent = new Intent("VIEW");
-//        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-//        setUpReceiver();
     }
 
     private void setUpReceiver(){
@@ -349,9 +344,10 @@ public class SavedAdsCard {
             mPlaceHolderView.removeView(this);
         }catch (Exception e){
             e.printStackTrace();
-
             Variables.placeHolderView.removeView(this);
         }
+        Intent intent = new Intent("EQUATE_PLACEHOLDER_VIEWS");
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
 
         Log.d("SAVED_ADS_CARD--","Removing pinned ad"+id);
         String uid = User.getUid();
@@ -413,10 +409,23 @@ public class SavedAdsCard {
 
     private void pushBlank(){
         try{
+            mPlaceHolderView.getViewResolverPosition(sac);
             mPlaceHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples",false));
         }catch (Exception e){
             e.printStackTrace();
-            Variables.placeHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples",false));
+            try{
+//                Variables.placeHolderView.getViewResolverPosition(sac);
+                mPlaceHolderView = Variables.placeHolderView;
+                mPlaceHolderView.getViewResolverPosition(sac);
+                try{
+                    mPlaceHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples",false));
+                }catch (Exception e3){
+                    e3.printStackTrace();
+                    mPlaceHolderView.addViewAfter(mPlaceHolderView.getViewResolverPosition(sac),new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples",false));
+                }
+            }catch (Exception e2){
+                e2.printStackTrace();
+            }
         }
     }
 

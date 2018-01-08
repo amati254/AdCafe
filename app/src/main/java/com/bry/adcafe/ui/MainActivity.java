@@ -902,7 +902,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         if(v==findViewById(R.id.profileImageView)){
             if(mDoublePressedToPin) {
-                findViewById(R.id.bookmark2Btn).callOnClick();
+//                findViewById(R.id.bookmark2Btn).callOnClick();
             }else{
                 mSwipeView.doSwipe(true);
             }
