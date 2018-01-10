@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -16,6 +18,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Vibrator;
+import android.support.annotation.DimenRes;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -23,8 +27,11 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,10 +40,12 @@ import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.adapters.BlankItem;
 import com.bry.adcafe.adapters.DateItem;
+import com.bry.adcafe.adapters.SAContainer;
 import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.fragments.ViewImageFragment;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
+import com.bry.adcafe.services.Utils;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -58,10 +67,14 @@ import java.util.List;
 
 import com.wang.avi.AVLoadingIndicatorView;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class Bookmarks extends AppCompatActivity {
     private static final String TAG = "Bookmarks";
     private Context mContext;
-    private PlaceHolderView mPlaceHolderView;
+    @Bind(R.id.PlaceHolderView) public PlaceHolderView mPlaceHolderView;
+    @Bind(R.id.PlaceHolderView2) public PlaceHolderView mPlaceHolderView2;
 
     private ChildEventListener mChildEventListener;
     private DatabaseReference mRef;
@@ -84,6 +97,7 @@ public class Bookmarks extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
         mContext = getApplicationContext();
+        ButterKnife.bind(this);
 
         loadPlaceHolderViews();
         registerReceivers();
@@ -117,10 +131,19 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowingAreYouSureText2);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForContinue);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForEquatePHViews);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddView);
 
+
+        sendBroadCastToUnregisterReceivers();
+    }
+
+    private void sendBroadCastToUnregisterReceivers(){
         Intent intent = new Intent("UNREGISTER");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
+
+
+
 
     private void registerReceivers(){
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnpinned,new IntentFilter(Constants.REMOVE_PINNED_AD));
@@ -131,6 +154,7 @@ public class Bookmarks extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText2,new IntentFilter("ARE_YOU_SURE2"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForContinue,new IntentFilter("DONE!!"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForEquatePHViews,new IntentFilter("EQUATE_PLACEHOLDER_VIEWS"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddView,new IntentFilter("ADD_VIEW_IN_ACTIVITY"));
 
     }
 
@@ -143,15 +167,134 @@ public class Bookmarks extends AppCompatActivity {
     }
 
     private void loadPlaceHolderViews() {
-        mPlaceHolderView = (PlaceHolderView) findViewById(R.id.PlaceHolderView);
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.avi);
         loadingText = (TextView) findViewById(R.id.loadingPinnedAdsMessage);
-        mPlaceHolderView.getBuilder().setLayoutManager(new GridLayoutManager(mContext,3));
 
         noAdsText = (TextView) findViewById(R.id.noPins);
+
+        Point windowSize = Utils.getDisplaySize(getWindowManager());
+        int width = windowSize.x;
+        Variables.width = width;
+//        int spanCount = width/Utils.dpToPx(88);
+
+        int spanCount = 4;
+        GridLayoutManager glm = new GridLayoutManager(mContext,spanCount);
+        mPlaceHolderView.getBuilder().setLayoutManager(glm);
+
+//        ItemOffsetDecoration itemDecoration = new ItemOffsetDecoration(mContext,R.dimen.item_offset);
+//
+//        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.item_offset);
+//        SpacesItemDecoration sid = new SpacesItemDecoration(spacingInPixels);
+//
+//        GridSpacingItemDecoration gsid = new GridSpacingItemDecoration(spanCount,1,true);
+//
+//        mPlaceHolderView.addItemDecoration(sid);
     }
 
 
+
+
+
+    public class ItemOffsetDecoration extends RecyclerView.ItemDecoration {
+
+        private int mItemOffset;
+
+        public ItemOffsetDecoration(int itemOffset) {
+            mItemOffset = itemOffset;
+        }
+
+        public ItemOffsetDecoration(@NonNull Context context, @DimenRes int itemOffsetId) {
+            this(context.getResources().getDimensionPixelSize(itemOffsetId));
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent,
+                                   RecyclerView.State state) {
+            super.getItemOffsets(outRect, view, parent, state);
+            outRect.set(mItemOffset, mItemOffset, mItemOffset, mItemOffset);
+        }
+    }
+
+    public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
+        private int space;
+        public SpacesItemDecoration(int space) {
+            this.space = space;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view,
+                                   RecyclerView parent, RecyclerView.State state) {
+            outRect.left = space;
+            outRect.right = space;
+            outRect.bottom = space;
+
+            // Add top margin only for the first item to avoid double space between items
+            if (parent.getChildLayoutPosition(view) == 0) {
+                outRect.top = space;
+            } else {
+                outRect.top = 0;
+            }
+        }
+    }
+
+    public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
+
+        private int spanCount;
+        private int spacing;
+        private boolean includeEdge;
+
+        public GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
+            this.spanCount = spanCount;
+            this.spacing = spacing;
+            this.includeEdge = includeEdge;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            int position = parent.getChildAdapterPosition(view); // item position
+            int column = position % spanCount; // item column
+
+            if (includeEdge) {
+                outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
+                outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
+
+                if (position < spanCount) { // top edge
+                    outRect.top = spacing;
+                }
+                outRect.bottom = spacing; // item bottom
+            } else {
+                outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
+                outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
+                if (position >= spanCount) {
+                    outRect.top = spacing; // item top
+                }
+            }
+        }
+    }
+
+
+    private BroadcastReceiver mMessageReceiverForAddView = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BOOKMARKS--","Trying to add blank view from activity...");
+            try{
+                mPlaceHolderView.addViewAfter(mPlaceHolderView.getViewResolverPosition(Variables.adView),
+                        new BlankItem(mContext,mPlaceHolderView,Variables.lastNoOfDays,"pineapples",false));
+            }catch (Exception e){
+                e.printStackTrace();
+                refreshActivity();
+            }
+
+        }
+    };
+
+    private void refreshActivity() {
+        sendBroadCastToUnregisterReceivers();
+        mPlaceHolderView.removeAllViews();
+        hideProg();
+        mProg.setMessage("Reloading your pinns..");
+        new LongOperation().execute("");
+    }
 
     private BroadcastReceiver mMessageReceiverForEquatePHViews = new BroadcastReceiver() {
         @Override
@@ -221,6 +364,9 @@ public class Bookmarks extends AppCompatActivity {
         }
     };
 
+
+
+
     private void promptUserIfTheyAreSureIfTheyWantToDeleteAd2() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Do you really want to unpin that?")
@@ -284,6 +430,9 @@ public class Bookmarks extends AppCompatActivity {
     }
 
 
+
+
+
     private void loadAdsFromFirebase(){
         if(!mSavedAds.isEmpty()){
             mSavedAds.clear();
@@ -334,6 +483,7 @@ public class Bookmarks extends AppCompatActivity {
                     isDone = true;
 //                    startLoadAdsIntoViews();
                 }
+                isDone = true;
             }
 
             @Override
@@ -350,13 +500,14 @@ public class Bookmarks extends AppCompatActivity {
             noAdsText.setVisibility(View.VISIBLE);
             mAvi.setVisibility(View.GONE);
             loadingText.setVisibility(View.GONE);
+            hideProg();
         }else{
             Log.d(TAG,"Ads have been loaded.");
             if(cycleCount+1<=HashOfAds.size()) {
                 Long days = getDaysFromHash(cycleCount);
-                List adList = HashOfAds.get(days);
+                List<Advert> adList = HashOfAds.get(days);
                 Log.d(TAG,"Loading ads : "+days);
-                loadDaysAdsIntoViews(adList, days);
+                loadDaysAdsIntoViews2(adList, days);
             }else{
                 Log.d(TAG,"Cycle-count plus one is not less than hash of ads size.");
                 hideProg();
@@ -367,7 +518,9 @@ public class Bookmarks extends AppCompatActivity {
 
     private void loadDaysAdsIntoViews(List<Advert> adList, long noOfDays) {
         if(mPlaceHolderView == null) loadPlaceHolderViews();
+        Variables.daysArray.add(noOfDays);
         mPlaceHolderView.addView(new DateItem(mContext,mPlaceHolderView,noOfDays,getDateFromDays(noOfDays)));
+        mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,"",false));
         mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,"",false));
         mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,"",false));
         Log.d(TAG,"Adlist size for "+noOfDays+" is: "+adList.size());
@@ -383,6 +536,12 @@ public class Bookmarks extends AppCompatActivity {
             mPlaceHolderView.addView(new BlankItem(mContext,mPlaceHolderView,noOfDays,"pineapples",islst));
             Log.d(TAG,"Loaded a blank item for :"+getDateFromDays(noOfDays)+"; isLast item is : "+islst);
         }
+        cycleCount++;
+        startLoadAdsIntoViews();
+    }
+
+    private void loadDaysAdsIntoViews2(List<Advert> adList, long noOfDays){
+        mPlaceHolderView2.addView(new SAContainer(adList,mContext,mPlaceHolderView2,noOfDays));
         cycleCount++;
         startLoadAdsIntoViews();
     }
@@ -495,9 +654,6 @@ public class Bookmarks extends AppCompatActivity {
         return dayOfMonth+" "+monthName+yearName;
     }
 
-
-
-
     public String getMonthName_Abbr(int month) {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MONTH, month);
@@ -506,10 +662,13 @@ public class Bookmarks extends AppCompatActivity {
         return month_name;
     }
 
+
+
+
     private int getNumber(int size){
         int newSize = size;
         int number = 0;
-        while (newSize%3!=0){
+        while (newSize%4!=0){
             newSize++;
             number++;
         }
@@ -551,6 +710,7 @@ public class Bookmarks extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            if(!Variables.daysArray.isEmpty())Variables.daysArray.clear();
             showProg();
         }
     }

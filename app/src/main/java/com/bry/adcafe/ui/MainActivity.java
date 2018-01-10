@@ -2,7 +2,6 @@ package com.bry.adcafe.ui;
 
 import android.app.AlarmManager;
 import android.app.FragmentManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,7 +12,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -140,6 +138,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onStart();
         setIsUserLoggedOnInSharedPrefs(true);
         lastAdSeen = Variables.lastAdSeen;
+//        if (!getCurrentDateInSharedPreferences().equals("0") && getCurrentDateInSharedPreferences().equals(getDate())) {
+//            loadAdsFromThread();
+//        }
     }
 
     @Override
@@ -153,19 +154,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
         if (!getCurrentDateInSharedPreferences().equals("0") && !getCurrentDateInSharedPreferences().equals(getDate())) {
             Log.d(TAG, "---Date in shared preferences does not match current date,therefore resetting everything.");
-            mIsBeingReset = true;
-            resetEverything();
             sendBroadcastToUnregisterAllReceivers();
             removeAllViews();
+            resetEverything();
+            lastAdSeen = null;
+            Variables.lastAdSeen = null;
         }else if (isAlmostMidNight() && Variables.isMainActivityOnline) {
             mIsBeingReset = true;
-            resetEverything();
             sendBroadcastToUnregisterAllReceivers();
             removeAllViews();
+            resetEverything();
+            lastAdSeen = null;
+            Variables.lastAdSeen = null;
         }else if(Variables.hasChangesBeenMadeToCategories && !mIsBeingReset){
             sendBroadcastToUnregisterAllReceivers();
             removeAllViews();
             loadAdsFromThread();
+            lastAdSeen = null;
+            Variables.lastAdSeen = null;
             Variables.hasChangesBeenMadeToCategories = false;
         }
         r = new Runnable() {
@@ -177,6 +183,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     resetEverything();
                     sendBroadcastToUnregisterAllReceivers();
                     removeAllViews();
+                    lastAdSeen = null;
+                    Variables.lastAdSeen = null;
                 }
                 h.postDelayed(r, 60000);
             }
@@ -188,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause() {
         super.onPause();
         h.removeCallbacks(r);
-        setCurrentTimeToSharedPrefs();
+        setCurrentDateToSharedPrefs();
         setUserDataInSharedPrefs();
     }
 
@@ -312,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG, "CURRENT SUBSCRIPTION INDEX NUMBER GOTTEN FROM SHARED PREFERENCES IS - " + currentSubIndex);
         if (mIsBeingReset || !getCurrentDateInSharedPreferences().equals(getDate())) {
             Variables.setCurrentSubscriptionIndex(0);
+            Log.d(TAG,"Setting current sub index to 0 since date in shared prefs doesnt match current date or is being reset");
         }else{
             Variables.setCurrentSubscriptionIndex(currentSubIndex);
         }
@@ -1392,6 +1401,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void resetEverything() {
         resetAdTotalSharedPreferencesAndDayAdTotals();
         Variables.clearAllAdsFromAdList();
+        lastAdSeen = null;
         loadAdsFromThread();
     }
 
@@ -1410,11 +1420,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private void setCurrentTimeToSharedPrefs() {
+    private void setCurrentDateToSharedPrefs() {
         Log.d(TAG, "---Setting current date in shared preferences.");
         SharedPreferences prefs = getSharedPreferences(Constants.DATE, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("date", getDate());
+        if(isAlmostMidNight()) editor.putString("date",getNextDay());
+        else editor.putString("date", getDate());
         editor.apply();
     }
 

@@ -46,18 +46,21 @@ public class DateItem {
     private String mDateText;
     private DateItem di;
     private DatabaseReference dbRef;
+    private boolean isMessageReceivedForAddingBlank = false;
+    private boolean haveListenersLoaded = false;
 
     public DateItem(Context context, PlaceHolderView PHView, long dateindays, String datetext){
         this.mContext = context;
         this.mPlaceHolderView = PHView;
         this.dateInDays = dateindays;
         this.mDateText = datetext;
+//        loadListeners();
     }
 
     @Resolve
     private void onResolved(){
         mDateTextView.setText(mDateText);
-        loadListeners();
+        if(!haveListenersLoaded)loadListeners();
         di = this;
     }
 
@@ -66,51 +69,31 @@ public class DateItem {
         dbRef =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.PINNED_AD_LIST).child(Long.toString(dateInDays));
         dbRef.addChildEventListener(chil);
-//        dbRef.addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//                Log.d("DateItem","OnChildRemoved listener has been called.");
-//                checkIfHasChildren();
-//            }
-//
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
+
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
                 new IntentFilter("UNREGISTER"));
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToAdBlankBeforeThis,
+                new IntentFilter("ADD_BLANK_BEFORE_THIS"+dateInDays));
+        haveListenersLoaded = true;
     }
+
+    private BroadcastReceiver mMessageReceiverToAdBlankBeforeThis = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("DateItem--","Received broadcast to Add blank before this.");
+            addBlankBeforeThis();
+        }
+    };
 
     private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("DateItem--","Received broadcast to Unregister all receivers");
-            try{
-                dbRef.removeEventListener(chil);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+            removeListeners();
         }
     };
 
-    ChildEventListener chil = new ChildEventListener() {
+    private ChildEventListener chil = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
@@ -155,7 +138,7 @@ public class DateItem {
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.hasChildren()){
+                if(!dataSnapshot.exists()){
                     removeThisView();
                     removeItem();
                     Log.d("DateItem -- ","Removing date since no ads are in date :"+mDateText);
@@ -164,17 +147,27 @@ public class DateItem {
                         Intent intent = new Intent("REMOVE_PLACEHOLDER_BLANK_ITEM"+dateInDays);
                         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                     }else{
-                        List<Advert> AdList = new ArrayList<>();
-                        for(DataSnapshot snap: dataSnapshot.getChildren()){
-                            Advert advert = snap.getValue(Advert.class);
-                            AdList.add(advert);
-                        }
-                        Advert adToBeNotified = AdList.get(AdList.size()-1);
-                        Log.d("DateItem","Sending message to ad blank item to ad: "+adToBeNotified.getPushId()+" for date: "+dateInDays);
+//                        List<Advert> AdList = new ArrayList<>();
+//                        for(DataSnapshot snap: dataSnapshot.getChildren()){
+//                            Advert advert = snap.getValue(Advert.class);
+//                            AdList.add(advert);
+//                        }
+//                        Advert adToBeNotified = AdList.get(AdList.size()-1);
+//                        Log.d("DateItem","Sending message to ad blank item to ad: "+adToBeNotified.getPushId()+" for date: "+dateInDays);
 //                        if(mPlaceHolderView!=null)Variables.placeHolderView = mPlaceHolderView;
-                        Intent intent = new Intent("ADD_BLANK"+dateInDays+adToBeNotified.getPushId());
-                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-                        AdList.clear();
+//                        Intent intent = new Intent("ADD_BLANK"+dateInDays+adToBeNotified.getPushId());
+//                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+//                        AdList.clear();
+
+                        int posOfThisDate = Variables.daysArray.indexOf(dateInDays);
+                        if(posOfThisDate+1!=Variables.daysArray.size()){
+                            int nextPos = posOfThisDate+1;
+                            long previousDate = Variables.daysArray.get(nextPos);
+                            Variables.previousDaysNumber = previousDate;
+                            Intent intent2 = new Intent("ADD_BLANK_BEFORE_THIS"+previousDate);
+                            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
+                        }
+
                     }
 
                 }
@@ -223,12 +216,13 @@ public class DateItem {
 //    };
 
     private void removeItem(){
+        removeListeners();
+        Variables.daysArray.remove(dateInDays);
         try{
             mPlaceHolderView.removeView(di);
         }catch (Exception e){
             e.printStackTrace();
             mPlaceHolderView = Variables.placeHolderView;
-
             try{
                 mPlaceHolderView.removeView(di);
             }catch (Exception e2){
@@ -236,7 +230,33 @@ public class DateItem {
                 Variables.placeHolderView.removeView(di);
             }
         }
+    }
 
+    private void removeListeners(){
+        try{
+            dbRef.removeEventListener(chil);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToAdBlankBeforeThis);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
+    }
+
+    private void addBlankBeforeThis(){
+        long daysNumber = Variables.previousDaysNumber;
+        try{
+            mPlaceHolderView.addViewBefore(di,
+                    new BlankItem(mContext,mPlaceHolderView,daysNumber,"pineapples",false));
+        }catch (Exception e){
+            e.printStackTrace();
+            mPlaceHolderView = Variables.placeHolderView;
+            try{
+                mPlaceHolderView.addViewBefore(di,
+                        new BlankItem(mContext,mPlaceHolderView,daysNumber,"pineapples",false));
+            }catch (Exception e2){
+                e2.printStackTrace();
+            }
+        }
     }
 
 }

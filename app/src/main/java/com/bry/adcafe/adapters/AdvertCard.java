@@ -90,7 +90,7 @@ public class AdvertCard{
     @Resolve
     private void onResolved(){
 
-        if(mLastOrNotLast == Constants.NO_ADS){
+        if(mLastOrNotLast.equals(Constants.NO_ADS)){
             mIsNoAds = true;
             loadAdPlaceHolderImage();
         }else{
@@ -141,25 +141,27 @@ public class AdvertCard{
                 Log.d("ADVERT_CARD--","The image has loaded successfully");
                 mAvi.setVisibility(android.view.View.GONE);
                 errorImageView.setVisibility(android.view.View.GONE);
-                if(isFirstResource && mLastOrNotLast==Constants.NOT_LAST) {
-                    if(mLastOrNotLast!=Constants.ANNOUNCEMENTS) {
-                        Log.d("ADVERT_CARD---","sending broadcast to start timer...");
-                        if(mAdvert.isFlagged()){
-                            if(mSwipeView.getChildCount()==1) {
-                                mSwipeView.lockViews();
-                                Variables.isLockedBecauseOfFlagedAds= true;
-                            } else{
-                                mSwipeView.unlockViews();
-                            }
-                        }else{
-                            sendBroadcast(START_TIMER);
-                        }
-                    }
+                if(isFirstResource && mLastOrNotLast.equals(Constants.NOT_LAST) && !mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)) {
+                    Log.d("ADVERT_CARD---","sending broadcast to start timer...");
+                    sendBroadcast(START_TIMER);
+//                        if(mAdvert.isFlagged()){
+//                            if(mSwipeView.getChildCount()==1) {
+//                                mSwipeView.lockViews();
+//                                Variables.isLockedBecauseOfFlagedAds= true;
+//                            } else{
+//                                mSwipeView.unlockViews();
+//                            }
+//                        }else{
                     if(!mAdvert.getWebsiteLink().equals(igsNein)){
                         webIcon.setAlpha(1.0f);
                         webText.setAlpha(1.0f);
                     }
                     setLastAdSeen();
+                }else{
+                    Log.d("ADVERT_CARD","not starting timer because:");
+                    Log.d("ADVERT_CARD","is first resource is supposed to be true and is: "+isFirstResource);
+                    Log.d("ADVERT_CARD","mLastOrNotLast is :" +mLastOrNotLast+" and is supposed to be "+Constants.NOT_LAST);
+                    Log.d("ADVERT_CARD","mLastOrNotLast is :" +mLastOrNotLast+" and is not supposed to be: "+Constants.ANNOUNCEMENTS);
                 }
                 clickable=false;
                 return false;
@@ -218,7 +220,7 @@ public class AdvertCard{
             mSwipeView.enableTouchSwipe();
             hasBeenSwiped = true;
         }
-        if(mLastOrNotLast == Constants.ANNOUNCEMENTS ||mLastOrNotLast == Constants.LAST){
+        if(mLastOrNotLast.equals(Constants.ANNOUNCEMENTS) || mLastOrNotLast.equals(Constants.LAST)){
             mSwipeView.enableTouchSwipe();
         }
 
@@ -227,12 +229,12 @@ public class AdvertCard{
     @SwipeOut
     private void onSwipedOut(){
         Log.d("EVENT----", "onSwipedOut");
-        if(mLastOrNotLast!=Constants.ANNOUNCEMENTS){
+        if(!mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
             Variables.removeAd();
             hasBeenSwiped = true;
             sendBroadcast(START_TIMER);
         }
-        if(mSwipeView.getChildCount()==2 && mLastOrNotLast==Constants.ANNOUNCEMENTS){
+        if(mSwipeView.getChildCount()==2 && mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
             Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
             mSwipeView.lockViews();
         }
@@ -241,12 +243,12 @@ public class AdvertCard{
     @SwipeIn
     private void onSwipeIn(){
         Log.d("EVENT----", "onSwipedIn");
-        if(mLastOrNotLast!=Constants.ANNOUNCEMENTS){
+        if(!mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
             Variables.removeAd();
             hasBeenSwiped = true;
             sendBroadcast(START_TIMER);
         }
-        if(mSwipeView.getChildCount()==2 && mLastOrNotLast==Constants.ANNOUNCEMENTS){
+        if(mSwipeView.getChildCount()==2 && mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
             Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
             mSwipeView.lockViews();
         }
@@ -254,7 +256,7 @@ public class AdvertCard{
 
 
     private void sendBroadcast(String message ) {
-        if(message == START_TIMER && hasBeenSwiped){
+        if(message.equals(START_TIMER) && hasBeenSwiped){
             Log.d("AdvertCard - ", "Sending message to start timer");
             mSwipeView.lockViews();
             clickable = false;
@@ -263,11 +265,11 @@ public class AdvertCard{
             Variables.hasBeenPinned = false;
             setLastAdSeen();
             if(mSwipeView.getChildCount()<3) sendBroadcast(Constants.LOAD_MORE_ADS);
-        }else if(message == Constants.LAST){
+        }else if(message.equals(Constants.LAST)){
             Intent intent = new Intent(Constants.LAST);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             setLastAdSeen();
-        }else if(message == Constants.LOAD_MORE_ADS){
+        }else if(message.equals(Constants.LOAD_MORE_ADS)){
             Intent intent = new Intent(Constants.LOAD_MORE_ADS);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         }
@@ -289,7 +291,8 @@ public class AdvertCard{
                     mSwipeView.unlockViews();
                     clickable = true;
                     hasBeenSwiped = false;
-                }else if(mSwipeView.getChildCount()==1 && mLastOrNotLast!=Constants.ANNOUNCEMENTS){
+                }else if(mSwipeView.getChildCount()==1 && !mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
+                    Log.d("ADVERT_CARD","Sending broadcast for last ad. Also setting isLockedBecauseOfNoMoreAds");
                     sendBroadcast(Constants.LAST);
                     Variables.isLockedBecauseOfNoMoreAds = true;
                 }
@@ -384,7 +387,7 @@ public class AdvertCard{
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             if(mImageBytes!=null){
-                if(mLastOrNotLast == Constants.LAST){
+                if(mLastOrNotLast.equals(Constants.LAST)){
                     mIsNoAds = false;
                     loadOnlyLastAd();
                 }else{

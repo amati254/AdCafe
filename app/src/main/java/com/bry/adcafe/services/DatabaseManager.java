@@ -284,6 +284,8 @@ public class DatabaseManager {
                     }else{
                         Intent intent = new Intent(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
                         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                        setDateInSharedPrefs(getDate(),context);
+                        setUserDataInSharedPrefs(context);
                     }
                 }
             }
@@ -292,6 +294,9 @@ public class DatabaseManager {
         if(!isUserAddingANewCategory) Variables.Subscriptions.put(AdvertCategory,Cluster);
 
     }
+
+
+
 
     public void setNumberOfSubscriptionsUserKnowsAbout(int number){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -369,7 +374,7 @@ public class DatabaseManager {
                 DataSnapshot dateSnap = dataSnapshot.child(Constants.DATE_IN_FIREBASE);
                 String date = dateSnap.getValue(String.class);
                 Log.d(TAG,"Date gotten from firebase is : "+date);
-                setDateInSharedPrefs(date,mContext);
+                setDateInSharedPrefs(getDate(),mContext);
 
                 if(date.equals(getDate())){
                     Log.d(TAG,"---Date in firebase matches date in system,thus User was last online today");

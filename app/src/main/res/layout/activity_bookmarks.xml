@@ -31,11 +31,21 @@
 
         <com.mindorks.placeholderview.PlaceHolderView
             android:id="@+id/PlaceHolderView"
-            android:padding="10dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginBottom="1dp"
+            android:layout_marginLeft="1dp"
+            android:layout_width="360dp"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginStart="1dp" />
+
+        <com.mindorks.placeholderview.PlaceHolderView
+            android:id="@+id/PlaceHolderView2"
+            android:layout_marginBottom="1dp"
+            android:layout_marginLeft="1dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical"/>
+            android:scrollbars="none"
+            android:layout_marginStart="1dp" />
 
     </LinearLayout>
 

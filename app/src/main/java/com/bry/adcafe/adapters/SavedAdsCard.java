@@ -16,8 +16,10 @@ import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.CardView;
 import android.util.Base64;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -68,6 +70,7 @@ public class SavedAdsCard {
     @View(R.id.SavedImageView) private ImageView imageView;
     @View(R.id.savedErrorImageView) private ImageView errorImageView;
     @View(R.id.savedAdCardAvi) private AVLoadingIndicatorView mAvi;
+    @View(R.id.sacard) private CardView mCardView;
 
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
@@ -97,21 +100,24 @@ public class SavedAdsCard {
     private void onResolved() {
         if(mImageBytes!=null) loadImage2();
         else new LongOperationFI().execute("");
-
 //        if(mImageBytes==null) new LongOperationFI().execute("");
 
-       LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
-               new IntentFilter("UNREGISTER"));
-       LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForAddNewBlank,
+        if(mImageBytes==null)loadListeners();
+        sac = this;
+    }
+
+    private void loadListeners() {
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
+                new IntentFilter("UNREGISTER"));
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForAddNewBlank,
                 new IntentFilter("ADD_BLANK"+noOfDaysDate+mAdvert.getPushId()));
-       sac = this;
     }
 
     private void setImage() {
         try {
             Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
             Log.d("SavedAdsCard---","Image has been converted to bitmap.");
-            mImageBytes = bitmapToByte(getResizedBitmap(bm,170));
+            mImageBytes = bitmapToByte(getResizedBitmap(bm,350));
             mAdvert.setImageBitmap(bm);
         } catch (IOException e) {
             e.printStackTrace();
@@ -203,15 +209,7 @@ public class SavedAdsCard {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
-            try{LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            try{LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddNewBlank);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+            unregisterAllReceivers();
         }
     };
 
@@ -238,9 +236,18 @@ public class SavedAdsCard {
         public void onReceive(Context context, Intent intent) {
             Log.d("SAVED_ADS--","Received broadcast to ad blank item.");
             pushBlank();
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+//            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
         }
     };
+
+    private void unregisterAllReceivers(){
+        try{LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddNewBlank);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
+    }
 
     @LongClick(R.id.SavedImageView)
     private void onLongClick(){
@@ -346,6 +353,12 @@ public class SavedAdsCard {
             e.printStackTrace();
             Variables.placeHolderView.removeView(this);
         }
+        if(Variables.placeHolderView.getChildCount()==0){
+            Intent intent2 = new Intent("CHECK_IF_IS_EMPTY"+noOfDaysDate);
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
+        }
+        unregisterAllReceivers();
+
         Intent intent = new Intent("EQUATE_PLACEHOLDER_VIEWS");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
 
@@ -409,22 +422,25 @@ public class SavedAdsCard {
 
     private void pushBlank(){
         try{
-            mPlaceHolderView.getViewResolverPosition(sac);
             mPlaceHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples",false));
         }catch (Exception e){
             e.printStackTrace();
             try{
-//                Variables.placeHolderView.getViewResolverPosition(sac);
                 mPlaceHolderView = Variables.placeHolderView;
-                mPlaceHolderView.getViewResolverPosition(sac);
-                try{
-                    mPlaceHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples",false));
-                }catch (Exception e3){
-                    e3.printStackTrace();
-                    mPlaceHolderView.addViewAfter(mPlaceHolderView.getViewResolverPosition(sac),new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples",false));
-                }
+                mPlaceHolderView.addViewAfter(sac,new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples",false));
             }catch (Exception e2){
                 e2.printStackTrace();
+                try{
+                    mPlaceHolderView = Variables.placeHolderView;
+                    mPlaceHolderView.addViewAfter(mPlaceHolderView.getViewResolverPosition(sac),
+                            new BlankItem(mContext,mPlaceHolderView,noOfDaysDate,"pineapples",false));
+                }catch (Exception e3){
+                    e3.printStackTrace();
+                    Variables.adView = sac;
+                    Variables.lastNoOfDays = noOfDaysDate;
+                    Intent intent = new Intent("ADD_VIEW_IN_ACTIVITY");
+                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                }
             }
         }
     }

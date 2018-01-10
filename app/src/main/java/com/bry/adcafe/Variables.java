@@ -2,6 +2,8 @@ package com.bry.adcafe;
 
 import android.util.Log;
 
+import com.bry.adcafe.adapters.AdvertCard;
+import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.models.Advert;
 import com.mindorks.placeholderview.PlaceHolderView;
 
@@ -62,9 +64,12 @@ public class Variables {
 
     public static boolean isLoginOnline = false;
     public static boolean hasChangesBeenMadeToCategories = false;
+    public static SavedAdsCard adView;
+    public static long lastNoOfDays;
+    public static List<Long> daysArray = new ArrayList<>();
+    public static long previousDaysNumber;
 
-
-
+    public static int width;
 
 
     public static void setNewNumberOfAds(int number){
