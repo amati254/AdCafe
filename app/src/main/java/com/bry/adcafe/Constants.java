@@ -81,4 +81,6 @@ public class Constants {
     public static String CANCELLED = "canceled";
 
     public static String NO_OF_CATEGORIES_KNOWN = "NoOfCategoriesKnown";
+    public static String IS_AD = "Is_ad";
+    public static String IS_ANNOUNCEMENT = "Is_announcement";
 }

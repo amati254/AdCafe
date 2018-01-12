@@ -369,21 +369,22 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                         Snackbar.make(findViewById(R.id.adUploadCoordinatorLayout), R.string.UploadAdNoConnection,
                             Snackbar.LENGTH_LONG).show();
                     }else{
-                        if(bm!=null){
-                            if(noOfChildrenInClusterToStartFrom>=510){
-                                Toast.makeText(mContext,"The ad limit has been exceeded.You may need to upload tomorrow instead.",Toast.LENGTH_LONG).show();
-                            }else{
+                        if(bm!=null && !uploading){
+//                            if(noOfChildrenInClusterToStartFrom>=510){
+//                                Toast.makeText(mContext,"The ad limit has been exceeded.You may need to upload tomorrow instead.",Toast.LENGTH_LONG).show();
+//                            }else{
 //                                setAllOtherViewsToBeGone();
 //                                mAvi.setVisibility(View.VISIBLE);
 //                                mLoadingTextView.setVisibility(View.VISIBLE);
 //                                mLoadingTextView.setText(R.string.uploadMessage);
                                 mAuthProgressDialog.show();
 //                                mAuthProgressDialog.setProgress(0);
+                                uploading = true;
                                 setNewValueToStartFrom();
                                 date = getNextDay();
                                 numberOfClustersBeingUploadedTo = clustersToUpLoadTo.size();
                                 uploadImageToManagerConsole();
-                            }
+//                            }
 
                         }else{
                             Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
@@ -560,14 +561,25 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
     private void uploadImageAsAnnouncement(){
-        if(User.getUid().equals("WglDJKRpaYUGZEwSuRhqPw2nZPt1")){
+        if(FirebaseAuth.getInstance().getCurrentUser().getEmail().equals("bryonyoni@gmail.com")){
             Toast.makeText(mContext,"Uploading announcement to firebase",Toast.LENGTH_SHORT).show();
             String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
+
             DatabaseReference dba = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(getNextDay());
             DatabaseReference pushRef = dba.push();
             String key = pushRef.getKey();
+
             Advert announcement = new Advert(encodedImageToUpload);
+            announcement.setNumberOfTimesSeen(0);
+            announcement.setNumberOfUsersToReach(1000);
+            announcement.setPushRefInAdminConsole(key);
+            announcement.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+            announcement.setWebsiteLink(mLink);
+            announcement.setHasBeenReimbursed(false);
+            announcement.setDateInDays(getDateInDays());
+            announcement.setCategory("technology");
             announcement.setPushId(key);
+
             pushRef.setValue(announcement).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
@@ -677,6 +689,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                                 Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
 //                                setHasPayedInFirebaseToFalse();
                                 cycleCount = 1;
+                                uploading = false;
                                 startDashboardActivity();
                             }
                         }else{
@@ -747,6 +760,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                                 Log.d(TAG,"---Ad has been successfully uploaded to one of the clusters in firebase");
 //                                setHasPayedInFirebaseToFalse();
                                 cycleCount = 1;
+                                uploading = false;
                                 startDashboardActivity();
                             }
 
@@ -805,7 +819,6 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
     private void startDashboardActivity() {
-
         final Dialog d = new Dialog(AdUpload.this);
         d.setTitle("Upload complete");
         d.setContentView(R.layout.dialog4);
@@ -814,10 +827,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             @Override
             public void onClick(View v) {
                 d.dismiss();
-                Intent intent = new Intent(AdUpload.this,Dashboard.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                onBackPressed();
             }
         });
         d.show();

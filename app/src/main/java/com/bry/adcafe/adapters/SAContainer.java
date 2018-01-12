@@ -10,8 +10,19 @@ import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
+import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.services.Utils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.NonReusable;
@@ -39,6 +50,7 @@ public class SAContainer {
     private long noOfDays;
     private boolean hasLoaded = false;
     private SAContainer ths;
+    private DatabaseReference dbRef;
 
     public SAContainer(List<Advert> adlist, Context context, PlaceHolderView placeHolderView, long noOfDayss) {
         this.adList = adlist;
@@ -54,11 +66,17 @@ public class SAContainer {
         ths = this;
     }
 
+
+
     private void addAdsIntoViews() {
+        int width = Variables.width;
+        int calculatedSpanCount = width/ Utils.dpToPx(88);
         int spanCount = 4;
-        GridLayoutManager glm = new GridLayoutManager(mContext,spanCount);
+        GridLayoutManager glm = new GridLayoutManager(mContext,calculatedSpanCount);
         PHViewForSpecificDay.getBuilder().setLayoutManager(glm);
+
         PHViewForSpecificDay.setNestedScrollingEnabled(false);
+
         for (Advert ad: adList) {
             PHViewForSpecificDay.addView(new SavedAdsCard(ad,mContext,PHViewForSpecificDay,ad.getPushId(),noOfDays,false));
         }
@@ -67,11 +85,21 @@ public class SAContainer {
     }
 
     private void loadListeners() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        dbRef =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.PINNED_AD_LIST).child(Long.toString(noOfDays));
+        dbRef.addChildEventListener(chil);
+
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
                 new IntentFilter("UNREGISTER"));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToCheckIfIsEmpty,
                 new IntentFilter("CHECK_IF_IS_EMPTY"+noOfDays));
+
     }
+
+
+
+
 
     private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
         @Override
@@ -85,9 +113,12 @@ public class SAContainer {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG,"Received broadcast to check if is empty.");
-            checkIfIsEmpty();
+//            checkIfIsEmpty();
         }
     };
+
+
+
 
     private void checkIfIsEmpty() {
         new Handler().postDelayed(new Runnable() {
@@ -102,10 +133,79 @@ public class SAContainer {
 
     }
 
+    private ChildEventListener chil = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            Log.d(TAG,"OnChildRemoved listener has been called.");
+            checkIfHasChildren();
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    private void checkIfHasChildren() {
+        Long days;
+        try {
+            days = noOfDays;
+            String test = Long.toString(days);
+        }catch (Exception e){
+            e.printStackTrace();
+            days = Variables.noOfDays;
+            noOfDays = Variables.noOfDays;
+        }
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Query query =  FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.PINNED_AD_LIST).child(Long.toString(days));
+        DatabaseReference dbRef = query.getRef();
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()) {
+                    removeThisView();
+                    Log.d("DateItem -- ", "Removing date since no ads are in date :" + getDateFromDays(noOfDays));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+
+
+    private void removeThisView() {
+        mPlaceHolderView.removeView(ths);
+        unregisterAllReceivers();
+    }
+
     private void unregisterAllReceivers() {
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToCheckIfIsEmpty);
+        if(dbRef!=null) dbRef.removeEventListener(chil);
     }
+
+
 
 
     private String getDateFromDays(long days){

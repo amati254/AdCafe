@@ -34,6 +34,7 @@ public class Advert {
     public LinkedHashMap<Integer,Integer> clusters  = new LinkedHashMap<>();
     private boolean hasBeenReimbursed;
     private int dateInDays;
+    private String natureOfBanner;
 
     public Advert(String ImageUrl){
         this.imageUrl = ImageUrl;
@@ -181,5 +182,13 @@ public class Advert {
 
     public void setDateInDays(long dateInDays) {
         this.dateInDays = (int) dateInDays;
+    }
+
+    public String getNatureOfBanner() {
+        return natureOfBanner;
+    }
+
+    public void setNatureOfBanner(String natureOfBanner) {
+        this.natureOfBanner = natureOfBanner;
     }
 }

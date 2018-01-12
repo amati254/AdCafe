@@ -89,7 +89,6 @@ public class AdvertCard{
 
     @Resolve
     private void onResolved(){
-
         if(mLastOrNotLast.equals(Constants.NO_ADS)){
             mIsNoAds = true;
             loadAdPlaceHolderImage();
@@ -238,6 +237,8 @@ public class AdvertCard{
             Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
             mSwipeView.lockViews();
         }
+        Intent intent = new Intent("SWIPED");
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     @SwipeIn
@@ -252,6 +253,8 @@ public class AdvertCard{
             Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
             mSwipeView.lockViews();
         }
+        Intent intent = new Intent("SWIPED");
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
 
@@ -321,6 +324,7 @@ public class AdvertCard{
         byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
         Bitmap bitm = BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
         return getResizedBitmap(bitm,700);
+//        return bitm;
     }
 
 

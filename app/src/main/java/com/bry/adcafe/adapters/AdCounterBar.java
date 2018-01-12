@@ -127,18 +127,19 @@ public class AdCounterBar {
     private void startTimer2() {
         if (!hasTimerStarted) {
             Log.d("AdCounterBar", "Starting timer from asynch task");
+            hasTimerMessageBeenSent = false;
             new InitTask().execute();
         }
     }
 
 
     private void sendBroadcast(String message) {
-        if (message == Constants.TIMER_HAS_ENDED && !hasTimerMessageBeenSent) {
+        if (message.equals(Constants.TIMER_HAS_ENDED) && !hasTimerMessageBeenSent) {
+            hasTimerMessageBeenSent = true;
             Log.d("AD_COUNTER_BAR---", "sending message that timer has ended.");
             Intent intent = new Intent(Constants.TIMER_HAS_ENDED);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             Variables.hasTimerStarted = false;
-            hasTimerMessageBeenSent = true;
         }
     }
 

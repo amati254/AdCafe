@@ -176,6 +176,10 @@ public class Variables {
         currentAdNumberForAllAdsList++;
     }
 
+    public static int getSizeOfAdlist(){
+        return allAdsList.size();
+    }
+
 
 
     public static void setCurrentAdNumberForAllAdsList(int number){

@@ -90,6 +90,7 @@ public class Bookmarks extends AppCompatActivity {
     private int cycleCount = 0;
     private LinkedHashMap<Long,List> HashOfAds = new LinkedHashMap<>();
     private boolean isDone = false;
+    private LongOperation Lo;
 
 
     @Override
@@ -105,7 +106,9 @@ public class Bookmarks extends AppCompatActivity {
 
         if(isNetworkConnected(mContext)){
 //            loadAdsFromFirebase2();
+            showProg();
             new LongOperation().execute("");
+
         }else{
             Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.connectionDropped,
                     Snackbar.LENGTH_INDEFINITE).show();
@@ -117,7 +120,8 @@ public class Bookmarks extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         mPlaceHolderView.removeAllViews();
-        hideProg();
+        if(Lo!=null) Lo = null;
+//        hideProg();
         unregisterAllReceivers();
         super.onDestroy();
     }
@@ -163,7 +167,7 @@ public class Bookmarks extends AppCompatActivity {
     }
 
     private void hideProg(){
-        mProg.hide();
+        mProg.dismiss();
     }
 
     private void loadPlaceHolderViews() {
@@ -711,7 +715,6 @@ public class Bookmarks extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             if(!Variables.daysArray.isEmpty())Variables.daysArray.clear();
-            showProg();
         }
     }
 

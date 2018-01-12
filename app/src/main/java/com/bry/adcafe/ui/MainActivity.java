@@ -110,10 +110,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isFirebaseResetNecessary = false;
     private boolean isOffline = false;
     private boolean isLastAd = false;
+
     private String igsNein = "none";
     private boolean isLoadingMoreAds = false;
     private boolean mDoublePressedToPin = false;
     private Advert lastAdSeen = null;
+
+    private boolean isSeingNormalAds = true;
 
 
     @Override
@@ -627,9 +630,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddingToSharedPreferences);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOffline);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForConnectionOnline);
+
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForLastAd);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForLoadMoreAds);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasStarted);
+
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForOnSwiped);
+
         sendBroadcastToUnregisterAllReceivers();
     }
 
@@ -732,11 +739,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(Variables.didAdCafeAddNewCategory) tellUserOfNewSubscription();
                 Toast.makeText(mContext, "We've got no more stuff for you today.", Toast.LENGTH_SHORT).show();
                 isLastAd = true;
+                Variables.isLockedBecauseOfNoMoreAds = true;
+                loadAnyAnnouncements();
             } else {
                 if (mAdList.size() == 1 && Variables.getCurrentSubscriptionIndex() + 1 < Variables.Subscriptions.size()) {
                     Variables.nextSubscriptionIndex = Variables.getCurrentSubscriptionIndex() + 1;
                     mChildToStartFrom = 0;
-                    loadMoreAds = true;
+//                    loadMoreAds = true;
 //                    loadMoreAds();
                 }
                 for (Advert ad : mAdList) {
@@ -784,8 +793,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 findViewById(R.id.WebsiteIcon).setAlpha(0.4f);
                 findViewById(R.id.websiteText).setAlpha(0.4f);
                 findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
-                loadAnyAnnouncements();
+//                loadAnyAnnouncements();
             }
+            Variables.isLockedBecauseOfNoMoreAds = true;
+            loadAnyAnnouncements();
         }
         Log.d(TAG, "---Setting up On click listeners...");
         onclicks();
@@ -802,9 +813,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences, new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline, new IntentFilter(Constants.CONNECTION_OFFLINE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline, new IntentFilter(Constants.CONNECTION_ONLINE));
+
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLastAd, new IntentFilter(Constants.LAST));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLoadMoreAds, new IntentFilter(Constants.LOAD_MORE_ADS));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForTimerHasStarted, new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForOnSwiped, new IntentFilter("SWIPED"));
 
     }
 
@@ -816,8 +830,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 @Override
                 public void onClick(View v) {
                     if (!Variables.hasBeenPinned) {
-                        if (Variables.mIsLastOrNotLast == Constants.NOT_LAST || Variables.mIsLastOrNotLast == Constants.LAST
-                                && !Variables.getCurrentAdvert().isFlagged()) {
+                        if (Variables.mIsLastOrNotLast.equals(Constants.NOT_LAST) || Variables.mIsLastOrNotLast.equals(Constants.LAST)
+                                && isSeingNormalAds) {
                             Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
                                     Snackbar.LENGTH_SHORT).show();
                             pinAd();
@@ -874,7 +888,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.reportBtn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (Variables.mIsLastOrNotLast == Constants.NO_ADS || Variables.getCurrentAdvert().isFlagged()) {
+                    if (Variables.mIsLastOrNotLast == Constants.NO_ADS || !isSeingNormalAds) {
                         Snackbar.make(findViewById(R.id.mainCoordinatorLayout), "You can't report that..",
                                 Snackbar.LENGTH_SHORT).show();
                     } else {
@@ -893,7 +907,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.shareImageIcon).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (Variables.mIsLastOrNotLast == Constants.NO_ADS || Variables.getCurrentAdvert().isFlagged()) {
+                    if (Variables.mIsLastOrNotLast.equals(Constants.NO_ADS) || !isSeingNormalAds) {
                         Snackbar.make(findViewById(R.id.mainCoordinatorLayout), "You can't share that..",
                                 Snackbar.LENGTH_SHORT).show();
                     } else {
@@ -1085,6 +1099,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
+    private BroadcastReceiver mMessageReceiverForOnSwiped = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(Variables.getCurrentAdNumberForAllAdsList()+1<Variables.getSizeOfAdlist()){
+                        if(Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList()+1)
+                                .getNatureOfBanner().equals(Constants.IS_ANNOUNCEMENT)){
+                            findViewById(R.id.WebsiteIcon).setAlpha(0.3f);
+                            findViewById(R.id.websiteText).setAlpha(0.3f);
+                            findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
+
+                            findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
+                            findViewById(R.id.reportBtn).setAlpha(0.3f);
+                            isSeingNormalAds = false;
+                            onclicks();
+                        }
+                    }
+                }
+            }, 300);
+
+        }
+    };
+
     private BroadcastReceiver mMessageReceiverForLoadMoreAds = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1192,6 +1231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void loadMoreAdsIntoAdvertCard() {
         for (Advert ad : mAdList) {
+            ad.setNatureOfBanner(Constants.IS_AD);
             mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.LOAD_MORE_ADS));
             Variables.adToVariablesAdList(ad);
             Variables.setIsLastOrNotLast(Constants.NOT_LAST);
@@ -1225,12 +1265,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     for (Advert ad : mAdList) {
                         ad.setImageUrl(igsNein);
+                        ad.setNatureOfBanner(Constants.IS_ANNOUNCEMENT);
+                        Variables.adToVariablesAdList(ad);
                         mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.ANNOUNCEMENTS));
                     }
-                    Toast.makeText(mContext, "Before you leave, we have a few messages for you...", Toast.LENGTH_SHORT).show();
-                    mSwipeView.unlockViews();
-                    findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
-                    findViewById(R.id.reportBtn).setAlpha(0.3f);
+                    if(Variables.isLockedBecauseOfNoMoreAds){
+                        mSwipeView.unlockViews();
+                        Log.d(TAG,"Unlocking views since isLockedBecauseOfNoMoreAds is : "+Variables.isLockedBecauseOfNoMoreAds);
+                        Variables.isLockedBecauseOfNoMoreAds = false;
+                    }
+//                    Toast.makeText(mContext, "Before you leave, we have a few messages for you...", Toast.LENGTH_SHORT).show();
+//                    mSwipeView.unlockViews();
+//                    findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
+//                    findViewById(R.id.reportBtn).setAlpha(0.3f);
                     mAdList.clear();
                 } else {
                     Log.d(TAG, "There are no announcements today...");
@@ -1487,6 +1534,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String uid = User.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.PINNED_AD_LIST).child(getDateInDays());
+
+        long currentTimeMillis = Calendar.getInstance().getTimeInMillis();
+        long currentDay = (currentTimeMillis+1000*60*60*3)/(1000*60*60*24);
+
+        Log.d(TAG,"The date in days is : "+getDateInDays()+" translating to : "+getDateFromDays(-currentDay));
         DatabaseReference pushRef = adRef.push();
         String pushId = pushRef.getKey();
 
@@ -1586,7 +1638,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
                 Log.v(TAG, "Permission is granted");
-                shareImage(Variables.adToBeShared.getImageBitmap());
+                shareImage(Variables.getCurrentAdvert().getImageBitmap());
                 return true;
             } else {
 
@@ -1734,7 +1786,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         long currentTimeMillis = System.currentTimeMillis();
         long extraTimeFromMidnight = currentTimeMillis%(1000*60*60*24);
 //        long currentDay = (currentTimeMillis-extraTimeFromMidnight)/(1000*60*60*24);
-        long currentDay = (currentTimeMillis)/(1000*60*60*24);
+        long currentDay = (currentTimeMillis+1000*60*60*3)/(1000*60*60*24);
         Log.d(TAG,"The current day is : "+currentDay);
         return Long.toString(-currentDay);
     }
@@ -1763,6 +1815,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         dialog.cancel();
                     }
                 }).show();
+    }
+
+    private String getDateFromDays(long days){
+        long currentTimeInMills = -days*(1000*60*60*24);
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(currentTimeInMills);
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+        int monthOfYear = cal.get(Calendar.MONTH);
+        int year = cal.get(Calendar.YEAR);
+
+//        String monthName = new DateFormatSymbols().getMonths()[monthOfYear];
+        String monthName = getMonthName_Abbr(monthOfYear);
+
+        Log.d(TAG,"Date gotten is : "+dayOfMonth+" "+monthName+" "+year);
+
+        Calendar cal2 = Calendar.getInstance();
+        int year2 = cal2.get(Calendar.YEAR);
+        String yearName;
+
+        if(year == year2){
+            Log.d(TAG,"Ad was pined this year...");
+            yearName = "";
+        }else if(year2 == year+1){
+            Log.d(TAG,"Ad was pined last year...");
+            yearName =", "+Integer.toString(year);
+        }else{
+            yearName =", "+ Integer.toString(year);
+        }
+
+        return dayOfMonth+" "+monthName+yearName;
+    }
+
+    private String getMonthName_Abbr(int month) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.MONTH, month);
+        SimpleDateFormat month_date = new SimpleDateFormat("MMM");
+        String month_name = month_date.format(cal.getTime());
+        return month_name;
     }
 
 }
