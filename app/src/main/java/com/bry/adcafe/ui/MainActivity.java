@@ -1261,10 +1261,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (dataSnapshot.hasChildren()) {
                     for (DataSnapshot snap : dataSnapshot.getChildren()) {
                         Advert ad = snap.getValue(Advert.class);
+                        DataSnapshot imgSnap = snap.child("imageUrl");
+                        String img = imgSnap.getValue(String.class);
+                        ad.setImageUrl(img);
                         mAdList.add(ad);
                     }
                     for (Advert ad : mAdList) {
-                        ad.setImageUrl(igsNein);
+                        ad.setWebsiteLink(igsNein);
                         ad.setNatureOfBanner(Constants.IS_ANNOUNCEMENT);
                         Variables.adToVariablesAdList(ad);
                         mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.ANNOUNCEMENTS));

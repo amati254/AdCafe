@@ -72,6 +72,7 @@ public class SAContainer {
         int width = Variables.width;
         int calculatedSpanCount = width/ Utils.dpToPx(88);
         int spanCount = 4;
+
         GridLayoutManager glm = new GridLayoutManager(mContext,calculatedSpanCount);
         PHViewForSpecificDay.getBuilder().setLayoutManager(glm);
 

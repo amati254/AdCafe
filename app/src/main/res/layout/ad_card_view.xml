@@ -126,15 +126,15 @@
             android:id="@+id/profileImageView"
             android:scaleType="fitXY"
             android:layout_width="match_parent"
-            android:layout_marginRight="0.5dp"
-            android:layout_marginLeft="0.5dp"
-            android:layout_marginTop="0.5dp"
+            android:layout_marginRight="0.4dp"
+            android:layout_marginLeft="0.4dp"
+            android:layout_marginTop="0.4dp"
             android:layout_height="match_parent"
             android:layout_marginBottom="48dp"/>
 
         <View
             android:layout_width="2dp"
-            android:visibility="visible"
+            android:visibility="invisible"
             android:layout_gravity="bottom"
             android:layout_marginLeft="147dp"
             android:layout_marginBottom="35dp"
