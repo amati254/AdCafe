@@ -70,7 +70,7 @@ public class SAContainer {
 
     private void addAdsIntoViews() {
         int width = Variables.width;
-        int calculatedSpanCount = width/ Utils.dpToPx(88);
+        int calculatedSpanCount = width/ Utils.dpToPx(87);
         int spanCount = 4;
 
         GridLayoutManager glm = new GridLayoutManager(mContext,calculatedSpanCount);
@@ -97,8 +97,6 @@ public class SAContainer {
                 new IntentFilter("CHECK_IF_IS_EMPTY"+noOfDays));
 
     }
-
-
 
 
 
@@ -148,7 +146,8 @@ public class SAContainer {
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
             Log.d(TAG,"OnChildRemoved listener has been called.");
-            checkIfHasChildren();
+//            checkIfHasChildren();
+            checkIfHasChildren2();
         }
 
         @Override
@@ -161,6 +160,12 @@ public class SAContainer {
 
         }
     };
+
+    private void checkIfHasChildren2() {
+        if(Variables.VariablesHashOfAds.get(noOfDays).isEmpty()){
+            removeThisView();
+        }
+    }
 
     private void checkIfHasChildren() {
         Long days;
@@ -196,8 +201,17 @@ public class SAContainer {
 
 
     private void removeThisView() {
-        mPlaceHolderView.removeView(ths);
         unregisterAllReceivers();
+        Variables.VariablesHashOfAds.remove(noOfDays);
+        if(Variables.VariablesHashOfAds.isEmpty()){
+            Intent intent2 = new Intent("SHOW_NO_ADS_TEXT");
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
+        }
+        try{
+            mPlaceHolderView.removeView(ths);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void unregisterAllReceivers() {

@@ -34,6 +34,7 @@
             <com.mindorks.placeholderview.PlaceHolderView
                 android:id="@+id/PlaceHolderViewInfo"
                 android:layout_width="match_parent"
+                android:overScrollMode="never"
                 android:layout_height="wrap_content"
                 android:scrollbars="vertical"/>
 

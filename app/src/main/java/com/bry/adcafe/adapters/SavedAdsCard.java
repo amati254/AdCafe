@@ -347,6 +347,7 @@ public class SavedAdsCard {
             e.printStackTrace();
             id = Variables.adToBeUnpinned.getPushId();
         }
+        Variables.VariablesHashOfAds.get(noOfDaysDate).remove(Variables.adToBeUnpinned);
         try{
             mPlaceHolderView.removeView(this);
         }catch (Exception e){
@@ -413,6 +414,8 @@ public class SavedAdsCard {
 
         return Bitmap.createScaledBitmap(image, width, height, true);
     }
+
+
 
     private boolean isNetworkConnected(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

@@ -126,17 +126,37 @@ public class Bookmarks extends AppCompatActivity {
         super.onDestroy();
     }
 
+    private void registerReceivers(){
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnpinned,new IntentFilter(Constants.REMOVE_PINNED_AD));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForReceivingUnableToPinAd,new IntentFilter(Constants.UNABLE_TO_REMOVE_PINNED_AD));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForSharingAd,new IntentFilter("SHARE"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForViewingAd,new IntentFilter("VIEW"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText,new IntentFilter("ARE_YOU_SURE_INTENT"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText2,new IntentFilter("ARE_YOU_SURE2"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForContinue,new IntentFilter("DONE!!"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForEquatePHViews,new IntentFilter("EQUATE_PLACEHOLDER_VIEWS"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddView,new IntentFilter("ADD_VIEW_IN_ACTIVITY"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowNoAdsText,new IntentFilter("SHOW_NO_ADS_TEXT"));
+
+    }
+
     private void unregisterAllReceivers() {
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpinned);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForReceivingUnableToPinAd);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForSharingAd);
+
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForViewingAd);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowingAreYouSureText);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowingAreYouSureText2);
+
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForContinue);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForEquatePHViews);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForAddView);
 
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowNoAdsText);
 
         sendBroadCastToUnregisterReceivers();
     }
@@ -148,19 +168,6 @@ public class Bookmarks extends AppCompatActivity {
 
 
 
-
-    private void registerReceivers(){
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnpinned,new IntentFilter(Constants.REMOVE_PINNED_AD));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForReceivingUnableToPinAd,new IntentFilter(Constants.UNABLE_TO_REMOVE_PINNED_AD));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForSharingAd,new IntentFilter("SHARE"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForViewingAd,new IntentFilter("VIEW"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText,new IntentFilter("ARE_YOU_SURE_INTENT"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowingAreYouSureText2,new IntentFilter("ARE_YOU_SURE2"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForContinue,new IntentFilter("DONE!!"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForEquatePHViews,new IntentFilter("EQUATE_PLACEHOLDER_VIEWS"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddView,new IntentFilter("ADD_VIEW_IN_ACTIVITY"));
-
-    }
 
     private void showProg(){
         mProg.show();
@@ -276,6 +283,15 @@ public class Bookmarks extends AppCompatActivity {
         }
     }
 
+
+
+    private BroadcastReceiver mMessageReceiverForShowNoAdsText = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BOOKMARKS--","Received message for showing no ads text.");
+            noAdsText.setVisibility(View.VISIBLE);
+        }
+    };
 
     private BroadcastReceiver mMessageReceiverForAddView = new BroadcastReceiver() {
         @Override
@@ -403,6 +419,7 @@ public class Bookmarks extends AppCompatActivity {
                         Intent intent2 = new Intent(Variables.adToBeViewed.getPushRefInAdminConsole());
                         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
                         Variables.placeHolderView = mPlaceHolderView;
+                        mAuthProgressDialog.show();
                     }
                 })
                 .setNegativeButton("No!!", new DialogInterface.OnClickListener() {
@@ -482,10 +499,10 @@ public class Bookmarks extends AppCompatActivity {
                             Log.d("BOOKMARKS"," --Loaded ads from firebase.--"+advert.getPushId());
                         }
                         HashOfAds.put(noOfDays,AdList);
+                        Variables.VariablesHashOfAds.put(noOfDays,AdList);
                         Log.d(TAG,"Added ads for day : "+noOfDays+" to hashmap.Adlist size is : "+AdList.size());
                     }
                     isDone = true;
-//                    startLoadAdsIntoViews();
                 }
                 isDone = true;
             }
@@ -519,6 +536,8 @@ public class Bookmarks extends AppCompatActivity {
 
         }
     }
+
+
 
     private void loadDaysAdsIntoViews(List<Advert> adList, long noOfDays) {
         if(mPlaceHolderView == null) loadPlaceHolderViews();

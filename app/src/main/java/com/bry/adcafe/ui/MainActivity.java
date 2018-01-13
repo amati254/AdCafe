@@ -102,9 +102,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private DatabaseReference dbRef;
     private int mChildToStartFrom = 0;
-
     Handler h = new Handler();
     Runnable r;
+
     private NetworkStateReceiver networkStateReceiver;
     boolean doubleBackToExitPressedOnce = false;
     private boolean isFirebaseResetNecessary = false;
@@ -115,8 +115,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isLoadingMoreAds = false;
     private boolean mDoublePressedToPin = false;
     private Advert lastAdSeen = null;
-
     private boolean isSeingNormalAds = true;
+
+    private boolean hasLoadedAnnouncements = false;
 
 
     @Override
@@ -136,8 +137,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    @Override
-    protected void onStart() {
+    @Override protected void onStart() {
         super.onStart();
         setIsUserLoggedOnInSharedPrefs(true);
         lastAdSeen = Variables.lastAdSeen;
@@ -146,8 +146,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        }
     }
 
-    @Override
-    protected void onResume() {
+    @Override protected void onResume() {
         Variables.isMainActivityOnline = true;
         try{
             onclicks();
@@ -195,16 +194,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         h.postDelayed(r, 60000);
     }
 
-    @Override
-    protected void onPause() {
+    @Override protected void onPause() {
         super.onPause();
         h.removeCallbacks(r);
         setCurrentDateToSharedPrefs();
         setUserDataInSharedPrefs();
     }
 
-    @Override
-    protected void onStop() {
+
+
+
+    @Override protected void onStop() {
         super.onStop();
         if (dbRef != null) {
             dbRef.removeEventListener(val);
@@ -213,6 +213,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setAlarmForNotifications();
         Variables.lastAdSeen = lastAdSeen;
         Log.d(TAG, "---removing callback for checking time of day.");
+    }
+
+    @Override protected void onDestroy() {
+        setLastUsedDateInFirebaseDate(User.getUid());
+        unregisterAllReceivers();
+        removeAllViews();
+        Variables.clearAllAdsFromAdList();
+        if (!Variables.isDashboardActivityOnline) Variables.clearAdTotal();
+        if (networkStateReceiver != null) {
+            networkStateReceiver.removeListener(this);
+            this.unregisterReceiver(networkStateReceiver);
+        }
+
+        Variables.isMainActivityOnline = false;
+        super.onDestroy();
     }
 
     private void setUserDataInSharedPrefs() {
@@ -262,21 +277,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         prefs.edit().putString("hashString", hashMapString).apply();
     }
 
-    @Override
-    protected void onDestroy() {
-        setLastUsedDateInFirebaseDate(User.getUid());
-        unregisterAllReceivers();
-        removeAllViews();
-        Variables.clearAllAdsFromAdList();
-        if (!Variables.isDashboardActivityOnline) Variables.clearAdTotal();
-        if (networkStateReceiver != null) {
-            networkStateReceiver.removeListener(this);
-            this.unregisterReceiver(networkStateReceiver);
-        }
-
-        Variables.isMainActivityOnline = false;
-        super.onDestroy();
-    }
 
 
     private void loadAdsFromThread() {
@@ -375,7 +375,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     } ///////////////////////////
 
-    //method for loading ads from thread.Contains sleep length...
+
+
+
     private void getAds() {
         try {
             Log.d(TAG, "---The getAdsFromFirebase method has been called...");
@@ -385,8 +387,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.e("BACKGROUND_PROC", e.getMessage());
         }
         runOnUiThread(returnRes);
-    }
-
+    }//method for loading ads from thread.Contains sleep length...
 
     private void getGetAdsFromFirebase() {
         String date;
@@ -612,6 +613,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
+
+
+
     private void showFailedView() {
         mFailedToLoadLayout.setVisibility(View.VISIBLE);
         mRetryButton.setOnClickListener(this);
@@ -623,7 +627,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            loadAdsIntoAdvertCard();
         }
     };
-
 
     private void unregisterAllReceivers() {
         Log.d("MAIN_ACTIVITY--", "Unregistering all receivers");
@@ -644,6 +647,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent(Constants.UNREGISTER_ALL_RECEIVERS);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
+
 
 
     private void setUpSwipeView() {
@@ -809,6 +813,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+
+
     private void registerReceivers() {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences, new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline, new IntentFilter(Constants.CONNECTION_OFFLINE));
@@ -829,18 +835,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!Variables.hasBeenPinned) {
-                        if (Variables.mIsLastOrNotLast.equals(Constants.NOT_LAST) || Variables.mIsLastOrNotLast.equals(Constants.LAST)
-                                && isSeingNormalAds) {
+                    if (Variables.mIsLastOrNotLast.equals(Constants.NOT_LAST) || Variables.mIsLastOrNotLast.equals(Constants.LAST) && isSeingNormalAds) {
+                        if (!Variables.hasBeenPinned) {
                             Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
                                     Snackbar.LENGTH_SHORT).show();
                             pinAd();
                         } else {
-                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), "You can't pin that..",
+                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
                                     Snackbar.LENGTH_SHORT).show();
                         }
                     } else {
-                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
+                        Snackbar.make(findViewById(R.id.mainCoordinatorLayout), "You can't pin that..",
                                 Snackbar.LENGTH_SHORT).show();
                     }
 
@@ -921,8 +926,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    @Override
-    public void onClick(View v) {
+    @Override public void onClick(View v) {
         if(v==findViewById(R.id.profileImageView)){
             if(mDoublePressedToPin) {
 //                findViewById(R.id.bookmark2Btn).callOnClick();
@@ -993,7 +997,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         editor.apply();
     }
 
-
     private void logoutUser() {
         setLastUsedDateInFirebaseDate(User.getUid());
         if (dbRef != null) {
@@ -1011,6 +1014,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(intent);
         finish();
     }
+
+
 
 
     private BroadcastReceiver mMessageReceiverForAddingToSharedPreferences = new BroadcastReceiver() {
@@ -1094,7 +1099,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     onclicks();
                 }
-            }, 400);
+            }, 300);
 
         }
     };
@@ -1244,54 +1249,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadAnyAnnouncements() {
-        Log.d("MAIN-ACTIVITY---", "Now loading announcements since there are no more ads....");
-        Query query;
-        if (isAlmostMidNight()) {
-            query = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(getNextDay());
-            Log.d(TAG, "---Query set up is : " + Constants.ANNOUNCEMENTS + " : " + getNextDay());
-        } else {
-            query = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(getDate());
-            Log.d(TAG, "---Query set up is : " + Constants.ANNOUNCEMENTS + " : " + getDate());
-        }
+        if(!hasLoadedAnnouncements){
+            hasLoadedAnnouncements = true;
+            Log.d("MAIN-ACTIVITY---", "Now loading announcements since there are no more ads....");
+            String date = isAlmostMidNight() ? getNextDay() : getDate();
+            Query query = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(date);
 
-        dbRef = query.getRef();
-        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.hasChildren()) {
-                    for (DataSnapshot snap : dataSnapshot.getChildren()) {
-                        Advert ad = snap.getValue(Advert.class);
-                        DataSnapshot imgSnap = snap.child("imageUrl");
-                        String img = imgSnap.getValue(String.class);
-                        ad.setImageUrl(img);
-                        mAdList.add(ad);
-                    }
-                    for (Advert ad : mAdList) {
-                        ad.setWebsiteLink(igsNein);
-                        ad.setNatureOfBanner(Constants.IS_ANNOUNCEMENT);
-                        Variables.adToVariablesAdList(ad);
-                        mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.ANNOUNCEMENTS));
-                    }
-                    if(Variables.isLockedBecauseOfNoMoreAds){
-                        mSwipeView.unlockViews();
-                        Log.d(TAG,"Unlocking views since isLockedBecauseOfNoMoreAds is : "+Variables.isLockedBecauseOfNoMoreAds);
-                        Variables.isLockedBecauseOfNoMoreAds = false;
-                    }
+            Log.d(TAG, "---Query set up is : " + Constants.ANNOUNCEMENTS + " : " + date);
+            dbRef = query.getRef();
+            dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.hasChildren()) {
+                        for (DataSnapshot snap : dataSnapshot.getChildren()) {
+                            Advert ad = snap.getValue(Advert.class);
+                            DataSnapshot imgSnap = snap.child("imageUrl");
+                            String img = imgSnap.getValue(String.class);
+                            ad.setImageUrl(img);
+                            mAdList.add(ad);
+                        }
+                        for (Advert ad : mAdList) {
+                            ad.setWebsiteLink(igsNein);
+                            ad.setNatureOfBanner(Constants.IS_ANNOUNCEMENT);
+                            Variables.adToVariablesAdList(ad);
+                            mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.ANNOUNCEMENTS));
+                        }
+                        if(Variables.isLockedBecauseOfNoMoreAds){
+                            mSwipeView.unlockViews();
+                            Log.d(TAG,"Unlocking views since isLockedBecauseOfNoMoreAds is : "+Variables.isLockedBecauseOfNoMoreAds);
+                            Variables.isLockedBecauseOfNoMoreAds = false;
+                        }
 //                    Toast.makeText(mContext, "Before you leave, we have a few messages for you...", Toast.LENGTH_SHORT).show();
 //                    mSwipeView.unlockViews();
 //                    findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
 //                    findViewById(R.id.reportBtn).setAlpha(0.3f);
-                    mAdList.clear();
-                } else {
-                    Log.d(TAG, "There are no announcements today...");
+                        mAdList.clear();
+                    } else {
+                        Log.d(TAG, "There are no announcements today...");
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "Unable to load announcements...");
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.d(TAG, "Unable to load announcements...");
+                    hasLoadedAnnouncements = false;
+                }
+            });
+        }
     }
 
     private void hideNavBars() {
@@ -1299,6 +1303,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
         decorView.setSystemUiVisibility(uiOptions);
     }
+
 
 
     public float density() {
@@ -1359,6 +1364,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+
     private void adDayAndMonthTotalsToFirebase() {
         String uid = User.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
@@ -1403,7 +1409,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return todaysDate;
     }
 
-
     private void resetAdTotalSharedPreferencesAndDayAdTotals() {
         SharedPreferences prefs = getSharedPreferences(Constants.AD_TOTAL, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -1415,6 +1420,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Variables.setCurrentSubscriptionIndex(0);
         resetAdTotalsInFirebase();
     }
+
 
 
     private void setLastUsedDateInFirebaseDate(String uid) {
@@ -1455,6 +1461,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loadAdsFromThread();
     }
 
+
+
+
     private String getNextDay() {
         Calendar c = Calendar.getInstance();
         c.add(Calendar.DAY_OF_MONTH, 1);
@@ -1468,7 +1477,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return tomorrowsDate;
 
     }
-
 
     private void setCurrentDateToSharedPrefs() {
         Log.d(TAG, "---Setting current date in shared preferences.");
@@ -1487,8 +1495,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    @Override
-    public void networkAvailable() {
+
+    @Override public void networkAvailable() {
         Log.d(TAG, "User is connected to the internet via wifi or cellular data");
         isOffline = false;
         findViewById(R.id.droppedInternetLayout).setVisibility(View.GONE);
@@ -1500,8 +1508,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    public void networkUnavailable() {
+    @Override public void networkUnavailable() {
         Log.d(TAG, "User has gone offline...");
         isOffline = true;
         findViewById(R.id.bottomNavButtons).setVisibility(View.GONE);
@@ -1511,8 +1518,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    @Override
-    public void onBackPressed() {
+    @Override public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             super.onBackPressed();
             return;
@@ -1529,6 +1535,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }, 2000);
     }
+
 
 
     private void pinAd() {
@@ -1656,8 +1663,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.v(TAG, "Permission: " + permissions[0] + "was " + grantResults[0]);
@@ -1684,6 +1690,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
         startActivity(Intent.createChooser(share, "Share Image"));
     }
+
+
 
 
     private void getAndSetAllAdsThatHaveBeenSeenEver() {
@@ -1787,8 +1795,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String getDateInDays(){
         long currentTimeMillis = System.currentTimeMillis();
-        long extraTimeFromMidnight = currentTimeMillis%(1000*60*60*24);
-//        long currentDay = (currentTimeMillis-extraTimeFromMidnight)/(1000*60*60*24);
         long currentDay = (currentTimeMillis+1000*60*60*3)/(1000*60*60*24);
         Log.d(TAG,"The current day is : "+currentDay);
         return Long.toString(-currentDay);
@@ -1806,6 +1812,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }).show();
     }
+
+
+
 
     private void tellUserOfNewSubscription(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

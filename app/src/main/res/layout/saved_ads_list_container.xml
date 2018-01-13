@@ -12,7 +12,7 @@
         android:layout_marginTop="10dp"
         android:text="24 Jan"
         android:layout_marginBottom="4dp"
-        android:textSize="13sp"/>
+        android:textSize="11sp"/>
 
     <com.mindorks.placeholderview.PlaceHolderView
         android:id="@+id/PHViewForSpecificDay"
