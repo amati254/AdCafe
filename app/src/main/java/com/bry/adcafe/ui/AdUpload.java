@@ -548,14 +548,14 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,65,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,75,baos);
         byte[] byteArray = baos.toByteArray();
         return byteArray;
     }
 
     private String encodeBitmapForFirebaseStorage(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,60,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,75,baos);
         String imageEncoded = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
         return imageEncoded;
     }

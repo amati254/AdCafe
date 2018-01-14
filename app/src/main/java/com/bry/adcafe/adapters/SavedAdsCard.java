@@ -251,24 +251,26 @@ public class SavedAdsCard {
 
     @LongClick(R.id.SavedImageView)
     private void onLongClick(){
-        promptUserIfSureToUnpinAd();
+        if(hasLoaded) promptUserIfSureToUnpinAd();
     }
 
     @Click(R.id.SavedImageView)
     private void onClick(){
-        if(onDoublePressed){
-            shareAd();
-        }else{
-            viewAd();
-        }
-        onDoublePressed = true;
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                onDoublePressed=false;
+        if(hasLoaded){
+            if(onDoublePressed){
+                shareAd();
+            }else{
+                viewAd();
             }
-        }, 200);
+            onDoublePressed = true;
+            new Handler().postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    onDoublePressed=false;
+                }
+            }, 300);
+        }
     }
 
     private void promptUserIfSureToUnpinAd(){
@@ -305,7 +307,7 @@ public class SavedAdsCard {
                 }
                 isBeingShared = false;
             }
-        }, 230);
+        }, 330);
     }
 
     private void setUpReceiver(){

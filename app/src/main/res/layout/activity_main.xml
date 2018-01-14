@@ -9,6 +9,7 @@
     android:background="@color/grey">
 
 
+    <!--Bottom nav buttons-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="70dp"
@@ -96,15 +97,19 @@
         </RelativeLayout>
     </LinearLayout>
 
+    <!--Ad Counter place Holder views-->
     <com.mindorks.placeholderview.PlaceHolderView
         android:id="@+id/adCounterView"
         android:layout_width="match_parent"
         android:layout_height="50dp"/>
+
+    <!--Ads Swipe Place Holder Views-->
     <com.mindorks.placeholderview.SwipePlaceHolderView
         android:id="@+id/swipeView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <!--Top loading indicator views-->
     <LinearLayout
         android:layout_width="match_parent"
         android:gravity="right"
@@ -134,6 +139,7 @@
 
     </LinearLayout>
 
+    <!--Failed to load ads view-->
     <LinearLayout
         android:layout_width="match_parent"
         android:gravity="center"
@@ -167,6 +173,7 @@
             android:textColor="@color/icons" />
     </LinearLayout>
 
+    <!--Internet dropped view-->
     <LinearLayout
         android:layout_width="match_parent"
         android:gravity="center"
@@ -187,6 +194,36 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <!--No internet on start-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:id="@+id/noInternetLayout"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="70dp"
+            android:background="@drawable/ic_action_connection"
+            android:layout_height="70dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/noInternetForLoadAds"
+            android:textSize="11sp"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btn_retry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:text="Retry"
+            android:textColor="@color/colorPrimary" />
+    </LinearLayout>
+
+    <!--Loading view-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

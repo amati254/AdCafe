@@ -91,6 +91,7 @@ public class Bookmarks extends AppCompatActivity {
     private LinkedHashMap<Long,List> HashOfAds = new LinkedHashMap<>();
     private boolean isDone = false;
     private LongOperation Lo;
+    private boolean isSharing = false;
 
 
     @Override
@@ -597,22 +598,27 @@ public class Bookmarks extends AppCompatActivity {
 
 
     private void shareImage(Bitmap icon){
-        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        v.vibrate(30);
-        Intent share = new Intent(Intent.ACTION_SEND);
-        share.setType("image/jpeg");
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        icon.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");
-        try {
-            f.createNewFile();
-            FileOutputStream fo = new FileOutputStream(f);
-            fo.write(bytes.toByteArray());
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(!isSharing){
+            isSharing = true;
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            v.vibrate(30);
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("image/jpeg");
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            icon.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+            File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");
+            try {
+                f.createNewFile();
+                FileOutputStream fo = new FileOutputStream(f);
+                fo.write(bytes.toByteArray());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//        share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
+            share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///"+Environment.getExternalStorageDirectory().getPath()+"/temporary_file.jpg"));
+            startActivity(Intent.createChooser(share, "Share Image"));
+            isSharing = false;
         }
-        share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
-        startActivity(Intent.createChooser(share, "Share Image"));
     }
 
     public  boolean isStoragePermissionGranted() {

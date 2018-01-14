@@ -18,7 +18,8 @@
     <string name="SignUpNoConnection">"You may need internet connection to sign up."</string>
     <string name="connectionDropped">"Hmmm, your connection may have a problem."</string>
     <string name="connectionDropped2">"Your connection may have a few problems."</string>
-    <string name="connectToInternet">"You need an internet connection to continue..."</string>
+    <string name="connectToInternet">"You need an internet connection to continue…"</string>
+    <string name="noInternetForLoadAds">You need an internet connection to load the ads.</string>
     <string name="shared">"Shared."</string>
     <string name="connectionBack">"Your back online, you may now continue."</string>
     <string name="Logout">"Logout"</string>
@@ -135,7 +136,7 @@
         details then after processing the payment, the upload will be carried out.</string>
 
     <string name="dontuploadsameadtwice">We have a strict policy concerning re-uploading ads. Uploading the same ad more than once is not
-        allowed.</string>
+        allowed here.</string>
 
     <string name="contactus">Feel free to contact us if you have any questions or inquiries for us. We will try our best to reply as soon
         as possible.</string>

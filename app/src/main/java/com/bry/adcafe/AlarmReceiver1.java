@@ -214,11 +214,12 @@ public class AlarmReceiver1 extends BroadcastReceiver {
                 .setColor(mContext.getResources().getColor(R.color.colorPrimaryDark))
                 .setAutoCancel(true)
                 .setPriority(8)
-                .setSound(soundUri)
+//                .setSound(soundUri)
                 .setContentTitle("AdCafé.")
                 .setContentText(message).build();
         notification.flags|=Notification.FLAG_AUTO_CANCEL|Notification.FLAG_SHOW_LIGHTS;
-        notification.defaults|=Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE;
+        notification.defaults|=Notification.DEFAULT_VIBRATE;
+//        notification.defaults|=Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE;
         notification.ledARGB = 0xFFFFA500;
         notification.ledOnMS = 800;
         notification.ledOffMS = 1000;

@@ -12,6 +12,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private List<Advert> mAdList = new ArrayList<>();
     private Runnable mViewRunnable;
-    private LinearLayout mLinearLayout;
+    private LinearLayout mBottomNavButtons;
     private AVLoadingIndicatorView mAvi;
     private AVLoadingIndicatorView mAviLoadingMoreAds;
     private ProgressBar spinner;
@@ -118,6 +120,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isSeingNormalAds = true;
 
     private boolean hasLoadedAnnouncements = false;
+    private String stage;
+    private LinearLayout cannotLoadLayout;
+    private Button retryLoadingFromCannotLoad;
 
 
     @Override
@@ -126,11 +131,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         mContext = getApplicationContext();
         Variables.isMainActivityOnline = true;
+        stage = "LOADING_ADS";
         registerReceivers();
         if (!Fabric.isInitialized()) Fabric.with(this, new Crashlytics());
-        setUpSwipeView();
-        loadAdsFromThread();
+        setUpAllTheViews();
+
+        if(!isOnline()){
+            mAvi.smoothToShow();
+            mLoadingText.setVisibility(View.GONE);
+            mBottomNavButtons.setVisibility(View.GONE);
+            cannotLoadLayout.setVisibility(View.VISIBLE);
+            retryLoadingFromCannotLoad.setOnClickListener(this);
+        } else {
+            loadAdsFromThread();
+        }
         logUser();
+
         new DatabaseManager().setLastSeenDateInFirebase();
         mAviLoadingMoreAds.hide();
 
@@ -358,10 +374,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startGetAds() {
-        setUpSwipeView();
+        setUpAllTheViews();
         mAvi.setVisibility(View.VISIBLE);
         mLoadingText.setVisibility(View.VISIBLE);
-        mLinearLayout.setVisibility(View.GONE);
+        mBottomNavButtons.setVisibility(View.GONE);
         Log.d(TAG, "---Setting up mViewRunnable thread...");
         mViewRunnable = new Runnable() {
             @Override
@@ -439,7 +455,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Variables.setCurrentAdNumberForAllAdsList(0);
                             mAvi.setVisibility(View.GONE);
                             mLoadingText.setVisibility(View.GONE);
-                            mLinearLayout.setVisibility(View.VISIBLE);
+                            mBottomNavButtons.setVisibility(View.VISIBLE);
                             loadAdsIntoAdvertCard();
                         }else{
                             //user has seen the one ad that has been loaded.
@@ -457,7 +473,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 Log.d(TAG, "---There are no ads in any of the subscriptions");
                                 mAvi.setVisibility(View.GONE);
                                 mLoadingText.setVisibility(View.GONE);
-                                mLinearLayout.setVisibility(View.VISIBLE);
+                                mBottomNavButtons.setVisibility(View.VISIBLE);
                                 loadAdsIntoAdvertCard();
                             }
                         }
@@ -473,7 +489,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Log.d(TAG, "---There are no ads in any of the subscriptions");
                             mAvi.setVisibility(View.GONE);
                             mLoadingText.setVisibility(View.GONE);
-                            mLinearLayout.setVisibility(View.VISIBLE);
+                            mBottomNavButtons.setVisibility(View.VISIBLE);
                             loadAdsIntoAdvertCard();
                         }
                     }
@@ -508,7 +524,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d(TAG, "---All the ads have been handled.Total is " + mAdList.size());
                         mAvi.setVisibility(View.GONE);
                         mLoadingText.setVisibility(View.GONE);
-                        mLinearLayout.setVisibility(View.VISIBLE);
+                        mBottomNavButtons.setVisibility(View.VISIBLE);
                         loadAdsIntoAdvertCard();
                     }
                 }
@@ -523,7 +539,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "---There are no ads in any of the subscriptions");
                     mAvi.setVisibility(View.GONE);
                     mLoadingText.setVisibility(View.GONE);
-                    mLinearLayout.setVisibility(View.VISIBLE);
+                    mBottomNavButtons.setVisibility(View.VISIBLE);
                     loadAdsIntoAdvertCard();
                 }
             }
@@ -550,7 +566,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "---There are no ads in any of the subscriptions");
                     mAvi.setVisibility(View.GONE);
                     mLoadingText.setVisibility(View.GONE);
-                    mLinearLayout.setVisibility(View.VISIBLE);
+                    mBottomNavButtons.setVisibility(View.VISIBLE);
                     loadAdsIntoAdvertCard();
                 }
             } else {
@@ -584,7 +600,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "---All the ads have been handled.Total is " + mAdList.size());
                     mAvi.setVisibility(View.GONE);
                     mLoadingText.setVisibility(View.GONE);
-                    mLinearLayout.setVisibility(View.VISIBLE);
+                    mBottomNavButtons.setVisibility(View.VISIBLE);
                     loadAdsIntoAdvertCard();
                 }else{
                     if (Variables.getCurrentSubscriptionIndex()+1 < Variables.Subscriptions.size()) {
@@ -597,7 +613,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d(TAG, "---There are no ads in any other subscriptions");
                         mAvi.setVisibility(View.GONE);
                         mLoadingText.setVisibility(View.GONE);
-                        mLinearLayout.setVisibility(View.VISIBLE);
+                        mBottomNavButtons.setVisibility(View.VISIBLE);
                         loadAdsIntoAdvertCard();
                     }
                 }
@@ -650,9 +666,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-    private void setUpSwipeView() {
+    private void setUpAllTheViews() {
         mSwipeView = (SwipePlaceHolderView) findViewById(R.id.swipeView);
-        mLinearLayout = (LinearLayout) findViewById(R.id.bottomNavButtons);
+        mBottomNavButtons = (LinearLayout) findViewById(R.id.bottomNavButtons);
 
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.mainActivityAvi);
         mAviLoadingMoreAds = (AVLoadingIndicatorView) findViewById(R.id.aviLoadingNextAds);
@@ -662,6 +678,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mFailedToLoadLayout = (LinearLayout) findViewById(R.id.failedLoadAdsLayout);
         mRetryButton = (Button) findViewById(R.id.retryLoadingAds);
         mLogoutButton = (ImageButton) findViewById(R.id.logoutBtn);
+
+        cannotLoadLayout = (LinearLayout) findViewById(R.id.noInternetLayout);
+        retryLoadingFromCannotLoad =(Button) findViewById(R.id.btn_retry);
 
         int bottomMargin = Utils.dpToPx(90);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
@@ -699,13 +718,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void loadAdsIntoAdvertCard() {
         boolean loadMoreAds = false;
+        stage = "VIEWING_ADS";
         if (mAdCounterView == null) {
             Log.d(TAG, "---Setting up AdCounter...");
             loadAdCounter();
         }
         if (mSwipeView == null) {
             Log.d(TAG, "---Setting up Swipe views..");
-            setUpSwipeView();
+            setUpAllTheViews();
         }
         if (mSwipeView.getChildCount() != 0) {
             Log.d(TAG, "Removing existing children from swipeView...");
@@ -883,7 +903,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 s.vibrate(50);
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey, have you heard of this cool app called AdCafé?");
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey, check out this cool new app called The AdCafé.");
                 sendIntent.setType("text/plain");
                 startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.shareText)));
             }
@@ -941,6 +961,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     mDoublePressedToPin=false;
                 }
             }, 1000);
+        }
+
+        if(v == retryLoadingFromCannotLoad){
+            if(isOnline()){
+                cannotLoadLayout.setVisibility(View.GONE);
+                loadAdsFromThread();
+            }else{
+                Toast.makeText(mContext,"Connect to the internet first.",Toast.LENGTH_SHORT).show();
+            }
         }
 
         if (v == mLogoutButton) {
@@ -1142,7 +1171,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void loadMoreAds() {
         isLoadingMoreAds = true;
-        mAviLoadingMoreAds.show();
+        mAviLoadingMoreAds.smoothToShow();
 //        spinner.setVisibility(View.VISIBLE);
         Log.d("MAIN-ACTIVITY---", "Loading more ads since user has seen almost all....");
         String date;
@@ -1184,7 +1213,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         loadMoreAdsIntoAdvertCard();
                         mChildToStartFrom += (int) dataSnapshot.getChildrenCount();
                         isLoadingMoreAds = false;
-                        mAviLoadingMoreAds.hide();
+                        mAviLoadingMoreAds.smoothToHide();
 //                        spinner.setVisibility(View.VISIBLE);
                         if(Variables.isLockedBecauseOfNoMoreAds){
                             mSwipeView.unlockViews();
@@ -1199,7 +1228,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }else{
                             Log.d(TAG,"No more ads are available from the rest of the subscriptions");
                             isLoadingMoreAds = false;
-                            mAviLoadingMoreAds.hide();
+                            mAviLoadingMoreAds.smoothToHide();
                             if(mSwipeView.getChildCount()==1){
                                 Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
                                 loadAnyAnnouncements();
@@ -1217,7 +1246,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }else{
                         Log.d(TAG,"No more ads are available from the rest of the subscriptions");
                         isLoadingMoreAds = false;
-                        mAviLoadingMoreAds.hide();
+                        mAviLoadingMoreAds.smoothToHide();
                         if(mSwipeView.getChildCount()==1){
                             Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
                             loadAnyAnnouncements();
@@ -1251,6 +1280,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void loadAnyAnnouncements() {
         if(!hasLoadedAnnouncements){
             hasLoadedAnnouncements = true;
+            mAviLoadingMoreAds.smoothToShow();
             Log.d("MAIN-ACTIVITY---", "Now loading announcements since there are no more ads....");
             String date = isAlmostMidNight() ? getNextDay() : getDate();
             Query query = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(date);
@@ -1279,10 +1309,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Log.d(TAG,"Unlocking views since isLockedBecauseOfNoMoreAds is : "+Variables.isLockedBecauseOfNoMoreAds);
                             Variables.isLockedBecauseOfNoMoreAds = false;
                         }
-//                    Toast.makeText(mContext, "Before you leave, we have a few messages for you...", Toast.LENGTH_SHORT).show();
-//                    mSwipeView.unlockViews();
-//                    findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
-//                    findViewById(R.id.reportBtn).setAlpha(0.3f);
+                        mAviLoadingMoreAds.smoothToHide();
                         mAdList.clear();
                     } else {
                         Log.d(TAG, "There are no announcements today...");
@@ -1499,22 +1526,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override public void networkAvailable() {
         Log.d(TAG, "User is connected to the internet via wifi or cellular data");
         isOffline = false;
-        findViewById(R.id.droppedInternetLayout).setVisibility(View.GONE);
-        findViewById(R.id.bottomNavButtons).setVisibility(View.VISIBLE);
-        mSwipeView.setVisibility(View.VISIBLE);
-        mAdCounterView.setVisibility(View.VISIBLE);
-        if (isFirebaseResetNecessary) {
-            resetAdTotalsInFirebase();
+        if(stage.equals("VIEWING_ADS")){
+            //Sets these views if activity has already loaded the ads.
+            findViewById(R.id.droppedInternetLayout).setVisibility(View.GONE);
+            mBottomNavButtons.setVisibility(View.VISIBLE);
+            mSwipeView.setVisibility(View.VISIBLE);
+            mAdCounterView.setVisibility(View.VISIBLE);
+            if (isFirebaseResetNecessary) {
+                resetAdTotalsInFirebase();
+            }
         }
+//        else{
+            //Sets these views if activity has already loaded the ads.
+//            findViewById(R.id.droppedInternetLayout).setVisibility(View.GONE);
+//            mBottomNavButtons.setVisibility(View.VISIBLE);
+//            mSwipeView.setVisibility(View.VISIBLE);
+//            mAdCounterView.setVisibility(View.VISIBLE);
+//            if (isFirebaseResetNecessary) {
+//                resetAdTotalsInFirebase();
+//            }
+//        }
+//
+//        findViewById(R.id.droppedInternetLayout).setVisibility(View.GONE);
+//        mBottomNavButtons.setVisibility(View.VISIBLE);
+//        mSwipeView.setVisibility(View.VISIBLE);
+//        mAdCounterView.setVisibility(View.VISIBLE);
+//        if (isFirebaseResetNecessary) {
+//            resetAdTotalsInFirebase();
+//        }
     }
 
     @Override public void networkUnavailable() {
         Log.d(TAG, "User has gone offline...");
         isOffline = true;
-        findViewById(R.id.bottomNavButtons).setVisibility(View.GONE);
-        mSwipeView.setVisibility(View.GONE);
-        mAdCounterView.setVisibility(View.GONE);
-        findViewById(R.id.droppedInternetLayout).setVisibility(View.VISIBLE);
+        if(stage.equals("VIEWING_ADS")){
+            mBottomNavButtons.setVisibility(View.GONE);
+            mSwipeView.setVisibility(View.GONE);
+            mAdCounterView.setVisibility(View.GONE);
+            findViewById(R.id.droppedInternetLayout).setVisibility(View.VISIBLE);
+        }
+//        else{
+//            mBottomNavButtons.setVisibility(View.GONE);
+//            mSwipeView.setVisibility(View.GONE);
+//            mAdCounterView.setVisibility(View.GONE);
+//            findViewById(R.id.droppedInternetLayout).setVisibility(View.VISIBLE);
+//        }
+//        mBottomNavButtons.setVisibility(View.GONE);
+//        mSwipeView.setVisibility(View.GONE);
+//        mAdCounterView.setVisibility(View.GONE);
+//        findViewById(R.id.droppedInternetLayout).setVisibility(View.VISIBLE);
 
     }
 
@@ -1866,6 +1926,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SimpleDateFormat month_date = new SimpleDateFormat("MMM");
         String month_name = month_date.format(cal.getTime());
         return month_name;
+    }
+
+
+    public boolean isOnline() {
+        Context context = getApplicationContext();
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        //should check null because in airplane mode it will be null
+        return (netInfo != null && netInfo.isConnected());
     }
 
 }
