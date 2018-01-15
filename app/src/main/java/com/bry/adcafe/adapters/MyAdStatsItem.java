@@ -68,6 +68,8 @@ public class MyAdStatsItem {
     @Resolve
     public void onResolved(){
         if(mImageBytes==null) new LongOperationFI().execute("");
+        else loadImage2();
+
         mEmail.setText(String.format("Uploaded by : %s", mAdvert.getUserEmail()));
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
         mDateUploaded.setText(String.format("Uploaded on %s", getDateFromDays(mAdvert.getDateInDays())));
@@ -96,7 +98,7 @@ public class MyAdStatsItem {
 
     private void setImage() {
         try {
-            Bitmap bm = getResizedBitmap(decodeFromFirebaseBase64(mAdvert.getImageUrl()),150);
+            Bitmap bm = getResizedBitmap(decodeFromFirebaseBase64(mAdvert.getImageUrl()),250);
             Log.d("SavedAdsCard---","Image has been converted to bitmap.");
             mImageBytes = bitmapToByte(bm);
             mAdvert.setImageBitmap(bm);

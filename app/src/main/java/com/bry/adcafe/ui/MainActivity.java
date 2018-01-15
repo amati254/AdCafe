@@ -124,6 +124,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LinearLayout cannotLoadLayout;
     private Button retryLoadingFromCannotLoad;
 
+    private int iterations = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -407,8 +409,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void getGetAdsFromFirebase() {
         String date;
-        if (mIsBeingReset) date = getNextDay();
-        else date = getDate();
+        date = mIsBeingReset ? getNextDay() : getDate();
+
         Variables.nextSubscriptionIndex = Variables.getCurrentSubscriptionIndex();
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
                 .child(getSubscriptionValue(Variables.getCurrentSubscriptionIndex()))
@@ -453,9 +455,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             mChildToStartFrom = Variables.getCurrentAdInSubscription()+ mAdList.size();
                             Log.d(TAG,"The child set to start from is : "+mChildToStartFrom);
                             Variables.setCurrentAdNumberForAllAdsList(0);
-                            mAvi.setVisibility(View.GONE);
-                            mLoadingText.setVisibility(View.GONE);
-                            mBottomNavButtons.setVisibility(View.VISIBLE);
+//                            mAvi.setVisibility(View.GONE);
+//                            mLoadingText.setVisibility(View.GONE);
+//                            mBottomNavButtons.setVisibility(View.VISIBLE);
                             loadAdsIntoAdvertCard();
                         }else{
                             //user has seen the one ad that has been loaded.
@@ -471,9 +473,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 getGetAdsFromFirebase();
                             } else {
                                 Log.d(TAG, "---There are no ads in any of the subscriptions");
-                                mAvi.setVisibility(View.GONE);
-                                mLoadingText.setVisibility(View.GONE);
-                                mBottomNavButtons.setVisibility(View.VISIBLE);
+//                                mAvi.setVisibility(View.GONE);
+//                                mLoadingText.setVisibility(View.GONE);
+//                                mBottomNavButtons.setVisibility(View.VISIBLE);
                                 loadAdsIntoAdvertCard();
                             }
                         }
@@ -487,9 +489,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             getGetAdsFromFirebase();
                         } else {
                             Log.d(TAG, "---There are no ads in any of the subscriptions");
-                            mAvi.setVisibility(View.GONE);
-                            mLoadingText.setVisibility(View.GONE);
-                            mBottomNavButtons.setVisibility(View.VISIBLE);
+//                            mAvi.setVisibility(View.GONE);
+//                            mLoadingText.setVisibility(View.GONE);
+//                            mBottomNavButtons.setVisibility(View.VISIBLE);
                             loadAdsIntoAdvertCard();
                         }
                     }
@@ -522,9 +524,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         mChildToStartFrom = Variables.getCurrentAdInSubscription()+mAdList.size();
                         Log.d(TAG, "Child set to start from is -- " + mChildToStartFrom);
                         Log.d(TAG, "---All the ads have been handled.Total is " + mAdList.size());
-                        mAvi.setVisibility(View.GONE);
-                        mLoadingText.setVisibility(View.GONE);
-                        mBottomNavButtons.setVisibility(View.VISIBLE);
+//                        mAvi.setVisibility(View.GONE);
+//                        mLoadingText.setVisibility(View.GONE);
+//                        mBottomNavButtons.setVisibility(View.VISIBLE);
                         loadAdsIntoAdvertCard();
                     }
                 }
@@ -537,9 +539,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     getGetAdsFromFirebase();
                 } else {
                     Log.d(TAG, "---There are no ads in any of the subscriptions");
-                    mAvi.setVisibility(View.GONE);
-                    mLoadingText.setVisibility(View.GONE);
-                    mBottomNavButtons.setVisibility(View.VISIBLE);
+//                    mAvi.setVisibility(View.GONE);
+//                    mLoadingText.setVisibility(View.GONE);
+//                    mBottomNavButtons.setVisibility(View.VISIBLE);
                     loadAdsIntoAdvertCard();
                 }
             }
@@ -716,7 +718,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void loadAdsIntoAdvertCard() {
+    private void loadAdsIntoAdvertCard(){
+        String date;
+        date = mIsBeingReset ? getNextDay() : getDate();
+
+       if(!mAdList.isEmpty()){
+           //This will load all the ads images.
+           for(final Advert ad: mAdList){
+               String pushRefInAdminConsole = ad.getPushRefInAdminConsole();
+               DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE).child(date)
+                       .child(pushRefInAdminConsole).child("imageUrl");
+               adRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                   @Override
+                   public void onDataChange(DataSnapshot dataSnapshot) {
+                       String imageUrl = dataSnapshot.getValue(String.class);
+                       mAdList.get(mAdList.indexOf(ad)).setImageUrl(imageUrl);
+                       iterations++;
+                       if(iterations == mAdList.size()){
+                           iterations = 0;
+                           loadAdsIntoAdvertCard2();
+                       }
+                   }
+
+                   @Override
+                   public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG,"An error occured, "+databaseError.getDetails());
+                   }
+               });
+           }
+
+       }else if(lastAdSeen!=null){
+           //this will load the image of the last ad only.
+           String pushRefInAdminConsole = lastAdSeen.getPushRefInAdminConsole();
+           DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE).child(date)
+                   .child(pushRefInAdminConsole).child("imageUrl");
+           adRef.addListenerForSingleValueEvent(new ValueEventListener() {
+               @Override
+               public void onDataChange(DataSnapshot dataSnapshot) {
+                   String imageUrl = dataSnapshot.getValue(String.class);
+                   lastAdSeen.setImageUrl(imageUrl);
+                   loadAdsIntoAdvertCard2();
+               }
+
+               @Override
+               public void onCancelled(DatabaseError databaseError) {
+                    Log.d(TAG,"An error occurred while loading data, "+databaseError.getDetails());
+               }
+           });
+
+       } else{
+         loadAdsIntoAdvertCard2();
+       }
+    }
+
+    private void loadAdsIntoAdvertCard2() {
         boolean loadMoreAds = false;
         stage = "VIEWING_ADS";
         if (mAdCounterView == null) {
@@ -822,6 +877,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Variables.isLockedBecauseOfNoMoreAds = true;
             loadAnyAnnouncements();
         }
+        mAvi.setVisibility(View.GONE);
+        mLoadingText.setVisibility(View.GONE);
+        mBottomNavButtons.setVisibility(View.VISIBLE);
+
         Log.d(TAG, "---Setting up On click listeners...");
         onclicks();
         Log.d(TAG,"Todays ad total is : "+Variables.getAdTotal(mKey));
@@ -1213,12 +1272,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         loadMoreAdsIntoAdvertCard();
                         mChildToStartFrom += (int) dataSnapshot.getChildrenCount();
                         isLoadingMoreAds = false;
-                        mAviLoadingMoreAds.smoothToHide();
+//                        mAviLoadingMoreAds.smoothToHide();
 //                        spinner.setVisibility(View.VISIBLE);
-                        if(Variables.isLockedBecauseOfNoMoreAds){
-                            mSwipeView.unlockViews();
-                            Variables.isLockedBecauseOfNoMoreAds = false;
-                        }
+//                        if(Variables.isLockedBecauseOfNoMoreAds){
+//                            mSwipeView.unlockViews();
+//                            Variables.isLockedBecauseOfNoMoreAds = false;
+//                        }
                     }else{
                         Log.d(TAG,"Loaded no ad, loading more ads...");
                         if(Variables.nextSubscriptionIndex+1<Variables.Subscriptions.size()){
@@ -1263,7 +1322,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void loadMoreAdsIntoAdvertCard() {
+    private void loadMoreAdsIntoAdvertCard(){
+        String date = isAlmostMidNight() ? getNextDay() : getDate();
+        for(final Advert ad: mAdList){
+            String pushRefInAdminConsole = ad.getPushRefInAdminConsole();
+            DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE).child(date)
+                    .child(pushRefInAdminConsole).child("imageUrl");
+            adRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String imageUrl = dataSnapshot.getValue(String.class);
+                    mAdList.get(mAdList.indexOf(ad)).setImageUrl(imageUrl);
+                    iterations++;
+                    if(iterations == mAdList.size()){
+                        iterations = 0;
+                        loadMoreAdsIntoAdvertCard2();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.d(TAG,"An error occured, "+databaseError.getDetails());
+                }
+            });
+        }
+    }
+
+    private void loadMoreAdsIntoAdvertCard2() {
         for (Advert ad : mAdList) {
             ad.setNatureOfBanner(Constants.IS_AD);
             mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.LOAD_MORE_ADS));
@@ -1274,6 +1359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mSwipeView.unlockViews();
             Variables.isLockedBecauseOfNoMoreAds = false;
         }
+        mAviLoadingMoreAds.smoothToHide();
         mAdList.clear();
     }
 
@@ -1312,6 +1398,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         mAviLoadingMoreAds.smoothToHide();
                         mAdList.clear();
                     } else {
+                        mAviLoadingMoreAds.smoothToHide();
                         Log.d(TAG, "There are no announcements today...");
                     }
                 }

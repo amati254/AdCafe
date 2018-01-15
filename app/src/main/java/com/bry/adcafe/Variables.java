@@ -24,7 +24,7 @@ public class Variables {
     private static int mMonthAdTotals = 0;
     private static String lastSeenAd;
     private static String lastAdOfList;
-    public static int currentAdNumberForAllAdsList = 0;
+    private static int currentAdNumberForAllAdsList = 0;
     private static Advert currentAdvert;
 
     public static String mIsLastOrNotLast;
@@ -167,6 +167,7 @@ public class Variables {
 
     public static void clearAllAdsFromAdList(){
         if(allAdsList.size()!=0) allAdsList.clear();
+        currentAdNumberForAllAdsList = 0;
     }
 
     public static Advert getAdFromVariablesAdList(int i){

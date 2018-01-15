@@ -1,5 +1,6 @@
 package com.bry.adcafe.ui;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -42,6 +43,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -105,6 +107,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private DatabaseReference mRef3;
     private DatabaseReference mRef4;
     private DatabaseReference mRef5;
+    private DatabaseReference mRef6;
     private DatabaseReference boolRef;
     private String date;
 
@@ -138,8 +141,45 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         setUpViews();
         createProgressDialog();
         startGetNumberOfClusters();
+
     }
 
+    private ChildEventListener chilForRefresh = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            if(!uploading){
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    private void loadListenerForRecreate() {
+        mRef6 = FirebaseDatabase.getInstance()
+                .getReference(Constants.ADVERTS).child(getNextDay()).child(mCategory).child(Integer.toString(mClusterToStartFrom));
+        mRef6.addChildEventListener(chilForRefresh);
+    }
 
 
     private void startGetNumberOfClusters(){
@@ -286,6 +326,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 mAvi.setVisibility(View.GONE);
                 mLoadingTextView.setVisibility(View.GONE);
                 OnClicks();
+                loadListenerForRecreate();
             }
 
             @Override
@@ -309,6 +350,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         if(mRef!=null) mRef.removeEventListener(val);
         if(mRef2!=null) mRef2.removeEventListener(val2);
         if(boolRef!=null) boolRef.removeEventListener(val3);
+        if(mRef6!=null) mRef6.removeEventListener(chilForRefresh);
     }
 
     private void OnClicks(){
@@ -637,8 +679,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
     private void uploadImage(final Bitmap bm) {
-        String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
+//        String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
         uploading = true;
+        if(mRef6!=null) mRef6.removeEventListener(chilForRefresh);
         if(clustersToUpLoadTo.size()>10){
             for(int i = 0; i < 10; i++){
                 String pushId;
@@ -661,7 +704,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
                         .child(mCategory)
                         .child(Integer.toString(clusterNumber)).child(pushId);
-                Advert advert = new Advert(encodedImageToUpload);
+//                Advert advert = new Advert(encodedImageToUpload);
+                Advert advert = new Advert();
                 advert.setPushId(pushId);
                 advert.setWebsiteLink(mLink);
                 advert.setCategory(mCategory);
@@ -732,7 +776,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
                         .child(mCategory)
                         .child(Integer.toString(number)).child(pushId);
-                Advert advert = new Advert(encodedImageToUpload);
+//                Advert advert = new Advert(encodedImageToUpload);
+                Advert advert = new Advert();
                 advert.setPushId(pushId);
                 advert.setWebsiteLink(mLink);
                 advert.setCategory(mCategory);
@@ -983,6 +1028,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             d.show();
         }else{
             super.onBackPressed();
+            finish();
         }
 
     }

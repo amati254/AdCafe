@@ -60,7 +60,7 @@ public class Constants {
     public static String FEEDBACK = "Feedback";
 
     public static long CONSTANT_AMOUNT_PER_AD = 4;
-    public static double CONSTANT_AMMOUNT_FOR_USER = 1.5;
+    public static double CONSTANT_AMMOUNT_FOR_USER = 2;
     public static String TOTAL_ALL_TIME_ADS = "AllUserTotals";
     public static String SUBSCRIPTION_lIST = "UserSubscriptionList";
     public static String CREATE_USER_SPACE_COMPLETE = "UserSpaceCompleted";
