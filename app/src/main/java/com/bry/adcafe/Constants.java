@@ -84,5 +84,6 @@ public class Constants {
     public static String IS_AD = "Is_ad";
     public static String IS_ANNOUNCEMENT = "Is_announcement";
     public static String PINNED_AD_POOL = "PinnedAdPool";
+    public static String NO_OF_TIMES_PINNED = "NumberOfTimesPinned";
 
 }

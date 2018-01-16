@@ -1706,15 +1706,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ad.setDateInDays(currentDay);
 
         DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.PINNED_AD_POOL)
-                .child(getDateInDays()).child(ad.getPushRefInAdminConsole());
-
+                .child(getDateInDays()).child(ad.getPushRefInAdminConsole()).child("imageUrl");
         adRef2.setValue(ad.getImageUrl());
+        setAdsNumberOfPins();
+
+
         ad.setImageUrl(null);
         pushRef.setValue(ad).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 Log.d(TAG, "Pinning is complete.");
                 Variables.hasBeenPinned = true;
+            }
+        });
+    }
+
+    private void setAdsNumberOfPins() {
+        Advert ad = Variables.getCurrentAdvert();
+        final DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.PINNED_AD_POOL)
+                .child(getDateInDays()).child(ad.getPushRefInAdminConsole()).child(Constants.NO_OF_TIMES_PINNED);
+        adRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    int numberOfPins = dataSnapshot.getValue(int.class);
+                    adRef.setValue(numberOfPins+1);
+                }else{
+                    adRef.setValue(1);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
     }

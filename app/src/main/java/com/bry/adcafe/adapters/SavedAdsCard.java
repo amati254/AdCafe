@@ -119,7 +119,7 @@ public class SavedAdsCard {
         isLoadingImageFromFirebase = true;
         Log.d("SavedAdsCard","Loading the image from firebase first");
         DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.PINNED_AD_POOL)
-                .child(Long.toString(mAdvert.getDateInDays())).child(mAdvert.getPushRefInAdminConsole());
+                .child(Long.toString(mAdvert.getDateInDays())).child(mAdvert.getPushRefInAdminConsole()).child("imageUrl");
 
         Log.d("SavedAdsCard","Query set up is --"+Constants.PINNED_AD_POOL+" : "+
                 mAdvert.getDateInDays()+" : "+mAdvert.getPushRefInAdminConsole());
@@ -386,6 +386,8 @@ public class SavedAdsCard {
         String uid = User.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.PINNED_AD_LIST).child(Long.toString(noOfDaysDate)).child(id);
+
+        checkAndRemoveBannerIfNoOtherPiners();
         adRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -402,6 +404,35 @@ public class SavedAdsCard {
             }
         });
 
+    }
+
+    private void checkAndRemoveBannerIfNoOtherPiners() {
+        Advert ad = Variables.adToBeUnpinned;
+        final DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.PINNED_AD_POOL)
+                .child(Long.toString(ad.getDateInDays())).child(ad.getPushRefInAdminConsole()).child(Constants.NO_OF_TIMES_PINNED);
+
+        final DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.PINNED_AD_POOL)
+                .child(Long.toString(ad.getDateInDays())).child(ad.getPushRefInAdminConsole()).child("imageUrl");
+
+        adRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    int numberOfPins = dataSnapshot.getValue(int.class);
+                    if(numberOfPins==1){
+                        adRef.removeValue();
+                        adRef2.removeValue();
+                    }else{
+                        adRef.setValue(numberOfPins-1);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private byte[] bitmapToByte(Bitmap bitmap){
