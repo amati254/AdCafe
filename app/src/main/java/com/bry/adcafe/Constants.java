@@ -83,4 +83,6 @@ public class Constants {
     public static String NO_OF_CATEGORIES_KNOWN = "NoOfCategoriesKnown";
     public static String IS_AD = "Is_ad";
     public static String IS_ANNOUNCEMENT = "Is_announcement";
+    public static String PINNED_AD_POOL = "PinnedAdPool";
+
 }

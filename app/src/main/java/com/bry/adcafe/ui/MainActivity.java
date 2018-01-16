@@ -1184,6 +1184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         findViewById(R.id.WebsiteIcon).setAlpha(0.4f);
                         findViewById(R.id.websiteText).setAlpha(0.4f);
                         findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
+                        Variables.hasBeenPinned = false;
                     }
                     onclicks();
                 }
@@ -1692,16 +1693,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.PINNED_AD_LIST).child(getDateInDays());
 
-        long currentTimeMillis = Calendar.getInstance().getTimeInMillis();
-        long currentDay = (currentTimeMillis+1000*60*60*3)/(1000*60*60*24);
-
-        Log.d(TAG,"The date in days is : "+getDateInDays()+" translating to : "+getDateFromDays(-currentDay));
         DatabaseReference pushRef = adRef.push();
         String pushId = pushRef.getKey();
 
         Log.d(TAG, "pinning the selected ad.");
         ad.setImageBitmap(null);
         ad.setPushId(pushId);
+
+        long currentTimeMillis = System.currentTimeMillis();
+        long currentDay = -(currentTimeMillis+1000*60*60*3)/(1000*60*60*24);
+
+        ad.setDateInDays(currentDay);
+
+        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.PINNED_AD_POOL)
+                .child(getDateInDays()).child(ad.getPushRefInAdminConsole());
+
+        adRef2.setValue(ad.getImageUrl());
+        ad.setImageUrl(null);
         pushRef.setValue(ad).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {

@@ -85,6 +85,7 @@ public class AdvertCard{
         mAdvert = advert;
         mSwipeView = swipeView;
         mLastOrNotLast = lastOrNotLast;
+        Variables.hasBeenPinned = false;
     }
 
     @Resolve
@@ -98,7 +99,6 @@ public class AdvertCard{
         }
 
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
-        Variables.hasBeenPinned = false;
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
     }
 

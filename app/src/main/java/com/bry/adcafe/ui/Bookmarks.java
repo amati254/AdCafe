@@ -92,6 +92,8 @@ public class Bookmarks extends AppCompatActivity {
     private boolean isDone = false;
     private LongOperation Lo;
     private boolean isSharing = false;
+    private int iterations = 0;
+    private int numberOfAdsLoaded = 0;
 
 
     @Override
@@ -513,6 +515,35 @@ public class Bookmarks extends AppCompatActivity {
                 Log.d("Bookmarks","Failed to load ads from firebase.");
             }
         });
+    }
+
+    private void loadImagesForEachAdFirst(){
+        for(List <Advert>list: HashOfAds.values()){
+            numberOfAdsLoaded+=list.size();
+        }
+        for (List <Advert>list: HashOfAds.values()){
+            for(final Advert ad: list){
+                ad.getDateInDays();
+                DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.PINNED_AD_POOL)
+                        .child(Long.toString(ad.getDateInDays())).child(ad.getPushRefInAdminConsole());
+                adRef2.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                       String img = dataSnapshot.getValue(String.class);
+                       ad.setImageUrl(img);
+                       iterations++;
+                       if(iterations==numberOfAdsLoaded){
+                           startLoadAdsIntoViews();
+                       }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }
     }
 
     private void startLoadAdsIntoViews(){

@@ -9,19 +9,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.Handler;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.util.Base64;
 import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
@@ -33,15 +27,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mindorks.placeholderview.PlaceHolderView;
-import com.mindorks.placeholderview.annotations.Animate;
 import com.mindorks.placeholderview.annotations.Click;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.LongClick;
@@ -51,14 +42,8 @@ import com.mindorks.placeholderview.annotations.View;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.text.DateFormatSymbols;
-import java.util.Calendar;
-
-import butterknife.OnItemLongClick;
 
 /**
  * Created by bryon on 05/09/2017.
@@ -87,6 +72,8 @@ public class SavedAdsCard {
     private byte[] mImageBytes;
     private boolean hasLoaded =false;
 
+    private boolean isLoadingImageFromFirebase = false;
+
 
     public SavedAdsCard(Advert advert, Context context, PlaceHolderView placeHolderView,String pinID,long noOfDays,boolean isLastElement) {
         mAdvert = advert;
@@ -100,7 +87,6 @@ public class SavedAdsCard {
     private void onResolved() {
         if(mImageBytes!=null) loadImage2();
         else new LongOperationFI().execute("");
-//        if(mImageBytes==null) new LongOperationFI().execute("");
 
         if(mImageBytes==null)loadListeners();
         sac = this;
@@ -116,12 +102,43 @@ public class SavedAdsCard {
     private void setImage() {
         try {
             Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
-            Log.d("SavedAdsCard---","Image has been converted to bitmap.");
-            mImageBytes = bitmapToByte(getResizedBitmap(bm,350));
+            Log.d("SavedAdsCard---", "Image has been converted to bitmap.");
+            mImageBytes = bitmapToByte(getResizedBitmap(bm, 350));
             mAdvert.setImageBitmap(bm);
+            isLoadingImageFromFirebase = false;
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void doNothing() {
+
+    }
+
+    private void loadImageFromFirebaseFirst() {
+        isLoadingImageFromFirebase = true;
+        Log.d("SavedAdsCard","Loading the image from firebase first");
+        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.PINNED_AD_POOL)
+                .child(Long.toString(mAdvert.getDateInDays())).child(mAdvert.getPushRefInAdminConsole());
+
+        Log.d("SavedAdsCard","Query set up is --"+Constants.PINNED_AD_POOL+" : "+
+                mAdvert.getDateInDays()+" : "+mAdvert.getPushRefInAdminConsole());
+
+        adRef2.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String image = dataSnapshot.getValue(String.class);
+                if(image!=null)Log.d("SavedAdsCard","String of image has been loaded from firebase");
+                mAdvert.setImageUrl(image);
+                Log.d("SavedAdsCard","Now running the setImage method");
+                setImage();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void loadImage2(){
@@ -454,10 +471,18 @@ public class SavedAdsCard {
 
         @Override
         protected String doInBackground(String... strings) {
-            try{
-                setImage();
-            }catch (Exception e){
-                e.printStackTrace();
+            if(mAdvert.getImageUrl()!=null){
+                Log.d("SavedAdsCard","Image is null");
+                try{
+                    setImage();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }else{
+                loadImageFromFirebaseFirst();
+            }
+            while(isLoadingImageFromFirebase){
+                doNothing();
             }
             return "executed";
         }
@@ -478,5 +503,6 @@ public class SavedAdsCard {
             super.onPreExecute();
         }
     }
+
 }
 
