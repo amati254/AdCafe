@@ -2056,4 +2056,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return (netInfo != null && netInfo.isConnected());
     }
 
+    //Font; AR ESSENCE.
+
 }

@@ -258,6 +258,7 @@ public class AdvertCard{
     }
 
 
+
     private void sendBroadcast(String message ) {
         if(message.equals(START_TIMER) && hasBeenSwiped){
             Log.d("AdvertCard - ", "Sending message to start timer");
