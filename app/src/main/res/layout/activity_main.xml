@@ -97,6 +97,15 @@
         </RelativeLayout>
     </LinearLayout>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:visibility="gone"
+        android:id="@+id/easterText"
+        android:text="Hi you!"
+        android:layout_height="wrap_content" />
+
     <!--Ad Counter place Holder views-->
     <com.mindorks.placeholderview.PlaceHolderView
         android:id="@+id/adCounterView"
@@ -104,10 +113,11 @@
         android:layout_height="50dp"/>
 
     <!--Ads Swipe Place Holder Views-->
-    <com.mindorks.placeholderview.SwipePlaceHolderView
+    <com.mindorks.placeholderview.SwipeDirectionalView
         android:id="@+id/swipeView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
 
     <!--Top loading indicator views-->
     <LinearLayout

@@ -129,7 +129,7 @@ public class TutorialActivity extends AppCompatActivity {
             addBottomDots(position);
 
             if (position == myLayouts.length - 1){
-                myBtnNext.setText(getString(R.string.start));
+                myBtnNext.setText("CONTINUE");
                 myBtnSkip.setVisibility(View.GONE);
             }else {
                 myBtnNext.setText(getString(R.string.next));

@@ -66,6 +66,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.SwipeDecor;
+import com.mindorks.placeholderview.SwipeDirectionalView;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.wang.avi.AVLoadingIndicatorView;
 
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LinearLayout mFailedToLoadLayout;
     private Button mRetryButton;
     private ImageButton mLogoutButton;
-    private SwipePlaceHolderView mSwipeView;
+    private SwipeDirectionalView mSwipeView;
     private PlaceHolderView mAdCounterView;
     private Context mContext;
     private String mKey = "";
@@ -669,7 +670,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void setUpAllTheViews() {
-        mSwipeView = (SwipePlaceHolderView) findViewById(R.id.swipeView);
+        mSwipeView = (SwipeDirectionalView) findViewById(R.id.swipeView);
         mBottomNavButtons = (LinearLayout) findViewById(R.id.bottomNavButtons);
 
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.mainActivityAvi);
@@ -697,7 +698,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setViewWidth(windowSize.x)
                         .setViewHeight(windowSize.y - bottomMargin)
                         .setSwipeRotationAngle(0)
-                        .setSwipeAnimTime(200)
+                        .setSwipeAnimTime(150)
                         .setViewGravity(Gravity.TOP)
                         .setPaddingTop(15)
                         .setRelativeScale(relativeScale));
@@ -795,7 +796,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG, "---User has seen all the ads, thus will load only last ad...");
                 Log.d(TAG,"The child to start from is : "+mChildToStartFrom+" and currentAdInSubscriptionIs : "+
                         Variables.getCurrentAdInSubscription());
-                mSwipeView.lockViews();
+//                mSwipeView.lockViews();
+                lockViews();
                 mSwipeView.addView(new AdvertCard(mContext, mAdList.get(0), mSwipeView, Constants.LAST));
                 Variables.adToVariablesAdList(mAdList.get(0));
                 Variables.setIsLastOrNotLast(Constants.LAST);
@@ -842,7 +844,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             if(lastAdSeen!=null){
                 Log.d(TAG, "---Loading only last ad from lastAdSeen that was initialised...");
-                mSwipeView.lockViews();
+//                mSwipeView.lockViews();
+                lockViews();
                 mSwipeView.addView(new AdvertCard(mContext, lastAdSeen, mSwipeView, Constants.LAST));
                 Variables.adToVariablesAdList(lastAdSeen);
                 Variables.setIsLastOrNotLast(Constants.LAST);
@@ -880,6 +883,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAvi.setVisibility(View.GONE);
         mLoadingText.setVisibility(View.GONE);
         mBottomNavButtons.setVisibility(View.VISIBLE);
+        findViewById(R.id.easterText).setVisibility(View.VISIBLE);
 
         Log.d(TAG, "---Setting up On click listeners...");
         onclicks();
@@ -1010,7 +1014,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(mDoublePressedToPin) {
 //                findViewById(R.id.bookmark2Btn).callOnClick();
             }else{
-                mSwipeView.doSwipe(true);
+                if(!Variables.isLocked) mSwipeView.doSwipe(true);
             }
             mDoublePressedToPin = true;
             new Handler().postDelayed(new Runnable() {
@@ -1357,7 +1361,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Variables.setIsLastOrNotLast(Constants.NOT_LAST);
         }
         if(Variables.isLockedBecauseOfNoMoreAds){
-            mSwipeView.unlockViews();
+//            mSwipeView.unlockViews();
+            unLockViews();
             Variables.isLockedBecauseOfNoMoreAds = false;
         }
         mAviLoadingMoreAds.smoothToHide();
@@ -1392,7 +1397,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.ANNOUNCEMENTS));
                         }
                         if(Variables.isLockedBecauseOfNoMoreAds){
-                            mSwipeView.unlockViews();
+//                            mSwipeView.unlockViews();
+                            unLockViews();
                             Log.d(TAG,"Unlocking views since isLockedBecauseOfNoMoreAds is : "+Variables.isLockedBecauseOfNoMoreAds);
                             Variables.isLockedBecauseOfNoMoreAds = false;
                         }
@@ -1620,6 +1626,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mBottomNavButtons.setVisibility(View.VISIBLE);
             mSwipeView.setVisibility(View.VISIBLE);
             mAdCounterView.setVisibility(View.VISIBLE);
+            findViewById(R.id.easterText).setVisibility(View.VISIBLE);
             if (isFirebaseResetNecessary) {
                 resetAdTotalsInFirebase();
             }
@@ -1647,11 +1654,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override public void networkUnavailable() {
         Log.d(TAG, "User has gone offline...");
         isOffline = true;
+
         if(stage.equals("VIEWING_ADS")){
             mBottomNavButtons.setVisibility(View.GONE);
             mSwipeView.setVisibility(View.GONE);
             mAdCounterView.setVisibility(View.GONE);
             findViewById(R.id.droppedInternetLayout).setVisibility(View.VISIBLE);
+            findViewById(R.id.easterText).setVisibility(View.GONE);
         }
 //        else{
 //            mBottomNavButtons.setVisibility(View.GONE);
@@ -2054,6 +2063,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         //should check null because in airplane mode it will be null
         return (netInfo != null && netInfo.isConnected());
+    }
+
+    private void lockViews(){
+//        mSwipeView.lockViews();
+        mSwipeView.getBuilder()
+                .setWidthSwipeDistFactor(1f)
+                .setHeightSwipeDistFactor(1f);
+        Variables.isLocked = true;
+    }
+
+    private void unLockViews(){
+//        mSwipeView.unlockViews();
+        mSwipeView.getBuilder()
+                .setWidthSwipeDistFactor(10f)
+                .setHeightSwipeDistFactor(10f);
+        Variables.isLocked = false;
     }
 
     //Font; AR ESSENCE.

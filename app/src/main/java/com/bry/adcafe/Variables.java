@@ -71,6 +71,7 @@ public class Variables {
 
     public static int width;
     public static LinkedHashMap<Long,List> VariablesHashOfAds = new LinkedHashMap<>();
+    public static boolean isLocked;
 
 
     public static void setNewNumberOfAds(int number){

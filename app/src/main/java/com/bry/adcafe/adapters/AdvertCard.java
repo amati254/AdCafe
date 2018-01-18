@@ -39,14 +39,18 @@ import com.mindorks.placeholderview.annotations.Click;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
+import com.mindorks.placeholderview.annotations.swipe.SwipeCancelState;
 import com.mindorks.placeholderview.annotations.swipe.SwipeIn;
 import com.mindorks.placeholderview.annotations.swipe.SwipeInState;
 import com.mindorks.placeholderview.annotations.swipe.SwipeOut;
 import com.mindorks.placeholderview.annotations.swipe.SwipeOutState;
+import com.mindorks.placeholderview.annotations.swipe.SwipeTouch;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
@@ -62,7 +66,6 @@ public class AdvertCard{
     @View(R.id.adCardAvi) private AVLoadingIndicatorView mAvi;
     @View(R.id.WebsiteIcon) private ImageView webIcon;
     @View(R.id.websiteText) private TextView webText;
-    @View(R.id.smallDot) private android.view.View Dot;
 
     private Advert mAdvert;
     private Context mContext;
@@ -79,6 +82,10 @@ public class AdvertCard{
     private String igsNein = "none";
     private byte[] mImageBytes;
 
+    private int amount = 0;
+    private double mDistance = 0;
+    private List<Bitmap> blurredImageList = new ArrayList<>();
+
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
         mContext = context;
@@ -90,31 +97,39 @@ public class AdvertCard{
 
     @Resolve
     private void onResolved(){
-        if(mLastOrNotLast.equals(Constants.NO_ADS)){
-            mIsNoAds = true;
-            loadAdPlaceHolderImage();
-        }else{
-            mIsNoAds = false;
-            new LongOperationFI().execute("");
-        }
+        if(mLastOrNotLast.equals(Constants.NO_ADS)) loadAdPlaceHolderImage();
+        else new LongOperationFI().execute("");
 
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
     }
 
     private void loadAdPlaceHolderImage() {
+        mIsNoAds = true;
         Glide.with(mContext).load(R.drawable.noads5).into(profileImageView);
-        mSwipeView.lockViews();
+        lockViews();
         clickable=false;
         Variables.setCurrentAdvert(mAdvert);
+
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 1;
+        bs = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.noads5, options);
+        setUpListOfBlurrs();
+    }
+
+    private void setUpListOfBlurrs(){
+        for(int i = 0;i<6;i++){
+            blurredImageList.add(bs);
+        }
+        new LongOperationBL().execute();
     }
 
     private void setImage() {
         try {
-            Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+            bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
             Log.d("SavedAdsCard---","Image has been converted to bitmap.");
-            mImageBytes = bitmapToByte(bm);
-            mAdvert.setImageBitmap(bm);
+            mImageBytes = bitmapToByte(bs);
+            mAdvert.setImageBitmap(bs);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -258,11 +273,11 @@ public class AdvertCard{
     }
 
 
-
     private void sendBroadcast(String message ) {
         if(message.equals(START_TIMER) && hasBeenSwiped){
             Log.d("AdvertCard - ", "Sending message to start timer");
-            mSwipeView.lockViews();
+//            mSwipeView.lockViews();
+            lockViews();
             clickable = false;
             Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -290,18 +305,23 @@ public class AdvertCard{
     private BroadcastReceiver mMessageReceiverForTimerHasEnded = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-               Log.d("ADVERT_CARD--","message from adCounterBar that timer has ended has been received.");
-                if(mSwipeView.getChildCount() > 1){
-                    mSwipeView.unlockViews();
-                    clickable = true;
-                    hasBeenSwiped = false;
-                }else if(mSwipeView.getChildCount()==1 && !mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
-                    Log.d("ADVERT_CARD","Sending broadcast for last ad. Also setting isLockedBecauseOfNoMoreAds");
-                    sendBroadcast(Constants.LAST);
-                    Variables.isLockedBecauseOfNoMoreAds = true;
-                }
+        doTheStuffWhenTimerHasEnded();
         }
     };
+
+    private void doTheStuffWhenTimerHasEnded(){
+        Log.d("ADVERT_CARD--","message from adCounterBar that timer has ended has been received.");
+        if(mSwipeView.getChildCount() > 1){
+//                    mSwipeView.unlockViews();
+            unLockViews();
+            clickable = true;
+            hasBeenSwiped = false;
+        }else if(mSwipeView.getChildCount()==1 && !mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
+            Log.d("ADVERT_CARD","Sending broadcast for last ad. Also setting isLockedBecauseOfNoMoreAds");
+            sendBroadcast(Constants.LAST);
+            Variables.isLockedBecauseOfNoMoreAds = true;
+        }
+    }
 
     private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
         @Override
@@ -327,6 +347,24 @@ public class AdvertCard{
         return getResizedBitmap(bitm,700);
 //        return bitm;
     }
+
+    private void lockViews(){
+//        mSwipeView.lockViews();
+        mSwipeView.getBuilder()
+                .setWidthSwipeDistFactor(1f)
+                .setHeightSwipeDistFactor(1f);
+        Variables.isLocked = true;
+    }
+
+    private void unLockViews(){
+//        mSwipeView.unlockViews();
+        mSwipeView.getBuilder()
+                .setWidthSwipeDistFactor(10f)
+                .setHeightSwipeDistFactor(10f);
+        Variables.isLocked = false;
+    }
+
+
 
 
     private static Bitmap getResizedBitmap(Bitmap image, int maxSize) {
@@ -400,12 +438,296 @@ public class AdvertCard{
                     loadAllAds();
                 }
             }
+            setUpListOfBlurrs();
         }
 
         @Override
         protected void onPreExecute() {
+            mIsNoAds = false;
             mAvi.setVisibility(android.view.View.VISIBLE);
             super.onPreExecute();
         }
     }
+
+
+
+
+    private Bitmap fastblur(Bitmap sentBitmap, float scale, int radius) {
+
+        int width = Math.round(sentBitmap.getWidth() * scale);
+        int height = Math.round(sentBitmap.getHeight() * scale);
+        sentBitmap = Bitmap.createScaledBitmap(sentBitmap, width, height, false);
+
+        Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
+
+        if (radius < 1) {
+            return (null);
+        }
+
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        int[] pix = new int[w * h];
+        Log.e("pix", w + " " + h + " " + pix.length);
+        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+
+        int wm = w - 1;
+        int hm = h - 1;
+        int wh = w * h;
+        int div = radius + radius + 1;
+
+        int r[] = new int[wh];
+        int g[] = new int[wh];
+        int b[] = new int[wh];
+        int rsum, gsum, bsum, x, y, i, p, yp, yi, yw;
+        int vmin[] = new int[Math.max(w, h)];
+
+        int divsum = (div + 1) >> 1;
+        divsum *= divsum;
+        int dv[] = new int[256 * divsum];
+        for (i = 0; i < 256 * divsum; i++) {
+            dv[i] = (i / divsum);
+        }
+
+        yw = yi = 0;
+
+        int[][] stack = new int[div][3];
+        int stackpointer;
+        int stackstart;
+        int[] sir;
+        int rbs;
+        int r1 = radius + 1;
+        int routsum, goutsum, boutsum;
+        int rinsum, ginsum, binsum;
+
+        for (y = 0; y < h; y++) {
+            rinsum = ginsum = binsum = routsum = goutsum = boutsum = rsum = gsum = bsum = 0;
+            for (i = -radius; i <= radius; i++) {
+                p = pix[yi + Math.min(wm, Math.max(i, 0))];
+                sir = stack[i + radius];
+                sir[0] = (p & 0xff0000) >> 16;
+                sir[1] = (p & 0x00ff00) >> 8;
+                sir[2] = (p & 0x0000ff);
+                rbs = r1 - Math.abs(i);
+                rsum += sir[0] * rbs;
+                gsum += sir[1] * rbs;
+                bsum += sir[2] * rbs;
+                if (i > 0) {
+                    rinsum += sir[0];
+                    ginsum += sir[1];
+                    binsum += sir[2];
+                } else {
+                    routsum += sir[0];
+                    goutsum += sir[1];
+                    boutsum += sir[2];
+                }
+            }
+            stackpointer = radius;
+
+            for (x = 0; x < w; x++) {
+
+                r[yi] = dv[rsum];
+                g[yi] = dv[gsum];
+                b[yi] = dv[bsum];
+
+                rsum -= routsum;
+                gsum -= goutsum;
+                bsum -= boutsum;
+
+                stackstart = stackpointer - radius + div;
+                sir = stack[stackstart % div];
+
+                routsum -= sir[0];
+                goutsum -= sir[1];
+                boutsum -= sir[2];
+
+                if (y == 0) {
+                    vmin[x] = Math.min(x + radius + 1, wm);
+                }
+                p = pix[yw + vmin[x]];
+
+                sir[0] = (p & 0xff0000) >> 16;
+                sir[1] = (p & 0x00ff00) >> 8;
+                sir[2] = (p & 0x0000ff);
+
+                rinsum += sir[0];
+                ginsum += sir[1];
+                binsum += sir[2];
+
+                rsum += rinsum;
+                gsum += ginsum;
+                bsum += binsum;
+
+                stackpointer = (stackpointer + 1) % div;
+                sir = stack[(stackpointer) % div];
+
+                routsum += sir[0];
+                goutsum += sir[1];
+                boutsum += sir[2];
+
+                rinsum -= sir[0];
+                ginsum -= sir[1];
+                binsum -= sir[2];
+
+                yi++;
+            }
+            yw += w;
+        }
+        for (x = 0; x < w; x++) {
+            rinsum = ginsum = binsum = routsum = goutsum = boutsum = rsum = gsum = bsum = 0;
+            yp = -radius * w;
+            for (i = -radius; i <= radius; i++) {
+                yi = Math.max(0, yp) + x;
+
+                sir = stack[i + radius];
+
+                sir[0] = r[yi];
+                sir[1] = g[yi];
+                sir[2] = b[yi];
+
+                rbs = r1 - Math.abs(i);
+
+                rsum += r[yi] * rbs;
+                gsum += g[yi] * rbs;
+                bsum += b[yi] * rbs;
+
+                if (i > 0) {
+                    rinsum += sir[0];
+                    ginsum += sir[1];
+                    binsum += sir[2];
+                } else {
+                    routsum += sir[0];
+                    goutsum += sir[1];
+                    boutsum += sir[2];
+                }
+
+                if (i < hm) {
+                    yp += w;
+                }
+            }
+            yi = x;
+            stackpointer = radius;
+            for (y = 0; y < h; y++) {
+                // Preserve alpha channel: ( 0xff000000 & pix[yi] )
+                pix[yi] = ( 0xff000000 & pix[yi] ) | ( dv[rsum] << 16 ) | ( dv[gsum] << 8 ) | dv[bsum];
+
+                rsum -= routsum;
+                gsum -= goutsum;
+                bsum -= boutsum;
+
+                stackstart = stackpointer - radius + div;
+                sir = stack[stackstart % div];
+
+                routsum -= sir[0];
+                goutsum -= sir[1];
+                boutsum -= sir[2];
+
+                if (x == 0) {
+                    vmin[y] = Math.min(y + r1, hm) * w;
+                }
+                p = x + vmin[y];
+
+                sir[0] = r[p];
+                sir[1] = g[p];
+                sir[2] = b[p];
+
+                rinsum += sir[0];
+                ginsum += sir[1];
+                binsum += sir[2];
+
+                rsum += rinsum;
+                gsum += ginsum;
+                bsum += binsum;
+
+                stackpointer = (stackpointer + 1) % div;
+                sir = stack[stackpointer];
+
+                routsum += sir[0];
+                goutsum += sir[1];
+                boutsum += sir[2];
+
+                rinsum -= sir[0];
+                ginsum -= sir[1];
+                binsum -= sir[2];
+
+                yi += w;
+            }
+        }
+
+        Log.e("pix", w + " " + h + " " + pix.length);
+        bitmap.setPixels(pix, 0, w, 0, 0, w, h);
+
+        return (bitmap);
+    }
+
+    private class LongOperationBL extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            Log.d("Card","Doing in background");
+            float scale = 2f;
+            Bitmap bm = getResizedBitmap(bs,250);
+            for(int i = 0;i<6;i++){
+                blurredImageList.set(i,fastblur(bm,scale,(i+1)));
+            }
+            return "executed";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            Log.d("Card","Post execute");
+            mSwipeView.unlockViews();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            Log.d("Card","Pre execute");
+            super.onPreExecute();
+            mSwipeView.lockViews();
+        }
+    }
+
+    @SwipeTouch
+    private void onSwipeTouch(float xStart, float yStart, float xCurrent, float yCurrent) {
+        double distance = Math.sqrt(Math.pow(xCurrent - xStart, 2) + (Math.pow(yCurrent - yStart, 2)));
+        mDistance = distance;
+        int roundedDistance =(((int)distance + 99) / 200 ) * 200;
+        Log.d("DEBUG", "onSwipeTouch " + " distance : " + distance);
+
+        if(distance<49){
+            profileImageView.setImageBitmap(bs);
+        }else if(distance>49 &&distance<620){
+            if(amount!=roundedDistance/100){
+                updateImage();
+            }
+        }
+
+    }
+
+    @SwipeCancelState
+    private void onSwipeCancelState(){
+        Log.d("EVENT", "onSwipeCancelState");
+        setBooleanForResumingTimer();
+        profileImageView.setImageBitmap(bs);
+    }
+
+
+
+
+    private void updateImage() {
+        int roundedDistance =(((int)mDistance + 99) / 100 ) * 100;
+
+        profileImageView.setImageBitmap(blurredImageList.get((roundedDistance/100)-1));
+        amount = roundedDistance/100;
+    }
+
+    private void setBooleanForStoppingTimer(){
+
+    }
+
+    private void setBooleanForResumingTimer(){
+
+    }
+
 }
