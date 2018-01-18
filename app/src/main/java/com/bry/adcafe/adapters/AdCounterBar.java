@@ -60,11 +60,6 @@ public class AdCounterBar {
         adCounter.setText(Integer.toString(Variables.getAdTotal(mKey)));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToStartTimer, new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers, new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
-//        startTimer2();
-
-        if (Variables.mIsLastOrNotLast == Constants.NOT_LAST) {
-//            startTimer();
-        }
 
     }
 
@@ -166,8 +161,10 @@ public class AdCounterBar {
             while (i > 0) {
                 try {
                     Thread.sleep(100);
-                    i -= 100;
-                    publishProgress(i);
+                    if(Variables.isAllClearToContinueCountDown){
+                        i -= 100;
+                        publishProgress(i);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -177,7 +174,6 @@ public class AdCounterBar {
 
         @Override
         protected void onProgressUpdate(Integer... values) {
-//            Log.i("AdCounter-", "onProgressUpdate(): " + String.valueOf(values[0]));
             super.onProgressUpdate(values);
             int value = values[0];
             progressBarTimer.incrementProgressBy(-1);

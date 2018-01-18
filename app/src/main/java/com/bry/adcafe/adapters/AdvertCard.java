@@ -7,8 +7,6 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
@@ -20,30 +18,18 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.Advert;
-import com.bry.adcafe.models.User;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.mindorks.placeholderview.Animation;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
-import com.mindorks.placeholderview.Utils;
-import com.mindorks.placeholderview.annotations.Animate;
 import com.mindorks.placeholderview.annotations.Click;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
 import com.mindorks.placeholderview.annotations.swipe.SwipeCancelState;
 import com.mindorks.placeholderview.annotations.swipe.SwipeIn;
-import com.mindorks.placeholderview.annotations.swipe.SwipeInState;
 import com.mindorks.placeholderview.annotations.swipe.SwipeOut;
-import com.mindorks.placeholderview.annotations.swipe.SwipeOutState;
 import com.mindorks.placeholderview.annotations.swipe.SwipeTouch;
 import com.wang.avi.AVLoadingIndicatorView;
 
@@ -51,8 +37,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 /**
  * Created by bryon on 6/11/2017.
@@ -250,7 +234,7 @@ public class AdvertCard{
         }
         if(mSwipeView.getChildCount()==2 && mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
             Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
-            mSwipeView.lockViews();
+            lockViews();
         }
         Intent intent = new Intent("SWIPED");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -266,7 +250,7 @@ public class AdvertCard{
         }
         if(mSwipeView.getChildCount()==2 && mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
             Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
-            mSwipeView.lockViews();
+            lockViews();
         }
         Intent intent = new Intent("SWIPED");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -279,6 +263,7 @@ public class AdvertCard{
 //            mSwipeView.lockViews();
             lockViews();
             clickable = false;
+            setBooleanForResumingTimer();
             Intent intent = new Intent(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             Variables.hasBeenPinned = false;
@@ -695,6 +680,10 @@ public class AdvertCard{
         int roundedDistance =(((int)distance + 99) / 200 ) * 200;
         Log.d("DEBUG", "onSwipeTouch " + " distance : " + distance);
 
+        if(distance>200){
+            setBooleanForPausingTimer();
+        }
+
         if(distance<49){
             profileImageView.setImageBitmap(bs);
         }else if(distance>49 &&distance<620){
@@ -722,12 +711,15 @@ public class AdvertCard{
         amount = roundedDistance/100;
     }
 
-    private void setBooleanForStoppingTimer(){
+    private void setBooleanForPausingTimer(){
+        Log.d("AdvertCard","Setting boolean for pausing timer.");
+        if(Variables.isAllClearToContinueCountDown) Variables.isAllClearToContinueCountDown = false;
 
     }
 
     private void setBooleanForResumingTimer(){
-
+        Log.d("AdvertCard","Setting boolean for resuming timer.");
+        if(!Variables.isAllClearToContinueCountDown)Variables.isAllClearToContinueCountDown = true;
     }
 
 }
