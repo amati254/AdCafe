@@ -126,6 +126,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button retryLoadingFromCannotLoad;
 
     private int iterations = 0;
+    private boolean isHiddenBecauseNetworkDropped = false;
+    private boolean areVeiwsHidden = false;
 
 
     @Override
@@ -309,6 +311,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Variables.isStartFromLogin = false;
             } catch (Exception e) {
                 Log.e("BACKGROUND_PROC---", e.getMessage());
+                e.printStackTrace();
             }
         } else {
             loadUserDataFromSharedPrefs();
@@ -378,20 +381,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void startGetAds() {
         setUpAllTheViews();
-        mAvi.setVisibility(View.VISIBLE);
-        mLoadingText.setVisibility(View.VISIBLE);
-        mBottomNavButtons.setVisibility(View.GONE);
-        findViewById(R.id.easterText).setVisibility(View.GONE);
-        Log.d(TAG, "---Setting up mViewRunnable thread...");
-        mViewRunnable = new Runnable() {
-            @Override
-            public void run() {
-                getAds();
-            }
-        };
-        Thread thread = new Thread(null, mViewRunnable, "Background");
-        Log.d(TAG, "---Starting thread...");
-        thread.start();
+        hideViews();
+        getGetAdsFromFirebase();
+//        mAvi.setVisibility(View.VISIBLE);
+//        mLoadingText.setVisibility(View.VISIBLE);
+//        mBottomNavButtons.setVisibility(View.GONE);
+//        mSwipeView.setVisibility(View.INVISIBLE);
+//        mAdCounterView.setVisibility(View.GONE);
+//        findViewById(R.id.easterText).setVisibility(View.GONE);
+//        mAviLoadingMoreAds.setVisibility(View.GONE);
+
+//        Log.d(TAG, "---Setting up mViewRunnable thread...");
+//        mViewRunnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                getAds();
+//            }
+//        };
+//        Thread thread = new Thread(null, mViewRunnable, "Background");
+//        Log.d(TAG, "---Starting thread...");
+//        thread.start();
 
     } ///////////////////////////
 
@@ -413,6 +422,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String date;
         date = mIsBeingReset ? getNextDay() : getDate();
 
+        if(!mAdList.isEmpty()) mAdList.clear();
+        Variables.clearAllAdsFromAdList();
+
         Variables.nextSubscriptionIndex = Variables.getCurrentSubscriptionIndex();
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
                 .child(getSubscriptionValue(Variables.getCurrentSubscriptionIndex()))
@@ -428,8 +440,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             dbRef.orderByKey().startAt(Integer.toString(Variables.getCurrentAdInSubscription()))
                     .limitToFirst(5).addListenerForSingleValueEvent(val);
         }
-        if(!mAdList.isEmpty()) mAdList.clear();
-        Variables.clearAllAdsFromAdList();
     }
 
     ValueEventListener val = new ValueEventListener() {
@@ -457,9 +467,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             mChildToStartFrom = Variables.getCurrentAdInSubscription()+ mAdList.size();
                             Log.d(TAG,"The child set to start from is : "+mChildToStartFrom);
                             Variables.setCurrentAdNumberForAllAdsList(0);
-//                            mAvi.setVisibility(View.GONE);
-//                            mLoadingText.setVisibility(View.GONE);
-//                            mBottomNavButtons.setVisibility(View.VISIBLE);
                             loadAdsIntoAdvertCard();
                         }else{
                             //user has seen the one ad that has been loaded.
@@ -475,9 +482,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 getGetAdsFromFirebase();
                             } else {
                                 Log.d(TAG, "---There are no ads in any of the subscriptions");
-//                                mAvi.setVisibility(View.GONE);
-//                                mLoadingText.setVisibility(View.GONE);
-//                                mBottomNavButtons.setVisibility(View.VISIBLE);
                                 loadAdsIntoAdvertCard();
                             }
                         }
@@ -491,9 +495,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             getGetAdsFromFirebase();
                         } else {
                             Log.d(TAG, "---There are no ads in any of the subscriptions");
-//                            mAvi.setVisibility(View.GONE);
-//                            mLoadingText.setVisibility(View.GONE);
-//                            mBottomNavButtons.setVisibility(View.VISIBLE);
                             loadAdsIntoAdvertCard();
                         }
                     }
@@ -526,9 +527,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         mChildToStartFrom = Variables.getCurrentAdInSubscription()+mAdList.size();
                         Log.d(TAG, "Child set to start from is -- " + mChildToStartFrom);
                         Log.d(TAG, "---All the ads have been handled.Total is " + mAdList.size());
-//                        mAvi.setVisibility(View.GONE);
-//                        mLoadingText.setVisibility(View.GONE);
-//                        mBottomNavButtons.setVisibility(View.VISIBLE);
                         loadAdsIntoAdvertCard();
                     }
                 }
@@ -541,9 +539,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     getGetAdsFromFirebase();
                 } else {
                     Log.d(TAG, "---There are no ads in any of the subscriptions");
-//                    mAvi.setVisibility(View.GONE);
-//                    mLoadingText.setVisibility(View.GONE);
-//                    mBottomNavButtons.setVisibility(View.VISIBLE);
                     loadAdsIntoAdvertCard();
                 }
             }
@@ -659,6 +654,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasStarted);
 
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForOnSwiped);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnhideVeiws);
 
         sendBroadcastToUnregisterAllReceivers();
     }
@@ -672,6 +668,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setUpAllTheViews() {
         mSwipeView = (SwipeDirectionalView) findViewById(R.id.swipeView);
+        mAdCounterView = (PlaceHolderView) findViewById(R.id.adCounterView);
         mBottomNavButtons = (LinearLayout) findViewById(R.id.bottomNavButtons);
 
         mAvi = (AVLoadingIndicatorView) findViewById(R.id.mainActivityAvi);
@@ -820,7 +817,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if(Variables.didAdCafeRemoveCategory)informUserOfSubscriptionChanges();
                 if(Variables.didAdCafeAddNewCategory) tellUserOfNewSubscription();
-                Toast.makeText(mContext, "We've got no more stuff for you today.", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "We've got no more stuff for you today.", Toast.LENGTH_SHORT).show();
                 isLastAd = true;
                 Variables.isLockedBecauseOfNoMoreAds = true;
                 loadAnyAnnouncements();
@@ -867,9 +864,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
                 isLastAd = true;
-            }else {
+            }else{
                 Advert noAds = new Advert();
                 noAds.setWebsiteLink(igsNein);
+                noAds.setPushRefInAdminConsole("NONE");
                 noAds.setCategory("NoAds");
                 mSwipeView.addView(new AdvertCard(mContext, noAds, mSwipeView, Constants.NO_ADS));
                 Variables.adToVariablesAdList(noAds);
@@ -882,10 +880,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Variables.isLockedBecauseOfNoMoreAds = true;
             loadAnyAnnouncements();
         }
-        mAvi.setVisibility(View.GONE);
-        mLoadingText.setVisibility(View.GONE);
-        mBottomNavButtons.setVisibility(View.VISIBLE);
-        findViewById(R.id.easterText).setVisibility(View.VISIBLE);
 
         Log.d(TAG, "---Setting up On click listeners...");
         onclicks();
@@ -894,7 +888,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
-        if(loadMoreAds) loadMoreAds();
+//        if(loadMoreAds) loadMoreAds();
     }
 
 
@@ -910,6 +904,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForTimerHasStarted, new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForOnSwiped, new IntentFilter("SWIPED"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnhideVeiws, new IntentFilter("BLUREDIMAGESDONE"));
 
     }
 
@@ -1110,6 +1105,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    private BroadcastReceiver mMessageReceiverForUnhideVeiws = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("COUNTER_BAR_TO_MAIN- ", "Broadcast has been received that blurred images have loaded, unhiding views.");
+            unhideViews();
+        }
+    };
+
+    private void hideViews(){
+        areVeiwsHidden = true;
+        mAvi.setVisibility(View.VISIBLE);
+        mLoadingText.setVisibility(View.VISIBLE);
+        mBottomNavButtons.setVisibility(View.GONE);
+        mSwipeView.setVisibility(View.INVISIBLE);
+        mAdCounterView.setVisibility(View.GONE);
+        findViewById(R.id.easterText).setVisibility(View.GONE);
+        mAviLoadingMoreAds.setVisibility(View.GONE);
+    }
+
+    private void unhideViews(){
+        areVeiwsHidden = false;
+        mAvi.setVisibility(View.GONE);
+        mLoadingText.setVisibility(View.GONE);
+        mBottomNavButtons.setVisibility(View.VISIBLE);
+        findViewById(R.id.easterText).setVisibility(View.VISIBLE);
+        mSwipeView.setVisibility(View.VISIBLE);
+        mAdCounterView.setVisibility(View.VISIBLE);
+        if(isLastAd)Toast.makeText(mContext, "We've got no more stuff for you today.", Toast.LENGTH_SHORT).show();
+//        mAviLoadingMoreAds.setVisibility(View.VISIBLE);
+//        loadAnyAnnouncements();
+    }
 
 
     private BroadcastReceiver mMessageReceiverForAddingToSharedPreferences = new BroadcastReceiver() {
@@ -1218,6 +1244,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             onclicks();
                         }
                     }
+                    Intent intent = new Intent("UNBLURR_IMAGE"+Variables.getCurrentAdvert().getPushRefInAdminConsole());
+                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                 }
             }, 300);
 
@@ -1237,7 +1265,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void loadMoreAds() {
         isLoadingMoreAds = true;
-        mAviLoadingMoreAds.smoothToShow();
+        if(!areVeiwsHidden) mAviLoadingMoreAds.smoothToShow();
 //        spinner.setVisibility(View.VISIBLE);
         Log.d("MAIN-ACTIVITY---", "Loading more ads since user has seen almost all....");
         String date;
@@ -1374,7 +1402,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void loadAnyAnnouncements() {
         if(!hasLoadedAnnouncements){
             hasLoadedAnnouncements = true;
-            mAviLoadingMoreAds.smoothToShow();
+            if(!areVeiwsHidden)mAviLoadingMoreAds.smoothToShow();
             Log.d("MAIN-ACTIVITY---", "Now loading announcements since there are no more ads....");
             String date = isAlmostMidNight() ? getNextDay() : getDate();
             Query query = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(date);
@@ -1622,8 +1650,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override public void networkAvailable() {
         Log.d(TAG, "User is connected to the internet via wifi or cellular data");
         isOffline = false;
-        if(stage.equals("VIEWING_ADS")){
+        if(stage.equals("VIEWING_ADS") && isHiddenBecauseNetworkDropped){
             //Sets these views if activity has already loaded the ads.
+            isHiddenBecauseNetworkDropped = false;
             findViewById(R.id.droppedInternetLayout).setVisibility(View.GONE);
             mBottomNavButtons.setVisibility(View.VISIBLE);
             mSwipeView.setVisibility(View.VISIBLE);
@@ -1658,22 +1687,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         isOffline = true;
 
         if(stage.equals("VIEWING_ADS")){
+            isHiddenBecauseNetworkDropped = true;
             mBottomNavButtons.setVisibility(View.GONE);
             mSwipeView.setVisibility(View.GONE);
             mAdCounterView.setVisibility(View.GONE);
             findViewById(R.id.droppedInternetLayout).setVisibility(View.VISIBLE);
             findViewById(R.id.easterText).setVisibility(View.GONE);
         }
-//        else{
-//            mBottomNavButtons.setVisibility(View.GONE);
-//            mSwipeView.setVisibility(View.GONE);
-//            mAdCounterView.setVisibility(View.GONE);
-//            findViewById(R.id.droppedInternetLayout).setVisibility(View.VISIBLE);
-//        }
-//        mBottomNavButtons.setVisibility(View.GONE);
-//        mSwipeView.setVisibility(View.GONE);
-//        mAdCounterView.setVisibility(View.GONE);
-//        findViewById(R.id.droppedInternetLayout).setVisibility(View.VISIBLE);
 
     }
 

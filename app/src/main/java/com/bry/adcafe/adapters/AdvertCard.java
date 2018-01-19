@@ -84,8 +84,14 @@ public class AdvertCard{
         if(mLastOrNotLast.equals(Constants.NO_ADS)) loadAdPlaceHolderImage();
         else new LongOperationFI().execute("");
 
+       setListeners();
+    }
+
+    private void setListeners(){
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnblurrImage,new IntentFilter("UNBLURR_IMAGE"+mAdvert.getPushRefInAdminConsole()));
+
     }
 
     private void loadAdPlaceHolderImage() {
@@ -118,6 +124,9 @@ public class AdvertCard{
             e.printStackTrace();
         }
     }
+
+
+
 
     private void loadAllAds(){
         Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
@@ -169,18 +178,6 @@ public class AdvertCard{
 
     private void loadOnlyLastAd(){
         Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
-//        mAvi.setVisibility(android.view.View.VISIBLE);
-//        try {
-//            if(mAdvert.isFlagged()){
-//                bs = BitmapFactory.decodeResource(mContext.getResources(),R.drawable.placeholderimage);
-//            }else {
-//                bs = decodeFromFirebaseBase64(mAdvert.getImageUrl());
-//                mAdvert.setImageBitmap(bs);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
         Glide.with(mContext).load(
 //                bitmapToByte(mAdvert.getImageBitmap())
                 mImageBytes
@@ -224,6 +221,10 @@ public class AdvertCard{
 
     }
 
+
+
+
+
     @SwipeOut
     private void onSwipedOut(){
         Log.d("EVENT----", "onSwipedOut");
@@ -256,7 +257,6 @@ public class AdvertCard{
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
-
     private void sendBroadcast(String message ) {
         if(message.equals(START_TIMER) && hasBeenSwiped){
             Log.d("AdvertCard - ", "Sending message to start timer");
@@ -287,10 +287,30 @@ public class AdvertCard{
                 Variables.getCurrentAdvert().getPushRefInAdminConsole());
     }
 
+
+
+
     private BroadcastReceiver mMessageReceiverForTimerHasEnded = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
         doTheStuffWhenTimerHasEnded();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasEnded);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnblurrImage);
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForUnblurrImage = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            profileImageView.setImageBitmap(bs);
         }
     };
 
@@ -307,15 +327,6 @@ public class AdvertCard{
             Variables.isLockedBecauseOfNoMoreAds = true;
         }
     }
-
-    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasEnded);
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
-        }
-    };
 
 
 
@@ -663,12 +674,23 @@ public class AdvertCard{
             super.onPostExecute(result);
             Log.d("Card","Post execute");
             mSwipeView.unlockViews();
+            setBooleanForResumingTimer();
+
+            Intent intent = new Intent("BLUREDIMAGESDONE");
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            if(isCurrentlyBeingViewed()){
+                profileImageView.setImageBitmap(bs);
+            }else{
+                if(!mAdvert.getNatureOfBanner().equals(Constants.IS_ANNOUNCEMENT))
+                    profileImageView.setImageBitmap(blurredImageList.get(blurredImageList.size()-1));
+            }
         }
 
         @Override
         protected void onPreExecute() {
             Log.d("Card","Pre execute");
             super.onPreExecute();
+            setBooleanForPausingTimer();
             mSwipeView.lockViews();
         }
     }
@@ -678,7 +700,7 @@ public class AdvertCard{
         double distance = Math.sqrt(Math.pow(xCurrent - xStart, 2) + (Math.pow(yCurrent - yStart, 2)));
         mDistance = distance;
         int roundedDistance =(((int)distance + 99) / 200 ) * 200;
-        Log.d("DEBUG", "onSwipeTouch " + " distance : " + distance);
+//        Log.d("DEBUG", "onSwipeTouch " + " distance : " + distance);
 
         if(distance>200){
             setBooleanForPausingTimer();
@@ -720,6 +742,10 @@ public class AdvertCard{
     private void setBooleanForResumingTimer(){
         Log.d("AdvertCard","Setting boolean for resuming timer.");
         if(!Variables.isAllClearToContinueCountDown)Variables.isAllClearToContinueCountDown = true;
+    }
+
+    private boolean isCurrentlyBeingViewed(){
+        return mAdvert.getPushRefInAdminConsole().equals(Variables.getCurrentAdvert().getPushRefInAdminConsole());
     }
 
 }
