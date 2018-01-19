@@ -381,6 +381,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAvi.setVisibility(View.VISIBLE);
         mLoadingText.setVisibility(View.VISIBLE);
         mBottomNavButtons.setVisibility(View.GONE);
+        findViewById(R.id.easterText).setVisibility(View.GONE);
         Log.d(TAG, "---Setting up mViewRunnable thread...");
         mViewRunnable = new Runnable() {
             @Override
@@ -690,6 +691,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         float relativeScale = density();
 
         mSwipeView.getBuilder()
+
                 .setDisplayViewCount(4)
                 .setIsUndoEnabled(false)
                 .setHeightSwipeDistFactor(10)

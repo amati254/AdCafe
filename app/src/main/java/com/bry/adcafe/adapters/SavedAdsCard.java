@@ -73,6 +73,7 @@ public class SavedAdsCard {
     private boolean hasLoaded =false;
 
     private boolean isLoadingImageFromFirebase = false;
+    private boolean hasSentIntentToViewAd = false;
 
 
     public SavedAdsCard(Advert advert, Context context, PlaceHolderView placeHolderView,String pinID,long noOfDays,boolean isLastElement) {
@@ -275,7 +276,7 @@ public class SavedAdsCard {
     private void onClick(){
         if(hasLoaded){
             if(onDoublePressed){
-                shareAd();
+//                shareAd();
             }else{
                 viewAd();
             }
@@ -318,13 +319,16 @@ public class SavedAdsCard {
                     Variables.noOfDays = noOfDaysDate;
                     Variables.placeHolderView = mPlaceHolderView;
                     Variables.position = mPlaceHolderView.getViewResolverPosition(this);
-                    Intent intent = new Intent("VIEW");
-                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-                    setUpReceiver();
+//                    if(!hasSentIntentToViewAd){
+//                        hasSentIntentToViewAd = true;
+                        Intent intent = new Intent("VIEW");
+                        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                        setUpReceiver();
+//                    }
                 }
                 isBeingShared = false;
             }
-        }, 330);
+        }, 30);
     }
 
     private void setUpReceiver(){
@@ -334,6 +338,7 @@ public class SavedAdsCard {
 
     private void removeReceiver(){
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
+        hasSentIntentToViewAd = false;
     }
 
     private void shareAd() {
