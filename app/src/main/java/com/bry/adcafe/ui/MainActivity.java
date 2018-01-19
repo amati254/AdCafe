@@ -67,7 +67,6 @@ import com.google.gson.reflect.TypeToken;
 import com.mindorks.placeholderview.PlaceHolderView;
 import com.mindorks.placeholderview.SwipeDecor;
 import com.mindorks.placeholderview.SwipeDirectionalView;
-import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.ByteArrayOutputStream;
@@ -127,7 +126,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private int iterations = 0;
     private boolean isHiddenBecauseNetworkDropped = false;
-    private boolean areVeiwsHidden = false;
+    private boolean areViewsHidden = false;
+    private boolean isTimerPausedBecauseOfOfflineActivity = false;
+
 
 
     @Override
@@ -169,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override protected void onResume() {
         Variables.isMainActivityOnline = true;
+        if(isTimerPausedBecauseOfOfflineActivity) setBooleanForResumingTimer();
         try{
             onclicks();
         }catch (Exception e){
@@ -218,6 +220,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override protected void onPause() {
         super.onPause();
         h.removeCallbacks(r);
+        setBooleanForPausingTimer();
+        isTimerPausedBecauseOfOfflineActivity = true;
         setCurrentDateToSharedPrefs();
         setUserDataInSharedPrefs();
     }
@@ -1114,7 +1118,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
 
     private void hideViews(){
-        areVeiwsHidden = true;
+        areViewsHidden = true;
         mAvi.setVisibility(View.VISIBLE);
         mLoadingText.setVisibility(View.VISIBLE);
         mBottomNavButtons.setVisibility(View.GONE);
@@ -1125,7 +1129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void unhideViews(){
-        areVeiwsHidden = false;
+        areViewsHidden = false;
         mAvi.setVisibility(View.GONE);
         mLoadingText.setVisibility(View.GONE);
         mBottomNavButtons.setVisibility(View.VISIBLE);
@@ -1265,7 +1269,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void loadMoreAds() {
         isLoadingMoreAds = true;
-        if(!areVeiwsHidden) mAviLoadingMoreAds.smoothToShow();
+        if(!areViewsHidden) mAviLoadingMoreAds.smoothToShow();
 //        spinner.setVisibility(View.VISIBLE);
         Log.d("MAIN-ACTIVITY---", "Loading more ads since user has seen almost all....");
         String date;
@@ -1402,7 +1406,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void loadAnyAnnouncements() {
         if(!hasLoadedAnnouncements){
             hasLoadedAnnouncements = true;
-            if(!areVeiwsHidden)mAviLoadingMoreAds.smoothToShow();
+            if(!areViewsHidden)mAviLoadingMoreAds.smoothToShow();
             Log.d("MAIN-ACTIVITY---", "Now loading announcements since there are no more ads....");
             String date = isAlmostMidNight() ? getNextDay() : getDate();
             Query query = FirebaseDatabase.getInstance().getReference(Constants.ANNOUNCEMENTS).child(date);
@@ -2101,6 +2105,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setWidthSwipeDistFactor(10f)
                 .setHeightSwipeDistFactor(10f);
         Variables.isLocked = false;
+    }
+
+    private void setBooleanForPausingTimer(){
+        Log.d(TAG,"Setting boolean for pausing timer.");
+        if(Variables.isAllClearToContinueCountDown) Variables.isAllClearToContinueCountDown = false;
+
+    }
+
+    private void setBooleanForResumingTimer(){
+        Log.d(TAG,"Setting boolean for resuming timer.");
+        if(!Variables.isAllClearToContinueCountDown)Variables.isAllClearToContinueCountDown = true;
     }
 
     //Font; AR ESSENCE.
