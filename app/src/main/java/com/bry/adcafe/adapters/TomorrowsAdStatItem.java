@@ -64,6 +64,8 @@ public class TomorrowsAdStatItem {
     @Resolve
     private void onResolved(){
         if(mImageBytes==null) new  LongOperationFI().execute("");
+        else Glide.with(mContext).load(mImageBytes).into(mImage);
+
         mEmail.setText("Uploaded by : "+mAdvert.getUserEmail());
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
         mCategory.setText("Category : "+mAdvert.getCategory());

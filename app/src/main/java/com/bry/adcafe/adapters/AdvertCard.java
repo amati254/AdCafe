@@ -304,6 +304,8 @@ public class AdvertCard{
     }
 
 
+
+
     private BroadcastReceiver mMessageReceiverForTimerStarted = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

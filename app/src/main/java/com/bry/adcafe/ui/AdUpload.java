@@ -147,16 +147,14 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private ChildEventListener chilForRefresh = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            if(!uploading){
-                Intent intent = getIntent();
-                finish();
-                startActivity(intent);
-            }
+
         }
 
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+            if(!uploading){
+                startGetNumberOfClusters();
+            }
         }
 
         @Override
@@ -176,8 +174,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     };
 
     private void loadListenerForRecreate() {
-        mRef6 = FirebaseDatabase.getInstance()
-                .getReference(Constants.ADVERTS).child(getNextDay()).child(mCategory).child(Integer.toString(mClusterToStartFrom));
+        mRef6 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM)
+                .child(mCategory+"_cluster_to_start_from");
         mRef6.addChildEventListener(chilForRefresh);
     }
 
@@ -502,10 +500,12 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         d.show();
     }
 
-
     private void showDialogForPayments() {
         buildTransactionForPayment();
     }
+
+
+
 
     private void buildTransactionForPayment() {
 
@@ -549,7 +549,6 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         d.show();
 
     }
-
 
     private void chooseImage() {
         Log.d(TAG,"Starting intent for picking an image.");
@@ -636,6 +635,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         }
     }
 
+
+
+
     private void uploadImageToManagerConsole() {
         String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
         Log.d(TAG, "Uploading Ad to AdminConsole.");
@@ -671,7 +673,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private void createProgressDialog(){
         mAuthProgressDialog = new ProgressDialog(this,R.style.AppCompatAlertDialogStyle);
         mAuthProgressDialog.setTitle("AdCafe.");
-        mAuthProgressDialog.setMessage("Uploading your ad... "+0+"%");
+//        mAuthProgressDialog.setMessage("Uploading your ad... "+0+"%");
+        mAuthProgressDialog.setMessage("Uploading your ad... ");
         mAuthProgressDialog.setCancelable(false);
         mAuthProgressDialog.setProgress(ProgressDialog.STYLE_SPINNER);
         mAuthProgressDialog.setIndeterminate(true);
@@ -681,7 +684,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private void uploadImage(final Bitmap bm) {
 //        String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
         uploading = true;
-        if(mRef6!=null) mRef6.removeEventListener(chilForRefresh);
+        mRef6.removeEventListener(chilForRefresh);
         if(clustersToUpLoadTo.size()>10){
             for(int i = 0; i < 10; i++){
                 String pushId;
@@ -989,6 +992,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
         return todaysDate;
     }
+
+
+
 
     private String getNextDay(){
         Calendar c = Calendar.getInstance();
