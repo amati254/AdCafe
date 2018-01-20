@@ -25,7 +25,7 @@
     <string name="Logout">"Logout"</string>
     <string name="pinning">"Pinning."</string>
     <string name="learnSE">"Learn. Share. Earn."</string>
-    <string name="lastAd">"This may be the last ad we've got for you today."</string>
+    <string name="lastAd">"This may be the last ad."</string>
     <string name="dashInfo">"This is where all the stats concerning ads you've seen and money you can claim is stored."</string>
     <string name="cannotPin">"You cannot pin this without an internet connection"</string>
     <string name="pinningSuccess">"Successfully pinned!"</string>

@@ -71,6 +71,10 @@ public class AdvertCard{
     private List<Bitmap> blurredImageList = new ArrayList<>();
     private LongOperationBL BackgroundBlurrProcess;
     private boolean isSupposedToStartTimer = false;
+    private boolean isBackgroundTaskRunning = false;
+    private boolean needToContinueBackground = false;
+
+    private int positionBL = 0;
 
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
@@ -102,6 +106,8 @@ public class AdvertCard{
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToStartTimer,
                 new IntentFilter("START_TIMER_NOW"));
 
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerStarted,
+                new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
     }
 
     private void loadAdPlaceHolderImage() {
@@ -298,6 +304,24 @@ public class AdvertCard{
     }
 
 
+    private BroadcastReceiver mMessageReceiverForTimerStarted = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            pauseBackgroundTasks();
+        }
+    };
+
+    private void pauseBackgroundTasks(){
+        if(isBackgroundTaskRunning){
+            BackgroundBlurrProcess.cancel(true);
+            needToContinueBackground = true;
+        }
+    }
+
+    private void resumeBackgroundTasksIfRunning(){
+        if(needToContinueBackground) BackgroundBlurrProcess.execute();
+    }
+
     private BroadcastReceiver mMessageReceiverToStartTimer = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -315,24 +339,6 @@ public class AdvertCard{
         }
     };
 
-    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasEnded);
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnblurrImage);
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToStartTimer);
-        }
-    };
-
-    private BroadcastReceiver mMessageReceiverForUnblurrImage = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            profileImageView.setImageBitmap(bs);
-        }
-    };
-
     private void doTheStuffWhenTimerHasEnded(){
         Log.d("ADVERT_CARD--","message from adCounterBar that timer has ended has been received.");
         if(mSwipeView.getChildCount() > 1){
@@ -345,7 +351,31 @@ public class AdvertCard{
             sendBroadcast(Constants.LAST);
             Variables.isLockedBecauseOfNoMoreAds = true;
         }
+        resumeBackgroundTasksIfRunning();
     }
+
+    private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("ADVERT_CARD--","Received broadcast to Unregister all receivers");
+            unregisterAllReceivers();
+        }
+    };
+
+    private void unregisterAllReceivers(){
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasEnded);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnblurrImage);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToStartTimer);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerStarted);
+    }
+
+    private BroadcastReceiver mMessageReceiverForUnblurrImage = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            profileImageView.setImageBitmap(bs);
+        }
+    };
 
 
 
@@ -671,7 +701,7 @@ public class AdvertCard{
 
 //        Log.e("pix", w + " " + h + " " + pix.length);
         bitmap.setPixels(pix, 0, w, 0, 0, w, h);
-
+        positionBL++;
         return (bitmap);
     }
 
@@ -683,7 +713,7 @@ public class AdvertCard{
             float scale = 2f;
             Bitmap bm = getResizedBitmap(bs,250);
             for(int i = 0;i<6;i++){
-                blurredImageList.set(i,fastblur(bm,scale,(i+1)));
+                if(i>=positionBL) blurredImageList.set(i,fastblur(bm,scale,(i+1)));
             }
             return "executed";
         }
@@ -692,24 +722,23 @@ public class AdvertCard{
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             Log.d("AdvertCard","Finished blurring images in the background.");
-//            mSwipeView.unlockViews();
-//            setBooleanForResumingTimer();
             Intent intent = new Intent("BLUREDIMAGESDONE");
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+
             if(isCurrentlyBeingViewed()){
                 profileImageView.setImageBitmap(bs);
             }else{
                 if(!mAdvert.getNatureOfBanner().equals(Constants.IS_ANNOUNCEMENT))
                     profileImageView.setImageBitmap(blurredImageList.get(blurredImageList.size()-1));
             }
+            isBackgroundTaskRunning = false;
         }
 
         @Override
         protected void onPreExecute() {
             Log.d("AdvertCard","Preparing To Start working on the blurred images from the background.");
             super.onPreExecute();
-//            setBooleanForPausingTimer();
-//            mSwipeView.lockViews();
+            isBackgroundTaskRunning = true;
         }
     }
 

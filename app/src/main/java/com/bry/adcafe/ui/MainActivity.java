@@ -1187,6 +1187,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if(Variables.didAdCafeRemoveCategory)informUserOfSubscriptionChanges();
         if(Variables.didAdCafeAddNewCategory) tellUserOfNewSubscription();
+
+        if(mSwipeView.getChildCount() == 1 && !isLoadingMoreAds)
+            Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -1210,7 +1213,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!mIsBeingReset && !isLoadingMoreAds) {
-                Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
                 loadAnyAnnouncements();
             }
         }
