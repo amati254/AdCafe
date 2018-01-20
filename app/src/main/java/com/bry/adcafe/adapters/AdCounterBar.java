@@ -42,7 +42,7 @@ public class AdCounterBar {
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
     private boolean hasTimerMessageBeenSent;
-    private boolean hasTimerStarted;
+    private boolean hasTimerStarted = false;
     private String mKey = "";
 
 
@@ -60,7 +60,7 @@ public class AdCounterBar {
         adCounter.setText(Integer.toString(Variables.getAdTotal(mKey)));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToStartTimer, new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers, new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
-
+//        startTimer3();
     }
 
     private BroadcastReceiver mMessageReceiverToStartTimer = new BroadcastReceiver() {
@@ -69,6 +69,7 @@ public class AdCounterBar {
             Log.d("AD_COUNTER_BAR - ", "Broadcast has been received to start timer.");
 //            startTimer();
             startTimer2();
+//            startTimer3();
         }
     };
 
@@ -127,6 +128,14 @@ public class AdCounterBar {
         }
     }
 
+    private void startTimer3(){
+        if (!hasTimerStarted) {
+            Log.d("AdCounterBar", "Starting timer from ui thread version of asynch task");
+            hasTimerMessageBeenSent = false;
+            tryStartTimerFromUiThread();
+        }
+    }
+
 
     private void sendBroadcast(String message) {
         if (message.equals(Constants.TIMER_HAS_ENDED) && !hasTimerMessageBeenSent) {
@@ -144,12 +153,50 @@ public class AdCounterBar {
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
+    private void tryStartTimerFromUiThread(){
+        Variables.hasTimerStarted = true;
+        hasTimerStarted = true;
+        startTimerFromUiThread();
+    }
+
+
+
+
+    private void startTimerFromUiThread() {
+        int i = 7000;
+        while (i > 0) {
+            try {
+                wait(100);
+//                Thread.sleep(100);
+                if(Variables.isAllClearToContinueCountDown){
+                    i -= 100;
+                    publishProgressUI(i);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        resetTimer();
+        Log.d("Timer --- ", "Timer has finnished");
+//        sendBroadcast(Constants.TIMER_HAS_ENDED);
+//        addToSharedPreferencesViaBroadcast();
+//        hasTimerStarted = false;
+//        adCounter.setText(Integer.toString(Variables.getAdTotal(mKey)+1));
+//        textViewTime.setText(Integer.toString(7));
+    }
+
+    private void publishProgressUI(int i) {
+        progressBarTimer.incrementProgressBy(-1);
+        if (i % 1000 == 0) textViewTime.setText(Integer.toString(i / 1000));
+    }
+
 
 
     protected class InitTask extends AsyncTask<Context, Integer, String> {
         // -- gets called just before thread begins
         @Override
         protected void onPreExecute() {
+            Log.d("AdCounterBar","Preparing to start timer");
             Variables.hasTimerStarted = true;
             hasTimerStarted = true;
             super.onPreExecute();

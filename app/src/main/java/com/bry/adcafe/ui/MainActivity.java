@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -26,6 +27,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -129,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean areViewsHidden = false;
     private boolean isTimerPausedBecauseOfOfflineActivity = false;
 
-
+    private int numberOfResponsesForLoadingBlurredImages = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -692,7 +694,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         float relativeScale = density();
 
         mSwipeView.getBuilder()
-
                 .setDisplayViewCount(4)
                 .setIsUndoEnabled(false)
                 .setHeightSwipeDistFactor(10)
@@ -866,7 +867,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }else{
                     findViewById(R.id.smallDot).setVisibility(View.VISIBLE);
                 }
-                Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
                 isLastAd = true;
             }else{
                 Advert noAds = new Advert();
@@ -1113,32 +1114,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("COUNTER_BAR_TO_MAIN- ", "Broadcast has been received that blurred images have loaded, unhiding views.");
-            unhideViews();
+            int visibleChildren = mSwipeView.getChildCount() <= 4 ? mSwipeView.getChildCount() : 4;
+            numberOfResponsesForLoadingBlurredImages ++;
+            Log.d(TAG,"Number of visible cards : "+visibleChildren+" Number of responses for loading blurred images"+ numberOfResponsesForLoadingBlurredImages);
+            if(numberOfResponsesForLoadingBlurredImages== visibleChildren){
+                unhideViews();
+                Intent intent2 = new Intent("START_TIMER_NOW");
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
+            }
         }
     };
 
     private void hideViews(){
+        Log.d(TAG,"Hiding views...");
         areViewsHidden = true;
         mAvi.setVisibility(View.VISIBLE);
         mLoadingText.setVisibility(View.VISIBLE);
         mBottomNavButtons.setVisibility(View.GONE);
         mSwipeView.setVisibility(View.INVISIBLE);
-        mAdCounterView.setVisibility(View.GONE);
+        mAdCounterView.setVisibility(View.INVISIBLE);
         findViewById(R.id.easterText).setVisibility(View.GONE);
         mAviLoadingMoreAds.setVisibility(View.GONE);
     }
 
     private void unhideViews(){
-        areViewsHidden = false;
-        mAvi.setVisibility(View.GONE);
-        mLoadingText.setVisibility(View.GONE);
-        mBottomNavButtons.setVisibility(View.VISIBLE);
-        findViewById(R.id.easterText).setVisibility(View.VISIBLE);
-        mSwipeView.setVisibility(View.VISIBLE);
-        mAdCounterView.setVisibility(View.VISIBLE);
-        if(isLastAd)Toast.makeText(mContext, "We've got no more stuff for you today.", Toast.LENGTH_SHORT).show();
-//        mAviLoadingMoreAds.setVisibility(View.VISIBLE);
-//        loadAnyAnnouncements();
+        if(areViewsHidden){
+            areViewsHidden = false;
+            Log.d(TAG,"Unhiding views");
+            mAdCounterView.setVisibility(View.VISIBLE);
+            mAvi.setVisibility(View.GONE);
+            mLoadingText.setVisibility(View.GONE);
+            mBottomNavButtons.setVisibility(View.VISIBLE);
+            findViewById(R.id.easterText).setVisibility(View.VISIBLE);
+            mSwipeView.setVisibility(View.VISIBLE);
+            if(isLastAd)Toast.makeText(mContext, "We've got nothing else for you today.", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -1862,7 +1872,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
                 Log.v(TAG, "Permission is granted");
-                shareImage(Variables.getCurrentAdvert().getImageBitmap());
+                if(Variables.getCurrentAdvert().getImageBitmap()!=null) shareImage(Variables.getCurrentAdvert().getImageBitmap());
+                else {
+                    try{
+                        Bitmap image = decodeFromFirebaseBase64(Variables.getCurrentAdvert().getImageUrl());
+                        shareImage(image);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
                 return true;
             } else {
 
@@ -1903,6 +1921,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
         startActivity(Intent.createChooser(share, "Share Image"));
+    }
+
+    private Bitmap decodeFromFirebaseBase64(String image) throws IOException {
+        byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
+        Bitmap bitm = BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
+//        return getResizedBitmap(bitm,700);
+        return bitm;
     }
 
 

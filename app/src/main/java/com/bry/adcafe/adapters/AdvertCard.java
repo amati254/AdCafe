@@ -69,6 +69,8 @@ public class AdvertCard{
     private int amount = 0;
     private double mDistance = 0;
     private List<Bitmap> blurredImageList = new ArrayList<>();
+    private LongOperationBL BackgroundBlurrProcess;
+    private boolean isSupposedToStartTimer = false;
 
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
@@ -88,9 +90,17 @@ public class AdvertCard{
     }
 
     private void setListeners(){
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,new IntentFilter(Constants.TIMER_HAS_ENDED));
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnblurrImage,new IntentFilter("UNBLURR_IMAGE"+mAdvert.getPushRefInAdminConsole()));
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToUnregisterAllReceivers,
+                new IntentFilter(Constants.UNREGISTER_ALL_RECEIVERS));
+
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerHasEnded,
+                new IntentFilter(Constants.TIMER_HAS_ENDED));
+
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnblurrImage,
+                new IntentFilter("UNBLURR_IMAGE"+mAdvert.getPushRefInAdminConsole()));
+
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverToStartTimer,
+                new IntentFilter("START_TIMER_NOW"));
 
     }
 
@@ -111,7 +121,8 @@ public class AdvertCard{
         for(int i = 0;i<6;i++){
             blurredImageList.add(bs);
         }
-        new LongOperationBL().execute();
+        BackgroundBlurrProcess =  new LongOperationBL();
+        BackgroundBlurrProcess.execute();
     }
 
     private void setImage() {
@@ -139,7 +150,7 @@ public class AdvertCard{
                 Log.d("ADVERT_CARD--","The image has failed to load due to error."+e.getMessage());
                 errorImageView.setVisibility(android.view.View.VISIBLE);
                 mAvi.setVisibility(android.view.View.GONE);
-                if(isFirstResource) {mSwipeView.unlockViews();}
+                if(isFirstResource) {unLockViews();}
                 return false;
             }
 
@@ -150,7 +161,7 @@ public class AdvertCard{
                 errorImageView.setVisibility(android.view.View.GONE);
                 if(isFirstResource && mLastOrNotLast.equals(Constants.NOT_LAST) && !mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)) {
                     Log.d("ADVERT_CARD---","sending broadcast to start timer...");
-                    sendBroadcast(START_TIMER);
+//                    sendBroadcast(START_TIMER);
 //                        if(mAdvert.isFlagged()){
 //                            if(mSwipeView.getChildCount()==1) {
 //                                mSwipeView.lockViews();
@@ -159,6 +170,7 @@ public class AdvertCard{
 //                                mSwipeView.unlockViews();
 //                            }
 //                        }else{
+                    isSupposedToStartTimer = true;
                     if(!mAdvert.getWebsiteLink().equals(igsNein)){
                         webIcon.setAlpha(1.0f);
                         webText.setAlpha(1.0f);
@@ -198,7 +210,7 @@ public class AdvertCard{
                 return false;
             }
         }).into(profileImageView);
-        mSwipeView.lockViews();
+        lockViews();
         clickable=false;
         Variables.setCurrentAdvert(mAdvert);
         if(!mAdvert.getWebsiteLink().equals(igsNein)){
@@ -220,8 +232,6 @@ public class AdvertCard{
         }
 
     }
-
-
 
 
 
@@ -288,7 +298,15 @@ public class AdvertCard{
     }
 
 
-
+    private BroadcastReceiver mMessageReceiverToStartTimer = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(isSupposedToStartTimer){
+                Log.d("AdvertCard","Received Message from main activity that background stuff is finished and to start timer.");
+                sendBroadcast(START_TIMER);
+            }
+        }
+    };
 
     private BroadcastReceiver mMessageReceiverForTimerHasEnded = new BroadcastReceiver() {
         @Override
@@ -304,6 +322,7 @@ public class AdvertCard{
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerHasEnded);
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnblurrImage);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToStartTimer);
         }
     };
 
@@ -672,10 +691,9 @@ public class AdvertCard{
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            Log.d("Card","Post execute");
-            mSwipeView.unlockViews();
-            setBooleanForResumingTimer();
-
+            Log.d("AdvertCard","Finished blurring images in the background.");
+//            mSwipeView.unlockViews();
+//            setBooleanForResumingTimer();
             Intent intent = new Intent("BLUREDIMAGESDONE");
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
             if(isCurrentlyBeingViewed()){
@@ -688,10 +706,10 @@ public class AdvertCard{
 
         @Override
         protected void onPreExecute() {
-            Log.d("Card","Pre execute");
+            Log.d("AdvertCard","Preparing To Start working on the blurred images from the background.");
             super.onPreExecute();
-            setBooleanForPausingTimer();
-            mSwipeView.lockViews();
+//            setBooleanForPausingTimer();
+//            mSwipeView.lockViews();
         }
     }
 
@@ -734,14 +752,18 @@ public class AdvertCard{
     }
 
     private void setBooleanForPausingTimer(){
-        Log.d("AdvertCard","Setting boolean for pausing timer.");
-        if(Variables.isAllClearToContinueCountDown) Variables.isAllClearToContinueCountDown = false;
+        if(Variables.isAllClearToContinueCountDown){
+            Log.d("AdvertCard","Setting boolean for pausing timer.");
+            Variables.isAllClearToContinueCountDown = false;
+        }
 
     }
 
     private void setBooleanForResumingTimer(){
-        Log.d("AdvertCard","Setting boolean for resuming timer.");
-        if(!Variables.isAllClearToContinueCountDown)Variables.isAllClearToContinueCountDown = true;
+        if(!Variables.isAllClearToContinueCountDown){
+            Log.d("AdvertCard","Setting boolean for resuming timer.");
+            Variables.isAllClearToContinueCountDown = true;
+        }
     }
 
     private boolean isCurrentlyBeingViewed(){
