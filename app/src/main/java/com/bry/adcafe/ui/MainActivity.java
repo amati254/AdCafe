@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         logUser();
 
-        new DatabaseManager().setLastSeenDateInFirebase();
+//        new DatabaseManager().setLastSeenDateInFirebase();
         mAviLoadingMoreAds.hide();
 
     }
@@ -440,17 +440,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (Variables.getCurrentAdInSubscription() == 0) {
             Log.d(TAG, "User current ad in subscription is 0, so is starting at 1");
-            dbRef.orderByKey().startAt(Integer.toString(1)).limitToFirst(5).addValueEventListener(val);
+            dbRef.orderByKey().startAt(Integer.toString(1)).limitToFirst(Constants.NO_OF_ADS_TO_LOAD).addValueEventListener(val);
         } else {
             Log.d(TAG, "User current ad in subscription is not 0, so starting at its value : " + Variables.getCurrentAdInSubscription());
             dbRef.orderByKey().startAt(Integer.toString(Variables.getCurrentAdInSubscription()))
-                    .limitToFirst(5).addListenerForSingleValueEvent(val);
+                    .limitToFirst(Constants.NO_OF_ADS_TO_LOAD).addListenerForSingleValueEvent(val);
         }
     }
 
     ValueEventListener val = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d(TAG,"Number of children from firebase is : "+dataSnapshot.getChildrenCount());
             if (dataSnapshot.hasChildren()) {
                 if(dataSnapshot.getChildrenCount()==1){
                     //if only one ad has loaded.
@@ -522,7 +523,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Variables.setCurrentAdInSubscription(Variables.getCurrentAdInSubscription()+
                                 (int)dataSnapshot.getChildrenCount());
                         getGetAdsFromFirebase();
-                    }else{
+                    }else if(mAdList.size()==1 && Variables.getCurrentAdInSubscription()==Integer.parseInt(mAdList.get(0).getPushId())){
+                        Log.d(TAG,"There is only one ad that has been loaded.Perhaps the others were skipped because they were flagged");
+                        Log.d(TAG,"User has seen the one ad that has been loaded so going to the next subscription");
+                        Log.d(TAG,"Since the currentAdInSubscription is : "+Variables.getCurrentAdInSubscription()+" and " +
+                                "the ad's pushID is : "+(mAdList.get(0).getPushId()));
+                        lastAdSeen = mAdList.get(0);
+                        mChildToStartFrom = Integer.parseInt(lastAdSeen.getPushId());
+                        if (Variables.getCurrentSubscriptionIndex()+1 < Variables.Subscriptions.size()) {
+                            Log.d(TAG,"Trying the next subscription.");
+                            Variables.setNextSubscriptionIndex();
+                            Variables.setCurrentAdInSubscription(0);
+                            getGetAdsFromFirebase();
+                        } else {
+                            Log.d(TAG, "---There are no ads in any of the subscriptions");
+                            loadAdsIntoAdvertCard();
+                        }
+                    } else{
                         Variables.setCurrentAdNumberForAllAdsList(0);
                         //removing the first ad if the user has seen it.
                         Log.d(TAG,"removing the first ad if the user has seen it.");
@@ -800,10 +817,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG, "---User has seen all the ads, thus will load only last ad...");
                 Log.d(TAG,"The child to start from is : "+mChildToStartFrom+" and currentAdInSubscriptionIs : "+
                         Variables.getCurrentAdInSubscription());
-//                mSwipeView.lockViews();
                 lockViews();
-                mSwipeView.addView(new AdvertCard(mContext, mAdList.get(0), mSwipeView, Constants.LAST));
+                mAdList.get(0).setNatureOfBanner(Constants.IS_AD);
                 Variables.adToVariablesAdList(mAdList.get(0));
+                mSwipeView.addView(new AdvertCard(mContext, mAdList.get(0), mSwipeView, Constants.LAST));
                 Variables.setIsLastOrNotLast(Constants.LAST);
                 Variables.setCurrentAdvert(mAdList.get(0));
                 Variables.setCurrentSubscriptionIndex(getPositionOf(mAdList.get(0).getCategory()));
@@ -834,9 +851,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                    loadMoreAds();
                 }
                 for (Advert ad : mAdList) {
+                    ad.setNatureOfBanner(Constants.IS_AD);
+                    Variables.adToVariablesAdList(ad);
                     mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.NOT_LAST));
                     Log.d(TAG, "Loading ad " + ad.getPushRefInAdminConsole());
-                    Variables.adToVariablesAdList(ad);
                     Variables.setIsLastOrNotLast(Constants.NOT_LAST);
                 }
             }
@@ -848,10 +866,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             if(lastAdSeen!=null){
                 Log.d(TAG, "---Loading only last ad from lastAdSeen that was initialised...");
-//                mSwipeView.lockViews();
                 lockViews();
-                mSwipeView.addView(new AdvertCard(mContext, lastAdSeen, mSwipeView, Constants.LAST));
+                lastAdSeen.setNatureOfBanner(Constants.IS_AD);
                 Variables.adToVariablesAdList(lastAdSeen);
+                mSwipeView.addView(new AdvertCard(mContext, lastAdSeen, mSwipeView, Constants.LAST));
                 Variables.setIsLastOrNotLast(Constants.LAST);
                 Variables.setCurrentAdvert(lastAdSeen);
                 Variables.setCurrentSubscriptionIndex(getPositionOf(lastAdSeen.getCategory()));
@@ -874,6 +892,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 noAds.setWebsiteLink(igsNein);
                 noAds.setPushRefInAdminConsole("NONE");
                 noAds.setCategory("NoAds");
+                noAds.setNatureOfBanner("NoAds");
                 mSwipeView.addView(new AdvertCard(mContext, noAds, mSwipeView, Constants.NO_ADS));
                 Variables.adToVariablesAdList(noAds);
                 Variables.setIsLastOrNotLast(Constants.NO_ADS);
@@ -1120,6 +1139,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(numberOfResponsesForLoadingBlurredImages== visibleChildren){
                 unhideViews();
                 Intent intent2 = new Intent("START_TIMER_NOW");
+                Variables.hasFinishedLoadingBlurredImages = true;
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
             }
         }
@@ -1248,21 +1268,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if(Variables.getCurrentAdNumberForAllAdsList()+1<Variables.getSizeOfAdlist()){
-                        if(Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList()+1)
-                                .getNatureOfBanner().equals(Constants.IS_ANNOUNCEMENT)){
-                            findViewById(R.id.WebsiteIcon).setAlpha(0.3f);
-                            findViewById(R.id.websiteText).setAlpha(0.3f);
-                            findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
-
-                            findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
-                            findViewById(R.id.reportBtn).setAlpha(0.3f);
-                            isSeingNormalAds = false;
-                            onclicks();
-                        }
-                    }
-                    Intent intent = new Intent("UNBLURR_IMAGE"+Variables.getCurrentAdvert().getPushRefInAdminConsole());
-                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+//                    if(Variables.getCurrentAdNumberForAllAdsList()+1<Variables.getSizeOfAdlist()){
+//                        if(Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList()+1)
+//                                .getNatureOfBanner().equals(Constants.IS_ANNOUNCEMENT)){
+//                            findViewById(R.id.WebsiteIcon).setAlpha(0.3f);
+//                            findViewById(R.id.websiteText).setAlpha(0.3f);
+//                            findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
+//
+//                            findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
+//                            findViewById(R.id.reportBtn).setAlpha(0.3f);
+//                            isSeingNormalAds = false;
+//                            onclicks();
+//                        }
+//                    }
+                    isSeingNormalAds = false;
+                    onclicks();
+//                    Intent intent = new Intent("UNBLURR_IMAGE"+Variables.getCurrentAdvert().getPushRefInAdminConsole());
+//                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                 }
             }, 300);
 
@@ -1302,7 +1324,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dbRef = query.getRef();
         Log.d(TAG,"Dbref starts at "+(mChildToStartFrom + 1));
         dbRef.orderByKey().startAt(Integer.toString(mChildToStartFrom + 1))
-                .limitToFirst(5).addListenerForSingleValueEvent(new ValueEventListener() {
+                .limitToFirst(Constants.NO_OF_ADS_TO_LOAD2).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.hasChildren()) {
@@ -1403,8 +1425,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void loadMoreAdsIntoAdvertCard2() {
         for (Advert ad : mAdList) {
             ad.setNatureOfBanner(Constants.IS_AD);
-            mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.LOAD_MORE_ADS));
             Variables.adToVariablesAdList(ad);
+            mSwipeView.addView(new AdvertCard(mContext, ad, mSwipeView, Constants.LOAD_MORE_ADS));
             Variables.setIsLastOrNotLast(Constants.NOT_LAST);
         }
         if(Variables.isLockedBecauseOfNoMoreAds){
@@ -2134,6 +2156,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setHeightSwipeDistFactor(10f);
         Variables.isLocked = false;
     }
+
+
 
     private void setBooleanForPausingTimer(){
         Log.d(TAG,"Setting boolean for pausing timer.");

@@ -153,7 +153,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
             if(!uploading){
-                startGetNumberOfClusters();
+                resetAndRestart();
             }
         }
 
@@ -177,6 +177,12 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         mRef6 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM)
                 .child(mCategory+"_cluster_to_start_from");
         mRef6.addChildEventListener(chilForRefresh);
+    }
+
+    private void resetAndRestart(){
+        if(!clustersToUpLoadTo.isEmpty())clustersToUpLoadTo.clear();
+        mHasNumberBeenChosen = false;
+        startGetNumberOfClusters();
     }
 
 
@@ -423,7 +429,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                                 setNewValueToStartFrom();
                                 date = getNextDay();
                                 numberOfClustersBeingUploadedTo = clustersToUpLoadTo.size();
-                                uploadImageToManagerConsole();
+                                recheckNoOfChildrenInClulsterToStartFrom();
+//                                uploadImageToManagerConsole();
 //                            }
 
                         }else{
@@ -534,7 +541,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 tv.setText(String.valueOf(np.getValue()*1000));
                 mHasNumberBeenChosen = true;
                 mNumberOfClusters = np.getValue();
-                addToClusterListToUploadTo(mNumberOfClusters);
+//                addToClusterListToUploadTo(mNumberOfClusters);
                 mNumberOfUsersToAdvertiseTo.setVisibility(View.VISIBLE);
                 d.dismiss();
             }
@@ -635,11 +642,50 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         }
     }
 
+    private void recheckNoOfChildrenInClulsterToStartFrom(){
+        DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
+                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterToStartFrom));
+        boolRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                noOfChildrenInClusterToStartFrom = (int)dataSnapshot.getChildrenCount();
+                recheckNoOfChildrenInLatestClusters();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void recheckNoOfChildrenInLatestClusters(){
+        DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
+                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterTotal));
+        boolRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()){
+                    noOfChildrenInLatestCluster = (int)dataSnapshot.getChildrenCount();
+                }else{
+                    noOfChildrenInLatestCluster = 0;
+                }
+                uploadImageToManagerConsole();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 
 
 
     private void uploadImageToManagerConsole() {
         String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
+        addToClusterListToUploadTo(mNumberOfClusters);
         Log.d(TAG, "Uploading Ad to AdminConsole.");
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.ADS_FOR_CONSOLE).child(getNextDay());
         DatabaseReference pushRef = adRef.push();
@@ -722,9 +768,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                         cycleCount++;
                         clustersToUpLoadTo.remove(clusterNumber);
 //                        mAuthProgressDialog.setProgress((clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100);
-                        int percentage = (clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100;
-                        String message ="Uploading your ad... "+percentage+"%";
-                        mAuthProgressDialog.setMessage(message);
+//                        int percentage = (clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100;
+//                        String message ="Uploading your ad... "+percentage+"%";
+//                        mAuthProgressDialog.setMessage(message);
                         if(clustersToUpLoadTo.isEmpty()){
                             if(!failedClustersToUploadTo.isEmpty()){
                                 checkAndNotifyAnyFailed();
@@ -794,9 +840,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                         cycleCount++;
                         clustersToUpLoadTo.remove(number);
 //                        mAuthProgressDialog.setProgress((clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100);
-                        int percentage = (clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100;
-                        String message ="Uploading your ad... "+percentage+"%";
-                        mAuthProgressDialog.setMessage(message);
+//                        int percentage = (clustersToUpLoadTo.size()/numberOfClustersBeingUploadedTo)*100;
+//                        String message ="Uploading your ad... "+percentage+"%";
+//                        mAuthProgressDialog.setMessage(message);
                         if(clustersToUpLoadTo.isEmpty()){
                             if(!failedClustersToUploadTo.isEmpty()){
                                 checkAndNotifyAnyFailed();

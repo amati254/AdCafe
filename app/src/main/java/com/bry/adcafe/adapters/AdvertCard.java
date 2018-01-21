@@ -19,6 +19,7 @@ import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.Advert;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -28,6 +29,7 @@ import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.Resolve;
 import com.mindorks.placeholderview.annotations.View;
 import com.mindorks.placeholderview.annotations.swipe.SwipeCancelState;
+import com.mindorks.placeholderview.annotations.swipe.SwipeHead;
 import com.mindorks.placeholderview.annotations.swipe.SwipeIn;
 import com.mindorks.placeholderview.annotations.swipe.SwipeOut;
 import com.mindorks.placeholderview.annotations.swipe.SwipeTouch;
@@ -37,6 +39,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import jp.wasabeef.glide.transformations.BlurTransformation;
 
 /**
  * Created by bryon on 6/11/2017.
@@ -50,6 +54,10 @@ public class AdvertCard{
     @View(R.id.adCardAvi) private AVLoadingIndicatorView mAvi;
     @View(R.id.WebsiteIcon) private ImageView webIcon;
     @View(R.id.websiteText) private TextView webText;
+    @View(R.id.smallDot) private android.view.View mDot;
+    @View(R.id.bookmark2Btn) private ImageView bookmarkBtn;
+    @View(R.id.reportBtn) private ImageView reportBtn;
+
 
     private Advert mAdvert;
     private Context mContext;
@@ -74,7 +82,9 @@ public class AdvertCard{
     private boolean isBackgroundTaskRunning = false;
     private boolean needToContinueBackground = false;
 
+
     private int positionBL = 0;
+    private boolean isFirstCard = false;
 
 
     public AdvertCard(Context context, Advert advert, SwipePlaceHolderView swipeView,String lastOrNotLast){
@@ -110,25 +120,16 @@ public class AdvertCard{
                 new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
     }
 
-    private void loadAdPlaceHolderImage() {
-        mIsNoAds = true;
-        Glide.with(mContext).load(R.drawable.noads5).into(profileImageView);
-        lockViews();
-        clickable=false;
-        Variables.setCurrentAdvert(mAdvert);
-
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 1;
-        bs = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.noads5, options);
-        setUpListOfBlurrs();
-    }
-
     private void setUpListOfBlurrs(){
-        for(int i = 0;i<6;i++){
+        for(int i = 0;i<3;i++){
             blurredImageList.add(bs);
         }
-        BackgroundBlurrProcess =  new LongOperationBL();
-        BackgroundBlurrProcess.execute();
+        if(Variables.hasTimerStarted){
+            needToContinueBackground = true;
+        }else{
+            BackgroundBlurrProcess =  new LongOperationBL();
+            BackgroundBlurrProcess.execute();
+        }
     }
 
     private void setImage() {
@@ -144,13 +145,24 @@ public class AdvertCard{
 
 
 
+    private void loadAdPlaceHolderImage() {
+        mIsNoAds = true;
+        MultiTransformation multi = new MultiTransformation(new BlurTransformation(mContext, 30));
+        Glide.with(mContext).load(R.drawable.noads5).bitmapTransform(multi).into(profileImageView);
+        lockViews();
+        clickable=false;
+        Variables.setCurrentAdvert(mAdvert);
+
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 1;
+        bs = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.noads5, options);
+        setUpListOfBlurrs();
+    }
 
     private void loadAllAds(){
-        Log.d("ADVERT_CARD--","LOADING ALL ADS NORMALLY.");
-        Glide.with(mContext).load(
-//                bitmapToByte(mAdvert.getImageBitmap())
-                mImageBytes
-        ).listener(new RequestListener<byte[], GlideDrawable>() {
+        Log.d("ADVERT_CARD--","LOADING AD NORMALLY.");
+        MultiTransformation multi = new MultiTransformation(new BlurTransformation(mContext, 30));
+        Glide.with(mContext).load(mImageBytes).bitmapTransform(multi).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
             public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
                 Log.d("ADVERT_CARD--","The image has failed to load due to error."+e.getMessage());
@@ -165,18 +177,11 @@ public class AdvertCard{
                 Log.d("ADVERT_CARD--","The image has loaded successfully");
                 mAvi.setVisibility(android.view.View.GONE);
                 errorImageView.setVisibility(android.view.View.GONE);
+                setUpListOfBlurrs();
                 if(isFirstResource && mLastOrNotLast.equals(Constants.NOT_LAST) && !mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)) {
                     Log.d("ADVERT_CARD---","sending broadcast to start timer...");
-//                    sendBroadcast(START_TIMER);
-//                        if(mAdvert.isFlagged()){
-//                            if(mSwipeView.getChildCount()==1) {
-//                                mSwipeView.lockViews();
-//                                Variables.isLockedBecauseOfFlagedAds= true;
-//                            } else{
-//                                mSwipeView.unlockViews();
-//                            }
-//                        }else{
                     isSupposedToStartTimer = true;
+                    isFirstCard = true;
                     if(!mAdvert.getWebsiteLink().equals(igsNein)){
                         webIcon.setAlpha(1.0f);
                         webText.setAlpha(1.0f);
@@ -196,10 +201,8 @@ public class AdvertCard{
 
     private void loadOnlyLastAd(){
         Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
-        Glide.with(mContext).load(
-//                bitmapToByte(mAdvert.getImageBitmap())
-                mImageBytes
-        ).listener(new RequestListener<byte[], GlideDrawable>() {
+//        MultiTransformation multi = new MultiTransformation(new BlurTransformation(mContext, 30));
+        Glide.with(mContext).load(mImageBytes).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
             public boolean onException(Exception e, byte[] model, Target<GlideDrawable> target, boolean isFirstResource) {
                 errorImageView.setVisibility(android.view.View.VISIBLE);
@@ -212,6 +215,7 @@ public class AdvertCard{
             public boolean onResourceReady(GlideDrawable resource, byte[] model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                 mAvi.setVisibility(android.view.View.GONE);
                 errorImageView.setVisibility(android.view.View.GONE);
+                setUpListOfBlurrs();
                 hasAdLoaded = true;
                 return false;
             }
@@ -226,6 +230,8 @@ public class AdvertCard{
 //        sendBroadcast(Constants.LAST);
     }
 
+
+
     @Click(R.id.profileImageView)
     private void onClick(){
         Log.d("EVENT", "profileImageView click");
@@ -239,44 +245,80 @@ public class AdvertCard{
 
     }
 
-
-
     @SwipeOut
     private void onSwipedOut(){
         Log.d("EVENT----", "onSwipedOut");
         if(!mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
-            Variables.removeAd();
+//            Variables.removeAd();
             hasBeenSwiped = true;
-            sendBroadcast(START_TIMER);
+//            sendBroadcast(START_TIMER);
         }
-        if(mSwipeView.getChildCount()==2 && mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
-            Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
-            lockViews();
-        }
-        Intent intent = new Intent("SWIPED");
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+//        if(mSwipeView.getChildCount()==2 && mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
+//            Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
+//            lockViews();
+//        }
+//        Intent intent = new Intent("SWIPED");
+//        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     @SwipeIn
     private void onSwipeIn(){
         Log.d("EVENT----", "onSwipedIn");
         if(!mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
-            Variables.removeAd();
+//            Variables.removeAd();
             hasBeenSwiped = true;
-            sendBroadcast(START_TIMER);
+//            sendBroadcast(START_TIMER);
         }
-        if(mSwipeView.getChildCount()==2 && mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
-            Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
-            lockViews();
-        }
-        Intent intent = new Intent("SWIPED");
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+//        if(mSwipeView.getChildCount()==2 && mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
+//            Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
+//            lockViews();
+//        }
+//        Intent intent = new Intent("SWIPED");
+//        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
+    @SwipeHead
+    private void onSwipeHeadCard() {
+        Log.d("EVENT----------", "onSwipeHeadCard");
+        profileImageView.setImageBitmap(bs);
+        Log.d("AdvertCard","Set the normal image to the image view");
+
+        if(!firstAd()){
+            Log.d("AdvertCard","Card is not first one so continuing process of starting timer...");
+            if(mLastOrNotLast.equals(Constants.NOT_LAST)||mLastOrNotLast.equals(Constants.LOAD_MORE_ADS)){
+                Log.d("AdvertCard","mLastOrNotLast is : "+mLastOrNotLast+" So starting process of sending timer");
+                Variables.removeAd();
+                sendBroadcast(START_TIMER);
+            }else{
+                if(mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
+                    webIcon.setAlpha(0.3f);
+                    webText.setAlpha(0.3f);
+                    mDot.setAlpha(0.0f);
+                    bookmarkBtn.setAlpha(0.3f);
+                    reportBtn.setAlpha(0.3f);
+                }
+            }
+
+        }
+
+        if(mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
+            if(mSwipeView.getChildCount()==1){
+                Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
+                lockViews();
+            }
+            Intent intent = new Intent("SWIPED");
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        }
+    }
+
+    private boolean firstAd() {
+       return mAdvert.getPushRefInAdminConsole().equals(Variables.getAdFromVariablesAdList(0).getPushRefInAdminConsole());
+    }
+
+
     private void sendBroadcast(String message ) {
-        if(message.equals(START_TIMER) && hasBeenSwiped){
+        if(message.equals(START_TIMER)){
             Log.d("AdvertCard - ", "Sending message to start timer");
-//            mSwipeView.lockViews();
             lockViews();
             clickable = false;
             setBooleanForResumingTimer();
@@ -288,7 +330,7 @@ public class AdvertCard{
         }else if(message.equals(Constants.LAST)){
             Intent intent = new Intent(Constants.LAST);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-            setLastAdSeen();
+//            setLastAdSeen();
         }else if(message.equals(Constants.LOAD_MORE_ADS)){
             Intent intent = new Intent(Constants.LOAD_MORE_ADS);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -315,13 +357,19 @@ public class AdvertCard{
 
     private void pauseBackgroundTasks(){
         if(isBackgroundTaskRunning){
+            Log.d("AdvertCard","Pausing background task since timer is starting.");
             BackgroundBlurrProcess.cancel(true);
             needToContinueBackground = true;
         }
     }
 
     private void resumeBackgroundTasksIfRunning(){
-        if(needToContinueBackground) BackgroundBlurrProcess.execute();
+        if(needToContinueBackground){
+            Log.d("AdvertCard","Resuming background task since process wasn't finished");
+            BackgroundBlurrProcess = null;
+            BackgroundBlurrProcess =  new LongOperationBL();
+            BackgroundBlurrProcess.execute();
+        }
     }
 
     private BroadcastReceiver mMessageReceiverToStartTimer = new BroadcastReceiver() {
@@ -329,6 +377,8 @@ public class AdvertCard{
         public void onReceive(Context context, Intent intent) {
             if(isSupposedToStartTimer){
                 Log.d("AdvertCard","Received Message from main activity that background stuff is finished and to start timer.");
+                Variables.hasFinishedLoadingBlurredImages = true;
+                profileImageView.setImageBitmap(bs);
                 sendBroadcast(START_TIMER);
             }
         }
@@ -344,7 +394,6 @@ public class AdvertCard{
     private void doTheStuffWhenTimerHasEnded(){
         Log.d("ADVERT_CARD--","message from adCounterBar that timer has ended has been received.");
         if(mSwipeView.getChildCount() > 1){
-//                    mSwipeView.unlockViews();
             unLockViews();
             clickable = true;
             hasBeenSwiped = false;
@@ -485,7 +534,7 @@ public class AdvertCard{
                     loadAllAds();
                 }
             }
-            setUpListOfBlurrs();
+
         }
 
         @Override
@@ -714,8 +763,8 @@ public class AdvertCard{
             Log.d("Card","Doing in background");
             float scale = 2f;
             Bitmap bm = getResizedBitmap(bs,250);
-            for(int i = 0;i<6;i++){
-                if(i>=positionBL) blurredImageList.set(i,fastblur(bm,scale,(i+1)));
+            for(int i = 0;i<3;i++){
+                if(i>=positionBL) blurredImageList.set(i,fastblur(bm,scale,(i+2)));
             }
             return "executed";
         }
@@ -727,12 +776,6 @@ public class AdvertCard{
             Intent intent = new Intent("BLUREDIMAGESDONE");
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
 
-            if(isCurrentlyBeingViewed()){
-                profileImageView.setImageBitmap(bs);
-            }else{
-                if(!mAdvert.getNatureOfBanner().equals(Constants.IS_ANNOUNCEMENT))
-                    profileImageView.setImageBitmap(blurredImageList.get(blurredImageList.size()-1));
-            }
             isBackgroundTaskRunning = false;
         }
 
@@ -755,10 +798,10 @@ public class AdvertCard{
             setBooleanForPausingTimer();
         }
 
-        if(distance<49){
+        if(distance<149){
             profileImageView.setImageBitmap(bs);
-        }else if(distance>49 &&distance<620){
-            if(amount!=roundedDistance/100){
+        }else if(distance>149 &&distance<620){
+            if(amount!=roundedDistance/200){
                 updateImage();
             }
         }
@@ -776,10 +819,10 @@ public class AdvertCard{
 
 
     private void updateImage() {
-        int roundedDistance =(((int)mDistance + 99) / 100 ) * 100;
+        int roundedDistance =(((int)mDistance + 99) / 200 ) * 200;
 
-        profileImageView.setImageBitmap(blurredImageList.get((roundedDistance/100)-1));
-        amount = roundedDistance/100;
+        profileImageView.setImageBitmap(blurredImageList.get((roundedDistance/200)-1));
+        amount = roundedDistance/200;
     }
 
     private void setBooleanForPausingTimer(){

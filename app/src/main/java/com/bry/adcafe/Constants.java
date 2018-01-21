@@ -86,4 +86,7 @@ public class Constants {
     public static String PINNED_AD_POOL = "PinnedAdPool";
     public static String NO_OF_TIMES_PINNED = "NumberOfTimesPinned";
 
+    public static int NO_OF_ADS_TO_LOAD = 3;
+    public static int NO_OF_ADS_TO_LOAD2 = 2;
+
 }

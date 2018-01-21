@@ -68,8 +68,12 @@ public class AdCounterBar {
         public void onReceive(Context context, Intent intent) {
             Log.d("AD_COUNTER_BAR - ", "Broadcast has been received to start timer.");
 //            startTimer();
-            startTimer2();
-//            startTimer3();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startTimer2();
+                }
+            }, 40);
         }
     };
 
@@ -234,11 +238,11 @@ public class AdCounterBar {
             super.onPostExecute(result);
             resetTimer();
             Log.d("Timer --- ", "Timer has finnished");
-            sendBroadcast(Constants.TIMER_HAS_ENDED);
-            addToSharedPreferencesViaBroadcast();
-            hasTimerStarted = false;
-            adCounter.setText(Integer.toString(Variables.getAdTotal(mKey)+1));
-            textViewTime.setText(Integer.toString(7));
+//            sendBroadcast(Constants.TIMER_HAS_ENDED);
+//            addToSharedPreferencesViaBroadcast();
+//            hasTimerStarted = false;
+//            adCounter.setText(Integer.toString(Variables.getAdTotal(mKey)+1));
+//            textViewTime.setText(Integer.toString(7));
         }
     }
 
@@ -279,6 +283,11 @@ public class AdCounterBar {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             progressBarTimer.setProgress(70);
+            sendBroadcast(Constants.TIMER_HAS_ENDED);
+            addToSharedPreferencesViaBroadcast();
+            hasTimerStarted = false;
+            adCounter.setText(Integer.toString(Variables.getAdTotal(mKey)+1));
+            textViewTime.setText(Integer.toString(7));
         }
 
     }

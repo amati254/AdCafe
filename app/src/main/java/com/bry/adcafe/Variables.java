@@ -73,6 +73,7 @@ public class Variables {
     public static LinkedHashMap<Long,List> VariablesHashOfAds = new LinkedHashMap<>();
     public static boolean isLocked;
     public static boolean isAllClearToContinueCountDown = true;
+    public static boolean hasFinishedLoadingBlurredImages = false;
 
 
     public static void setNewNumberOfAds(int number){
