@@ -80,7 +80,9 @@ public class MyAdStatsItem {
         }
 
         int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
-        String number = Integer.toString((int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD));
+        int ammountToBeRepaid = (int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+        String number = Integer.toString(ammountToBeRepaid);
+
         mAmountToReimburse.setText("Reimbursing amount: "+number+" Ksh");
         try{
             if(mAdvert.isHasBeenReimbursed()) {
@@ -150,7 +152,8 @@ public class MyAdStatsItem {
                 mAdvert.setNumberOfTimesSeen(newValue);
                 mUsersReachedSoFar.setText("Users reached so far : "+newValue);
                 int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- newValue;
-                String number = Integer.toString((int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD));
+                int ammountToBeRepaid = (int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+                String number = Integer.toString(ammountToBeRepaid);
                 mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
             }catch (Exception e){
                 e.printStackTrace();
@@ -165,8 +168,9 @@ public class MyAdStatsItem {
                         mAmountToReimburse.setText("Reimbursing amount:  0 Ksh");
                     }else{
                         mHasBeenReimbursed.setText("Status: NOT Reimbursed.");
-                        int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
-                        String number = Integer.toString((int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD));
+                        int numberOfUsersWhoDidntSeeAd = (mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen());
+                        int ammountToBeRepaid = (int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+                        String number = Integer.toString(ammountToBeRepaid);
                         mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
                     }
                 }catch (Exception e){

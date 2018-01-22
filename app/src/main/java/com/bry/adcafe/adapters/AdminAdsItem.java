@@ -63,10 +63,12 @@ public class AdminAdsItem {
     private void onResolved(){
         mEmail.setText("Uploaded by : "+mAdvert.getUserEmail());
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
-        mCategory.setText("Category : "+mAdvert.getCategory());
-        mFlagged.setText("Is Flagged : "+mAdvert.isFlagged());
-        String ammount = Integer.toString(mAdvert.getNumberOfUsersToReach()*4);
+        mCategory.setText(String.format("Category : %s", mAdvert.getCategory()));
+        mFlagged.setText(String.format("Is Flagged : %s", mAdvert.isFlagged()));
+
+        String ammount = Integer.toString((int)(mAdvert.getNumberOfUsersToReach()*Constants.CONSTANT_AMOUNT_PER_AD));
         mAmountToReimburse.setText(String.format("Reimbursing amount : %s", ammount));
+
         if(mAdvert.isFlagged()) mTakeDown.setText("Put Up.");
         else mTakeDown.setText("Take Down.");
 

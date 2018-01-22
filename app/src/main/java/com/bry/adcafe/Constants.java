@@ -59,7 +59,7 @@ public class Constants {
     public static String UPLOADED_AD_LIST = "UploadedAdList";
     public static String FEEDBACK = "Feedback";
 
-    public static double CONSTANT_AMOUNT_PER_AD = 4.7;
+    public static double CONSTANT_AMOUNT_PER_AD = 4;
     public static double CONSTANT_AMMOUNT_FOR_USER = 2;
     public static String TOTAL_ALL_TIME_ADS = "AllUserTotals";
     public static String SUBSCRIPTION_lIST = "UserSubscriptionList";
