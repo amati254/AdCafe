@@ -76,11 +76,11 @@ public class MyAdStatsItem {
         if(!mAdvert.isFlagged()){
             mUsersReachedSoFar.setText("Users reached : "+mAdvert.getNumberOfTimesSeen());
         }else{
-            mUsersReachedSoFar.setText("Taken Down.No users to be reached.");
+            mUsersReachedSoFar.setText("Taken Down. No users reached.");
         }
 
         int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
-        String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+        String number = Integer.toString((int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD));
         mAmountToReimburse.setText("Reimbursing amount: "+number+" Ksh");
         try{
             if(mAdvert.isHasBeenReimbursed()) {
@@ -150,7 +150,7 @@ public class MyAdStatsItem {
                 mAdvert.setNumberOfTimesSeen(newValue);
                 mUsersReachedSoFar.setText("Users reached so far : "+newValue);
                 int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- newValue;
-                String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+                String number = Integer.toString((int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD));
                 mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
             }catch (Exception e){
                 e.printStackTrace();
@@ -166,7 +166,7 @@ public class MyAdStatsItem {
                     }else{
                         mHasBeenReimbursed.setText("Status: NOT Reimbursed.");
                         int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
-                        String number = Long.toString(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+                        String number = Integer.toString((int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD));
                         mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
                     }
                 }catch (Exception e){

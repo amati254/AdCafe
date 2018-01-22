@@ -25,9 +25,9 @@
                 android:layout_height="35dp"
                 android:layout_centerInParent="true"
                 android:indeterminate="false"
-                android:max="70"
+                android:max="140"
                 android:rotation="-90"
-                android:progress="70"
+                android:progress="140"
                 android:progressDrawable="@drawable/timer_layout" />
 
             <TextView

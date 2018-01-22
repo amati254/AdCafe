@@ -45,10 +45,9 @@ public class AdCounterBar {
     private boolean hasTimerStarted = false;
     private String mKey = "";
 
+    private InitTask IT = null;
 
-    Handler h = new Handler();
-    Runnable r;
-    int i = 0;
+
 
     public AdCounterBar(Context context, PlaceHolderView PlaceHolderView) {
         mContext = context;
@@ -84,6 +83,7 @@ public class AdCounterBar {
             Log.d("AD_COUNTER_BAR--", "Received broadcast to Unregister all receivers");
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToStartTimer);
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToUnregisterAllReceivers);
+            if(hasTimerStarted) IT.cancel(true);
 
         }
     };
@@ -126,9 +126,12 @@ public class AdCounterBar {
 
     private void startTimer2() {
         if (!hasTimerStarted) {
+            hasTimerStarted = true;
             Log.d("AdCounterBar", "Starting timer from asynch task");
             hasTimerMessageBeenSent = false;
-            new InitTask().execute();
+            if(IT!=null) IT = null;
+            IT = new InitTask();
+            IT.execute();
         }
     }
 
@@ -211,9 +214,9 @@ public class AdCounterBar {
             int i = 7000;
             while (i > 0) {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(50);
                     if(Variables.isAllClearToContinueCountDown){
-                        i -= 100;
+                        i -= 50;
                         publishProgress(i);
                     }
                 } catch (Exception e) {
@@ -260,10 +263,10 @@ public class AdCounterBar {
         @Override
         protected String doInBackground(Context... params) {
             int i = 0;
-            while (i <= 70) {
+            while (i <= 140) {
                 try {
                     Thread.sleep(50);
-                    i += 10;
+                    i += 20;
                     publishProgress(i);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -275,14 +278,14 @@ public class AdCounterBar {
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
-            progressBarTimer.incrementProgressBy(10);
+            progressBarTimer.incrementProgressBy(20);
 
         }
 
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            progressBarTimer.setProgress(70);
+            progressBarTimer.setProgress(140);
             sendBroadcast(Constants.TIMER_HAS_ENDED);
             addToSharedPreferencesViaBroadcast();
             hasTimerStarted = false;

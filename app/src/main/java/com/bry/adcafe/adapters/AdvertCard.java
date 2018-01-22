@@ -289,16 +289,7 @@ public class AdvertCard{
                 Log.d("AdvertCard","mLastOrNotLast is : "+mLastOrNotLast+" So starting process of sending timer");
                 Variables.removeAd();
                 sendBroadcast(START_TIMER);
-            }else{
-                if(mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
-                    webIcon.setAlpha(0.3f);
-                    webText.setAlpha(0.3f);
-                    mDot.setAlpha(0.0f);
-                    bookmarkBtn.setAlpha(0.3f);
-                    reportBtn.setAlpha(0.3f);
-                }
             }
-
         }
 
         if(mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)){
@@ -306,13 +297,22 @@ public class AdvertCard{
                 Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
                 lockViews();
             }
+            setBottomButtonsToBeTranslucent();
             Intent intent = new Intent("SWIPED");
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         }
     }
 
+    private void setBottomButtonsToBeTranslucent(){
+        webIcon.setAlpha(0.3f);
+        webText.setAlpha(0.3f);
+        mDot.setAlpha(0.0f);
+        bookmarkBtn.setAlpha(0.3f);
+        reportBtn.setAlpha(0.3f);
+    }
+
     private boolean firstAd() {
-       return mAdvert.getPushRefInAdminConsole().equals(Variables.getAdFromVariablesAdList(0).getPushRefInAdminConsole());
+       return mAdvert.getPushRefInAdminConsole().equals(Variables.firstAd.getPushRefInAdminConsole());
     }
 
 

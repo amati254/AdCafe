@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setUpAllTheViews();
 
         if(!isOnline()){
-            mAvi.smoothToShow();
+            mAvi.smoothToHide();
             mLoadingText.setVisibility(View.GONE);
             mBottomNavButtons.setVisibility(View.GONE);
             cannotLoadLayout.setVisibility(View.VISIBLE);
@@ -155,7 +155,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         logUser();
 
-//        new DatabaseManager().setLastSeenDateInFirebase();
         mAviLoadingMoreAds.hide();
 
     }
@@ -820,6 +819,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 lockViews();
                 mAdList.get(0).setNatureOfBanner(Constants.IS_AD);
                 Variables.adToVariablesAdList(mAdList.get(0));
+                Variables.firstAd = mAdList.get(0);
                 mSwipeView.addView(new AdvertCard(mContext, mAdList.get(0), mSwipeView, Constants.LAST));
                 Variables.setIsLastOrNotLast(Constants.LAST);
                 Variables.setCurrentAdvert(mAdList.get(0));
@@ -850,6 +850,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                    loadMoreAds = true;
 //                    loadMoreAds();
                 }
+                Variables.firstAd = mAdList.get(0);
                 for (Advert ad : mAdList) {
                     ad.setNatureOfBanner(Constants.IS_AD);
                     Variables.adToVariablesAdList(ad);
@@ -869,6 +870,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 lockViews();
                 lastAdSeen.setNatureOfBanner(Constants.IS_AD);
                 Variables.adToVariablesAdList(lastAdSeen);
+                Variables.firstAd = lastAdSeen;
                 mSwipeView.addView(new AdvertCard(mContext, lastAdSeen, mSwipeView, Constants.LAST));
                 Variables.setIsLastOrNotLast(Constants.LAST);
                 Variables.setCurrentAdvert(lastAdSeen);
@@ -893,6 +895,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 noAds.setPushRefInAdminConsole("NONE");
                 noAds.setCategory("NoAds");
                 noAds.setNatureOfBanner("NoAds");
+                Variables.firstAd = noAds;
                 mSwipeView.addView(new AdvertCard(mContext, noAds, mSwipeView, Constants.NO_ADS));
                 Variables.adToVariablesAdList(noAds);
                 Variables.setIsLastOrNotLast(Constants.NO_ADS);
@@ -1170,6 +1173,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(isLastAd)Toast.makeText(mContext, "We've got nothing else for you today.", Toast.LENGTH_SHORT).show();
         }
     }
+
 
 
     private BroadcastReceiver mMessageReceiverForAddingToSharedPreferences = new BroadcastReceiver() {
