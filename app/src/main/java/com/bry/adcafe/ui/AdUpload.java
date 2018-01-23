@@ -416,23 +416,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                             Snackbar.LENGTH_LONG).show();
                     }else{
                         if(bm!=null && !uploading){
-//                            if(noOfChildrenInClusterToStartFrom>=510){
-//                                Toast.makeText(mContext,"The ad limit has been exceeded.You may need to upload tomorrow instead.",Toast.LENGTH_LONG).show();
-//                            }else{
-//                                setAllOtherViewsToBeGone();
-//                                mAvi.setVisibility(View.VISIBLE);
-//                                mLoadingTextView.setVisibility(View.VISIBLE);
-//                                mLoadingTextView.setText(R.string.uploadMessage);
-                                mAuthProgressDialog.show();
-//                                mAuthProgressDialog.setProgress(0);
-                                uploading = true;
-                                setNewValueToStartFrom();
-                                date = getNextDay();
-                                numberOfClustersBeingUploadedTo = clustersToUpLoadTo.size();
-                                recheckNoOfChildrenInClulsterToStartFrom();
-//                                uploadImageToManagerConsole();
-//                            }
-
+                            //This method will begin the process for uploading ad;
+                            startProcessForUpload();
                         }else{
                             Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
                         }
@@ -440,6 +425,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 }
             });
         }
+
         if(findViewById(R.id.profileImageViewPreview)!=null){
             findViewById(R.id.profileImageViewPreview).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -480,6 +466,20 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
             });
         }
     }
+
+
+
+    //////This method will start the upload process.Call it when your done with the payments....
+    private void startProcessForUpload(){
+        mAuthProgressDialog.show();
+        uploading = true;
+        setNewValueToStartFrom();
+        date = getNextDay();
+        numberOfClustersBeingUploadedTo = clustersToUpLoadTo.size();
+        recheckNoOfChildrenInClulsterToStartFrom();
+    }
+    //Remember to comment out the one being called in the onClick listener (Line 420)////////
+    ///////////////////////////////////////////////////////////////////////
 
     private void promptUserForLink() {
         final Dialog d = new Dialog(AdUpload.this);
