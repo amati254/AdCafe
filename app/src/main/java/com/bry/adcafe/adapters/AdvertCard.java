@@ -178,6 +178,7 @@ public class AdvertCard{
                 mAvi.setVisibility(android.view.View.GONE);
                 errorImageView.setVisibility(android.view.View.GONE);
                 setUpListOfBlurrs();
+                if(Variables.getCurrentAdvert().getPushRefInAdminConsole().equals(mAdvert.getPushRefInAdminConsole())) profileImageView.setImageBitmap(bs);
                 if(isFirstResource && mLastOrNotLast.equals(Constants.NOT_LAST) && !mLastOrNotLast.equals(Constants.ANNOUNCEMENTS)) {
                     Log.d("ADVERT_CARD---","sending broadcast to start timer...");
                     isSupposedToStartTimer = true;

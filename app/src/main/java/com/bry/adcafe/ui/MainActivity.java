@@ -177,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }catch (Exception e){
             e.printStackTrace();
         }
+
         super.onResume();
         if (!getCurrentDateInSharedPreferences().equals("0") && !getCurrentDateInSharedPreferences().equals(getDate())) {
             Log.d(TAG, "---Date in shared preferences does not match current date,therefore resetting everything.");
@@ -896,8 +897,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 noAds.setCategory("NoAds");
                 noAds.setNatureOfBanner("NoAds");
                 Variables.firstAd = noAds;
-                mSwipeView.addView(new AdvertCard(mContext, noAds, mSwipeView, Constants.NO_ADS));
                 Variables.adToVariablesAdList(noAds);
+                mSwipeView.addView(new AdvertCard(mContext, noAds, mSwipeView, Constants.NO_ADS));
                 Variables.setIsLastOrNotLast(Constants.NO_ADS);
                 findViewById(R.id.WebsiteIcon).setAlpha(0.4f);
                 findViewById(R.id.websiteText).setAlpha(0.4f);
@@ -1826,8 +1827,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void getNumberOfTimesAndSetNewNumberOfTimes() {
         Log.d(TAG, "Getting the current ad's numberOfTimesSeen from firebase");
         final String datte;
-        //ad gotten will be previous since the broadcast receiver added one to currentAdNumberForAllAdsList
-        final Advert ad = Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList() - 1);
+        //ad gotten will be current advert
+        final Advert ad = Variables.getCurrentAdvert();
         datte = isAlmostMidNight() ? getNextDay() : getDate();
 
         Log.d(TAG, "Push ref for current Advert is : " + ad.getPushRefInAdminConsole());
@@ -1901,26 +1902,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
                 Log.v(TAG, "Permission is granted");
-                if(Variables.getCurrentAdvert().getImageBitmap()!=null) shareImage(Variables.getCurrentAdvert().getImageBitmap());
-                else {
-                    try{
-                        Bitmap image = decodeFromFirebaseBase64(Variables.getCurrentAdvert().getImageUrl());
-                        shareImage(image);
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
+                startShareImage();
                 return true;
             } else {
-
                 Log.v(TAG, "Permission is revoked");
                 ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 return false;
             }
         } else { //permission is automatically granted on sdk<23 upon installation
             Log.v(TAG, "Permission is granted");
-            shareImage(Variables.adToBeShared.getImageBitmap());
+            startShareImage();
             return true;
+        }
+    }
+
+    private void startShareImage(){
+        if(Variables.getCurrentAdvert().getImageBitmap()!=null) shareImage(Variables.getCurrentAdvert().getImageBitmap());
+        else if(Variables.getCurrentAdvert().getImageUrl()!=null){
+            try{
+                Bitmap image = decodeFromFirebaseBase64(Variables.getCurrentAdvert().getImageUrl());
+                shareImage(image);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        else{
+            try{
+                Bitmap image = decodeFromFirebaseBase64(Variables.getAdFromVariablesAdList
+                        (Variables.getCurrentAdNumberForAllAdsList()).getImageUrl());
+                shareImage(image);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
