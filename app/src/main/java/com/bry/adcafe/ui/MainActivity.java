@@ -132,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isTimerPausedBecauseOfOfflineActivity = false;
 
     private int numberOfResponsesForLoadingBlurredImages = 0;
+    private boolean hasSentMessageThatBlurrsHaveFinished = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -1140,7 +1141,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             int visibleChildren = mSwipeView.getChildCount() <= 4 ? mSwipeView.getChildCount() : 4;
             numberOfResponsesForLoadingBlurredImages ++;
             Log.d(TAG,"Number of visible cards : "+visibleChildren+" Number of responses for loading blurred images"+ numberOfResponsesForLoadingBlurredImages);
-            if(numberOfResponsesForLoadingBlurredImages== visibleChildren){
+            if(numberOfResponsesForLoadingBlurredImages == visibleChildren & !hasSentMessageThatBlurrsHaveFinished){
+                hasSentMessageThatBlurrsHaveFinished = true;
                 unhideViews();
                 Intent intent2 = new Intent("START_TIMER_NOW");
                 Variables.hasFinishedLoadingBlurredImages = true;

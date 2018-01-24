@@ -206,6 +206,7 @@ public class AdCounterBar {
             Log.d("AdCounterBar","Preparing to start timer");
             Variables.hasTimerStarted = true;
             hasTimerStarted = true;
+            Variables.hasBeenPinned = false;
             super.onPreExecute();
         }
 
