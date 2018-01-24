@@ -147,8 +147,8 @@ public class AdvertCard{
 
     private void loadAdPlaceHolderImage() {
         mIsNoAds = true;
-        MultiTransformation multi = new MultiTransformation(new BlurTransformation(mContext, 30));
-        Glide.with(mContext).load(R.drawable.noads5).bitmapTransform(multi).into(profileImageView);
+//        MultiTransformation multi = new MultiTransformation(new BlurTransformation(mContext, 30));
+        Glide.with(mContext).load(R.drawable.noads5).into(profileImageView);
         lockViews();
         clickable=false;
         Variables.setCurrentAdvert(mAdvert);
@@ -381,6 +381,7 @@ public class AdvertCard{
                 Variables.hasFinishedLoadingBlurredImages = true;
                 profileImageView.setImageBitmap(bs);
                 sendBroadcast(START_TIMER);
+                LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToStartTimer);
             }
         }
     };

@@ -450,7 +450,13 @@ public class Bookmarks extends AppCompatActivity {
         mProg = new ProgressDialog(this,R.style.AppCompatAlertDialogStyle);
         mProg.setMessage("Loading your Pins...");
         mProg.setTitle("AdCafe.");
-        mProg.setCancelable(false);
+        mProg.setCancelable(true);
+        mProg.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                finish();
+            }
+        });
     }
 
 

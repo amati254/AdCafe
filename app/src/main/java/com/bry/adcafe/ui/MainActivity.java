@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private int numberOfResponsesForLoadingBlurredImages = 0;
     private boolean hasSentMessageThatBlurrsHaveFinished = false;
+    private boolean hasShowedToastForNoMoreAds = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -1240,7 +1241,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!mIsBeingReset && !isLoadingMoreAds) {
-//                Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
                 loadAnyAnnouncements();
             }
         }
@@ -1353,12 +1353,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         loadMoreAdsIntoAdvertCard();
                         mChildToStartFrom += (int) dataSnapshot.getChildrenCount();
                         isLoadingMoreAds = false;
-//                        mAviLoadingMoreAds.smoothToHide();
-//                        spinner.setVisibility(View.VISIBLE);
-//                        if(Variables.isLockedBecauseOfNoMoreAds){
-//                            mSwipeView.unlockViews();
-//                            Variables.isLockedBecauseOfNoMoreAds = false;
-//                        }
+
                     }else{
                         Log.d(TAG,"Loaded no ad, loading more ads...");
                         if(Variables.nextSubscriptionIndex+1<Variables.Subscriptions.size()){
@@ -1370,7 +1365,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             isLoadingMoreAds = false;
                             mAviLoadingMoreAds.smoothToHide();
                             if(mSwipeView.getChildCount()==1){
-                                Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
+                                if(!hasShowedToastForNoMoreAds){
+                                    hasShowedToastForNoMoreAds = true;
+                                    Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
+                                }
                                 loadAnyAnnouncements();
                             }
 //                            spinner.setVisibility(View.VISIBLE);
@@ -1388,10 +1386,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         isLoadingMoreAds = false;
                         mAviLoadingMoreAds.smoothToHide();
                         if(mSwipeView.getChildCount()==1){
-                            Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
+                            if(!hasShowedToastForNoMoreAds){
+                                hasShowedToastForNoMoreAds = true;
+                                Toast.makeText(mContext, R.string.lastAd, Toast.LENGTH_SHORT).show();
+                            }
                             loadAnyAnnouncements();
                         }
-//                        spinner.setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -1562,6 +1562,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
+
     private void adDayAndMonthTotalsToFirebase() {
         String uid = User.getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
@@ -1617,6 +1618,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Variables.setCurrentSubscriptionIndex(0);
         resetAdTotalsInFirebase();
     }
+
 
 
 
@@ -1875,30 +1877,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-//    public static void scheduleRepeatingRTCNotification(Context context, String hour, String min) {
-//        //get calendar instance to be able to select what time notification should be scheduled
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTimeInMillis(System.currentTimeMillis());
-//        //Setting time of the day (8am here) when notification will be sent every day (default)
-//        calendar.set(Calendar.HOUR_OF_DAY,
-//                Integer.getInteger(hour, 8),
-//                Integer.getInteger(min, 0));
-//
-//        //Setting intent to class where Alarm broadcast message will be handled
-//        Intent intent = new Intent(context, AlarmReceiver.class);
-//        //Setting alarm pending intent
-//        PendingIntent alarmIntentRTC = PendingIntent.getBroadcast(context, 100, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//        //getting instance of AlarmManager service
-//        AlarmManager alarmManagerRTC = (AlarmManager)context.getSystemService(ALARM_SERVICE);
-//        //Setting alarm to wake up device every day for clock time.
-//        //AlarmManager.RTC_WAKEUP is responsible to wake up device for sure, which may not be good practice all the time.
-//        // Use this when you know what you're doing.
-//        //Use RTC when you don't need to wake up device, but want to deliver the notification whenever device is woke-up
-//        //We'll be using RTC.WAKEUP for demo purpose only
-//        alarmManagerRTC.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntentRTC);
-//    }
-
     public boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -2024,8 +2002,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Calendar alarmStartTime = Calendar.getInstance();
         Calendar now = Calendar.getInstance();
-        alarmStartTime.set(Calendar.HOUR_OF_DAY, 4);
-        alarmStartTime.set(Calendar.MINUTE, 21);
+        alarmStartTime.set(Calendar.HOUR_OF_DAY, 5);
+        alarmStartTime.set(Calendar.MINUTE, 30);
         alarmStartTime.set(Calendar.SECOND, 0);
         if (now.after(alarmStartTime)) {
             Log.d(TAG, "Setting alarm to tomorrow morning.");
@@ -2189,6 +2167,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(!Variables.isAllClearToContinueCountDown)Variables.isAllClearToContinueCountDown = true;
     }
 
-    //Font; AR ESSENCE.
+//    Font; AR ESSENCE.
 
 }
