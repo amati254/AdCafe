@@ -8,114 +8,210 @@
     android:id="@+id/baseLayout">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:background="@drawable/owl"
-        android:layout_margin="0.3dp"
         android:id="@+id/theAdImage"
-        android:scaleType="fitXY"
-        android:layout_height="wrap_content" />
+        android:layout_width="match_parent"
+        android:layout_height="420dp"
+        android:layout_gravity="center"
+        android:layout_margin="0.3dp"
+        android:background="@drawable/owl"
+        android:scaleType="fitXY" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:layout_gravity="bottom"
-        android:id="@+id/bottomNavButtons"
-        android:visibility="visible"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:paddingBottom="7dp"
+        android:id="@+id/bottomNavButtons"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom">
 
         <RelativeLayout
             android:layout_width="wrap_content"
+            android:visibility="visible"
+            android:layout_marginRight="5dp"
             android:layout_height="wrap_content">
-            <LinearLayout
+            <ImageButton
+                android:id="@+id/backBtn"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/ic_action_back"/>
+            <TextView
                 android:layout_width="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_height="wrap_content">
-                <ImageButton
-                    android:id="@+id/backBtn"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:background="@drawable/ic_action_back"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:id="@+id/backText"
-                    android:textSize="8dp"
-                    android:text="Back."
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
+                android:id="@+id/backText"
+                android:text="Back."
+                android:textSize="8dp"
+                android:paddingTop="40dp"
+                android:paddingLeft="23dp"
+                android:layout_height="wrap_content" />
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_marginLeft="15dp"
+            android:visibility="visible"
+            android:layout_marginRight="10dp"
             android:layout_height="wrap_content">
-            <LinearLayout
+            <ImageButton
+                android:id="@+id/shareBtn"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginLeft="7dp"
+                android:background="@drawable/ic_action_share"/>
+            <TextView
                 android:layout_width="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_height="wrap_content">
-                <ImageButton
-                    android:id="@+id/shareBtn"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:background="@drawable/ic_action_share"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:id="@+id/shareText"
-                    android:textSize="8dp"
-                    android:text="Share."
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
+                android:id="@+id/shareText"
+                android:text="Share."
+                android:textSize="8dp"
+                android:paddingTop="40dp"
+                android:paddingLeft="19dp"
+                android:layout_height="wrap_content" />
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_marginLeft="15dp"
+            android:visibility="visible"
+            android:layout_marginRight="10dp"
             android:layout_height="wrap_content">
-            <LinearLayout
+            <ImageButton
+                android:id="@+id/Website"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginLeft="6dp"
+                android:background="@drawable/ic_action_website"/>
+            <TextView
                 android:layout_width="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_height="wrap_content">
-                <ImageButton
-                    android:id="@+id/Website"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:background="@drawable/ic_action_website"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:id="@+id/websiteTextxx"
-                    android:textSize="8dp"
-                    android:text="Visit Website."
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
+                android:id="@+id/websiteTextxx"
+                android:text="Visit Website."
+                android:textSize="8dp"
+                android:paddingTop="40dp"
+                android:paddingLeft="5dp"
+                android:layout_height="wrap_content" />
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:layout_height="wrap_content">
-            <LinearLayout
+            android:layout_height="wrap_content"
+            android:visibility="visible">
+
+            <ImageButton
+                android:id="@+id/Delete"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginLeft="6dp"
+                android:background="@drawable/ic_action_delete" />
+
+            <TextView
+                android:id="@+id/DeleteText"
                 android:layout_width="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_height="wrap_content">
-                <ImageButton
-                    android:id="@+id/Delete"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:background="@drawable/ic_action_delete"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:id="@+id/DeleteText"
-                    android:textSize="8dp"
-                    android:text="Unpin."
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:paddingLeft="19dp"
+                android:paddingTop="40dp"
+                android:text="Unpin."
+                android:textSize="8dp" />
         </RelativeLayout>
 
     </LinearLayout>
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="60dp"-->
+        <!--android:layout_gravity="bottom"-->
+        <!--android:id="@+id/bottomNavButtonss"-->
+        <!--android:visibility="visible"-->
+        <!--android:gravity="center"-->
+        <!--android:orientation="horizontal">-->
+
+        <!--<RelativeLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content">-->
+            <!--<LinearLayout-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:orientation="vertical"-->
+                <!--android:gravity="center"-->
+                <!--android:layout_height="wrap_content">-->
+                <!--<ImageButton-->
+                    <!--android:id="@+id/backBtnn"-->
+                    <!--android:layout_width="35dp"-->
+                    <!--android:layout_height="35dp"-->
+                    <!--android:background="@drawable/ic_action_back"/>-->
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:id="@+id/backTextt"-->
+                    <!--android:textSize="8dp"-->
+                    <!--android:text="Back."-->
+                    <!--android:layout_height="wrap_content" />-->
+            <!--</LinearLayout>-->
+        <!--</RelativeLayout>-->
+
+        <!--<RelativeLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_marginLeft="15dp"-->
+            <!--android:layout_height="wrap_content">-->
+            <!--<LinearLayout-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:orientation="vertical"-->
+                <!--android:gravity="center"-->
+                <!--android:layout_height="wrap_content">-->
+                <!--<ImageButton-->
+                    <!--android:id="@+id/shareBtnn"-->
+                    <!--android:layout_width="35dp"-->
+                    <!--android:layout_height="35dp"-->
+                    <!--android:background="@drawable/ic_action_share"/>-->
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:id="@+id/shareTextt"-->
+                    <!--android:textSize="8dp"-->
+                    <!--android:text="Share."-->
+                    <!--android:layout_height="wrap_content" />-->
+            <!--</LinearLayout>-->
+        <!--</RelativeLayout>-->
+
+        <!--<RelativeLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_marginLeft="15dp"-->
+            <!--android:layout_height="wrap_content">-->
+            <!--<LinearLayout-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:orientation="vertical"-->
+                <!--android:gravity="center"-->
+                <!--android:layout_height="wrap_content">-->
+                <!--<ImageButton-->
+                    <!--android:id="@+id/Websitee"-->
+                    <!--android:layout_width="35dp"-->
+                    <!--android:layout_height="35dp"-->
+                    <!--android:background="@drawable/ic_action_website"/>-->
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:id="@+id/websiteTextxx"-->
+                    <!--android:textSize="8dp"-->
+                    <!--android:text="Visit Website."-->
+                    <!--android:layout_height="wrap_content" />-->
+            <!--</LinearLayout>-->
+        <!--</RelativeLayout>-->
+
+        <!--<RelativeLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_marginLeft="15dp"-->
+            <!--android:layout_height="wrap_content">-->
+            <!--<LinearLayout-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:orientation="vertical"-->
+                <!--android:gravity="center"-->
+                <!--android:layout_height="wrap_content">-->
+                <!--<ImageButton-->
+                    <!--android:id="@+id/Deletee"-->
+                    <!--android:layout_width="35dp"-->
+                    <!--android:layout_height="35dp"-->
+                    <!--android:background="@drawable/ic_action_delete"/>-->
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:id="@+id/DeleteTextt"-->
+                    <!--android:textSize="8dp"-->
+                    <!--android:text="Unpin."-->
+                    <!--android:layout_height="wrap_content" />-->
+            <!--</LinearLayout>-->
+        <!--</RelativeLayout>-->
+
+    <!--</LinearLayout>-->
 
 </LinearLayout>
