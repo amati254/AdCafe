@@ -710,6 +710,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         int bottomMargin = Utils.dpToPx(90);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
+        Variables.windowSize = windowSize;
         float relativeScale = density();
 
         mSwipeView.getBuilder()

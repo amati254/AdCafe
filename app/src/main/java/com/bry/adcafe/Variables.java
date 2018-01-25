@@ -1,5 +1,6 @@
 package com.bry.adcafe;
 
+import android.graphics.Point;
 import android.util.Log;
 
 import com.bry.adcafe.adapters.AdvertCard;
@@ -75,6 +76,7 @@ public class Variables {
     public static boolean isAllClearToContinueCountDown = true;
     public static boolean hasFinishedLoadingBlurredImages = false;
     public static Advert firstAd;
+    public static Point windowSize;
 
 
     public static void setNewNumberOfAds(int number){

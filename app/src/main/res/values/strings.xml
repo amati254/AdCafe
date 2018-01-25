@@ -112,8 +112,13 @@
     <string name="Advertiserslide2text">Essentially, we only advertise by views. When our user sees a banner for 7 seconds,
         we consider advertising to have taken place.</string>
 
-    <string name="reachabilityexplanation">Advertising here gives you the ability to reach users interested in your
-        type of product in a very short time.</string>
+    <string name="Advertiserslide2text2">Also, advertising here happens in 24h cycles; Meaning, when you upload an ad today, it will
+        only be seen on the day after.</string>
+
+    <string name="reachabilityexplanation">Advertising here gives you the ability to reach the apps users within a very short period of time.</string>
+
+    <string name="targetingExplanation">Here you can target the type of users you want to reach based on
+         the general category of product you deal with.</string>
 
     <string name="affordablilityexplanation">As we only charge 4000Ksh per 1000 views, advertising here is
         flexible as per your financial ability.</string>
@@ -121,7 +126,7 @@
     <string name="reimbursabilityexplanation">In the event your ad doesn\'t reach the number of users you intended,
         you will be reimbursed the remaining amount.</string>
 
-    <string name="monitorableexplanation">Through the Ad Stats Window, you can find
+    <string name="monitorableexplanation">Through the Ad Stats Window(Dashboars->Ad Stats), you can find
         out in real time how many users have seen your ad and the amount to be reimbursed.</string>
 
     <string name="advertisePageExplaation">The page is designed similar to the main page. This basically will give you a feel of how the
