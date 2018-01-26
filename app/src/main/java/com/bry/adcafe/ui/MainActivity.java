@@ -902,6 +902,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Variables.firstAd = noAds;
                 Variables.adToVariablesAdList(noAds);
                 mSwipeView.addView(new AdvertCard(mContext, noAds, mSwipeView, Constants.NO_ADS));
+                lockViews();
                 Variables.setIsLastOrNotLast(Constants.NO_ADS);
                 findViewById(R.id.WebsiteIcon).setAlpha(0.4f);
                 findViewById(R.id.websiteText).setAlpha(0.4f);
@@ -1909,8 +1910,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         else{
             try{
+                int number = Variables.hasTimerStarted ? Variables.getCurrentAdNumberForAllAdsList()
+                        : Variables.getCurrentAdNumberForAllAdsList() - 1;
+
                 Bitmap image = decodeFromFirebaseBase64(Variables.getAdFromVariablesAdList
-                        (Variables.getCurrentAdNumberForAllAdsList()).getImageUrl());
+                        (number).getImageUrl());
                 shareImage(image);
             }catch (Exception e){
                 e.printStackTrace();
@@ -2140,19 +2144,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void lockViews(){
+        if(!Variables.isLocked){
 //        mSwipeView.lockViews();
-        mSwipeView.getBuilder()
-                .setWidthSwipeDistFactor(1f)
-                .setHeightSwipeDistFactor(1f);
-        Variables.isLocked = true;
+            mSwipeView.getBuilder()
+                    .setWidthSwipeDistFactor(1f)
+                    .setHeightSwipeDistFactor(1f);
+            Variables.isLocked = true;
+            Log.e(TAG,"Locking views");
+        }
     }
 
     private void unLockViews(){
-//        mSwipeView.unlockViews();
-        mSwipeView.getBuilder()
-                .setWidthSwipeDistFactor(10f)
-                .setHeightSwipeDistFactor(10f);
-        Variables.isLocked = false;
+        if(Variables.isLocked && !Variables.hasTimerStarted){
+            //        mSwipeView.unlockViews();
+            mSwipeView.getBuilder()
+                    .setWidthSwipeDistFactor(10f)
+                    .setHeightSwipeDistFactor(10f);
+            Variables.isLocked = false;
+            Log.e(TAG,"Unlocking views");
+        }
+
     }
 
 

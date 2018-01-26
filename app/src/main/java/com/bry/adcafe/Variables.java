@@ -72,7 +72,7 @@ public class Variables {
 
     public static int width;
     public static LinkedHashMap<Long,List> VariablesHashOfAds = new LinkedHashMap<>();
-    public static boolean isLocked;
+    public static boolean isLocked = false;
     public static boolean isAllClearToContinueCountDown = true;
     public static boolean hasFinishedLoadingBlurredImages = false;
     public static Advert firstAd;

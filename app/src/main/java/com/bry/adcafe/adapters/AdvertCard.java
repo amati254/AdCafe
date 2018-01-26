@@ -202,6 +202,7 @@ public class AdvertCard{
 
     private void loadOnlyLastAd(){
         Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
+        lockViews();
 //        MultiTransformation multi = new MultiTransformation(new BlurTransformation(mContext, 30));
         Glide.with(mContext).load(mImageBytes).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
@@ -447,19 +448,26 @@ public class AdvertCard{
     }
 
     private void lockViews(){
-//        mSwipeView.lockViews();
-        mSwipeView.getBuilder()
-                .setWidthSwipeDistFactor(1f)
-                .setHeightSwipeDistFactor(1f);
-        Variables.isLocked = true;
+        if(!Variables.isLocked){
+            //        mSwipeView.lockViews();
+            mSwipeView.getBuilder()
+                    .setWidthSwipeDistFactor(1f)
+                    .setHeightSwipeDistFactor(1f);
+            Variables.isLocked = true;
+            Log.e("AdvertCard","Locking views");
+        }
     }
 
     private void unLockViews(){
+        if(Variables.isLocked && !Variables.hasTimerStarted){
 //        mSwipeView.unlockViews();
-        mSwipeView.getBuilder()
-                .setWidthSwipeDistFactor(10f)
-                .setHeightSwipeDistFactor(10f);
-        Variables.isLocked = false;
+            mSwipeView.getBuilder()
+                    .setWidthSwipeDistFactor(10f)
+                    .setHeightSwipeDistFactor(10f);
+            Variables.isLocked = false;
+            Log.e("AdvertCard","Unlocking views");
+        }
+
     }
 
 
