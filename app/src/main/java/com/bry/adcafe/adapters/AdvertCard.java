@@ -100,7 +100,7 @@ public class AdvertCard{
         if(mLastOrNotLast.equals(Constants.NO_ADS)) loadAdPlaceHolderImage();
         else new LongOperationFI().execute("");
 
-       setListeners();
+        setListeners();
     }
 
     private void setListeners(){
@@ -118,6 +118,9 @@ public class AdvertCard{
 
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerStarted,
                 new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
+
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForSetImageForSharing,
+                new IntentFilter("SET_IMAGE_FOR_SHARING"+mAdvert.getPushRefInAdminConsole()));
     }
 
     private void setUpListOfBlurrs(){
@@ -279,6 +282,9 @@ public class AdvertCard{
 //        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
+
+
+
     @SwipeHead
     private void onSwipeHeadCard() {
         Log.d("EVENT----------", "onSwipeHeadCard");
@@ -316,6 +322,8 @@ public class AdvertCard{
     private boolean firstAd() {
        return mAdvert.getPushRefInAdminConsole().equals(Variables.firstAd.getPushRefInAdminConsole());
     }
+
+
 
 
     private void sendBroadcast(String message ) {
@@ -422,12 +430,22 @@ public class AdvertCard{
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnblurrImage);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToStartTimer);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerStarted);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForSetImageForSharing);
     }
 
     private BroadcastReceiver mMessageReceiverForUnblurrImage = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             profileImageView.setImageBitmap(bs);
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForSetImageForSharing = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Variables.imageToBeShared = mAdvert.getImageBitmap();
+            Intent intent2  = new Intent("TRY_SHARE_IMAGE_AGAIN");
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
         }
     };
 

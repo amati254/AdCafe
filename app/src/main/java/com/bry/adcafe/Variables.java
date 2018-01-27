@@ -1,5 +1,6 @@
 package com.bry.adcafe;
 
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.util.Log;
 
@@ -77,6 +78,8 @@ public class Variables {
     public static boolean hasFinishedLoadingBlurredImages = false;
     public static Advert firstAd;
     public static Point windowSize;
+
+    public static Bitmap imageToBeShared;
 
 
     public static void setNewNumberOfAds(int number){

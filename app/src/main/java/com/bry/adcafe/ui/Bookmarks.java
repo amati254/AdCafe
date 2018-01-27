@@ -94,6 +94,7 @@ public class Bookmarks extends AppCompatActivity {
     private boolean isSharing = false;
     private int iterations = 0;
     private int numberOfAdsLoaded = 0;
+    private boolean isLoadingAds = false;
 
 
     @Override
@@ -173,10 +174,12 @@ public class Bookmarks extends AppCompatActivity {
 
 
     private void showProg(){
+        isLoadingAds = true;
         mProg.show();
     }
 
     private void hideProg(){
+        isLoadingAds = false;
         mProg.dismiss();
     }
 
@@ -450,7 +453,7 @@ public class Bookmarks extends AppCompatActivity {
         mProg = new ProgressDialog(this,R.style.AppCompatAlertDialogStyle);
         mProg.setMessage("Loading your Pins...");
         mProg.setTitle("AdCafe.");
-        mProg.setCancelable(false);
+        mProg.setCancelable(true);
         mProg.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -459,10 +462,15 @@ public class Bookmarks extends AppCompatActivity {
         });
     }
 
-//    @Override
-//    public void onBackPressed(){
-//        finish();
-//    }
+    @Override
+    public void onBackPressed(){
+        if(isLoadingAds){
+            hideProg();
+            finish();
+        }else{
+            super.onBackPressed();
+        }
+    }
 
 
 

@@ -1,6 +1,7 @@
 package com.bry.adcafe.ui;
 
 import android.app.FragmentManager;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,6 +36,7 @@ public class Dashboard extends AppCompatActivity {
     private SliderPrefManager myPrefManager;
     private Button mUploadedAdsStats;
     private Context mContext;
+    private static int NOTIFICATION_ID2 = 1880;
 
 
     @Override
@@ -47,6 +49,12 @@ public class Dashboard extends AppCompatActivity {
         loadViews();
         setValues();
         setClickListeners();
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        try{
+            notificationManager.cancel(NOTIFICATION_ID2);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void setClickListeners() {

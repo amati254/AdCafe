@@ -86,7 +86,7 @@ public class ViewImageFragment extends DialogFragment {
             public void onClick(View v) {
                 if(!mAdvert.getWebsiteLink().equals(igsNein)){
                     try {
-                        String url = Variables.getCurrentAdvert().getWebsiteLink();
+                        String url = mAdvert.getWebsiteLink();
                         if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
                         Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                         startActivity(webIntent);

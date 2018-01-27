@@ -2,6 +2,7 @@ package com.bry.adcafe.ui;
 
 import android.app.AlarmManager;
 import android.app.FragmentManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -87,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = "MainActivity";
     public String NOTIFICATION_ID = "notification_id";
     public String NOTIFICATION = "notification";
+    private static int NOTIFICATION_ID2 = 1880;
     private LinearLayout mFailedToLoadLayout;
     private Button mRetryButton;
     private ImageButton mLogoutButton;
@@ -135,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean hasSentMessageThatBlurrsHaveFinished = false;
     private boolean hasShowedToastForNoMoreAds = false;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         registerReceivers();
         if (!Fabric.isInitialized()) Fabric.with(this, new Crashlytics());
         setUpAllTheViews();
-
+        Variables.isLocked = false;
         if(!isOnline()){
             mAvi.smoothToHide();
             mLoadingText.setVisibility(View.GONE);
@@ -158,7 +161,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         logUser();
 
         mAviLoadingMoreAds.hide();
-
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        try{
+            notificationManager.cancel(NOTIFICATION_ID2);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 
@@ -680,6 +688,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForOnSwiped);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnhideVeiws);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForContinueShareImage);
 
         sendBroadcastToUnregisterAllReceivers();
     }
@@ -688,6 +697,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent(Constants.UNREGISTER_ALL_RECEIVERS);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
+
 
 
 
@@ -927,16 +937,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void registerReceivers() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences, new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline, new IntentFilter(Constants.CONNECTION_OFFLINE));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline, new IntentFilter(Constants.CONNECTION_ONLINE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,
+                new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,
+                new IntentFilter(Constants.CONNECTION_OFFLINE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,
+                new IntentFilter(Constants.CONNECTION_ONLINE));
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLastAd, new IntentFilter(Constants.LAST));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLoadMoreAds, new IntentFilter(Constants.LOAD_MORE_ADS));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForTimerHasStarted, new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForOnSwiped, new IntentFilter("SWIPED"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnhideVeiws, new IntentFilter("BLUREDIMAGESDONE"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLastAd,
+                new IntentFilter(Constants.LAST));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLoadMoreAds,
+                new IntentFilter(Constants.LOAD_MORE_ADS));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForTimerHasStarted,
+                new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
+
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForOnSwiped,
+                new IntentFilter("SWIPED"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnhideVeiws,
+                new IntentFilter("BLUREDIMAGESDONE"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForContinueShareImage,
+                new IntentFilter("TRY_SHARE_IMAGE_AGAIN"));
 
     }
 
@@ -1277,23 +1299,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-//                    if(Variables.getCurrentAdNumberForAllAdsList()+1<Variables.getSizeOfAdlist()){
-//                        if(Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList()+1)
-//                                .getNatureOfBanner().equals(Constants.IS_ANNOUNCEMENT)){
-//                            findViewById(R.id.WebsiteIcon).setAlpha(0.3f);
-//                            findViewById(R.id.websiteText).setAlpha(0.3f);
-//                            findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
-//
-//                            findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
-//                            findViewById(R.id.reportBtn).setAlpha(0.3f);
-//                            isSeingNormalAds = false;
-//                            onclicks();
-//                        }
-//                    }
                     isSeingNormalAds = false;
                     onclicks();
-//                    Intent intent = new Intent("UNBLURR_IMAGE"+Variables.getCurrentAdvert().getPushRefInAdminConsole());
-//                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                 }
             }, 300);
 
@@ -1307,6 +1314,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                Variables.nextSubscriptionIndex += 1;
                 loadMoreAds();
             }
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForContinueShareImage = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            startShareImage2();
         }
     };
 
@@ -1912,13 +1926,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             try{
                 int number = Variables.hasTimerStarted ? Variables.getCurrentAdNumberForAllAdsList()
                         : Variables.getCurrentAdNumberForAllAdsList() - 1;
-
                 Bitmap image = decodeFromFirebaseBase64(Variables.getAdFromVariablesAdList
                         (number).getImageUrl());
                 shareImage(image);
             }catch (Exception e){
                 e.printStackTrace();
+                Intent intent  = new Intent("SET_IMAGE_FOR_SHARING"+Variables.getCurrentAdvert().getPushRefInAdminConsole());
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }
+        }
+    }
+
+    private void startShareImage2(){
+        Bitmap imageBm = Variables.imageToBeShared;
+        try{
+            shareImage(imageBm);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

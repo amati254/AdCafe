@@ -70,6 +70,7 @@ public class SavedAdsCard {
     private SavedAdsCard sac;
     private boolean mIsLastElement;
     private byte[] mImageBytes;
+    private Bitmap bs;
     private boolean hasLoaded =false;
 
     private boolean isLoadingImageFromFirebase = false;
@@ -86,7 +87,7 @@ public class SavedAdsCard {
 
     @Resolve
     private void onResolved() {
-        if(mImageBytes!=null) loadImage2();
+        if(bs!=null) imageView.setImageBitmap(bs);
         else new LongOperationFI().execute("");
 
         if(mImageBytes==null)loadListeners();
@@ -98,18 +99,6 @@ public class SavedAdsCard {
                 new IntentFilter("UNREGISTER"));
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForAddNewBlank,
                 new IntentFilter("ADD_BLANK"+noOfDaysDate+mAdvert.getPushId()));
-    }
-
-    private void setImage() {
-        try {
-            Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
-            Log.d("SavedAdsCard---", "Image has been converted to bitmap.");
-            mImageBytes = bitmapToByte(getResizedBitmap(bm, 350));
-            mAdvert.setImageBitmap(bm);
-            isLoadingImageFromFirebase = false;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void doNothing() {
@@ -128,19 +117,39 @@ public class SavedAdsCard {
         adRef2.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String image = dataSnapshot.getValue(String.class);
-                if(image!=null)Log.d("SavedAdsCard","String of image has been loaded from firebase");
-                mAdvert.setImageUrl(image);
-                Log.d("SavedAdsCard","Now running the setImage method");
-                setImage();
+                if(dataSnapshot.exists()){
+                    String image = dataSnapshot.getValue(String.class);
+                    if(image!=null)Log.d("SavedAdsCard","String of image has been loaded from firebase");
+                    mAdvert.setImageUrl(image);
+                    Log.d("SavedAdsCard","Now running the setImage method");
+                    setImage();
+                }else{
+                    isLoadingImageFromFirebase = false;
+                }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.e("SavedAdsCard","Something went wrong while loading image from firebase : "+databaseError.getDetails());
             }
         });
     }
+
+    private void setImage() {
+        try {
+            Bitmap bm = decodeFromFirebaseBase64(mAdvert.getImageUrl());
+            Log.d("SavedAdsCard---", "Image has been converted to bitmap.");
+            bs = getResizedBitmap(bm, 350);
+            mImageBytes = bitmapToByte(bs);
+            mAdvert.setImageBitmap(bm);
+            isLoadingImageFromFirebase = false;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
 
     private void loadImage2(){
         Glide.with(mContext).load(mImageBytes).listener(new RequestListener<byte[], GlideDrawable>() {
@@ -223,6 +232,9 @@ public class SavedAdsCard {
         }).into(imageView);
     }
 
+
+
+
     private BroadcastReceiver mMessageReceiverToUnregisterAllReceivers = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -258,6 +270,9 @@ public class SavedAdsCard {
         }
     };
 
+
+
+
     private void unregisterAllReceivers(){
         try{LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
         }catch (Exception e){
@@ -269,7 +284,8 @@ public class SavedAdsCard {
 
     @LongClick(R.id.SavedImageView)
     private void onLongClick(){
-        if(hasLoaded) promptUserIfSureToUnpinAd();
+//        if(hasLoaded)
+            promptUserIfSureToUnpinAd();
     }
 
     @Click(R.id.SavedImageView)
@@ -290,6 +306,9 @@ public class SavedAdsCard {
             }, 300);
         }
     }
+
+
+
 
     private void promptUserIfSureToUnpinAd(){
         if(isNetworkConnected(mContext)){
@@ -328,13 +347,16 @@ public class SavedAdsCard {
                 }
                 isBeingShared = false;
             }
-        }, 30);
+        }, 3);
     }
 
     private void setUpReceiver(){
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin
                 ,new IntentFilter(mAdvert.getPushRefInAdminConsole()));
     }
+
+
+
 
     private void removeReceiver(){
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnpin);
@@ -350,8 +372,6 @@ public class SavedAdsCard {
 
     }
 
-
-
     private boolean isInternetAvailable() {
         try {
             InetAddress ipAddr = InetAddress.getByName("google.com");
@@ -361,6 +381,8 @@ public class SavedAdsCard {
         }
 
     }
+
+
 
 
     private void unPin(){
@@ -447,6 +469,9 @@ public class SavedAdsCard {
         return byteArray;
     }
 
+
+
+
     private static Bitmap decodeFromFirebaseBase64(String image) throws IOException {
         byte[] decodedByteArray = android.util.Base64.decode(image, Base64.DEFAULT);
         Bitmap bitm = BitmapFactory.decodeByteArray(decodedByteArray, 0, decodedByteArray.length);
@@ -507,16 +532,7 @@ public class SavedAdsCard {
 
         @Override
         protected String doInBackground(String... strings) {
-            if(mAdvert.getImageUrl()!=null){
-                Log.d("SavedAdsCard","Image is null");
-                try{
-                    setImage();
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }else{
-                loadImageFromFirebaseFirst();
-            }
+            loadImageFromFirebaseFirst();
             while(isLoadingImageFromFirebase){
                 doNothing();
             }
@@ -527,9 +543,9 @@ public class SavedAdsCard {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             if(mImageBytes!=null) loadImage2();
-            if(mIsLastElement){
-//                Intent intent = new Intent("DONE!!");
-//                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            else{
+                mAvi.setVisibility(android.view.View.GONE);
+                errorImageView.setVisibility(android.view.View.VISIBLE);
             }
         }
 
