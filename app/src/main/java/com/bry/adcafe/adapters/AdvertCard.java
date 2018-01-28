@@ -789,8 +789,8 @@ public class AdvertCard{
         @Override
         protected String doInBackground(String... strings) {
             Log.d("Card","Doing in background");
-            float scale = 2f;
-            Bitmap bm = getResizedBitmap(bs,250);
+            float scale = 1.5f;
+            Bitmap bm = bs;
             for(int i = 0;i<3;i++){
                 if(i>=positionBL) blurredImageList.set(i,fastblur(bm,scale,(i+2)));
             }
