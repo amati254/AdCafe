@@ -79,7 +79,7 @@ public class Variables {
     public static Advert firstAd;
     public static Point windowSize;
 
-    public static Bitmap imageToBeShared;
+    public static String imageToBeShared;
 
 
     public static void setNewNumberOfAds(int number){

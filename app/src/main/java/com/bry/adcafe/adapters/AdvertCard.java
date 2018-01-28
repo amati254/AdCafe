@@ -443,7 +443,7 @@ public class AdvertCard{
     private BroadcastReceiver mMessageReceiverForSetImageForSharing = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Variables.imageToBeShared = mAdvert.getImageBitmap();
+            Variables.imageToBeShared = mAdvert.getImageUrl();
             Intent intent2  = new Intent("TRY_SHARE_IMAGE_AGAIN");
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
         }

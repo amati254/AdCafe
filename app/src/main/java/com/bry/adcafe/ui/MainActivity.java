@@ -1311,7 +1311,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!mIsBeingReset && !isLoadingMoreAds && Variables.nextSubscriptionIndex + 1 < Variables.Subscriptions.size()) {
-//                Variables.nextSubscriptionIndex += 1;
                 loadMoreAds();
             }
         }
@@ -1921,8 +1920,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }catch (Exception e){
                 e.printStackTrace();
             }
-        }
-        else{
+        }else{
             try{
                 int number = Variables.hasTimerStarted ? Variables.getCurrentAdNumberForAllAdsList()
                         : Variables.getCurrentAdNumberForAllAdsList() - 1;
@@ -1938,8 +1936,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startShareImage2(){
-        Bitmap imageBm = Variables.imageToBeShared;
         try{
+            Bitmap imageBm = decodeFromFirebaseBase64(Variables.imageToBeShared);
             shareImage(imageBm);
         }catch (Exception e){
             e.printStackTrace();
