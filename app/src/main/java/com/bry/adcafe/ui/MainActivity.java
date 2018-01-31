@@ -969,7 +969,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (Variables.mIsLastOrNotLast.equals(Constants.NOT_LAST) || Variables.mIsLastOrNotLast.equals(Constants.LAST) && isSeingNormalAds) {
+                    if (Variables.mIsLastOrNotLast.equals(Constants.NOT_LAST) ||
+                            Variables.mIsLastOrNotLast.equals(Constants.LAST) && Variables.isNormalAdsBeingSeen) {
                         if (!Variables.hasBeenPinned) {
                             Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
                                     Snackbar.LENGTH_SHORT).show();

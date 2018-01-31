@@ -305,6 +305,7 @@ public class AdvertCard{
                 Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
                 lockViews();
             }
+            Variables.isNormalAdsBeingSeen = false;
             setBottomButtonsToBeTranslucent();
             Intent intent = new Intent("SWIPED");
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -789,7 +790,7 @@ public class AdvertCard{
         @Override
         protected String doInBackground(String... strings) {
             Log.d("Card","Doing in background");
-            float scale = 1.5f;
+            float scale = 0.6f;
             Bitmap bm = bs;
             for(int i = 0;i<3;i++){
                 if(i>=positionBL) blurredImageList.set(i,fastblur(bm,scale,(i+2)));

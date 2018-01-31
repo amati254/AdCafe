@@ -80,6 +80,8 @@ public class Variables {
     public static Point windowSize;
 
     public static String imageToBeShared;
+    public static int numberOfUnpinns = 0;
+    public static boolean isNormalAdsBeingSeen = true;
 
 
     public static void setNewNumberOfAds(int number){

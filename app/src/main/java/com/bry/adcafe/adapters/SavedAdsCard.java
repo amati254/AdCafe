@@ -284,8 +284,7 @@ public class SavedAdsCard {
 
     @LongClick(R.id.SavedImageView)
     private void onLongClick(){
-//        if(hasLoaded)
-            promptUserIfSureToUnpinAd();
+        promptUserIfSureToUnpinAd();
     }
 
     @Click(R.id.SavedImageView)
@@ -318,6 +317,7 @@ public class SavedAdsCard {
             Variables.position = mPlaceHolderView.getViewResolverPosition(this);
             Intent intent = new Intent("ARE_YOU_SURE2");
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+
             LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForUnpin2
                     ,new IntentFilter(mAdvert.getPushRefInAdminConsole()));
         }else{

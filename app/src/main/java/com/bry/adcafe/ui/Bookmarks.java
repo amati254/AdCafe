@@ -96,6 +96,8 @@ public class Bookmarks extends AppCompatActivity {
     private int numberOfAdsLoaded = 0;
     private boolean isLoadingAds = false;
 
+    private int iterationsFofUnpined = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -334,9 +336,14 @@ public class Bookmarks extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("BOOKMARKS--","Message received to show toast for unpin action");
-            Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.unpinned,
-                    Snackbar.LENGTH_SHORT).show();
-            mAuthProgressDialog.dismiss();
+//            iterationsFofUnpined++;
+//            if(iterationsFofUnpined==Variables.numberOfUnpinns){
+                Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.unpinned,
+                        Snackbar.LENGTH_SHORT).show();
+                mAuthProgressDialog.dismiss();
+                iterationsFofUnpined = 0;
+                Variables.numberOfUnpinns = 0;
+//            }
         }
     };
 
