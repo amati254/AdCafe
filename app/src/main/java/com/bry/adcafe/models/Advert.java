@@ -35,6 +35,7 @@ public class Advert {
     private boolean hasBeenReimbursed;
     private int dateInDays;
     private String natureOfBanner;
+    private int amountToPayPerTargetedView;
 
     public Advert(String ImageUrl){
         this.imageUrl = ImageUrl;
@@ -190,5 +191,13 @@ public class Advert {
 
     public void setNatureOfBanner(String natureOfBanner) {
         this.natureOfBanner = natureOfBanner;
+    }
+
+    public int getAmountToPayPerTargetedView() {
+        return amountToPayPerTargetedView;
+    }
+
+    public void setAmountToPayPerTargetedView(int amountToPayPerTargetedView) {
+        this.amountToPayPerTargetedView = amountToPayPerTargetedView;
     }
 }

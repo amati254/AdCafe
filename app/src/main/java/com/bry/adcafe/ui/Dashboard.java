@@ -57,6 +57,12 @@ public class Dashboard extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        setValues();
+    }
+
     private void setClickListeners() {
         mInfoImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,20 +150,25 @@ public class Dashboard extends AppCompatActivity {
     private void setValues() {
         int todaysTotals;
         int monthsTotals;
+        int reimbursementTotals;
         if(Variables.getMonthAdTotals(mKey) ==0) {
             SharedPreferences prefs = getSharedPreferences("TodayTotals", MODE_PRIVATE);
             todaysTotals = prefs.getInt("TodaysTotals", 0);
 
             SharedPreferences prefs2 = getSharedPreferences("MonthTotals", MODE_PRIVATE);
             monthsTotals = prefs2.getInt("MonthsTotals", 0);
+
+            SharedPreferences prefs3 = getSharedPreferences("ReimbursementTotals", MODE_PRIVATE);
+            reimbursementTotals = prefs3.getInt(Constants.REIMBURSEMENT_TOTALS, 0);
         }else{
             todaysTotals = Variables.getAdTotal(mKey);
-            monthsTotals =Variables.getMonthAdTotals(mKey);
+            monthsTotals = Variables.getMonthAdTotals(mKey);
+            reimbursementTotals = Variables.getTotalReimbursementAmount();
         }
         mTotalAdsSeenToday.setText(Integer.toString(todaysTotals));
         mTotalAdsSeenAllTime.setText(Integer.toString(monthsTotals));
         int totalAmounts = (int)(monthsTotals*Constants.CONSTANT_AMMOUNT_FOR_USER);
-        mAmmountNumber.setText(Integer.toString(totalAmounts));
+        mAmmountNumber.setText(Integer.toString(reimbursementTotals));
     }
 
     @Override

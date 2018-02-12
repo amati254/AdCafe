@@ -80,7 +80,7 @@ public class MyAdStatsItem {
         }
 
         int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen();
-        int ammountToBeRepaid = (int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+        int ammountToBeRepaid = (int)(numberOfUsersWhoDidntSeeAd*mAdvert.getAmountToPayPerTargetedView());
         String number = Integer.toString(ammountToBeRepaid);
 
         mAmountToReimburse.setText("Reimbursing amount: "+number+" Ksh");
@@ -152,7 +152,7 @@ public class MyAdStatsItem {
                 mAdvert.setNumberOfTimesSeen(newValue);
                 mUsersReachedSoFar.setText("Users reached so far : "+newValue);
                 int numberOfUsersWhoDidntSeeAd = mAdvert.getNumberOfUsersToReach()- newValue;
-                int ammountToBeRepaid = (int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+                int ammountToBeRepaid = (int)(numberOfUsersWhoDidntSeeAd*mAdvert.getAmountToPayPerTargetedView());
                 String number = Integer.toString(ammountToBeRepaid);
                 mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
             }catch (Exception e){
@@ -169,7 +169,7 @@ public class MyAdStatsItem {
                     }else{
                         mHasBeenReimbursed.setText("Status: NOT Reimbursed.");
                         int numberOfUsersWhoDidntSeeAd = (mAdvert.getNumberOfUsersToReach()- mAdvert.getNumberOfTimesSeen());
-                        int ammountToBeRepaid = (int)(numberOfUsersWhoDidntSeeAd*Constants.CONSTANT_AMOUNT_PER_AD);
+                        int ammountToBeRepaid = (int)(numberOfUsersWhoDidntSeeAd*mAdvert.getAmountToPayPerTargetedView());
                         String number = Integer.toString(ammountToBeRepaid);
                         mAmountToReimburse.setText("Amount to be reimbursed : "+number+" Ksh");
                     }

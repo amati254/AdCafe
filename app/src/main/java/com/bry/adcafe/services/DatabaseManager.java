@@ -49,6 +49,7 @@ public class DatabaseManager {
     private Context context;
     private List<String> categoryList = new ArrayList<>();
     private boolean isUserAddingANewCategory = false;
+    private int iterationsForResettingCPV = 0;
 
     ////Create user methods//////
 
@@ -61,6 +62,15 @@ public class DatabaseManager {
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
         adRef.setValue(0);
+
+        //Creates node for totals amount earned so far and sets it to 0;
+        DatabaseReference adRef9 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.REIMBURSEMENT_TOTALS);
+        adRef9.setValue(0);
+
+        DatabaseReference adRef10 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.RESET_ALL_SUBS_BOOLEAN);
+        adRef10.setValue(false);
 
         //Creates node for indicating users email.
         DatabaseReference adRef8 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
@@ -104,7 +114,8 @@ public class DatabaseManager {
 
     private void FlagSubscriptionThenUnsubscribeUser(final String AdvertCategory, final int clusterIDInCategory){
         Log.d(TAG,"Unsubscribing user from cluster "+ AdvertCategory);
-        DatabaseReference dbRef =FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS).child(AdvertCategory);
+        DatabaseReference dbRef =FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS)
+                .child(Integer.toString(Variables.constantAmountPerView)).child(AdvertCategory);
         DatabaseReference dbref = dbRef.push();
         dbref.setValue(clusterIDInCategory).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -118,8 +129,10 @@ public class DatabaseManager {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         Log.d(TAG,"Removing user from subscription");
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
-                .child(Constants.CLUSTERS_LIST).child(AdvertCategory).child(Integer.toString(Cluster)).child(uid);
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST)
+                .child(Integer.toString(Variables.constantAmountPerView))
+                .child(AdvertCategory)
+                .child(Integer.toString(Cluster)).child(uid);
         dbRef.removeValue();
 
         Log.d(TAG,"Removing category "+AdvertCategory+" from users categories list.");
@@ -129,7 +142,10 @@ public class DatabaseManager {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(getPositionOf(AdvertCategory)==Variables.getCurrentSubscriptionIndex()){
-                 Variables.setCurrentSubscriptionIndex(Variables.getCurrentSubscriptionIndex()-1);
+                    Log.d(TAG,"The category being removed is currently being viewed");
+                    if(Variables.getCurrentSubscriptionIndex()>0)
+                        Variables.setCurrentSubscriptionIndex((Variables.getCurrentSubscriptionIndex()-1));
+                    else Variables.setCurrentSubscriptionIndex((Variables.getCurrentSubscriptionIndex()+1));
                 }
                 String categoryBeingViewed = getSubscriptionValue(Variables.getCurrentSubscriptionIndex());
                 Log.d(TAG,"the current category being removed is "+categoryBeingViewed);
@@ -161,10 +177,19 @@ public class DatabaseManager {
 
     public void setUpUserSubscriptions(List<String> subscriptions){
         numberOfSubs = subscriptions.size();
+        setUsersPreferredChargePerView();
         Variables.Subscriptions.clear();
         for(String sub:subscriptions){
             generateClusterIDFromCategoryFlaggedClusters(sub);
         }
+    }
+
+    private void setUsersPreferredChargePerView(){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.CONSTANT_AMMOUNT_PER_VIEW);
+        adRef.setValue(Variables.constantAmountPerView);
     }
 
 
@@ -175,7 +200,8 @@ public class DatabaseManager {
         Variables.setAdTotal(0,mKey);
         Log.d(TAG,"--Generating clusterID from flagged ads.");
 
-        DatabaseReference dbRef =FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS).child(AdvertCategory);
+        DatabaseReference dbRef =FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS)
+                .child(Integer.toString(Variables.constantAmountPerView)).child(AdvertCategory);
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -206,7 +232,8 @@ public class DatabaseManager {
         String uid = user.getUid();
 
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
-                .child(Constants.CLUSTERS_LIST).child(AdvertCategory);
+                .child(Constants.CLUSTERS_LIST).child(Integer.toString(Variables.constantAmountPerView))
+                .child(AdvertCategory);
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -252,7 +279,8 @@ public class DatabaseManager {
     }
 
     private void removeIdThenSubscribeUser(String key, final String AdvertCategory, final int clusterIDInCategory) {
-        DatabaseReference dbr = FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS).child(AdvertCategory).child(key);
+        DatabaseReference dbr = FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS)
+                .child(Integer.toString(Variables.constantAmountPerView)).child(AdvertCategory).child(key);
         dbr.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
@@ -267,7 +295,9 @@ public class DatabaseManager {
 
         //this subscribes user to Cluster in Advert Category
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
-                .child(Constants.CLUSTERS_LIST).child(AdvertCategory).child(Integer.toString(Cluster)).child(uid);
+                .child(Constants.CLUSTERS_LIST).child(Integer.toString(Variables.constantAmountPerView))
+                .child(AdvertCategory)
+                .child(Integer.toString(Cluster)).child(uid);
         dbRef.setValue(uid);
 
         //this ads the advertCategory subscribed to by user to user space
@@ -346,6 +376,20 @@ public class DatabaseManager {
                 Variables.setMonthAdTotals(mKey,monthTotal);
                 Log.d(TAG,"Setting month total to : "+monthTotal);
 
+                //this loads the users reimbursement totals.
+                DataSnapshot reimbursementAmountSnap = dataSnapshot.child(Constants.REIMBURSEMENT_TOTALS);
+                int reimbursementAmount = reimbursementAmountSnap.getValue(int.class);
+                Variables.setTotalReimbursementAmount(reimbursementAmount);
+                Log.d(TAG,"Setting reimbursement total to : "+reimbursementAmount);
+
+                //this loads the users preferred amount per ad view.
+                DataSnapshot amountPerViewSnap = dataSnapshot.child(Constants.CONSTANT_AMMOUNT_PER_VIEW);
+                if(amountPerViewSnap.exists()){
+                    int amountPerView = amountPerViewSnap.getValue(int.class);
+                    Variables.constantAmountPerView = amountPerView;
+                    Log.d(TAG,"Setting the amount per ad to total to : "+amountPerView);
+                }
+
                 //this loads the users no Of Categories known
                 DataSnapshot subNoKnown = dataSnapshot.child(Constants.NO_OF_CATEGORIES_KNOWN);
                 int subNumberKnown = subNoKnown.getValue(int.class);
@@ -375,6 +419,7 @@ public class DatabaseManager {
                 String date = dateSnap.getValue(String.class);
                 Log.d(TAG,"Date gotten from firebase is : "+date);
                 setDateInSharedPrefs(getDate(),mContext);
+                boolean isNewDay = false;
 
                 if(date.equals(getDate())){
                     Log.d(TAG,"---Date in firebase matches date in system,thus User was last online today");
@@ -407,10 +452,20 @@ public class DatabaseManager {
                     Variables.setCurrentSubscriptionIndex(0);
                     Variables.setCurrentAdInSubscription(0);
                     resetTotalsInFirebase();
+                    isNewDay = true;
                 }
-                setUserDataInSharedPrefs(mContext);
-                Intent intent = new Intent(Constants.LOADED_USER_DATA_SUCCESSFULLY);
-                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                DataSnapshot isNeedToResetSubsSnap = dataSnapshot.child(Constants.RESET_ALL_SUBS_BOOLEAN);
+                if(isNewDay && isNeedToResetSubsSnap.getValue(Boolean.class)){
+                    DataSnapshot newConstantCPVSnap = dataSnapshot.child(Constants.NEW_CPV);
+                    int newConstantCPV = newConstantCPVSnap.getValue(Integer.class);
+                    int oldConstantCPV = Variables.constantAmountPerView;
+                    resetUsersSubscriptionsForNewPrice(oldConstantCPV,newConstantCPV);
+                }else{
+                    setUserDataInSharedPrefs(mContext);
+                    Intent intent = new Intent(Constants.LOADED_USER_DATA_SUCCESSFULLY);
+                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                }
+
             }
 
             @Override
@@ -487,6 +542,20 @@ public class DatabaseManager {
         editor2.putInt("MonthsTotals", Variables.getMonthAdTotals(mKey));
         Log.d("DatabaseManager--", "Setting the month totals in shared preferences - " + Integer.toString(Variables.getMonthAdTotals(mKey)));
         editor2.apply();
+
+        SharedPreferences pref3 = context.getSharedPreferences("ReimbursementTotals",MODE_PRIVATE);
+        SharedPreferences.Editor editor3 = pref3.edit();
+        editor3.clear();
+        editor3.putInt(Constants.REIMBURSEMENT_TOTALS,Variables.getTotalReimbursementAmount());
+        Log.d("DatabaseManager","Setting the Reimbursement totals in shared preferences - "+Integer.toString(Variables.getTotalReimbursementAmount()));
+        editor3.apply();
+
+        SharedPreferences pref4 = context.getSharedPreferences(Constants.CONSTANT_AMMOUNT_PER_VIEW,MODE_PRIVATE);
+        SharedPreferences.Editor editor4 = pref4.edit();
+        editor4.clear();
+        editor4.putInt(Constants.CONSTANT_AMMOUNT_PER_VIEW,Variables.constantAmountPerView);
+        Log.d("DatabaseManager","Setting the constant amount per view in shared preferences - "+Integer.toString(Variables.constantAmountPerView));
+        editor4.apply();
 
         setSubsInSharedPrefs(context);
     }
@@ -578,6 +647,248 @@ public class DatabaseManager {
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+    }
+
+
+    //called in main activity
+    public void checkIfNeedToResetUsersSubscriptions(final Context myContext){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid);
+        adRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                DataSnapshot isNeedToResetSubsSnap = dataSnapshot.child(Constants.RESET_ALL_SUBS_BOOLEAN);
+                if(isNeedToResetSubsSnap.getValue(Boolean.class)){
+                    DataSnapshot newConstantCPVSnap = dataSnapshot.child(Constants.NEW_CPV);
+                    int newConstantCPV = newConstantCPVSnap.getValue(Integer.class);
+                    int oldConstantCPV = Variables.constantAmountPerView;
+                    resetUsersSubscriptionsForNewPrice(oldConstantCPV,newConstantCPV);
+                }else{
+                    setUserDataInSharedPrefs(myContext);
+                    Intent intent = new Intent(Constants.LOADED_USER_DATA_SUCCESSFULLY);
+                    LocalBroadcastManager.getInstance(myContext).sendBroadcast(intent);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void resetUsersSubscriptionsForNewPrice(int oldConstant, int newConstant){
+        for(String AdvertCategory: Variables.Subscriptions.keySet()){
+            int clusterIDInCategory = Variables.Subscriptions.get(AdvertCategory);
+            removeSpecificCategoryForResettingNewPrice(newConstant,oldConstant,AdvertCategory,clusterIDInCategory);
+        }
+    }
+
+    //This will flag the category first...
+    private void removeSpecificCategoryForResettingNewPrice(final int newConstant,final int oldConstant, final String AdvertCategory, final int clusterIDInCategory){
+        Log.d(TAG,"Unsubscribing user from cluster "+ AdvertCategory);
+        DatabaseReference dbRef =FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS)
+                .child(Integer.toString(oldConstant)).child(AdvertCategory);
+        DatabaseReference dbref = dbRef.push();
+        dbref.setValue(clusterIDInCategory).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                removeSpecificAdCategryFromUserSpaceAndSubscriptionsForReset(newConstant,oldConstant,AdvertCategory,clusterIDInCategory);
+            }
+        });
+    }
+
+    //this then removes from cluster and users cluster list...
+    private void removeSpecificAdCategryFromUserSpaceAndSubscriptionsForReset(final int newConstant, final int oldConstant, final String AdvertCategory, int Cluster) {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        Log.d(TAG,"Removing user from subscription");
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST)
+                .child(Integer.toString(oldConstant))
+                .child(AdvertCategory)
+                .child(Integer.toString(Cluster)).child(uid);
+        dbRef.removeValue();
+
+        Log.d(TAG,"Removing category "+AdvertCategory+" from users categories list.");
+        DatabaseReference dbRefUser = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.SUBSCRIPTION_lIST).child(AdvertCategory);
+        dbRefUser.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+               iterationsForResettingCPV++;
+               if(iterationsForResettingCPV==Variables.Subscriptions.size()){
+                   startResubscriptionForAllUsersSubscriptions(newConstant);
+               }
+            }
+        });
+    }
+
+
+
+
+    //this will start resubscription for users subscriptions
+    private void startResubscriptionForAllUsersSubscriptions(final int newConstant) {
+        List<String> subList = new ArrayList<>();
+        subList.addAll(Variables.Subscriptions.keySet());
+        setUpUsersNewSubList(subList,newConstant);
+    }
+
+    private void setUpUsersNewSubList(List<String> subscriptions, int newConstant){
+        numberOfSubs = subscriptions.size();
+        iterations = 0;
+        Variables.Subscriptions.clear();
+        for(String sub:subscriptions){
+            generateClusterIDFromCategoryFlaggedClustersForCategroyReset(sub,newConstant);
+        }
+    }
+
+    private void generateClusterIDFromCategoryFlaggedClustersForCategroyReset(final String AdvertCategory,final int newConstant) {
+        DatabaseReference dbRef =FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS)
+                .child(Integer.toString(newConstant)).child(AdvertCategory);
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()){
+                    Log.d(TAG,"Flagged clusters has got children in it.");
+                    for(DataSnapshot snap: dataSnapshot.getChildren()){
+                        int clusterIDInCategory = snap.getValue(int.class);
+                        Log.d(TAG,"Cluster id gotten from Flagged cluster is --"+clusterIDInCategory);
+                        removeIdThenSubscribeUserForCategoryReset(newConstant,snap.getKey(),AdvertCategory,clusterIDInCategory);
+                        break;
+                    }
+                }else{
+                    Log.d(TAG,"--Flagged cluster in Category has got no children in it. Generating normally");
+                    generateClusterIDFromCategoryForCategoryReset(newConstant,AdvertCategory);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void generateClusterIDFromCategoryForCategoryReset(final int newConstant, final String AdvertCategory) {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
+                .child(Constants.CLUSTERS_LIST).child(Integer.toString(newConstant))
+                .child(AdvertCategory);
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //This loads the current cluster in AdCategory
+                long currentCluster;
+                if(dataSnapshot.getChildrenCount() == 0){
+                    currentCluster = 1;
+                    Log.d(TAG,"The adCategory is empty.Setting current cluster to 1");
+                }else{
+                    currentCluster = dataSnapshot.getChildrenCount();
+                    Log.d(TAG,"The latest current cluster in "+AdvertCategory+" category is :"+currentCluster);
+                }
+
+                //this loads number of users in the current cluster.
+                DataSnapshot UsersInCurrentCluster = dataSnapshot.child(Long.toString(currentCluster));
+                long numberOfUsersInCurrentCluster;
+                if(UsersInCurrentCluster.getChildrenCount()==0){
+                    numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount();
+                    Log.d(TAG,"--number of users in current clusters category is --"+numberOfUsersInCurrentCluster);
+                }else{
+                    numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount()+1;
+                    Log.d(TAG,"--number of users in current clusters category is --"+numberOfUsersInCurrentCluster);
+                }
+
+                //this checks if the number of users in cluster exceeds limit
+                int clusterIDForSpecificCategory;
+                if(numberOfUsersInCurrentCluster<1000){
+                    Log.d(TAG,"--Number of users in the current cluster is less than limit.setting AdCategory cluster to --"+currentCluster);
+                    clusterIDForSpecificCategory = (int)currentCluster;
+                }else {
+                    Log.d(TAG, "--Number of users in the current cluster exceeds limit.setting AdCategory cluster to --" + (currentCluster + 1));
+                    clusterIDForSpecificCategory = (int)currentCluster+1;
+                }
+                subscribeUserToAdvertCategoryAndAddCategoryToUserListForCategoryReset(newConstant,AdvertCategory,clusterIDForSpecificCategory);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void removeIdThenSubscribeUserForCategoryReset(final int newConstant, String key, final String AdvertCategory, final int clusterIDInCategory) {
+        DatabaseReference dbr = FirebaseDatabase.getInstance().getReference(Constants.FLAGGED_CLUSTERS)
+                .child(Integer.toString(newConstant)).child(AdvertCategory).child(key);
+        dbr.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG,"---Removed ClusterId From Flagged Clusters. Subscribing user to AdCategory.");
+                subscribeUserToAdvertCategoryAndAddCategoryToUserListForCategoryReset(newConstant,AdvertCategory,clusterIDInCategory);
+            }
+        });
+    }
+
+    private void subscribeUserToAdvertCategoryAndAddCategoryToUserListForCategoryReset(final int newConstant, String AdvertCategory, int Cluster) {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        //this subscribes user to Cluster in Advert Category
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
+                .child(Constants.CLUSTERS_LIST).child(Integer.toString(newConstant))
+                .child(AdvertCategory)
+                .child(Integer.toString(Cluster)).child(uid);
+        dbRef.setValue(uid);
+
+        //this ads the advertCategory subscribed to by user to user space
+        DatabaseReference dbRefUser = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.SUBSCRIPTION_lIST).child(AdvertCategory);
+        dbRefUser.setValue(Cluster).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                iterations++;
+                if(iterations == numberOfSubs){
+                    Intent intent = new Intent(Constants.LOADED_USER_DATA_SUCCESSFULLY);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    setDateInSharedPrefs(getDate(),context);
+                    setUserDataInSharedPrefs(context);
+                    Variables.constantAmountPerView = newConstant;
+                    setNewConstantAsConstantInDatabase();
+                }
+            }
+        });
+        Variables.Subscriptions.put(AdvertCategory,Cluster);
+    }
+
+    private void setNewConstantAsConstantInDatabase() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        setUsersPreferredChargePerView();
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.RESET_ALL_SUBS_BOOLEAN);
+        adRef.setValue(false);
+
+        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.NEW_CPV);
+        adRef2.setValue(Variables.constantAmountPerView);
+    }
+
+
+    private void setBooleanForResetSubscriptions(int newValue, final Context myContext){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.RESET_ALL_SUBS_BOOLEAN);
+        adRef.setValue(true);
+
+        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.NEW_CPV);
+        adRef2.setValue(newValue).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Intent intent = new Intent(Constants.FINISHED_SETUP_FOR_RESETTING_SUBS);
+                LocalBroadcastManager.getInstance(myContext).sendBroadcast(intent);
             }
         });
     }

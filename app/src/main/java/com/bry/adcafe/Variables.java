@@ -24,6 +24,7 @@ public class Variables {
 
     private static Integer todaysAdTotal = 0;
     private static int mMonthAdTotals = 0;
+    private static int mTotalReimbursementAmount = 0;
     private static String lastSeenAd;
     private static String lastAdOfList;
     private static int currentAdNumberForAllAdsList = 0;
@@ -82,6 +83,9 @@ public class Variables {
     public static String imageToBeShared;
     public static int numberOfUnpinns = 0;
     public static boolean isNormalAdsBeingSeen = true;
+    public static int constantAmountPerView = 3;
+    public static int amountToPayPerTargetedView = 5;
+
 
 
     public static void setNewNumberOfAds(int number){
@@ -231,5 +235,19 @@ public class Variables {
 
     public static void adOneToCurrentAdInSubscription(){
         currentAdInSubscription+=1;
+    }
+
+
+
+    public static int getTotalReimbursementAmount() {
+        return mTotalReimbursementAmount;
+    }
+
+    public static void setTotalReimbursementAmount(int mTotalReimbursementAmount) {
+        Variables.mTotalReimbursementAmount = mTotalReimbursementAmount;
+    }
+
+    public static void addOneToTotalReimbursementAmount(String k) {
+        if(k.equals(mKey)) mTotalReimbursementAmount+=(constantAmountPerView);
     }
 }

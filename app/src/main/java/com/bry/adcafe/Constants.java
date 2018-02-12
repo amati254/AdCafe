@@ -44,7 +44,7 @@ public class Constants {
     public static String CLUSTERS = "clusters";
     public static String CLUSTERS_LIST = "cluster_list";
     public static String CLUSTER_LIST_PUSHREF_ID = "cluster_list_pushref_id";
-    public static String FLAGGED_CLUSTERS = "FLAGGED_CLUSTERS";
+    public static String FLAGGED_CLUSTERS = "FlaggedClusters";
     public static String CLUSTER_TO_START_FROM = "cluster_to_start_from";
     public static String ADVERTS = "Adverts";
     public static String REPORTED_ADS = "Flagged_ads";
@@ -88,5 +88,10 @@ public class Constants {
 
     public static int NO_OF_ADS_TO_LOAD = 3;
     public static int NO_OF_ADS_TO_LOAD2 = 2;
+    public static String REIMBURSEMENT_TOTALS = "ReimbursementTotals";
+    public static String CONSTANT_AMMOUNT_PER_VIEW = "AmountPerView";
+    public static String FINISHED_SETUP_FOR_RESETTING_SUBS = "FINISHED_SETUP_FOR_RESETTING_SUBS";
+    public static String RESET_ALL_SUBS_BOOLEAN = "ResetAllSubs";
+    public static String NEW_CPV = "NewCPV";
 
 }

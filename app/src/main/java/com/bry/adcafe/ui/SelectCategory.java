@@ -1,5 +1,6 @@
 package com.bry.adcafe.ui;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
@@ -125,10 +128,7 @@ public class SelectCategory extends AppCompatActivity implements View.OnClickLis
                         Snackbar.LENGTH_LONG).show();
             }else{
                 if(isOnline(mContext)) {
-                    mainView.setVisibility(View.GONE);
-                    loadingLayout.setVisibility(View.VISIBLE);
-                    hasDataBeenLoaded = false;
-                    new DatabaseManager().setUpUserSubscriptions(Variables.selectedCategoriesToSubscribeTo);
+                    getAmountPerUser();
                 }else{
                     Toast.makeText(mContext,"To continue,you need an internet connection",Toast.LENGTH_SHORT).show();
                 }
@@ -140,6 +140,62 @@ public class SelectCategory extends AppCompatActivity implements View.OnClickLis
                 Toast.makeText(mContext,"To continue,you need an internet connection",Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void getAmountPerUser(){
+        final Dialog d = new Dialog(mContext);
+        d.setTitle("Amount to receive.");
+        d.setContentView(R.layout.dialog7);
+        Button b1 = (Button) d.findViewById(R.id.submitButton);
+        Button b2 = (Button) d.findViewById(R.id.cancelButton);
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int cpv;
+                RadioButton button1 = (RadioButton) d.findViewById(R.id.radioButton1);
+                RadioButton button3 = (RadioButton) d.findViewById(R.id.radioButton3);
+                RadioButton button6 = (RadioButton) d.findViewById(R.id.radioButton6);
+                if(button1.isChecked()){
+                    cpv = 1;
+                }else if(button3.isChecked()){
+                    cpv = 3;
+                }else{
+                    cpv = 6;
+                }
+
+//                switch (selectedId) {
+//                    case R.id.radioButton1:
+//                        cpv = 1;
+//                        break;
+//                    case R.id.radioButton3:
+//                        cpv = 3;
+//                        break;
+//                    default:
+//                        cpv = 6;
+//                        break;
+//                }
+                Variables.constantAmountPerView = cpv;
+                startSetUp();
+                d.dismiss();
+            }
+        });
+        b2.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+        d.show();
+    }
+
+    private void startSetUp(){
+        mainView.setVisibility(View.GONE);
+        loadingLayout.setVisibility(View.VISIBLE);
+        hasDataBeenLoaded = false;
+        DatabaseManager dbm = new DatabaseManager();
+        dbm.setContext(mContext);
+        dbm.setUpUserSubscriptions(Variables.selectedCategoriesToSubscribeTo);
     }
 
     private BroadcastReceiver mMessageReceiverForFinishedCreatingUserSubscriptionList = new BroadcastReceiver() {

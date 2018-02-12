@@ -136,6 +136,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int numberOfResponsesForLoadingBlurredImages = 0;
     private boolean hasSentMessageThatBlurrsHaveFinished = false;
     private boolean hasShowedToastForNoMoreAds = false;
+    private int numberOfInitiallyLoadedAds = 0;
+    private boolean isNewDay = false;
 
 
     @Override
@@ -282,6 +284,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d("MAIN_ACTIVITY--", "Setting the month totals in shared preferences - " + Integer.toString(Variables.getMonthAdTotals(mKey)));
         editor2.apply();
 
+        SharedPreferences pref7 = getApplicationContext().getSharedPreferences("ReimbursementTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor7 = pref7.edit();
+        editor7.clear();
+        editor7.putInt(Constants.REIMBURSEMENT_TOTALS, Variables.getTotalReimbursementAmount());
+        Log.d("MAIN_ACTIVITY--", "Setting the Reimbursement totals in shared preferences - " + Integer.toString(Variables.getTotalReimbursementAmount()));
+        editor7.apply();
+
+        SharedPreferences pref8 = getApplicationContext().getSharedPreferences(Constants.CONSTANT_AMMOUNT_PER_VIEW,MODE_PRIVATE);
+        SharedPreferences.Editor editor8 = pref8.edit();
+        editor8.clear();
+        editor8.putInt(Constants.CONSTANT_AMMOUNT_PER_VIEW,Variables.constantAmountPerView);
+        Log.d(TAG,"Setting the constant amount per view in shared preferences - "+Integer.toString(Variables.constantAmountPerView));
+        editor8.apply();
+
         SharedPreferences pref4 = mContext.getSharedPreferences("UID", MODE_PRIVATE);
         SharedPreferences.Editor editor4 = pref4.edit();
         editor4.clear();
@@ -335,12 +351,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadUserDataFromSharedPrefs() {
+        loadSubsFromSharedPrefs();
         Log.d(TAG, "Loading user data from shared preferences first...");
         SharedPreferences prefs = getSharedPreferences("TodayTotals", MODE_PRIVATE);
         int number = prefs.getInt("TodaysTotals", 0);
         Log.d(TAG, "AD TOTAL NUMBER GOTTEN FROM SHARED PREFERENCES IS - " + number);
         if (mIsBeingReset || !getCurrentDateInSharedPreferences().equals(getDate())) {
             Variables.setAdTotal(0, mKey);
+            isNewDay = true;
             Log.d(TAG, "Setting ad totals in firebase to 0 since is being reset...");
         } else {
             Variables.setAdTotal(number, mKey);
@@ -350,6 +368,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int number2 = prefs2.getInt("MonthsTotals", 0);
         Log.d(TAG, "MONTH AD TOTAL NUMBER GOTTEN FROM SHARED PREFERENCES IS - " + number2);
         Variables.setMonthAdTotals(mKey, number2);
+
+        SharedPreferences prefs7 = getSharedPreferences("ReimbursementTotals", MODE_PRIVATE);
+        int number7 = prefs7.getInt(Constants.REIMBURSEMENT_TOTALS, 0);
+        Log.d(TAG, "REIMBURSEMENT TOTAL NUMBER GOTTEN FROM SHARED PREFERENCES IS - " + number7);
+        Variables.setTotalReimbursementAmount(number7);
+
+        SharedPreferences prefs8 = getSharedPreferences(Constants.CONSTANT_AMMOUNT_PER_VIEW,MODE_PRIVATE);
+        int number8 = prefs8.getInt(Constants.CONSTANT_AMMOUNT_PER_VIEW,3);
+        Log.d(TAG,"CONSTANT AMOUNT GOTTEN PER AD FROM SHARED PREFERENCES IS -   "+number8);
+        Variables.constantAmountPerView = number8;
 
         SharedPreferences prefs4 = getSharedPreferences("UID", MODE_PRIVATE);
         String uid = prefs4.getString("Uid", "");
@@ -375,14 +403,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Variables.setCurrentAdInSubscription(currentAdInSubscription);
         }
 
-        loadSubsFromSharedPrefs();
         Variables.isStartFromLogin = false;
-        try {
-            Log.d(TAG, "---Starting the getAds method...");
-            startGetAds();
-        } catch (Exception e) {
-            Log.e("BACKGROUND_PROC---", e.getMessage());
+        if(isNewDay){
+            new DatabaseManager().checkIfNeedToResetUsersSubscriptions(mContext);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForDoneCheckingIfNeedToReCreateClusters,
+                    new IntentFilter(Constants.LOADED_USER_DATA_SUCCESSFULLY));
+            isNewDay = false;
+        }else{
+            try {
+                Log.d(TAG, "---Starting the getAds method...");
+                startGetAds();
+            } catch (Exception e) {
+                Log.e("BACKGROUND_PROC---", e.getMessage());
+            }
         }
+
     }
 
     private void loadSubsFromSharedPrefs() {
@@ -443,9 +478,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Variables.nextSubscriptionIndex = Variables.getCurrentSubscriptionIndex();
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
+                .child(Integer.toString(Variables.constantAmountPerView))
                 .child(getSubscriptionValue(Variables.getCurrentSubscriptionIndex()))
                 .child(Integer.toString(getClusterValue(Variables.getCurrentSubscriptionIndex())));
-        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : " + getSubscriptionValue(Variables.getCurrentSubscriptionIndex())+ " : " + getClusterValue(Variables.getCurrentSubscriptionIndex()));
+        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : "+Variables.constantAmountPerView+ " : "
+                + getSubscriptionValue(Variables.getCurrentSubscriptionIndex())+ " : " + getClusterValue(Variables.getCurrentSubscriptionIndex()));
         dbRef = query.getRef();
 
         if (Variables.getCurrentAdInSubscription() == 0) {
@@ -690,6 +727,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnhideVeiws);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForContinueShareImage);
 
+        try{
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForDoneCheckingIfNeedToReCreateClusters);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         sendBroadcastToUnregisterAllReceivers();
     }
 
@@ -873,12 +916,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Variables.setIsLastOrNotLast(Constants.NOT_LAST);
                 }
             }
+            numberOfInitiallyLoadedAds = mAdList.size();
             mAdList.clear();
             Log.d(TAG,"cleared the adlist");
         } else {
             if(Variables.didAdCafeRemoveCategory)informUserOfSubscriptionChanges();
             if(Variables.didAdCafeAddNewCategory) tellUserOfNewSubscription();
-
+            numberOfInitiallyLoadedAds = 1;
             if(lastAdSeen!=null){
                 Log.d(TAG, "---Loading only last ad from lastAdSeen that was initialised...");
                 lockViews();
@@ -959,6 +1003,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new IntentFilter("BLUREDIMAGESDONE"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForContinueShareImage,
                 new IntentFilter("TRY_SHARE_IMAGE_AGAIN"));
+
+//        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForDoneCheckingIfNeedToReCreateClusters,
+//                new IntentFilter(Constants.LOADED_USER_DATA_SUCCESSFULLY));
 
     }
 
@@ -1164,12 +1211,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("COUNTER_BAR_TO_MAIN- ", "Broadcast has been received that blurred images have loaded, unhiding views.");
-            int visibleChildren = mSwipeView.getChildCount() <= 4 ? mSwipeView.getChildCount() : 4;
+            int visibleChildren =  numberOfInitiallyLoadedAds <= 4 ? numberOfInitiallyLoadedAds : 4;
             numberOfResponsesForLoadingBlurredImages ++;
-            Log.d(TAG,"Number of visible cards : "+visibleChildren+" Number of responses for loading blurred images"+ numberOfResponsesForLoadingBlurredImages);
-            if(numberOfResponsesForLoadingBlurredImages == visibleChildren & !hasSentMessageThatBlurrsHaveFinished){
+            Log.d(TAG,"Number of visible cards : "+visibleChildren+" Number of responses for loading blurred images :"+ numberOfResponsesForLoadingBlurredImages);
+            if(numberOfResponsesForLoadingBlurredImages == visibleChildren && !hasSentMessageThatBlurrsHaveFinished){
                 hasSentMessageThatBlurrsHaveFinished = true;
                 unhideViews();
+                numberOfResponsesForLoadingBlurredImages = 0;
                 Intent intent2 = new Intent("START_TIMER_NOW");
                 Variables.hasFinishedLoadingBlurredImages = true;
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
@@ -1187,6 +1235,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAdCounterView.setVisibility(View.INVISIBLE);
         findViewById(R.id.easterText).setVisibility(View.GONE);
         mAviLoadingMoreAds.setVisibility(View.GONE);
+        hasSentMessageThatBlurrsHaveFinished = false;
     }
 
     private void unhideViews(){
@@ -1203,20 +1252,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
+    private BroadcastReceiver mMessageReceiverForDoneCheckingIfNeedToReCreateClusters = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Broadcast has been received that database manager is done checking if need to readd categories");
+            try {
+                Log.d(TAG, "---Starting the getAds method...");
+                startGetAds();
+            } catch (Exception e) {
+                Log.e("BACKGROUND_PROC---", e.getMessage());
+            }
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+        }
+    };
 
     private BroadcastReceiver mMessageReceiverForAddingToSharedPreferences = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("COUNTER_BAR_TO_MAIN- ", "Broadcast has been received to add to shared preferences.");
             updateData();
-
         }
     };
 
     private void updateData() {
         Variables.adAdToTotal(mKey);
         Variables.adToMonthTotals(mKey);
+        Variables.addOneToTotalReimbursementAmount(mKey);
         Variables.adOneToCurrentAdNumberForAllAdsList();
         addToSharedPreferences();
         adDayAndMonthTotalsToFirebase();
@@ -1334,11 +1395,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         date = isAlmostMidNight() ? getNextDay() : getDate();
 
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
+                .child(Integer.toString(Variables.constantAmountPerView))
                 .child(getSubscriptionValue(Variables.nextSubscriptionIndex))
                 .child(Integer.toString(getClusterValue(Variables.nextSubscriptionIndex)));
 
 
-        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : "
+        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : "+Variables.constantAmountPerView+ " : "
                 + getSubscriptionValue(Variables.nextSubscriptionIndex)
                 + " : "
                 + Integer.toString(getClusterValue(Variables.nextSubscriptionIndex)));
@@ -1586,6 +1648,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
         adRef2.setValue(Variables.getMonthAdTotals(mKey));
+
+        DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.REIMBURSEMENT_TOTALS);
+        adRef3.setValue(Variables.getTotalReimbursementAmount());
 
     }
 
@@ -2158,6 +2224,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+
+
     public boolean isOnline() {
         Context context = getApplicationContext();
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -2202,6 +2270,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(!Variables.isAllClearToContinueCountDown)Variables.isAllClearToContinueCountDown = true;
     }
 
-//    Font; AR ESSENCE.
+//    Font: AR ESSENCE.
 
 }

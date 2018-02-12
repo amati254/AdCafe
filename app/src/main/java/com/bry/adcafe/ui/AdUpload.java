@@ -124,6 +124,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private ProgressDialog mAuthProgressDialog;
     private int numberOfClustersBeingUploadedTo = 0;
 
+    private int mAmountToPayPerTargetedView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,6 +139,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         mCategory = Variables.SelectedCategory;
         Log.d(TAG,"Category gotten from Variables class is : "+mCategory);
         mCategoryText.setText("Category: "+mCategory);
+
+        mAmountToPayPerTargetedView = Variables.amountToPayPerTargetedView-2;
+        Log.d(TAG,"Amount to pay per targeted user is : "+ mAmountToPayPerTargetedView);
 
         setUpViews();
         createProgressDialog();
@@ -175,6 +180,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void loadListenerForRecreate() {
         mRef6 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM)
+                .child(Integer.toString(mAmountToPayPerTargetedView))
                 .child(mCategory+"_cluster_to_start_from");
         mRef6.addChildEventListener(chilForRefresh);
     }
@@ -220,7 +226,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         setAllOtherViewsToBeGone();
         Log.d(TAG,"---Getting number of clusters.");
         //When restructuring to advertising to specific type of users,add .child("%AdvertCategory%");
-        mRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST).child(mCategory);
+        mRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST)
+                .child(Integer.toString(mAmountToPayPerTargetedView)).child(mCategory);
         mRef.addListenerForSingleValueEvent(val);
 
     }
@@ -253,7 +260,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private void getClusterToStartForm() {
         Log.d(TAG,"---getting cluster to start from");
         //When changing to specific clusters, this will need to change from this to .getReference("%AdvertCategory%_cluster_to_start_from");
-        mRef2 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM).child(mCategory+"_cluster_to_start_from");
+        mRef2 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM)
+                .child(Integer.toString(mAmountToPayPerTargetedView)).child(mCategory+"_cluster_to_start_from");
         mRef2.addListenerForSingleValueEvent(val2);
     }
 
@@ -288,7 +296,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         Log.d(TAG,"---Starting query for no of ads in cluster to start from.");
         //When changing to targeted advertising,this will need to have .child("%AdvertCategory%") between getNextDay and clusterToStartFrom child;
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterToStartFrom));
+                .child(getNextDay()).child(Integer.toString(mAmountToPayPerTargetedView))
+                .child(mCategory).child(Integer.toString(mClusterToStartFrom));
         boolRef.addListenerForSingleValueEvent(val3);
     }
 
@@ -316,7 +325,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         Log.d(TAG,"---Starting query for no of ads in Latest cluster now.");
         //When changing to targeted advertising,this will need to have .child("%AdvertCategory%") between getNextDay and clusterTotal child;
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterTotal));
+                .child(getNextDay()).child(Integer.toString(mAmountToPayPerTargetedView))
+                .child(mCategory).child(Integer.toString(mClusterTotal));
         boolRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -644,7 +654,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void recheckNoOfChildrenInClulsterToStartFrom(){
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterToStartFrom));
+                .child(getNextDay()).child(Integer.toString(mAmountToPayPerTargetedView))
+                .child(mCategory).child(Integer.toString(mClusterToStartFrom));
         boolRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -661,7 +672,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void recheckNoOfChildrenInLatestClusters(){
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterTotal));
+                .child(getNextDay()).child(Integer.toString(mAmountToPayPerTargetedView))
+                .child(mCategory).child(Integer.toString(mClusterTotal));
         boolRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -702,6 +714,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         advert.setPushRefInAdminConsole(pushId);
         advert.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
         advert.setWebsiteLink(mLink);
+        advert.setAmountToPayPerTargetedView(mAmountToPayPerTargetedView+2);
         advert.setHasBeenReimbursed(false);
         advert.setDateInDays(getDateInDays());
 //        advert.setClustersToUpLoadTo(clustersToUpLoadTo);
@@ -751,6 +764,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 //When configuring for targeted advertising based on user prefs, this will change by add ing .child("%AdvertCategory%") between
                 //date and cluster number.
                 mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
+                        .child(Integer.toString(mAmountToPayPerTargetedView))
                         .child(mCategory)
                         .child(Integer.toString(clusterNumber)).child(pushId);
 //                Advert advert = new Advert(encodedImageToUpload);
@@ -823,6 +837,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 //When configuring for targeted advertising based on user prefs, this will change by add ing .child("%AdvertCategory%") between
                 //date and cluster number.
                 mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
+                        .child(Integer.toString(mAmountToPayPerTargetedView))
                         .child(mCategory)
                         .child(Integer.toString(number)).child(pushId);
 //                Advert advert = new Advert(encodedImageToUpload);
@@ -931,7 +946,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
 
     private void setNewValueToStartFrom() {
-        mRef4 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM).child(mCategory+"_cluster_to_start_from");
+        mRef4 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM).child(Integer.toString(mAmountToPayPerTargetedView))
+                .child(mCategory+"_cluster_to_start_from");
         if(mClusterToStartFrom + mNumberOfClusters > mClusterTotal){
             mRef4.setValue((mClusterToStartFrom + mNumberOfClusters)-mClusterTotal);
         }else{

@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.bry.adcafe.ui.LoginActivity;
 import com.bry.adcafe.ui.Splash;
@@ -61,6 +62,7 @@ public class AlarmReceiver1 extends BroadcastReceiver {
     private int iterations = 0;
     private int numberOfAdsInTotal = 0;
     private LinkedHashMap<String,Integer> Subscriptions  = new LinkedHashMap<>();
+    private int constantAmountPerView = 3;
 
 
 
@@ -71,12 +73,6 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         Intent service1 = new Intent(context, NotificationService1.class);
         service1.setData((Uri.parse("custom://"+System.currentTimeMillis())));
         if(isUserLoggedIn()) checkIfUserWasLastOnlineToday();
-//        LocalBroadcastManager.getInstance(mContext).registerReceiver(new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(Context context, Intent intent) {
-//                cancelAlarm();
-//            }
-//        },new IntentFilter("CANCEL_ALARM"));
     }
 
     private void checkIfUserWasLastOnlineToday(){
@@ -106,11 +102,15 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.d(TAG,"Starting to load users data to check if there are ads");
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
-                .child(uid).child(Constants.SUBSCRIPTION_lIST);
+                .child(uid);
         adRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot snap: dataSnapshot.getChildren()){
+                DataSnapshot cpvSnap = dataSnapshot.child(Constants.CONSTANT_AMMOUNT_PER_VIEW);
+                constantAmountPerView = cpvSnap.getValue(int.class);
+
+                DataSnapshot subSnap = dataSnapshot.child(Constants.SUBSCRIPTION_lIST);
+                for(DataSnapshot snap: subSnap.getChildren()){
                     numberOfSubsFromFirebase = (int)dataSnapshot.getChildrenCount();
                     String category = snap.getKey();
                     Integer cluster = snap.getValue(Integer.class);
@@ -136,19 +136,20 @@ public class AlarmReceiver1 extends BroadcastReceiver {
 
     private void checkInForEachCategory(String category,int cluster){
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate())
+                .child(Integer.toString(constantAmountPerView))
                 .child(category).child(Integer.toString(cluster));
         DatabaseReference dbRef = query.getRef();
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren()){
-                    int numberOfAds = (int)dataSnapshot.getChildrenCount();
-                    Log.d(TAG,"adding "+numberOfAds+" to number of ada list.");
-                    numberOfAdsInTotal+=numberOfAds;
-//                    if(iterations==numberOfSubsFromFirebase){
-//                        Log.d(TAG,"All the categories have been handled, total is : "+numberOfAdsInTotal);
-//                        if(numberOfAds>0) handleEverything(numberOfAdsInTotal);
-//                    }
+                    for(DataSnapshot snap: dataSnapshot.getChildren()){
+                        boolean isFlagged = snap.child("flagged").getValue(boolean.class);
+                        if(!isFlagged)numberOfAdsInTotal+=1;
+                    }
+//                    int numberOfAds = (int)dataSnapshot.getChildrenCount();
+//                    Log.d(TAG,"adding "+numberOfAds+" to number of ada list.");
+//                    numberOfAdsInTotal+=numberOfAds;
                 }
                 iterations++;
                 if(iterations<numberOfSubsFromFirebase){
