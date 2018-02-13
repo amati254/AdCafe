@@ -1084,6 +1084,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         reportDialogFragment.setMenuVisibility(false);
                         reportDialogFragment.show(fm, "Report dialog fragment.");
                         reportDialogFragment.setfragcontext(mContext);
+                        setBooleanForPausingTimer();
                     }
 
                 }
@@ -2060,7 +2061,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     number = dataSnapshot.getValue(long.class);
                 else number = 0;
                 Log.d(TAG, "number gotten for global ad totals is : " + number);
-                long newNumber = number + 1;
+                long newNumber = number + Variables.constantAmountPerView;
                 setNewAllAdsThatHaveBeenSeenEver(newNumber);
             }
 

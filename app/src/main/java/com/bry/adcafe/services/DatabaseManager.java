@@ -312,10 +312,8 @@ public class DatabaseManager {
                         loadNewSubList();
                         isUserAddingANewCategory = false;
                     }else{
-                        Intent intent = new Intent(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
-                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                         setDateInSharedPrefs(getDate(),context);
-                        setUserDataInSharedPrefs(context);
+                        reloadUsersSubscriptions(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
                     }
                 }
             }
@@ -652,6 +650,8 @@ public class DatabaseManager {
     }
 
 
+
+
     //called in main activity
     public void checkIfNeedToResetUsersSubscriptions(final Context myContext){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -851,16 +851,13 @@ public class DatabaseManager {
             public void onComplete(@NonNull Task<Void> task) {
                 iterations++;
                 if(iterations == numberOfSubs){
-                    Intent intent = new Intent(Constants.LOADED_USER_DATA_SUCCESSFULLY);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     setDateInSharedPrefs(getDate(),context);
-                    setUserDataInSharedPrefs(context);
                     Variables.constantAmountPerView = newConstant;
                     setNewConstantAsConstantInDatabase();
+                    reloadUsersSubscriptions(Constants.LOADED_USER_DATA_SUCCESSFULLY);
                 }
             }
         });
-        Variables.Subscriptions.put(AdvertCategory,Cluster);
     }
 
     private void setNewConstantAsConstantInDatabase() {
@@ -875,6 +872,33 @@ public class DatabaseManager {
         adRef2.setValue(Variables.constantAmountPerView);
     }
 
+    private void reloadUsersSubscriptions(final String intentString){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        User.setUid(uid);
+        Log.d(TAG,"Starting to load users data");
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.SUBSCRIPTION_lIST);
+        adRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!Variables.Subscriptions.isEmpty())Variables.Subscriptions.clear();
+                for(DataSnapshot snap: dataSnapshot.getChildren()){
+                    String category = snap.getKey();
+                    Integer cluster = snap.getValue(Integer.class);
+                    Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
+                    Variables.Subscriptions.put(category,cluster);
+                }
+                setUserDataInSharedPrefs(context);
+                Intent intent = new Intent(intentString);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     public void setBooleanForResetSubscriptions(int newValue, final Context myContext){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
