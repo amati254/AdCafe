@@ -1137,6 +1137,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (v == mLogoutButton) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("AdCafé");
             builder.setMessage("Are you sure you want to log out?")
                     .setCancelable(true)
                     .setPositiveButton("Yes.", new DialogInterface.OnClickListener() {

@@ -149,6 +149,11 @@
     <string name="noteAboutChoosingAmmount">Note: The higher the amount chosen, the lower the number of banners you might see. So we recommend 3 Ksh
         per view.</string>
 
+    <string name="changecpvexplanation">Press continue if you wish to change the amount you charge for each banner you see.</string>
+
+    <string name="noteAboutChoosingAmmount2">Remember: The higher the amount chosen, the lower the number of banners you might see. So we recommend 3 Ksh
+        per view.</string>
+
     <string name="feedbacktype">Feedback Type</string>
     <string name="feedbacktype1">Praise</string>
     <string name="feedbacktype2">Gripe</string>

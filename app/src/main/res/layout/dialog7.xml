@@ -12,7 +12,7 @@
         android:textAlignment="center"
         android:textSize="14sp"
         android:padding="10dp"
-        android:text="Also, choose the amount you want to receive for each banner you see." />
+        android:text="Also, choose the amount you wish to charge for each banner you see." />
 
     <LinearLayout
         android:orientation="horizontal"

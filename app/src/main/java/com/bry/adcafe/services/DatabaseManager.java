@@ -72,6 +72,10 @@ public class DatabaseManager {
                 .child(uid).child(Constants.RESET_ALL_SUBS_BOOLEAN);
         adRef10.setValue(false);
 
+        DatabaseReference adRef11 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.PREFERRED_NOTIF);
+        adRef11.setValue(true);
+
         //Creates node for indicating users email.
         DatabaseReference adRef8 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child("Email");
@@ -388,6 +392,10 @@ public class DatabaseManager {
                     Log.d(TAG,"Setting the amount per ad to total to : "+amountPerView);
                 }
 
+                DataSnapshot notPrefSnap = dataSnapshot.child(Constants.PREFERRED_NOTIF);
+                Variables.doesUserWantNotifications = notPrefSnap.getValue(Boolean.class);
+                Log.d(TAG,"Set the preferred value for receivin morning notifications to :"+Variables.doesUserWantNotifications);
+
                 //this loads the users no Of Categories known
                 DataSnapshot subNoKnown = dataSnapshot.child(Constants.NO_OF_CATEGORIES_KNOWN);
                 int subNumberKnown = subNoKnown.getValue(int.class);
@@ -554,6 +562,13 @@ public class DatabaseManager {
         editor4.putInt(Constants.CONSTANT_AMMOUNT_PER_VIEW,Variables.constantAmountPerView);
         Log.d("DatabaseManager","Setting the constant amount per view in shared preferences - "+Integer.toString(Variables.constantAmountPerView));
         editor4.apply();
+
+        SharedPreferences pref7 = context.getSharedPreferences(Constants.PREFERRED_NOTIF,MODE_PRIVATE);
+        SharedPreferences.Editor editor7 = pref7.edit();
+        editor7.clear();
+        editor7.putBoolean(Constants.PREFERRED_NOTIF,Variables.doesUserWantNotifications);
+        Log.d(TAG,"Set the users preference for seing notifications to : "+Variables.doesUserWantNotifications);
+        editor7.apply();
 
         setSubsInSharedPrefs(context);
     }
@@ -859,6 +874,9 @@ public class DatabaseManager {
             }
         });
     }
+
+
+
 
     private void setNewConstantAsConstantInDatabase() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();

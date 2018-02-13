@@ -72,7 +72,10 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         mContext = context;
         Intent service1 = new Intent(context, NotificationService1.class);
         service1.setData((Uri.parse("custom://"+System.currentTimeMillis())));
-        if(isUserLoggedIn()) checkIfUserWasLastOnlineToday();
+
+        SharedPreferences prefs = context.getSharedPreferences(Constants.PREFERRED_NOTIF, MODE_PRIVATE);
+        Boolean doesUserWantNotf = prefs.getBoolean(Constants.PREFERRED_NOTIF, true);
+        if(isUserLoggedIn() && doesUserWantNotf) checkIfUserWasLastOnlineToday();
     }
 
     private void checkIfUserWasLastOnlineToday(){

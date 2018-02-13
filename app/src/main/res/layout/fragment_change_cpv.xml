@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible"
+            android:id="@+id/mainLayout"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:textSize="17sp"
+                android:paddingLeft="20dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="20dp"
+                android:text="Changing your charge per view."
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="20dp"
+                android:text="@string/changecpvexplanation"
+                android:layout_height="wrap_content" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:paddingRight="20dp"
+                android:paddingLeft="20dp"
+                android:layout_marginBottom="20dp"
+                android:layout_height="50dp">
+
+                <Button
+                    android:id="@+id/cancelBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:background="@null"
+                    android:text="Cancel"
+                    android:textColor="@color/colorPrimary" />
+
+                <Button
+                    android:id="@+id/continueBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:background="@null"
+                    android:text="Continue"
+                    android:textColor="@color/colorPrimary" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:id="@+id/chooseAmountLayout"
+            android:translationX="200dp"
+            android:visibility="gone"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/topText"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:padding="20dp"
+                android:text="Choose the amount you wish to charge for each banner you see." />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:padding="20dp"
+                    android:id="@+id/cpvRadioGroup2"
+                    android:orientation="vertical"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/radioButton1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:text="1 Ksh per view." />
+
+                    <RadioButton
+                        android:id="@+id/radioButton3"
+                        android:checked="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:text="3 Ksh per view. (Recommended)" />
+
+                    <RadioButton
+                        android:id="@+id/radioButton6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:text="6 Ksh per view." />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:textSize="13sp"
+                        android:textAlignment="center"
+                        android:text="@string/noteAboutChoosingAmmount2"
+                        android:layout_height="wrap_content" />
+
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:paddingLeft="10dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_height="wrap_content">
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:text="Cancel"
+                            android:background="@null"
+                            android:textColor="@color/colorPrimary"
+                            android:id="@+id/cancelButton"
+                            android:layout_height="wrap_content" />
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:text="change."
+                            android:textColor="@color/colorPrimary"
+                            android:background="@null"
+                            android:layout_marginLeft="150dp"
+                            android:id="@+id/submitButton"
+                            android:layout_height="wrap_content" />
+                    </RelativeLayout>
+                </RadioGroup>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

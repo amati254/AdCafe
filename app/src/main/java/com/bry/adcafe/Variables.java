@@ -85,6 +85,7 @@ public class Variables {
     public static boolean isNormalAdsBeingSeen = true;
     public static int constantAmountPerView = 3;
     public static int amountToPayPerTargetedView = 5;
+    public static boolean doesUserWantNotifications = true;
 
 
 

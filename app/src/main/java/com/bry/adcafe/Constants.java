@@ -96,5 +96,6 @@ public class Constants {
     public static String FINISHED_SETUP_FOR_RESETTING_SUBS = "FINISHED_SETUP_FOR_RESETTING_SUBS";
     public static String RESET_ALL_SUBS_BOOLEAN = "ResetAllSubs";
     public static String NEW_CPV = "NewCPV";
+    public static String PREFERRED_NOTIF = "NotificationsPref";
 
 }
