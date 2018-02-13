@@ -80,11 +80,14 @@ public class Constants {
     public static String ALL_CLEAR = "AllClear";
     public static String CANCELLED = "canceled";
 
+
     public static String NO_OF_CATEGORIES_KNOWN = "NoOfCategoriesKnown";
     public static String IS_AD = "Is_ad";
     public static String IS_ANNOUNCEMENT = "Is_announcement";
     public static String PINNED_AD_POOL = "PinnedAdPool";
     public static String NO_OF_TIMES_PINNED = "NumberOfTimesPinned";
+
+
 
     public static int NO_OF_ADS_TO_LOAD = 3;
     public static int NO_OF_ADS_TO_LOAD2 = 2;

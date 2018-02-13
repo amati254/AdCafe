@@ -876,7 +876,7 @@ public class DatabaseManager {
     }
 
 
-    private void setBooleanForResetSubscriptions(int newValue, final Context myContext){
+    public void setBooleanForResetSubscriptions(int newValue, final Context myContext){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.RESET_ALL_SUBS_BOOLEAN);
