@@ -422,7 +422,7 @@
                                 android:id="@+id/NotificationBtn"
                                 android:layout_width="60dp"
                                 android:layout_height="60dp"
-                                android:background="@drawable/ic_action_notification" />
+                                android:background="@drawable/notificat" />
 
                             <View
                                 android:id="@+id/dotForNotification"
@@ -449,7 +449,7 @@
                                 android:id="@+id/ChangeCPVBtn"
                                 android:layout_width="60dp"
                                 android:layout_height="60dp"
-                                android:background="@drawable/ic_action_changecpv" />
+                                android:background="@drawable/changecpvhd" />
 
                         </android.support.v7.widget.CardView>
 
@@ -474,7 +474,7 @@
                                 android:id="@+id/LogoutBtn"
                                 android:layout_width="60dp"
                                 android:layout_height="60dp"
-                                android:background="@drawable/ic_action_exit" />
+                                android:background="@drawable/exithd" />
 
                         </android.support.v7.widget.CardView>
 
@@ -505,9 +505,9 @@
                         android:id="@+id/payoutBtn"
                         android:layout_width="70dp"
                         android:layout_gravity="center"
-                        android:alpha="0.6"
-                        android:layout_height="60dp"
-                        android:background="@drawable/money3" />
+                        android:layout_marginTop="7dp"
+                        android:layout_height="70dp"
+                        android:background="@drawable/money6" />
 
                     <TextView
                         android:layout_width="match_parent"
