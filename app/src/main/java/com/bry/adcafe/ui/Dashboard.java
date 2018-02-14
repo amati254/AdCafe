@@ -304,6 +304,7 @@ public class Dashboard extends AppCompatActivity {
             public void onClick(View v) {
                 boolean newValue = !Variables.doesUserWantNotifications;
                 setUsersPreferedNotfStatus(newValue);
+                d.dismiss();
             }
         });
         b2.setOnClickListener(new View.OnClickListener()
