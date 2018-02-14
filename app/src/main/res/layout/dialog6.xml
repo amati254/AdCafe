@@ -48,6 +48,30 @@
                 android:layout_marginBottom="20dp"
                 android:text="8 Ksh per view." />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/shStats3"
+                android:layout_marginLeft="10dp"
+                android:text="Number of users for 3Ksh is: 1500."
+                android:layout_marginBottom="5dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/shStats5"
+                android:layout_marginLeft="10dp"
+                android:text="Number of users for 5Ksh is: 1500."
+                android:layout_marginBottom="5dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/shStats8"
+                android:layout_marginLeft="10dp"
+                android:text="Number of users for 8Ksh is: 1500."
+                android:layout_marginBottom="5dp"
+                android:layout_height="wrap_content" />
+
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -60,18 +84,18 @@
                     android:text="Cancel"
                     android:textColor="@color/colorPrimary"
                     android:background="@null"
+                    android:layout_alignParentLeft="true"
                     android:id="@+id/cancelButton"
                     android:layout_height="wrap_content" />
 
                 <Button
                     android:layout_width="wrap_content"
                     android:text="continue"
-                    android:layout_marginLeft="150dp"
+                    android:layout_alignParentRight="true"
                     android:textColor="@color/colorPrimary"
                     android:background="@null"
                     android:id="@+id/submitButton"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="180dp" />
+                    android:layout_height="wrap_content"/>
 
             </RelativeLayout>
         </RadioGroup>

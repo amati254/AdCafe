@@ -76,6 +76,18 @@ public class DatabaseManager {
                 .child(uid).child(Constants.PREFERRED_NOTIF);
         adRef11.setValue(true);
 
+        DatabaseReference adRef12 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.PREFERRED_NOTF_HOUR);
+        adRef12.setValue(Variables.preferredHourOfNotf);
+
+        DatabaseReference adRef13 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.PREFERRED_NOTF_MIN);
+        adRef13.setValue(Variables.preferredMinuteOfNotf);
+
+        DatabaseReference adRef14 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.USER_NICKNAME);
+        adRef14.setValue(Variables.userName);
+
         //Creates node for indicating users email.
         DatabaseReference adRef8 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child("Email");
@@ -394,7 +406,18 @@ public class DatabaseManager {
 
                 DataSnapshot notPrefSnap = dataSnapshot.child(Constants.PREFERRED_NOTIF);
                 Variables.doesUserWantNotifications = notPrefSnap.getValue(Boolean.class);
-                Log.d(TAG,"Set the preferred value for receivin morning notifications to :"+Variables.doesUserWantNotifications);
+                Log.d(TAG,"Set the preferred value for receiving morning notifications to :"+Variables.doesUserWantNotifications);
+
+                //this set the users preferred notification hour
+                DataSnapshot notHour = dataSnapshot.child(Constants.PREFERRED_NOTF_HOUR);
+                if(notHour.exists())Variables.preferredHourOfNotf = notHour.getValue(int.class);
+
+                //this set the users preferred notification minute
+                DataSnapshot notMin = dataSnapshot.child(Constants.PREFERRED_NOTF_MIN);
+                if(notMin.exists())Variables.preferredMinuteOfNotf = notMin.getValue(int.class);
+
+                DataSnapshot nameSnap = dataSnapshot.child(Constants.USER_NICKNAME);
+                if(nameSnap.exists()) Variables.userName = nameSnap.getValue(String.class);
 
                 //this loads the users no Of Categories known
                 DataSnapshot subNoKnown = dataSnapshot.child(Constants.NO_OF_CATEGORIES_KNOWN);
@@ -560,14 +583,14 @@ public class DatabaseManager {
         SharedPreferences.Editor editor3 = pref3.edit();
         editor3.clear();
         editor3.putInt(Constants.REIMBURSEMENT_TOTALS,Variables.getTotalReimbursementAmount());
-        Log.d("DatabaseManager","Setting the Reimbursement totals in shared preferences - "+Integer.toString(Variables.getTotalReimbursementAmount()));
+        Log.d(TAG,"Setting the Reimbursement totals in shared preferences - "+Integer.toString(Variables.getTotalReimbursementAmount()));
         editor3.apply();
 
         SharedPreferences pref4 = context.getSharedPreferences(Constants.CONSTANT_AMMOUNT_PER_VIEW,MODE_PRIVATE);
         SharedPreferences.Editor editor4 = pref4.edit();
         editor4.clear();
         editor4.putInt(Constants.CONSTANT_AMMOUNT_PER_VIEW,Variables.constantAmountPerView);
-        Log.d("DatabaseManager","Setting the constant amount per view in shared preferences - "+Integer.toString(Variables.constantAmountPerView));
+        Log.d(TAG,"Setting the constant amount per view in shared preferences - "+Integer.toString(Variables.constantAmountPerView));
         editor4.apply();
 
         SharedPreferences pref7 = context.getSharedPreferences(Constants.PREFERRED_NOTIF,MODE_PRIVATE);
@@ -576,6 +599,20 @@ public class DatabaseManager {
         editor7.putBoolean(Constants.PREFERRED_NOTIF,Variables.doesUserWantNotifications);
         Log.d(TAG,"Set the users preference for seing notifications to : "+Variables.doesUserWantNotifications);
         editor7.apply();
+
+        SharedPreferences pref8 = context.getSharedPreferences(Constants.PREFERRED_NOTF_HOUR,MODE_PRIVATE);
+        SharedPreferences.Editor editor8 = pref8.edit();
+        editor8.clear();
+        editor8.putInt(Constants.PREFERRED_NOTF_HOUR,Variables.preferredHourOfNotf);
+        Log.d(TAG,"Set the users preferred noification hour to : "+Variables.preferredHourOfNotf);
+        editor8.apply();
+
+        SharedPreferences pref9 = context.getSharedPreferences(Constants.PREFERRED_NOTF_MIN,MODE_PRIVATE);
+        SharedPreferences.Editor editor9 = pref9.edit();
+        editor9.clear();
+        editor9.putInt(Constants.PREFERRED_NOTF_MIN,Variables.preferredMinuteOfNotf);
+        Log.d(TAG,"Set the users preferred noification minute to : "+Variables.preferredMinuteOfNotf);
+        editor9.apply();
 
         setSubsInSharedPrefs(context);
     }

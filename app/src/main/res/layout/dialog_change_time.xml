@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:orientation="vertical"
-        android:visibility="visible"
         android:id="@+id/mainLayout"
         android:layout_height="wrap_content">
 
@@ -17,7 +17,7 @@
             android:layout_marginBottom="10dp"
             android:textColor="@color/primary_text"
             android:layout_marginTop="20dp"
-            android:text="Logout."
+            android:text="Change Notification Time."
             android:layout_height="wrap_content" />
 
         <TextView
@@ -27,7 +27,7 @@
             android:id="@+id/explanation"
             android:layout_marginLeft="20dp"
             android:layout_marginBottom="10dp"
-            android:text="Do you wish to log out of your account?"
+            android:text="@string/changeTimeExplanation"
             android:layout_height="wrap_content" />
 
         <RelativeLayout
@@ -45,7 +45,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
                 android:background="@null"
-                android:text="No"
+                android:text="Cancel"
                 android:textColor="@color/colorPrimary" />
 
             <Button
@@ -55,11 +55,26 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:background="@null"
-                android:text="Yes."
+                android:text="Continue."
                 android:textColor="@color/colorPrimary" />
 
         </RelativeLayout>
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/pickTimeLayout"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editText2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="time" />
+    </LinearLayout>
+
 
 </LinearLayout>

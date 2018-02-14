@@ -134,6 +134,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                     if(task.isSuccessful()){
                         Log.d(TAG,"authentication successful");
                         createFirebaseUserProfile(task.getResult().getUser());
+                        Variables.userName = name;
                     }else {
                         mRelative.setVisibility(View.VISIBLE);
                         mAvi.setVisibility(View.GONE);

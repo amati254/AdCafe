@@ -3,6 +3,7 @@ package com.bry.adcafe.ui;
 import android.app.Dialog;
 import android.app.FragmentManager;
 import android.app.NotificationManager;
+import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,11 +13,13 @@ import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.Vibrator;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,6 +27,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.bry.adcafe.Constants;
@@ -37,6 +41,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Calendar;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -60,6 +66,8 @@ public class Dashboard extends AppCompatActivity {
     @Bind(R.id.payoutBtn) public ImageButton payoutBtn;
     @Bind(R.id.shareAppBtn) public ImageButton shareAppBtn;
 
+    public Context miniContext;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +75,7 @@ public class Dashboard extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
         Variables.isDashboardActivityOnline = true;
         mContext = this.getApplicationContext();
+        miniContext = mContext;
         ButterKnife.bind(this);
 
         loadViews();
@@ -298,7 +307,15 @@ public class Dashboard extends AppCompatActivity {
         Button b1 = (Button) d.findViewById(R.id.continueBtn);
         Button b2 = (Button) d.findViewById(R.id.cancelBtn);
         TextView t = (TextView) d.findViewById(R.id.explanation);
+        ImageButton imgBtn = (ImageButton) d.findViewById(R.id.pickTimeIcon);
+        final TextView timeTxt = (TextView) d.findViewById(R.id.setTimeText);
         t.setText(message);
+
+        String hour = Integer.toString(Variables.preferredHourOfNotf);
+        String minute = Integer.toString(Variables.preferredMinuteOfNotf);
+        if(Variables.preferredHourOfNotf<10) hour = "0"+hour;
+        timeTxt.setText(String.format("Time for daily notifications : %s:%s", hour, minute));
+
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -312,6 +329,31 @@ public class Dashboard extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 d.cancel();
+            }
+        });
+        imgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment newFragment = new TimePickerFragment();
+                newFragment.show(getSupportFragmentManager(), "timePicker");
+            }
+        });
+        final BroadcastReceiver br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String hour = Integer.toString(Variables.preferredHourOfNotf);
+                String minute = Integer.toString(Variables.preferredMinuteOfNotf);
+                if(Variables.preferredHourOfNotf<10) hour = "0"+hour;
+                timeTxt.setText(String.format("Time for daily notifications : %s:%s", hour, minute));
+
+                setUsersPreferredNotificationTime();
+            }
+        };
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(br,new IntentFilter("UPDATE_CHOSEN_TIME"));
+        d.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                LocalBroadcastManager.getInstance(mContext).unregisterReceiver(br);
             }
         });
         d.show();
@@ -429,6 +471,62 @@ public class Dashboard extends AppCompatActivity {
         else mDotForNotf.setVisibility(View.INVISIBLE);
 
         Toast.makeText(mContext,"Your preference has been set.",Toast.LENGTH_SHORT).show();
+    }
+
+    private void setUsersPreferredNotificationTime(){
+        SharedPreferences pref = mContext.getSharedPreferences(Constants.PREFERRED_NOTF_HOUR,MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.putInt(Constants.PREFERRED_NOTF_HOUR,Variables.preferredHourOfNotf);
+        Log.d("DashBoard","Set the users preferred noification hour to : "+Variables.preferredHourOfNotf);
+        editor.apply();
+
+        SharedPreferences pref7 = mContext.getSharedPreferences(Constants.PREFERRED_NOTF_MIN,MODE_PRIVATE);
+        SharedPreferences.Editor editor7 = pref7.edit();
+        editor7.clear();
+        editor7.putInt(Constants.PREFERRED_NOTF_MIN,Variables.preferredMinuteOfNotf);
+        Log.d("DashBoard","Set the users preferred noification minute to : "+Variables.preferredMinuteOfNotf);
+        editor7.apply();
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference adRef11 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.PREFERRED_NOTF_HOUR);
+        adRef11.setValue(Variables.preferredHourOfNotf);
+
+        DatabaseReference adRef12 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.PREFERRED_NOTF_MIN);
+        adRef12.setValue(Variables.preferredMinuteOfNotf);
+
+        Toast.makeText(mContext,"The time has been set.",Toast.LENGTH_SHORT).show();
+    }
+
+    public static class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
+        private Context mContext = getContext();
+
+        public void setContext(Context context){
+            mContext = context;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the current time as the default values for the picker
+            final Calendar c = Calendar.getInstance();
+            int hour = c.get(Calendar.HOUR_OF_DAY);
+            int minute = c.get(Calendar.MINUTE);
+
+            // Create a new instance of TimePickerDialog and return it
+            return new TimePickerDialog(getActivity(), this, Variables.preferredHourOfNotf, Variables.preferredMinuteOfNotf,
+                    DateFormat.is24HourFormat(getActivity()));
+        }
+
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            // Do something with the time chosen by the user
+            Variables.preferredHourOfNotf = hourOfDay;
+            Variables.preferredMinuteOfNotf = minute;
+
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(new Intent("UPDATE_CHOSEN_TIME"));
+        }
     }
 
 }

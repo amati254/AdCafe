@@ -98,4 +98,8 @@ public class Constants {
     public static String NEW_CPV = "NewCPV";
     public static String PREFERRED_NOTIF = "NotificationsPref";
 
+    public static String PREFERRED_NOTF_HOUR = "PreferredNotfHour";
+    public static String PREFERRED_NOTF_MIN = "PreferredNotfMin";
+    public static String USER_NICKNAME = "UserName";
+
 }

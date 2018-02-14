@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (dbRef != null) {
             dbRef.removeEventListener(val);
         }
-        setUserDataInSharedPrefs();
+//        setUserDataInSharedPrefs();
         setAlarmForNotifications();
         Variables.lastAdSeen = lastAdSeen;
         Log.d(TAG, "---removing callback for checking time of day.");
@@ -378,6 +378,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int number8 = prefs8.getInt(Constants.CONSTANT_AMMOUNT_PER_VIEW,3);
         Log.d(TAG,"CONSTANT AMOUNT GOTTEN PER AD FROM SHARED PREFERENCES IS -   "+number8);
         Variables.constantAmountPerView = number8;
+
+        SharedPreferences pref9 = getSharedPreferences(Constants.PREFERRED_NOTF_HOUR,MODE_PRIVATE);
+        Variables.preferredHourOfNotf = pref9.getInt(Constants.PREFERRED_NOTF_HOUR,7);
+
+        SharedPreferences pref10 = getSharedPreferences(Constants.PREFERRED_NOTF_MIN,MODE_PRIVATE);
+        Variables.preferredMinuteOfNotf = pref10.getInt(Constants.PREFERRED_NOTF_MIN,30);
 
         SharedPreferences prefs4 = getSharedPreferences("UID", MODE_PRIVATE);
         String uid = prefs4.getString("Uid", "");
@@ -2098,8 +2104,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Calendar alarmStartTime = Calendar.getInstance();
         Calendar now = Calendar.getInstance();
-        alarmStartTime.set(Calendar.HOUR_OF_DAY, 5);
-        alarmStartTime.set(Calendar.MINUTE, 30);
+        alarmStartTime.set(Calendar.HOUR_OF_DAY, Variables.preferredHourOfNotf);
+        alarmStartTime.set(Calendar.MINUTE, Variables.preferredMinuteOfNotf);
         alarmStartTime.set(Calendar.SECOND, 0);
         if (now.after(alarmStartTime)) {
             Log.d(TAG, "Setting alarm to tomorrow morning.");

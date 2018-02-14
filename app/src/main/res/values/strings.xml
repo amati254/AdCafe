@@ -171,6 +171,8 @@
 
     <string name="shareText2">Hey, check out this cool new app called The AdCafé.</string>
 
+    <string name="changeTimeExplanation">Click continue if you wish to change the time you are notified daily about new ads.</string>
+
     <string name="feedbacktype">Feedback Type</string>
     <string name="feedbacktype1">Praise</string>
     <string name="feedbacktype2">Gripe</string>

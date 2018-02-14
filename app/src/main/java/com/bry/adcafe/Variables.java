@@ -87,6 +87,10 @@ public class Variables {
     public static int amountToPayPerTargetedView = 5;
     public static boolean doesUserWantNotifications = true;
 
+    public static int preferredHourOfNotf = 7;
+    public static int preferredMinuteOfNotf = 30;
+    public static String userName;
+
 
 
     public static void setNewNumberOfAds(int number){

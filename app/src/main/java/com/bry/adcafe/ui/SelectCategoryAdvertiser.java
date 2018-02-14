@@ -34,6 +34,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mindorks.placeholderview.PlaceHolderView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -48,6 +53,8 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
     private Context acCont;
     private boolean isDialogShowing = false;
 
+    private LinkedHashMap<Integer,LinkedHashMap<String,Long>> userStats = new LinkedHashMap<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +63,7 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
         ButterKnife.bind(this);
         mContext = this.getApplicationContext();
         acCont = SelectCategoryAdvertiser.this;
-        if(isOnline(mContext)) loadCategoriesFromFirebase();
+        if(isOnline(mContext)) loadUserStatsFirst();
         else{
             mainView.setVisibility(View.GONE);
             failedToLoadLayout.setVisibility(View.VISIBLE);
@@ -68,6 +75,34 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForStartingNextActivity,
                 new IntentFilter("START_NEXT_ACTIVITY"));
 
+    }
+
+    private void loadUserStatsFirst(){
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
+                .child(Constants.CLUSTERS_LIST);
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snap:dataSnapshot.getChildren()){
+                    Integer cpvValue = Integer.parseInt(snap.getKey());
+                    LinkedHashMap<String,Long> categoryStats = new LinkedHashMap<>();
+                    for (DataSnapshot categorySnap: snap.getChildren()){
+                        String category = categorySnap.getKey();
+                        long numberOfUsers = ((categorySnap.getChildrenCount()-1)*1000)
+                                +categorySnap.child(Long.toString(categorySnap.getChildrenCount())).getChildrenCount();
+                        categoryStats.put(category,numberOfUsers);
+                    }
+                    userStats.put(cpvValue,categoryStats);
+                }
+                loadCategoriesFromFirebase();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                failedToLoadLayout.setVisibility(View.VISIBLE);
+                loadingLayout.setVisibility(View.GONE);
+            }
+        });
     }
 
     private void loadCategoriesFromFirebase() {
@@ -173,8 +208,10 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
         FragmentManager fm = getFragmentManager();
         GetAmmountPerUserFragment getAmmountPerUserFragment = new GetAmmountPerUserFragment();
         getAmmountPerUserFragment.setMenuVisibility(false);
-        getAmmountPerUserFragment.show(fm, "Amount Per User.");
         getAmmountPerUserFragment.setContext(mContext);
+        getAmmountPerUserFragment.setStats(userStats);
+        getAmmountPerUserFragment.show(fm, "Amount Per User.");
+
     }
 
 
@@ -182,7 +219,7 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
     public void onClick(View v) {
         if(v==retryLoadingButton){
             if(isOnline(mContext)) {
-                loadCategoriesFromFirebase();
+                loadUserStatsFirst();
             }else{
                 Toast.makeText(mContext,"To continue,you need an internet connection",Toast.LENGTH_SHORT).show();
             }
