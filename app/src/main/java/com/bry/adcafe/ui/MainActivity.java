@@ -1065,7 +1065,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 s.vibrate(50);
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey, check out this cool new app called The AdCafé.");
+                sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getText(R.string.shareText2));
                 sendIntent.setType("text/plain");
                 startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.shareText)));
             }

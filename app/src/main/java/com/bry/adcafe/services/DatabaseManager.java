@@ -514,13 +514,20 @@ public class DatabaseManager {
     ////Other stuff.///
     private void setDateInSharedPrefs(String date,Context context){
         Log.d(TAG, "---Setting current date in shared preferences.");
-        SharedPreferences prefs = context.getSharedPreferences(Constants.DATE, MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("date", date);
-        editor.apply();
+        if(context == null)context = this.context;
+        try{
+            SharedPreferences prefs = context.getSharedPreferences(Constants.DATE, MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("date", date);
+            editor.apply();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     private void setUserDataInSharedPrefs(Context context) {
+        if(context == null) context = this.context;
         SharedPreferences pref5 = context.getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
         SharedPreferences.Editor editor5 = pref5.edit();
         editor5.clear();
@@ -574,6 +581,7 @@ public class DatabaseManager {
     }
 
     private void setSubsInSharedPrefs(Context context) {
+        if(context == null) context = this.context;
         Gson gson = new Gson();
         String hashMapString = gson.toJson(Variables.Subscriptions);
 

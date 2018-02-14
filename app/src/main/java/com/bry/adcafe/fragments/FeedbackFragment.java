@@ -62,7 +62,8 @@ public class FeedbackFragment extends DialogFragment implements View.OnClickList
             if(isNetworkConnected(mContext)){
                 String feedback = editText.getText().toString();
                 String feedbackType = spinner.getSelectedItem().toString();
-                uploadFeedBackToDatabase(feedback,feedbackType);
+                if(!feedback.isEmpty()) uploadFeedBackToDatabase(feedback,feedbackType);
+                else editText.setError("Say something!");
             }else{
                 Toast.makeText(mContext,"You need to be connected to the internet to send your feedback",Toast.LENGTH_SHORT).show();
             }

@@ -128,7 +128,7 @@ public class SelectCategory extends AppCompatActivity implements View.OnClickLis
                         Snackbar.LENGTH_LONG).show();
             }else{
                 if(isOnline(mContext)) {
-                    getAmountPerUser();
+                    if(!isFinishing()) getAmountPerUser();
                 }else{
                     Toast.makeText(mContext,"To continue,you need an internet connection",Toast.LENGTH_SHORT).show();
                 }
@@ -143,7 +143,7 @@ public class SelectCategory extends AppCompatActivity implements View.OnClickLis
     }
 
     private void getAmountPerUser(){
-        final Dialog d = new Dialog(mContext);
+        final Dialog d = new Dialog(this);
         d.setTitle("Amount to receive.");
         d.setContentView(R.layout.dialog7);
         Button b1 = (Button) d.findViewById(R.id.submitButton);

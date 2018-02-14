@@ -1,8 +1,10 @@
 package com.bry.adcafe.ui;
 
 import android.app.Dialog;
+import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
@@ -23,6 +25,8 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.adapters.SelectCategoryAdvertiserItem;
+import com.bry.adcafe.fragments.FeedbackFragment;
+import com.bry.adcafe.fragments.GetAmmountPerUserFragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -42,6 +46,7 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
     @Bind(R.id.categoryPlaceHolderView) PlaceHolderView placeHolderView;
     private Context mContext;
     private Context acCont;
+    private boolean isDialogShowing = false;
 
 
     @Override
@@ -59,6 +64,9 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
         retryLoadingButton.setOnClickListener(this);
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForSelectingCategory,
                 new IntentFilter("SELECTED_CATEGORY"));
+
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForStartingNextActivity,
+                new IntentFilter("START_NEXT_ACTIVITY"));
 
     }
 
@@ -99,8 +107,16 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG,"Selected category : "+ Variables.SelectedCategory);
-            getAmountPerUser();
-//            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+            if(!isFinishing()) getAmountPerUser();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForStartingNextActivity = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            startAdUpload();
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForSelectingCategory);
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
         }
     };
 
@@ -110,7 +126,7 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
         finish();
     }
 
-    private void getAmountPerUser(){
+    private void getAmountPerUser2(){
         final Dialog d = new Dialog(acCont);
         d.setTitle("Targeted people category.");
         d.setContentView(R.layout.dialog6);
@@ -131,7 +147,7 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
                     cpv = 8;
                 }
                 Variables.amountToPayPerTargetedView = cpv;
-                d.dismiss();
+                d.cancel();
                 startAdUpload();
                 LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForSelectingCategory);
             }
@@ -140,10 +156,25 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
         {
             @Override
             public void onClick(View v) {
-                d.dismiss();
+                d.cancel();
+            }
+        });
+        d.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                isDialogShowing = false;
             }
         });
         d.show();
+        isDialogShowing = true;
+    }
+
+    private void getAmountPerUser(){
+        FragmentManager fm = getFragmentManager();
+        GetAmmountPerUserFragment getAmmountPerUserFragment = new GetAmmountPerUserFragment();
+        getAmmountPerUserFragment.setMenuVisibility(false);
+        getAmmountPerUserFragment.show(fm, "Amount Per User.");
+        getAmmountPerUserFragment.setContext(mContext);
     }
 
 
@@ -156,5 +187,10 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
                 Toast.makeText(mContext,"To continue,you need an internet connection",Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    public void onBackPressed(){
+        super.onBackPressed();
     }
 }

@@ -10,6 +10,9 @@
     <string name="signInText">"Login."</string>
     <string name="passwordHintText">"Password."</string>
     <string name="confirmPasswordText">"Confirm Password."</string>
+
+
+
     <string name="emailText">"Email (you@example.com)."</string>
     <string name="nameText">"Name."</string>
     <string name="title_activity_login">"Login."</string>
@@ -21,6 +24,9 @@
     <string name="connectToInternet">"You need an internet connection to continue…"</string>
     <string name="noInternetForLoadAds">You need an internet connection to load the ads.</string>
     <string name="shared">"Shared."</string>
+
+
+
     <string name="connectionBack">"Your back online, you may now continue."</string>
     <string name="Logout">"Logout"</string>
     <string name="pinning">"Pinning."</string>
@@ -33,6 +39,9 @@
     <string name="hasBeenPinned">"You already pinned that."</string>
     <string name="unpinned">"Unpinned."</string>
     <string name="failedUnpinned">"We're unable to unpin that right now."</string>
+
+
+
     <string name="cannotUploadFailedFirebase">"Your connection may be low,try again after a few moments."</string>
     <string name="UploadAdNoConnection">"You may need internet connection to Upload your Advert."</string>
     <string name="DoNotPayTwice">"Note that once you pay, you can upload your advert at any time."</string>
@@ -43,6 +52,9 @@
     <string name="unsuccessfullyUploaded">"Something went wrong,try uploading again after a few minutes."</string>
     <string name="uploadMessage">"Upload may take some time..."</string>
     <string name="settingUpMessage">"Setting a couple of things up..."</string>
+
+
+
     <string name="settingUpMessage2">"Setting a few things up..."</string>
     <string name="settingUpAccountMessage">"Setting up your account..."</string>
     <string name="loadingTodaysAdsmessage">"Loading today's ads..."</string>
@@ -50,7 +62,10 @@
     <string name="failedToLoadTodaysAds">"Failed to load today's ads."</string>
     <string name="noteForPickingMessage">"The number shown is by 1000 (*1000 users). Select having that in mind."</string>
     <string name="pickBeforePaying">"So make sure you pick before making any payments."</string>
-    <string name="shareText">"Share for awesomeness."</string>
+    <string name="shareText">"Share App for awesomeness."</string>
+
+
+
     <string name="confirmMessage">"We've just sent you a confirmation email. Head over to your inbox to verify and activate your account(Worry not, its only a one time thing)."</string>
     <string name="next">NEXT</string>
     <string name="skip">SKIP</string>
@@ -153,6 +168,8 @@
 
     <string name="noteAboutChoosingAmmount2">Remember: The higher the amount chosen, the lower the number of banners you might see. So we recommend 3 Ksh
         per view.</string>
+
+    <string name="shareText2">Hey, check out this cool new app called The AdCafé.</string>
 
     <string name="feedbacktype">Feedback Type</string>
     <string name="feedbacktype1">Praise</string>

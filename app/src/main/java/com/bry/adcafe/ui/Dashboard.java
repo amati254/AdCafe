@@ -1,5 +1,6 @@
 package com.bry.adcafe.ui;
 
+import android.app.Dialog;
 import android.app.FragmentManager;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.Image;
+import android.os.Vibrator;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -20,6 +22,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +58,7 @@ public class Dashboard extends AppCompatActivity {
     @Bind(R.id.ChangeCPVBtn) public ImageButton mCPVBtn;
     @Bind(R.id.LogoutBtn) public ImageButton mLogout;
     @Bind(R.id.payoutBtn) public ImageButton payoutBtn;
+    @Bind(R.id.shareAppBtn) public ImageButton shareAppBtn;
 
 
     @Override
@@ -194,6 +198,13 @@ public class Dashboard extends AppCompatActivity {
             }
         });
 
+        shareAppBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                promptUserToShareApp();
+            }
+        });
+
     }
 
     @Override
@@ -251,13 +262,11 @@ public class Dashboard extends AppCompatActivity {
 
     }
 
-    private void promptUserAboutNotifications(){
+    private void promptUserAboutNotifications2(){
         String message;
         if(Variables.doesUserWantNotifications)
-            message = "Do you wish to put off daily morning notifications about new ads?";
+            message = "Do you wish to put off daily morning alerts about new ads?";
         else message = "Do you wish to put back on daily morning notifications?";
-
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Morning Notifications");
         builder.setMessage(message)
@@ -277,6 +286,36 @@ public class Dashboard extends AppCompatActivity {
                 }).show();
     }
 
+    private void promptUserAboutNotifications(){
+        String message;
+        if(Variables.doesUserWantNotifications)
+            message = "Do you wish to put off daily morning notifications about new ads?";
+        else message = "Do you wish to put back on daily morning notifications?";
+
+        final Dialog d = new Dialog(this);
+        d.setTitle("Notifications.");
+        d.setContentView(R.layout.dialog8);
+        Button b1 = (Button) d.findViewById(R.id.continueBtn);
+        Button b2 = (Button) d.findViewById(R.id.cancelBtn);
+        TextView t = (TextView) d.findViewById(R.id.explanation);
+        t.setText(message);
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean newValue = !Variables.doesUserWantNotifications;
+                setUsersPreferedNotfStatus(newValue);
+            }
+        });
+        b2.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                d.cancel();
+            }
+        });
+        d.show();
+    }
+
     private void promptUserAboutChangingPrice(){
         FragmentManager fm = getFragmentManager();
         ChangeCPVFragment cpvFragment = new ChangeCPVFragment();
@@ -285,7 +324,9 @@ public class Dashboard extends AppCompatActivity {
         cpvFragment.setContext(mContext);
     }
 
-    private void promptUserIfSureToLogout(){
+
+
+    private void promptUserIfSureToLogout2(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("AdCafé");
         builder.setMessage("Are you sure you want to log out?")
@@ -304,9 +345,44 @@ public class Dashboard extends AppCompatActivity {
                 }).show();
     }
 
-    private void promptUserAboutPayout(){
-
+    private void promptUserIfSureToLogout(){
+        final Dialog d = new Dialog(this);
+        d.setTitle("Logout.");
+        d.setContentView(R.layout.dialog9);
+        Button b1 = (Button) d.findViewById(R.id.continueBtn);
+        Button b2 = (Button) d.findViewById(R.id.cancelBtn);
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logoutUser();
+            }
+        });
+        b2.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                d.cancel();
+            }
+        });
+        d.show();
     }
+
+    private void promptUserAboutPayout(){
+        Toast.makeText(mContext,"Payout",Toast.LENGTH_SHORT).show();
+    }
+
+    private void promptUserToShareApp(){
+        Vibrator s = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        s.vibrate(50);
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getText(R.string.shareText2));
+        sendIntent.setType("text/plain");
+        startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.shareText)));
+    }
+
+
+
 
     public void promptUserAboutChanges(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

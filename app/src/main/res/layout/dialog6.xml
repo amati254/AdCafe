@@ -51,22 +51,28 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_marginLeft="30dp"
+                android:layout_marginLeft="10dp"
                 android:layout_marginTop="20dp"
-                android:layout_height="wrap_content">
-                <Button
-                    android:layout_width="wrap_content"
-                    android:text="continue"
-                    android:textColor="@color/white"
-                    android:id="@+id/submitButton"
-                    android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp">
                 <Button
                     android:layout_width="wrap_content"
                     android:text="Cancel"
-                    android:layout_marginLeft="100dp"
-                    android:textColor="@color/primary_text"
+                    android:textColor="@color/colorPrimary"
+                    android:background="@null"
                     android:id="@+id/cancelButton"
                     android:layout_height="wrap_content" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:text="continue"
+                    android:layout_marginLeft="150dp"
+                    android:textColor="@color/colorPrimary"
+                    android:background="@null"
+                    android:id="@+id/submitButton"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="180dp" />
+
             </RelativeLayout>
         </RadioGroup>
 
