@@ -14,7 +14,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -88,6 +90,19 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
 
         mLoginTextView.setOnClickListener(this);
         mCreateUserButton.setOnClickListener(this);
+        mConfirmPasswordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) ||
+                        (actionId == EditorInfo.IME_ACTION_DONE) ||
+                        (actionId == EditorInfo.IME_ACTION_NEXT) ||
+                        (actionId == EditorInfo.IME_ACTION_GO)) {
+                    mCreateUserButton.performClick();
+                    Log.i(TAG,"Enter pressed");
+                }
+                return false;
+            }
+        });
 
     }
 
@@ -250,55 +265,11 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
             mAvi.setVisibility(View.VISIBLE);
             mLoadingText.setVisibility(View.VISIBLE);
             mConfirmEmailLayout.setVisibility(View.GONE);
-
-//            generateClusterIDFromFlagedClusters();
         }else {
             Toast.makeText(mContext,"Your email is not verified!",Toast.LENGTH_SHORT).show();
         }
     }
 
-//    private void setUpFirebaseNodes() {
-//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//        String uid = user.getUid();
-//        mRelative.setAlpha(0.0f);
-//
-//        //Creates nodes for totals seen today and sets them to 0;
-//        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
-//                .child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_TODAY);
-//        adRef.setValue(Variables.getAdTotal(mKey));
-//
-//        //Creates nodes for totals seen all month and sets them to 0;
-//        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
-//                .child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
-//        adRef2.setValue(Variables.getMonthAdTotals(mKey));
-//
-//        //This is going to change
-//        //Creates node for cluster ID and sets its value to ID;
-//        DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
-//                .child(uid).child(Constants.CLUSTER_ID);
-//        adRef3.setValue(mClusterID);
-//
-//        //This is going to change since user will subscribe to multiple categories based on preferences
-//        //Adds the new users id to children in its respective cluster.
-//        DatabaseReference adRef4 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
-//                .child(Constants.CLUSTERS_LIST).child(Integer.toString(mClusterID));
-//        DatabaseReference pushRef4 = adRef4.push();
-//        String pushId  = pushRef4.getKey();
-//        pushRef4.setValue(uid);
-//
-//        //sets pushref key generated from adding user to cluster to clusterListPushrefID;
-//        DatabaseReference adRef5 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
-//                .child(uid).child(Constants.CLUSTER_LIST_PUSHREF_ID);
-//        adRef5.setValue(pushId);
-//
-//        //sets the date for when last used in firebase.
-//        DatabaseReference adRef7 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
-//                .child(uid).child(Constants.DATE_IN_FIREBASE);
-//        adRef7.setValue(getDate());
-//
-//        startMainActivity();
-//
-//    }
 
     private void startMainActivity(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -346,6 +317,10 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     private boolean isValidName(String name) {
         if (name.equals("")) {
             mNameEditText.setError("Please enter your name");
+            return false;
+        }
+        if(name.length()>16){
+            mNameEditText.setError("Your name is too long");
             return false;
         }
         return true;

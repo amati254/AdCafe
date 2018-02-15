@@ -71,7 +71,7 @@
             android:layout_width="match_parent"
             android:orientation="vertical"
             android:id="@+id/chooseAmountLayout"
-            android:translationX="200dp"
+            android:translationX="500dp"
             android:visibility="gone"
             android:layout_height="wrap_content">
 

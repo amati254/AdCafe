@@ -529,6 +529,10 @@ public class DatabaseManager {
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.DATE_IN_FIREBASE);
         adRef.setValue(getDate());
+
+        DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.LAST_SEEN_DATE_IN_DAYS);
+        adRef2.setValue(getDateInDays());
     }
 
     ////load user data methods.//////////////////////////////////////////////////////////////////////////
@@ -978,6 +982,13 @@ public class DatabaseManager {
                 LocalBroadcastManager.getInstance(myContext).sendBroadcast(intent);
             }
         });
+    }
+
+    private long getDateInDays(){
+        long currentTimeMillis = System.currentTimeMillis();
+        long currentDay = (currentTimeMillis+1000*60*60*3)/(1000*60*60*24);
+        Log.d(TAG,"The current day is : "+currentDay);
+        return currentDay;
     }
 
 
