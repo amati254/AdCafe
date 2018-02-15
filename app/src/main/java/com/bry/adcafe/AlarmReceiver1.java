@@ -64,6 +64,7 @@ public class AlarmReceiver1 extends BroadcastReceiver {
     private LinkedHashMap<String,Integer> Subscriptions  = new LinkedHashMap<>();
     private int constantAmountPerView = 3;
 
+    private String userName;
 
 
     @Override
@@ -112,15 +113,19 @@ public class AlarmReceiver1 extends BroadcastReceiver {
                 DataSnapshot cpvSnap = dataSnapshot.child(Constants.CONSTANT_AMMOUNT_PER_VIEW);
                 constantAmountPerView = cpvSnap.getValue(int.class);
 
+                DataSnapshot usernameSnap = dataSnapshot.child(Constants.USER_NICKNAME);
+                userName = usernameSnap.getValue(String.class);
+
                 DataSnapshot subSnap = dataSnapshot.child(Constants.SUBSCRIPTION_lIST);
                 for(DataSnapshot snap: subSnap.getChildren()){
-                    numberOfSubsFromFirebase = (int)dataSnapshot.getChildrenCount();
+//                    numberOfSubsFromFirebase = (int)dataSnapshot.getChildrenCount();
                     String category = snap.getKey();
                     Integer cluster = snap.getValue(Integer.class);
                     Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
                     Subscriptions.put(category,cluster);
 //                    checkInForEachCategory(category,cluster);
                 }
+                numberOfSubsFromFirebase = Subscriptions.size();
                 checkNumberForEach();
             }
 
@@ -197,8 +202,8 @@ public class AlarmReceiver1 extends BroadcastReceiver {
 
     private void handleEverything(int number) {
         String message;
-        if (number > 1)message = Html.fromHtml("&#128077;") + "We've got " + number + " ads for you today.";
-        else message = Html.fromHtml("&#128516;") + "We've got " + number + " ad for you today.";
+        if (number > 1)message = "Hey "+userName+", "+ "we've got " + number + " ads for you today."+Html.fromHtml("&#128076;") ;
+        else message = "Hey "+userName+", "+ "we've got " + number + " ad for you today."+Html.fromHtml("&#128516;") ;
         Context context = mContext;
         notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         Intent mIntent = new Intent(context, Splash.class);

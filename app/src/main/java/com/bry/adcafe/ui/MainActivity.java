@@ -2113,7 +2113,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         try {
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmStartTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-            Log.w("Alarm", "Alarms set for everyday 04:15 hrs.");
+            String message = String.format("Alarms set for everyday %s:%s hrs.",Variables.preferredHourOfNotf,Variables.preferredMinuteOfNotf);
+            Log.w("Alarm", message);
         }catch (Exception e){
             e.printStackTrace();
         }

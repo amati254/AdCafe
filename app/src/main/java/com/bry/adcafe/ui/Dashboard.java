@@ -298,7 +298,7 @@ public class Dashboard extends AppCompatActivity {
     private void promptUserAboutNotifications(){
         String message;
         if(Variables.doesUserWantNotifications)
-            message = "Do you wish to put off daily morning notifications about new ads?";
+            message = "Do you wish to put off daily morning alerts about new ads?";
         else message = "Do you wish to put back on daily morning notifications?";
 
         final Dialog d = new Dialog(this);
@@ -314,7 +314,8 @@ public class Dashboard extends AppCompatActivity {
         String hour = Integer.toString(Variables.preferredHourOfNotf);
         String minute = Integer.toString(Variables.preferredMinuteOfNotf);
         if(Variables.preferredHourOfNotf<10) hour = "0"+hour;
-        timeTxt.setText(String.format("Time for daily notifications : %s:%s", hour, minute));
+        if(Variables.preferredMinuteOfNotf<10) minute = "0"+minute;
+        timeTxt.setText(String.format("Set time : %s:%s", hour, minute));
 
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -344,7 +345,8 @@ public class Dashboard extends AppCompatActivity {
                 String hour = Integer.toString(Variables.preferredHourOfNotf);
                 String minute = Integer.toString(Variables.preferredMinuteOfNotf);
                 if(Variables.preferredHourOfNotf<10) hour = "0"+hour;
-                timeTxt.setText(String.format("Time for daily notifications : %s:%s", hour, minute));
+                if(Variables.preferredMinuteOfNotf<10) minute = "0"+minute;
+                timeTxt.setText(String.format("Set time : %s:%s", hour, minute));
 
                 setUsersPreferredNotificationTime();
             }
