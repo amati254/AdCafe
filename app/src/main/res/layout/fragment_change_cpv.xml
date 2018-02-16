@@ -79,7 +79,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/topText"
-                android:textAlignment="center"
                 android:textSize="14sp"
                 android:padding="20dp"
                 android:text="Choose the amount you wish to charge for each banner you see." />
@@ -121,10 +120,8 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:textSize="13sp"
-                        android:textAlignment="center"
                         android:text="@string/noteAboutChoosingAmmount2"
                         android:layout_height="wrap_content" />
-
 
                     <RelativeLayout
                         android:layout_width="match_parent"

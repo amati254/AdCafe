@@ -239,7 +239,11 @@ public class SAContainer {
 
         Calendar cal2 = Calendar.getInstance();
         int year2 = cal2.get(Calendar.YEAR);
+        int day2 = cal2.get(Calendar.DAY_OF_MONTH);
+        int month2 = cal2.get(Calendar.MONTH);
+
         String yearName;
+        String dayWord;
 
         if(year == year2){
             Log.d(TAG,"Ad was pined this year...");
@@ -249,6 +253,10 @@ public class SAContainer {
             yearName =", "+Integer.toString(year);
         }else{
             yearName =", "+ Integer.toString(year);
+        }
+
+        if(day2 == (dayOfMonth-1) && month2 == monthOfYear){
+            return "Yesterday";
         }
 
         return dayOfMonth+" "+monthName+yearName;
