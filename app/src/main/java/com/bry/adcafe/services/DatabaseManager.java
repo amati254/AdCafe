@@ -11,8 +11,6 @@ import android.widget.Toast;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.User;
-import com.bry.adcafe.ui.LoginActivity;
-import com.bry.adcafe.ui.MainActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -28,12 +26,8 @@ import com.google.gson.Gson;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -46,17 +40,18 @@ public class DatabaseManager {
     private String mKey = "";
     private int numberOfSubs = 0;
     private int iterations = 0;
-    private Context context;
+    private Context DBContext;
     private List<String> categoryList = new ArrayList<>();
     private boolean isUserAddingANewCategory = false;
     private int iterationsForResettingCPV = 0;
+
 
     ////Create user methods//////
 
     public void createUserSpace(final Context mContext){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
-        context = mContext;
+        DBContext = mContext;
 
         //Creates nodes for totals seen today and sets them to 0;
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
@@ -121,7 +116,7 @@ public class DatabaseManager {
     }
 
     public void setContext(Context context){
-        this.context = context;
+        this.DBContext = context;
     }
 
     public void unSubscribeUserFormAdvertCategory(String AdvertCategory, int clusterIDInCategory){
@@ -172,11 +167,11 @@ public class DatabaseManager {
                 Variables.setCurrentSubscriptionIndex(newIndex);
 
                 updateCurrentSubIndex();
-                setUserDataInSharedPrefs(context);
+                setUserDataInSharedPrefs(DBContext);
                 Variables.hasChangesBeenMadeToCategories = true;
 
                 Intent intent = new Intent(Constants.FINISHED_UNSUBSCRIBING);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                LocalBroadcastManager.getInstance(DBContext).sendBroadcast(intent);
             }
         });
 
@@ -328,7 +323,7 @@ public class DatabaseManager {
                         loadNewSubList();
                         isUserAddingANewCategory = false;
                     }else{
-                        setDateInSharedPrefs(getDate(),context);
+                        setDateInSharedPrefs(getDate(), DBContext);
                         reloadUsersSubscriptions(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
                     }
                 }
@@ -541,7 +536,7 @@ public class DatabaseManager {
     ////Other stuff.///
     private void setDateInSharedPrefs(String date,Context context){
         Log.d(TAG, "---Setting current date in shared preferences.");
-        if(context == null)context = this.context;
+        if(context == null)context = this.DBContext;
         try{
             SharedPreferences prefs = context.getSharedPreferences(Constants.DATE, MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
@@ -554,7 +549,7 @@ public class DatabaseManager {
     }
 
     private void setUserDataInSharedPrefs(Context context) {
-        if(context == null) context = this.context;
+        if(context == null) context = this.DBContext;
         SharedPreferences pref5 = context.getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
         SharedPreferences.Editor editor5 = pref5.edit();
         editor5.clear();
@@ -622,7 +617,7 @@ public class DatabaseManager {
     }
 
     private void setSubsInSharedPrefs(Context context) {
-        if(context == null) context = this.context;
+        if(context == null) context = this.DBContext;
         Gson gson = new Gson();
         String hashMapString = gson.toJson(Variables.Subscriptions);
 
@@ -701,8 +696,8 @@ public class DatabaseManager {
                 updateCurrentSubIndex();
 
                 Intent intent = new Intent(Constants.SET_UP_USERS_SUBSCRIPTION_LIST);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-                setUserDataInSharedPrefs(context);
+                LocalBroadcastManager.getInstance(DBContext).sendBroadcast(intent);
+                setUserDataInSharedPrefs(DBContext);
                 Variables.hasChangesBeenMadeToCategories = true;
             }
 
@@ -915,7 +910,7 @@ public class DatabaseManager {
             public void onComplete(@NonNull Task<Void> task) {
                 iterations++;
                 if(iterations == numberOfSubs){
-                    setDateInSharedPrefs(getDate(),context);
+                    setDateInSharedPrefs(getDate(), DBContext);
                     Variables.constantAmountPerView = newConstant;
                     setNewConstantAsConstantInDatabase();
                     reloadUsersSubscriptions(Constants.LOADED_USER_DATA_SUCCESSFULLY);
@@ -955,9 +950,9 @@ public class DatabaseManager {
                     Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
                     Variables.Subscriptions.put(category,cluster);
                 }
-                setUserDataInSharedPrefs(context);
+                setUserDataInSharedPrefs(DBContext);
                 Intent intent = new Intent(intentString);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                LocalBroadcastManager.getInstance(DBContext).sendBroadcast(intent);
             }
 
             @Override
@@ -989,6 +984,136 @@ public class DatabaseManager {
         long currentDay = (currentTimeMillis+1000*60*60*3)/(1000*60*60*24);
         Log.d(TAG,"The current day is : "+currentDay);
         return currentDay;
+    }
+
+
+
+
+    //These methods will check if all users subscriptions are ok.This is to prevent clusters from having more users than intended.
+    public void checkIfClustersAreOk(final LinkedHashMap<String,Integer> subscriptions,final Context context, final String intentFilter){
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
+                .child(Constants.CLUSTERS_LIST).child(Integer.toString(Variables.constantAmountPerView));
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                LinkedHashMap<String, Integer> subscriptionsToBeReset = new LinkedHashMap<>();
+
+                for(String category: subscriptions.keySet()){
+                    Integer clusterId = subscriptions.get(category);
+                    if(dataSnapshot.child(category).child(Integer.toString(clusterId)).getChildrenCount()>Constants.NUMBER_OF_USERS_PER_CLUSTER){
+                        subscriptionsToBeReset.put(category,clusterId);
+                    }
+                }
+
+                if(!subscriptionsToBeReset.isEmpty()){
+                    resetUsersSubscriptions(subscriptionsToBeReset,context,intentFilter);
+                }else{
+                    Intent intent = new Intent(intentFilter);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void resetUsersSubscriptions(final LinkedHashMap<String,Integer> subscriptionsToBeReset,final Context context,final String intentFilter){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        numberOfSubs = subscriptionsToBeReset.size();
+         iterations = 0;
+         for(final String category:subscriptionsToBeReset.keySet()){
+             Integer clusterId = subscriptionsToBeReset.get(category);
+
+             DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
+                     .child(Constants.CLUSTERS_LIST).child(Integer.toString(Variables.constantAmountPerView))
+                     .child(category)
+                     .child(Integer.toString(clusterId))
+                     .child(uid);
+             dbRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                 @Override
+                 public void onComplete(@NonNull Task<Void> task) {
+                    getNewClusterId(category,context,intentFilter);
+                 }
+             });
+         }
+    }
+
+    private void getNewClusterId(final String category, final Context context, final String intentFilter){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
+                .child(Constants.CLUSTERS_LIST).child(Integer.toString(Variables.constantAmountPerView))
+                .child(category);
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //This loads the current cluster in AdCategory
+                long currentCluster;
+                if(dataSnapshot.getChildrenCount() == 0){
+                    currentCluster = dataSnapshot.getChildrenCount()+1;
+                    Log.d(TAG,"The adCategory is empty.Setting current cluster to 1");
+                }else{
+                    currentCluster = dataSnapshot.getChildrenCount();
+                    Log.d(TAG,"The latest current cluster in "+category+" category is :"+currentCluster);
+                }
+
+                //this loads number of users in the current cluster.
+                DataSnapshot UsersInCurrentCluster = dataSnapshot.child(Integer.toString((int)currentCluster));
+                long numberOfUsersInCurrentCluster;
+                if(UsersInCurrentCluster.getChildrenCount()==0){
+                    numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount();
+                    Log.d(TAG,"--number of users in current clusters category is --"+numberOfUsersInCurrentCluster);
+                }else{
+                    numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount()+1;
+                    Log.d(TAG,"--number of users in current clusters category is --"+numberOfUsersInCurrentCluster);
+                }
+
+                //this checks if the number of users in cluster exceeds limit
+                int clusterIDForSpecificCategory;
+                if(numberOfUsersInCurrentCluster<Constants.NUMBER_OF_USERS_PER_CLUSTER){
+                    Log.d(TAG,"--Number of users in the current cluster is less than limit.setting AdCategory cluster to --"+currentCluster);
+                    clusterIDForSpecificCategory = (int)currentCluster;
+                }else {
+                    Log.d(TAG, "--Number of users in the current cluster exceeds limit.setting AdCategory cluster to --" + (currentCluster + 1));
+                    clusterIDForSpecificCategory = (int)currentCluster+1;
+                }
+                subscribeToNewClusterAndAddClusterToUserList(category,clusterIDForSpecificCategory,context,intentFilter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void subscribeToNewClusterAndAddClusterToUserList(final String category, final int clusterId, final Context context, final String intentFilter){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        //this subscribes user to Cluster in Advert Category
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
+                .child(Constants.CLUSTERS_LIST).child(Integer.toString(Variables.constantAmountPerView))
+                .child(category)
+                .child(Integer.toString(clusterId)).child(uid);
+        dbRef.setValue(uid);
+
+        DatabaseReference dbRefUser = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.SUBSCRIPTION_lIST).child(category);
+        dbRefUser.setValue(clusterId).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                iterations++;
+                if(iterations == numberOfSubs){
+                    DBContext = context;
+                    reloadUsersSubscriptions(intentFilter);
+                }
+            }
+        });
     }
 
 

@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/topText"
         android:layout_marginTop="10dp"
-        android:textAlignment="center"
+        android:layout_marginLeft="10dp"
         android:textSize="14sp"
         android:padding="10dp"
         android:text="Also, choose the amount you wish to charge for each banner you see." />

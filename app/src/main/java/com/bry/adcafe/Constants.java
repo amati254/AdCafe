@@ -102,5 +102,6 @@ public class Constants {
     public static String PREFERRED_NOTF_MIN = "PreferredNotfMin";
     public static String USER_NICKNAME = "UserName";
     public static String LAST_SEEN_DATE_IN_DAYS = "LSDate";
+    public static int NUMBER_OF_USERS_PER_CLUSTER = 1000;
 
 }

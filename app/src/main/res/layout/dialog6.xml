@@ -9,10 +9,11 @@
         android:layout_height="wrap_content"
         android:id="@+id/topText"
         android:layout_marginTop="10dp"
-        android:textAlignment="center"
         android:textSize="15sp"
         android:padding="10dp"
-        android:text="Also, choose the category of viewers your targeting. This is based on the amount each user charges for every banner they see. " />
+        android:layout_marginLeft="10dp"
+        android:text="Also, choose the category of viewers your targeting. This is based on the amount each user charges for every banner they see. "
+        android:layout_marginStart="10dp" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -75,10 +76,10 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="0dp"
                 android:layout_marginTop="20dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp">
+                android:layout_marginStart="0dp">
                 <Button
                     android:layout_width="wrap_content"
                     android:text="Cancel"
