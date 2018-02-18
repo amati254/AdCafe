@@ -950,7 +950,11 @@ public class DatabaseManager {
                     Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
                     Variables.Subscriptions.put(category,cluster);
                 }
-                setUserDataInSharedPrefs(DBContext);
+                try{
+                    setUserDataInSharedPrefs(DBContext);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
                 Intent intent = new Intent(intentString);
                 LocalBroadcastManager.getInstance(DBContext).sendBroadcast(intent);
             }

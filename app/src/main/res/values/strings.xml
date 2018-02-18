@@ -71,17 +71,19 @@
     <string name="skip">SKIP</string>
     <string name="start">GOT IT</string>
     <string name="slider1text">It\'s basically an app for advertising information, products and all
-    types of services to users from across the country. </string>
+    types of services to users in the app from across the country. </string>
     <string name="slider1title">Tap, View And Go</string>
     <string name="slider2title">AdCafé</string>
-    <string name="slider2text">Basically you\'ll be able to view ads uploaded by advertisers in the app
-    and also advertise your product to the app\'s users.</string>
+    <string name="slider2text">Basically you can charge advertisers for your time to view their ads in the app and also
+        advertise your product to the app\'s users.</string>
     <string name="slider2hello">Hello!</string>
     <string name="slider2take">Take a Tour</string>
 
 
-    <string name="slide3text2">We want to make advertising cool; We believe that the adCafe can do just that, and do it in a way that is
+    <string name="slide3text21">We want to make advertising cool; We believe that the adCafe can do just that, and do it in a way that is
         effective, interesting and maybe, just maybe, entertaining.</string>
+
+    <string name="slide3text2">Your attention has value to advertisers. Here you can charge them for it, making money in the process.</string>
 
     <string name="slide4text">Even better! Among many other benefits, the AdCafe gives you the ability to
         target many of its users in a very short period of time.</string>
@@ -121,8 +123,8 @@
     <string name="slide13text">Its quite simple really. Essentially you will be monetised based on (and in proportion to) the
         number of ads you see.</string>
 
-    <string name="Advertiserslide1text">Advertising in the AdCafe is one of the most simple and convenient way to
-        advertise, as it offers benefits to help you promote your product.</string>
+    <string name="Advertiserslide1text">Advertising in the AdCafe is one of the simplest and most convenient way to
+        advertise, as it has many benefits that help you promote your product.</string>
 
     <string name="Advertiserslide2text">Essentially, we only advertise by views. When our user sees a banner for 7 seconds,
         we consider advertising to have taken place.</string>
@@ -135,13 +137,13 @@
     <string name="targetingExplanation">Here you can target the type of users you want to reach based on
          the general category of product you deal with.</string>
 
-    <string name="affordablilityexplanation">As we only charge 4000Ksh per 1000 views, advertising here is
-        flexible as per your financial ability.</string>
+    <string name="affordablilityexplanation">Advertising here is affordable and flexible as per your financial ability. The price,
+        however, is dependent on the price your targeted users charge for their time.</string>
 
-    <string name="reimbursabilityexplanation">In the event your ad doesn\'t reach the number of users you intended,
-        you will be reimbursed the remaining amount.</string>
+    <string name="reimbursabilityexplanation">In the event your ad doesn\'t reach your targeted number of users,
+        you can take back the remaining amount through the Ad Stats Window.</string>
 
-    <string name="monitorableexplanation">Through the Ad Stats Window(Dashboars->Ad Stats), you can find
+    <string name="monitorableexplanation">Through the Ad Stats Window(Dashboard->Ad Stats), you can find
         out in real time how many users have seen your ad and the amount to be reimbursed.</string>
 
     <string name="advertisePageExplaation">The page is designed similar to the main page. This basically will give you a feel of how the

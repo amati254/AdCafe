@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,9 +18,6 @@ import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.models.Advert;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,6 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.mindorks.placeholderview.PlaceHolderView;
+import com.mindorks.placeholderview.annotations.Click;
 import com.mindorks.placeholderview.annotations.Layout;
 import com.mindorks.placeholderview.annotations.NonReusable;
 import com.mindorks.placeholderview.annotations.Resolve;
@@ -52,6 +51,7 @@ public class MyAdStatsItem {
     @View(R.id.AmountToReimburse) private TextView mAmountToReimburse;
     @View(R.id.hasBeenReimbursed) private TextView mHasBeenReimbursed;
     @View(R.id.dateUploaded) private TextView mDateUploaded;
+    @View(R.id.reimburseBtn) private Button mReimburseButton;
 
     private Context mContext;
     private PlaceHolderView mPlaceHolderView;
@@ -95,7 +95,14 @@ public class MyAdStatsItem {
         }catch (Exception e){
             e.printStackTrace();
         }
+        if(isCardForYesterdayAds())mReimburseButton.setVisibility(android.view.View.VISIBLE);
         loadListeners();
+//        mReimburseButton.setOnClickListener(new android.view.View.OnClickListener() {
+//            @Override
+//            public void onClick(android.view.View v) {
+//
+//            }
+//        });
     }
 
     private void setImage() {
@@ -122,6 +129,11 @@ public class MyAdStatsItem {
             e.printStackTrace();
         }
         Glide.with(mContext).load(bitmapToByte(getResizedBitmap(mAdvert.getImageBitmap(),150))).into(mAdImage);
+    }
+
+    @Click(R.id.reimburseBtn)
+    private void onClick(){
+
     }
 
 
@@ -320,4 +332,14 @@ public class MyAdStatsItem {
             super.onPreExecute();
         }
     }
+
+    private boolean isCardForYesterdayAds(){
+        return mAdvert.getDateInDays()+1 < getDateInDays();
+    }
+
+    private long getDateInDays(){
+        long currentTimeMillis = System.currentTimeMillis();
+        return (currentTimeMillis+1000*60*60*3)/(1000*60*60*24);
+    }
+
 }

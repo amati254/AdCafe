@@ -183,14 +183,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override protected void onResume() {
         Variables.isMainActivityOnline = true;
+        super.onResume();
         if(isTimerPausedBecauseOfOfflineActivity) setBooleanForResumingTimer();
         try{
             onclicks();
         }catch (Exception e){
             e.printStackTrace();
         }
-
-        super.onResume();
         if (!getCurrentDateInSharedPreferences().equals("0") && !getCurrentDateInSharedPreferences().equals(getDate())) {
             Log.d(TAG, "---Date in shared preferences does not match current date,therefore resetting everything.");
             sendBroadcastToUnregisterAllReceivers();
@@ -411,7 +410,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Variables.isStartFromLogin = false;
         if(isNewDay){
-            new DatabaseManager().checkIfNeedToResetUsersSubscriptions(mContext);
+            hideViews();
+            DatabaseManager dbmanager = new DatabaseManager();
+            dbmanager.setContext(mContext);
+            dbmanager.checkIfNeedToResetUsersSubscriptions(mContext);
             LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForDoneCheckingIfNeedToReCreateClusters,
                     new IntentFilter(Constants.LOADED_USER_DATA_SUCCESSFULLY));
             isNewDay = false;
@@ -440,25 +442,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setUpAllTheViews();
         hideViews();
         getGetAdsFromFirebase();
-//        mAvi.setVisibility(View.VISIBLE);
-//        mLoadingText.setVisibility(View.VISIBLE);
-//        mBottomNavButtons.setVisibility(View.GONE);
-//        mSwipeView.setVisibility(View.INVISIBLE);
-//        mAdCounterView.setVisibility(View.GONE);
-//        findViewById(R.id.easterText).setVisibility(View.GONE);
-//        mAviLoadingMoreAds.setVisibility(View.GONE);
-
-//        Log.d(TAG, "---Setting up mViewRunnable thread...");
-//        mViewRunnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                getAds();
-//            }
-//        };
-//        Thread thread = new Thread(null, mViewRunnable, "Background");
-//        Log.d(TAG, "---Starting thread...");
-//        thread.start();
-
     } ///////////////////////////
 
 

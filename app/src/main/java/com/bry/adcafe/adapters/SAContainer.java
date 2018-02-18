@@ -255,11 +255,20 @@ public class SAContainer {
             yearName =", "+ Integer.toString(year);
         }
 
-        if(day2 == (dayOfMonth-1) && month2 == monthOfYear){
-            return "Yesterday";
+        String ret = dayOfMonth+" "+monthName+yearName;
+
+        if((-days) == getDateInDays()-1){
+            ret = "Yesterday";
         }
 
-        return dayOfMonth+" "+monthName+yearName;
+        return ret;
+    }
+
+    private long getDateInDays(){
+        long currentTimeMillis = System.currentTimeMillis();
+        long currentDay = (currentTimeMillis+1000*60*60*3)/(1000*60*60*24);
+        Log.d(TAG,"The current day is : "+currentDay);
+        return currentDay;
     }
 
     private String getMonthName_Abbr(int month) {
