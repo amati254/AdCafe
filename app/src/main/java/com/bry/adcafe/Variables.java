@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.util.Log;
 
+import com.braintreepayments.cardform.view.CardForm;
 import com.bry.adcafe.adapters.AdvertCard;
 import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.models.Advert;
@@ -90,6 +91,11 @@ public class Variables {
     public static int preferredHourOfNotf = 7;
     public static int preferredMinuteOfNotf = 30;
     public static String userName;
+
+    public static String cardNumber;
+    public static String expiration;
+    public static String cvv;
+    public static String postalCode;
 
 
 

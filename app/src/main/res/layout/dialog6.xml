@@ -32,7 +32,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                android:text="3 Ksh per view." />
+                android:text="1 Ksh per view." />
 
             <RadioButton
                 android:id="@+id/radioButton5"
@@ -40,20 +40,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                android:text="5 Ksh per view. (Recommended)" />
+                android:text="3 Ksh per view. (Recommended)" />
 
             <RadioButton
                 android:id="@+id/radioButton8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                android:text="8 Ksh per view." />
+                android:text="6 Ksh per view." />
 
             <TextView
                 android:layout_width="match_parent"
                 android:id="@+id/shStats3"
                 android:layout_marginLeft="10dp"
-                android:text="Number of users for 3Ksh is: 1500."
+                android:text="Number of users for 1Ksh is: 1500."
                 android:layout_marginBottom="5dp"
                 android:layout_height="wrap_content" />
 
@@ -61,7 +61,7 @@
                 android:layout_width="match_parent"
                 android:id="@+id/shStats5"
                 android:layout_marginLeft="10dp"
-                android:text="Number of users for 5Ksh is: 1500."
+                android:text="Number of users for 3Ksh is: 1500."
                 android:layout_marginBottom="5dp"
                 android:layout_height="wrap_content" />
 
@@ -69,7 +69,7 @@
                 android:layout_width="match_parent"
                 android:id="@+id/shStats8"
                 android:layout_marginLeft="10dp"
-                android:text="Number of users for 8Ksh is: 1500."
+                android:text="Number of users for 6Ksh is: 1500."
                 android:layout_marginBottom="5dp"
                 android:layout_height="wrap_content" />
 

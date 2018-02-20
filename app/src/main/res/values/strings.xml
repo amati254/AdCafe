@@ -130,7 +130,7 @@
         we consider advertising to have taken place.</string>
 
     <string name="Advertiserslide2text2">Also, advertising here happens in 24h cycles; Meaning, when you upload an ad today, it will
-        only be seen on the day after.</string>
+        only be showcased on the day after.</string>
 
     <string name="reachabilityexplanation">Advertising here gives you the ability to reach the apps users within a very short period of time.</string>
 
@@ -174,6 +174,27 @@
     <string name="shareText2">Hey, check out this cool new app called The AdCafé.</string>
 
     <string name="changeTimeExplanation">Click continue if you wish to change the time you are notified daily about new ads.</string>
+
+    <string name="needToMakePayments">Next you need to make payments before the upload.
+        We only support credit/debit card payments as of now.</string>
+
+    <string name="needUserDetails">We also need a few more details from you before we can continue.</string>
+
+    <string name="tutorialExplanationAdvertiser6.2">The cost of advertising here depends on the amount charged by
+        the group of users you are targeting. For instance, some users charge 3Ksh per view.</string>
+
+    <string name="tutorialExplanationAdvertiser6.3">So if you were to target the 3Ksh users, you would pay 5250Ksh per 1000 users reached
+        &#13;&#10; i.e   3Ksh + 2Ksh per user reached, plus 5% on the total amount paid (for transaction fees).</string>
+
+    <string name="tutorialExplanationAdvertiser6.4">We charge 2Ksh on top of the amount charged by the users, for every user reached
+        <br />(thus the 3Ksh + 2Ksh). Also the transaction fee is not reimbursed. Remember that.</string>
+
+    <string name="adStatsPageEplanation">The Ad Stats Window can help you monitor and perform actions on your uploaded ads in real time.</string>
+
+    <string name="takeDownButton">The take down button is for taking down an ad uploaded if you need to do so.</string>
+
+    <string name="reimburseButton">Only visible the day after showcasing the ad, the reimburse button gives you the option to
+        obtain the remaining amount for the targeted users not reached.</string>
 
     <string name="feedbacktype">Feedback Type</string>
     <string name="feedbacktype1">Praise</string>

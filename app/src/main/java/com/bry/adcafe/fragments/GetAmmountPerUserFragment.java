@@ -64,9 +64,9 @@ public class GetAmmountPerUserFragment extends DialogFragment {
             }else numberOfUsersIn6 = 0;
         } else numberOfUsersIn6 = 0;
 
-        t3.setText(String.format("Number of users for 3Ksh is: %s", numberOfUsersIn1));
-        t5.setText(String.format("Number of users for 5Ksh is: %s", numberOfUsersIn3));
-        t8.setText(String.format("Number of users for 8Ksh is: %s", numberOfUsersIn6));
+        t3.setText(String.format("Number of users for 1Ksh is: %s", numberOfUsersIn1));
+        t5.setText(String.format("Number of users for 3Ksh is: %s", numberOfUsersIn3));
+        t8.setText(String.format("Number of users for 6Ksh is: %s", numberOfUsersIn6));
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,11 +75,11 @@ public class GetAmmountPerUserFragment extends DialogFragment {
                 RadioButton button5 = (RadioButton) rootView.findViewById(R.id.radioButton5);
                 RadioButton button8 = (RadioButton) rootView.findViewById(R.id.radioButton8);
                 if(button3.isChecked()){
-                    cpv = 3;
+                    cpv = 1;
                 }else if(button5.isChecked()){
-                    cpv = 5;
+                    cpv = 3;
                 }else{
-                    cpv = 8;
+                    cpv = 6;
                 }
                 Variables.amountToPayPerTargetedView = cpv;
                 Intent intent = new Intent("START_NEXT_ACTIVITY");

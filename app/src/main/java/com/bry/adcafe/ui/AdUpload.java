@@ -3,8 +3,10 @@ package com.bry.adcafe.ui;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
@@ -15,6 +17,7 @@ import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -34,6 +37,8 @@ import android.widget.Toast;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.fragments.FragmentModalBottomSheet;
+import com.bry.adcafe.fragments.FragmentSelectPaymentOptionBottomSheet;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.bumptech.glide.Glide;
@@ -125,6 +130,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private int numberOfClustersBeingUploadedTo = 0;
 
     private int mAmountToPayPerTargetedView;
+    private int mAmountPlusOurShare;
 
 
     @Override
@@ -140,12 +146,14 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         Log.d(TAG,"Category gotten from Variables class is : "+mCategory);
         mCategoryText.setText("Category: "+mCategory);
 
-        mAmountToPayPerTargetedView = Variables.amountToPayPerTargetedView-2;
+        mAmountToPayPerTargetedView = Variables.amountToPayPerTargetedView;
+        mAmountPlusOurShare = Variables.amountToPayPerTargetedView+2;
         Log.d(TAG,"Amount to pay per targeted user is : "+ mAmountToPayPerTargetedView);
 
         setUpViews();
         createProgressDialog();
         startGetNumberOfClusters();
+        setUpListeners();
 
     }
 
@@ -365,6 +373,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         if(mRef2!=null) mRef2.removeEventListener(val2);
         if(boolRef!=null) boolRef.removeEventListener(val3);
         if(mRef6!=null) mRef6.removeEventListener(chilForRefresh);
+        removeListeners();
     }
 
     private void OnClicks(){
@@ -427,7 +436,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                     }else{
                         if(bm!=null && !uploading){
                             //This method will begin the process for uploading ad;
-                            startProcessForUpload();
+                            showDialogForPayments();
                         }else{
                             Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
                         }
@@ -477,6 +486,19 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         }
     }
 
+    private void setUpListeners(){
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,
+                new IntentFilter("PROCEED_CARD_DETAILS_PART"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForStartPayments,
+                new IntentFilter("START_PAYMENTS_INTENT"));
+    }
+
+    private void removeListeners(){
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForAddingToSharedPreferences);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForStartPayments);
+    }
+
 
 
     //////This method will start the upload process.Call it when your done with the payments....
@@ -518,15 +540,53 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
     private void showDialogForPayments() {
-        buildTransactionForPayment();
+        showMessageBeforeBottomsheet();
+    }
+
+    private BroadcastReceiver mMessageReceiverForAddingToSharedPreferences = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Broadcast has been received show bottomsheet.");
+            showBottomSheetFragment();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForStartPayments = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Broadcast has been received show bottomsheet.");
+            startPayments();
+        }
+    };
+
+
+    private void startPayments() {
+        Toast.makeText(mContext,"Payments should start",Toast.LENGTH_SHORT).show();
+        String cardNumber = Variables.cardNumber;
+        String expiration = Variables.expiration;
+        String cvv = Variables.cvv;
+        String postalCode = Variables.postalCode;
+        float amount = mAmountPlusOurShare*(mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER);
+        startProcessForUpload();
+    }
+
+    private void showMessageBeforeBottomsheet(){
+        FragmentSelectPaymentOptionBottomSheet fragmentModalBottomSheet = new FragmentSelectPaymentOptionBottomSheet();
+        fragmentModalBottomSheet.setActivity(AdUpload.this);
+        fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
+    }
+
+    private void showBottomSheetFragment(){
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        FragmentModalBottomSheet fragmentModalBottomSheet = new FragmentModalBottomSheet();
+        fragmentModalBottomSheet.setActivity(AdUpload.this);
+        fragmentModalBottomSheet.setDetails(mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER,
+                (mAmountPlusOurShare), getNextDay(), mCategory,userEmail,Variables.userName);
+
+        fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
     }
 
 
-
-
-    private void buildTransactionForPayment() {
-
-    }
 
     @Override
     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
@@ -548,7 +608,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tv.setText(String.valueOf(np.getValue()*1000));
+                tv.setText(String.valueOf(np.getValue()*Constants.NUMBER_OF_USERS_PER_CLUSTER));
                 mHasNumberBeenChosen = true;
                 mNumberOfClusters = np.getValue();
 //                addToClusterListToUploadTo(mNumberOfClusters);
@@ -574,6 +634,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(intent.createChooser(intent,"Select Picture"),PICK_IMAGE_REQUEST);
     }
+
 
 
     @Override

@@ -271,7 +271,7 @@ public class DatabaseManager {
 
                 //this checks if the number of users in cluster exceeds limit
                 int clusterIDForSpecificCategory;
-                if(numberOfUsersInCurrentCluster<1000){
+                if(numberOfUsersInCurrentCluster<Constants.NUMBER_OF_USERS_PER_CLUSTER){
                     Log.d(TAG,"--Number of users in the current cluster is less than limit.setting AdCategory cluster to --"+currentCluster);
                     clusterIDForSpecificCategory = (int)currentCluster;
                 }else {

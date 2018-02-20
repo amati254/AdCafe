@@ -103,5 +103,7 @@ public class Constants {
     public static String USER_NICKNAME = "UserName";
     public static String LAST_SEEN_DATE_IN_DAYS = "LSDate";
     public static int NUMBER_OF_USERS_PER_CLUSTER = 1000;
+    public static double PAYMENT_TRANSFER_PERENTAGE = 0.035;
+    public static double PAYOUT_TRANSFER_FEE = 0.015;
 
 }

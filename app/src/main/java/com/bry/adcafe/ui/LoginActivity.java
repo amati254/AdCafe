@@ -306,7 +306,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
         if(password.equals("")){
 //            mEmail.setText("Password cannot be blank");
-            mEmail.setError("Password cannot be blank");
+            mPassword.setError("Password cannot be blank");
             return;
         }
         if(!isOnline(mContext)){

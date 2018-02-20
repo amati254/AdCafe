@@ -185,11 +185,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Variables.isMainActivityOnline = true;
         super.onResume();
         if(isTimerPausedBecauseOfOfflineActivity) setBooleanForResumingTimer();
-        try{
-            onclicks();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+//        try{
+//            onclicks();
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }finally {
+//
+//        }
         if (!getCurrentDateInSharedPreferences().equals("0") && !getCurrentDateInSharedPreferences().equals(getDate())) {
             Log.d(TAG, "---Date in shared preferences does not match current date,therefore resetting everything.");
             sendBroadcastToUnregisterAllReceivers();
