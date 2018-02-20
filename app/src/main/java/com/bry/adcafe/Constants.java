@@ -105,5 +105,6 @@ public class Constants {
     public static int NUMBER_OF_USERS_PER_CLUSTER = 1000;
     public static double PAYMENT_TRANSFER_PERENTAGE = 0.035;
     public static double PAYOUT_TRANSFER_FEE = 0.015;
+    public static double TOTAL_PAYOUT_PERCENTAGE = 0.05;
 
 }

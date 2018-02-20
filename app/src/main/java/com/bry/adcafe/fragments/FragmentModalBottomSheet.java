@@ -44,7 +44,8 @@ public class FragmentModalBottomSheet extends BottomSheetDialogFragment {
     private String mCategory = "food";
     private String mUploaderEmail = "john.doe@yaymail.com";
     private String mName = "John Doe";
-    private long mAmountToBePaid = mTargetedUsers*mConstantAmountPerUserTargeted;
+    private long mAmountToBePaid = (long) ((mTargetedUsers*mConstantAmountPerUserTargeted)+
+                ((mTargetedUsers*mConstantAmountPerUserTargeted)*Constants.TOTAL_PAYOUT_PERCENTAGE));
     private View mContentView;
 
 

@@ -293,7 +293,7 @@
                         android:layout_alignParentBottom="true"
                         android:layout_alignParentRight="true"
                         android:background="@null"
-                        android:text="Start."
+                        android:text="Pay and Upload."
                         android:textColor="@color/colorPrimary" />
 
                 </RelativeLayout>

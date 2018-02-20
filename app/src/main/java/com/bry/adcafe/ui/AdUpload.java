@@ -511,7 +511,6 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         recheckNoOfChildrenInClulsterToStartFrom();
     }
     //Remember to comment out the one being called in the onClick listener (Line 420)////////
-    ///////////////////////////////////////////////////////////////////////
 
     private void promptUserForLink() {
         final Dialog d = new Dialog(AdUpload.this);
@@ -560,13 +559,16 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     };
 
 
+
+
     private void startPayments() {
         Toast.makeText(mContext,"Payments should start",Toast.LENGTH_SHORT).show();
         String cardNumber = Variables.cardNumber;
         String expiration = Variables.expiration;
         String cvv = Variables.cvv;
         String postalCode = Variables.postalCode;
-        float amount = mAmountPlusOurShare*(mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER);
+        double amount = mAmountPlusOurShare*(mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER) +
+                (mAmountPlusOurShare*(mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER)*Constants.TOTAL_PAYOUT_PERCENTAGE) ;
         startProcessForUpload();
     }
 
