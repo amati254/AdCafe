@@ -35,7 +35,9 @@ import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.fragments.ChangeCPVFragment;
 import com.bry.adcafe.fragments.FeedbackFragment;
+import com.bry.adcafe.fragments.FragmentUserPayoutBottomSheet;
 import com.bry.adcafe.models.User;
+import com.bry.adcafe.services.DatabaseManager;
 import com.bry.adcafe.services.SliderPrefManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -99,10 +101,14 @@ public class Dashboard extends AppCompatActivity {
     private void setListeners(){
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForShowingPrompt,
                 new IntentFilter("SHOW_PROMPT"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForStartPayout,
+                new IntentFilter("START_PAYOUT"));
     }
 
     private void removeListeners(){
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForShowingPrompt);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForStartPayout);
     }
 
     private BroadcastReceiver mMessageReceiverForShowingPrompt = new BroadcastReceiver() {
@@ -111,6 +117,9 @@ public class Dashboard extends AppCompatActivity {
             promptUserAboutChanges();
         }
     };
+
+
+
 
     private void setClickListeners() {
         mInfoImageView.setOnClickListener(new View.OnClickListener() {
@@ -203,7 +212,11 @@ public class Dashboard extends AppCompatActivity {
         payoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                promptUserAboutPayout();
+                if(Variables.getTotalReimbursementAmount()<1){
+                    promptUserForUnableToPayout();
+                }else{
+                    promptUserAboutPayout();
+                }
             }
         });
 
@@ -257,6 +270,8 @@ public class Dashboard extends AppCompatActivity {
 
         if(Variables.doesUserWantNotifications)mDotForNotf.setVisibility(View.VISIBLE);
     }
+
+
 
     @Override
     public void onBackPressed(){
@@ -413,7 +428,17 @@ public class Dashboard extends AppCompatActivity {
     }
 
     private void promptUserAboutPayout(){
-        Toast.makeText(mContext,"Payout",Toast.LENGTH_SHORT).show();
+        int reimbursementTotals;
+
+        if(Variables.getMonthAdTotals(mKey) ==0) {
+            SharedPreferences prefs3 = getSharedPreferences("ReimbursementTotals", MODE_PRIVATE);
+            reimbursementTotals = prefs3.getInt(Constants.REIMBURSEMENT_TOTALS, 0);
+        }else reimbursementTotals = Variables.getTotalReimbursementAmount();
+
+        FragmentUserPayoutBottomSheet fragmentModalBottomSheet = new FragmentUserPayoutBottomSheet();
+        fragmentModalBottomSheet.setActivity(Dashboard.this);
+        fragmentModalBottomSheet.setDetails(reimbursementTotals,"123456");
+        fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
     }
 
     private void promptUserToShareApp(){
@@ -529,6 +554,58 @@ public class Dashboard extends AppCompatActivity {
 
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(new Intent("UPDATE_CHOSEN_TIME"));
         }
+    }
+
+
+
+
+    private BroadcastReceiver mMessageReceiverForStartPayout = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("Dashboard", "Broadcast has been received to start payout.");
+            startPayout();
+        }
+    };
+
+
+    //Payout api implementation comes here...
+    private void startPayout(){
+        Toast.makeText(mContext,"payout!",Toast.LENGTH_SHORT).show();
+        String payoutPhoneNumber = Variables.phoneNo;
+    }
+
+    private void promptUserForUnableToPayout(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Payout");
+        builder.setMessage("You cant make a payout of 0Ksh.")
+                .setCancelable(true)
+                .setPositiveButton("Yes.", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                }).show();
+    }
+
+    //call this when the payout process has occurred...
+    private void resetUserMoneyTotals(){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        DatabaseReference adRef9 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.REIMBURSEMENT_TOTALS);
+        adRef9.setValue(0);
+
+        Variables.setTotalReimbursementAmount(0);
+
+        SharedPreferences pref3 = mContext.getSharedPreferences("ReimbursementTotals",MODE_PRIVATE);
+        SharedPreferences.Editor editor3 = pref3.edit();
+        editor3.clear();
+        editor3.putInt(Constants.REIMBURSEMENT_TOTALS,Variables.getTotalReimbursementAmount());
+        Log.d("Dashboard","Setting the Reimbursement totals in shared preferences - "+Integer.toString(Variables.getTotalReimbursementAmount()));
+        editor3.apply();
+
+        setValues();
+
     }
 
 }

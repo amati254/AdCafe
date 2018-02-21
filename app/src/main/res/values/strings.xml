@@ -196,6 +196,11 @@
     <string name="reimburseButton">Only visible the day after showcasing the ad, the reimburse button gives you the option to
         obtain the remaining amount for the targeted users not reached.</string>
 
+    <string name="payoutDetails">Click the proceed button if you wish to withdraw your money totals into your
+        mobile account. We only support MPesa payouts as of now.</string>
+
+    <string name="requiredUserDetails">We only need your phone number and your account password to make the payout.</string>
+
     <string name="feedbacktype">Feedback Type</string>
     <string name="feedbacktype1">Praise</string>
     <string name="feedbacktype2">Gripe</string>

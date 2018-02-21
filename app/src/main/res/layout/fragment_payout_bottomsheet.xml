@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/payoutOptions"
+        android:padding="15dp"
+        android:layout_height="180dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:textSize="25sp"
+            android:text="Payout Options."
+            android:layout_marginBottom="10dp"
+            android:textColor="@color/primary_text"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_marginBottom="10dp"
+            android:textSize="15sp"
+            android:text="@string/payoutDetails"
+            android:layout_height="wrap_content" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="40dp">
+
+            <Button
+                android:id="@+id/cancelBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:background="@null"
+                android:text="Cancel"
+                android:textColor="@color/colorPrimary" />
+
+            <Button
+                android:id="@+id/continueButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:background="@null"
+                android:text="Proceed."
+                android:textColor="@color/colorPrimary" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="15dp"
+        android:translationX="400dp"
+        android:id="@+id/enterPayoutDetailsPart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:textSize="25sp"
+            android:textColor="@color/primary_text"
+            android:text="Payout Details."
+            android:layout_marginBottom="10dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_marginBottom="10dp"
+            android:textSize="15sp"
+            android:text="@string/requiredUserDetails"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_marginTop="15dp"
+            android:text="Your Phone Number."
+            android:layout_height="wrap_content" />
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/phoneEditText"
+            android:inputType="phone"
+            android:padding="10dp"
+            android:textSize="15sp"
+            android:textColorHint="@color/greyHint"
+            android:nextFocusDown="@+id/passwordEditText"
+            android:hint="0712345678"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_marginTop="15dp"
+            android:text="Your Password."
+            android:layout_height="wrap_content" />
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/passwordEditText"
+            android:inputType="textPassword"
+            android:padding="10dp"
+            android:textSize="15sp"
+            android:hint="The one used to log in to the app"
+            android:textColorHint="@color/greyHint"
+            android:layout_height="wrap_content" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="0dp"
+            android:layout_height="40dp">
+
+            <Button
+                android:id="@+id/cancelBtn2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:background="@null"
+                android:text="Cancel"
+                android:textColor="@color/colorPrimary" />
+
+            <Button
+                android:id="@+id/continueButton2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:background="@null"
+                android:text="Continue."
+                android:textColor="@color/colorPrimary" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:padding="15dp"
+        android:id="@+id/confirmLayout"
+        android:translationX="500dp"
+        android:visibility="gone"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:textSize="25sp"
+            android:layout_marginBottom="10dp"
+            android:text="Confirm Everything."
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:text="Confirm the details then click the checkout button to finish here."
+            android:paddingBottom="20dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:id="@+id/amountToBeSent"
+            android:text="Amount To Be Sent: 4000KSH."
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:id="@+id/phoneNumber"
+            android:text="Phone number: 0722123456"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_marginBottom="10dp"
+                android:layout_height="40dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:textSize="17sp"
+                    android:layout_marginTop="10dp"
+                    android:text=""
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/startButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:background="@null"
+                    android:text="Checkout."
+                    android:textColor="@color/colorPrimary" />
+
+            </RelativeLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>

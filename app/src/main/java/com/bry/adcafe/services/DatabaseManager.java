@@ -548,7 +548,7 @@ public class DatabaseManager {
 
     }
 
-    private void setUserDataInSharedPrefs(Context context) {
+    private void setUserDataInSharedPrefs(Context context)  {
         if(context == null) context = this.DBContext;
         SharedPreferences pref5 = context.getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
         SharedPreferences.Editor editor5 = pref5.edit();

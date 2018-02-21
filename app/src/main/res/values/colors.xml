@@ -12,6 +12,7 @@
     <color name="colorAccent">#BDBDBD</color>
     <color name="white">#FFFFFF</color>
     <color name="grey">#F3F3F3</color>
+    <color name="greyHint">#dcdcdc</color>
     <color name="darkslategrey">#2F4F4F</color>
     <color name="lightyellow">#FFFFE0</color>
     <color name="red">#fb0000</color>

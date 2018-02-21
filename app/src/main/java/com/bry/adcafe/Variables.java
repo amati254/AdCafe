@@ -97,6 +97,9 @@ public class Variables {
     public static String cvv;
     public static String postalCode;
 
+    public static String phoneNo;
+    private static String password;
+
 
 
     public static void setNewNumberOfAds(int number){
@@ -260,5 +263,13 @@ public class Variables {
 
     public static void addOneToTotalReimbursementAmount(String k) {
         if(k.equals(mKey)) mTotalReimbursementAmount+=(constantAmountPerView);
+    }
+
+    public static String getPassword() {
+        return password;
+    }
+
+    public static void setPassword(String password) {
+        Variables.password = password;
     }
 }
