@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
+import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.Advert;
 import com.bumptech.glide.Glide;
 import com.google.firebase.database.ChildEventListener;
@@ -133,7 +134,8 @@ public class MyAdStatsItem {
 
     @Click(R.id.reimburseBtn)
     private void onClick(){
-
+        Variables.adToBeReimbursed = mAdvert;
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(new Intent("START_ADVERTISER_PAYOUT"));
     }
 
 

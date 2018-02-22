@@ -38,29 +38,36 @@ public class FragmentModalBottomSheet extends BottomSheetDialogFragment {
     private Button mStartTransactionThenUpload;
     private LinearLayout CardHolderDetailsPart;
 
-    private long mTargetedUsers = 1000;
-    private long mConstantAmountPerUserTargeted = 5;
-    private String mAdViewingDate = "19:2:2018";
-    private String mCategory = "food";
-    private String mUploaderEmail = "john.doe@yaymail.com";
-    private String mName = "John Doe";
-    private long mAmountToBePaid = (long) ((mTargetedUsers*mConstantAmountPerUserTargeted)+
-                ((mTargetedUsers*mConstantAmountPerUserTargeted)*Constants.TOTAL_PAYOUT_PERCENTAGE));
+    private long mTargetedUsers;
+    private long mConstantAmountPerUserTargeted;
+    private String mAdViewingDate;
+    private String mCategory;
+    private String mUploaderEmail;
+    private String mName;
+    private long mAmountToBePaid;
     private View mContentView;
+    private double chargeForPayment;
+
+    private double paymentTotals;
 
 
     public void setActivity(Activity activity){
         this.mActivity = activity;
     }
 
-    public void setDetails(long targetedUsers, long constantAmountPerUserTargeted, String adViewingDate,
+    public void setDetails(long targetedUsers, long constantAmountPerUser, String adViewingDate,
                            String category, String uploaderEmail, String name){
         this.mTargetedUsers = targetedUsers;
-        this.mConstantAmountPerUserTargeted = constantAmountPerUserTargeted;
         this.mAdViewingDate = adViewingDate;
+        this.mConstantAmountPerUserTargeted = constantAmountPerUser;
+        Log.d("ModalbottomSheet","Constant amount per ad: "+constantAmountPerUser);
         this.mCategory = category;
         this.mUploaderEmail = uploaderEmail;
         this.mName = name;
+        this.mAmountToBePaid = mTargetedUsers*mConstantAmountPerUserTargeted;
+        this.chargeForPayment = mAmountToBePaid*Constants.TOTAL_PAYOUT_PERCENTAGE;
+
+        paymentTotals = mAmountToBePaid+chargeForPayment;
     }
 
     private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback = new BottomSheetBehavior.BottomSheetCallback() {
@@ -142,6 +149,7 @@ public class FragmentModalBottomSheet extends BottomSheetDialogFragment {
                     Variables.cardNumber = cardForm.getCardNumber();
                     Variables.postalCode = cardForm.getPostalCode();
                     Variables.expiration = ""+cardForm.getExpirationMonth()+cardForm.getExpirationYear();
+                    Variables.amountToPayForUpload = paymentTotals;
                 }
                 else Toast.makeText(mActivity.getApplication(),"Please use valid details.",Toast.LENGTH_SHORT).show();
             }
@@ -217,7 +225,7 @@ public class FragmentModalBottomSheet extends BottomSheetDialogFragment {
                 }else if(emailString.equals("")){
                     email.setError("We need your email.");
                 }else if(stateText.equals("")){
-                    state.setError("We need your Province/county.");
+                    state.setError("We need your Province/County.");
                 }else if(phoneText.equals("")){
                     phone.setError("We need your Phone Number.");
                 }else{
@@ -252,18 +260,17 @@ public class FragmentModalBottomSheet extends BottomSheetDialogFragment {
         TextView userEmailView = mContentView.findViewById(R.id.userEmail);
         TextView amountToBePaidView = mContentView.findViewById(R.id.amountToBePaid);
         TextView cardToPayVew = mContentView.findViewById(R.id.cardNumber);
+        TextView transactionCostView = mContentView.findViewById(R.id.transationCost);
 
         String strLastFourDi = card.getCardNumber().length() >= 4 ? card.getCardNumber().substring(card.getCardNumber().length() - 4): "";
-
-        double chargePayment = (mAmountToBePaid* Constants.PAYMENT_TRANSFER_PERENTAGE)+(mAmountToBePaid*Constants.PAYOUT_TRANSFER_FEE);
 
         targetingView.setText(Html.fromHtml("Targeting : <b>" + Long.toString(mTargetedUsers) + " users.</b>"));
         dateView.setText(Html.fromHtml("Ad Viewing Date : <b>" + mAdViewingDate + "</b>"));
         categoryView.setText(Html.fromHtml("Category : <b>" + mCategory + "</b>"));
         userEmailView.setText(Html.fromHtml("Uploader : <b>" + mUploaderEmail + "</b>"));
-        amountToBePaidView.setText(Html.fromHtml("Amount To Be Paid: <b>" + Long.toString(mAmountToBePaid) + "Ksh.</b>"));
+        amountToBePaidView.setText(Html.fromHtml("Amount To Be Paid: <b>" + mAmountToBePaid + "Ksh.</b>"));
         cardToPayVew.setText(Html.fromHtml("Paying card number : <b>****" + strLastFourDi + "</b>"));
-
+        transactionCostView.setText(Html.fromHtml("Transaction cost amount : <b>" + chargeForPayment + "Ksh.</b>"));
 
 
     }

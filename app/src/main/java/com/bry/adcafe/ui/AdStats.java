@@ -27,6 +27,7 @@ import com.bry.adcafe.Variables;
 import com.bry.adcafe.adapters.DateForAdStats;
 import com.bry.adcafe.adapters.MyAdStatsItem;
 import com.bry.adcafe.adapters.TomorrowsAdStatItem;
+import com.bry.adcafe.fragments.FragmentAdvertiserPayoutBottomsheet;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -102,10 +103,18 @@ public class AdStats extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForTakeDownAd,
                 new IntentFilter("TAKE_DOWN"));
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForStartPayout,
+                new IntentFilter("START_PAYOUT"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowBottomSheet,
+                new IntentFilter("START_ADVERTISER_PAYOUT"));
     }
 
     private void unregisterReceivers(){
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForTakeDownAd);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForStartPayout);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForShowBottomSheet);
+
         Intent intent = new Intent("REMOVE-LISTENERS");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
@@ -565,6 +574,47 @@ public class AdStats extends AppCompatActivity {
         }
 
         return number;
+    }
+
+
+
+
+    private BroadcastReceiver mMessageReceiverForShowBottomSheet = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Broadcast has been received to show bottom sheet.");
+            showBottomSheetForReimbursement();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForStartPayout = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("Dashboard", "Broadcast has been received to start payout.");
+            startPayout();
+        }
+    };
+
+    //Payout api implementation comes here...
+    private void startPayout(){
+        Advert ad = Variables.adToBeReimbursed;
+        int numberOfUsersWhoDidntSeeAd = ad.getNumberOfUsersToReach()- ad.getNumberOfTimesSeen();
+        double reimbursementTotals = (numberOfUsersWhoDidntSeeAd*ad.getAmountToPayPerTargetedView());
+
+        Toast.makeText(mContext,"payout!",Toast.LENGTH_SHORT).show();
+        String payoutPhoneNumber = Variables.phoneNo;
+        String totalsToReimburse = Double.toString(reimbursementTotals);
+    }
+
+    private void showBottomSheetForReimbursement(){
+        Advert ad = Variables.adToBeReimbursed;
+        int numberOfUsersWhoDidntSeeAd = ad.getNumberOfUsersToReach()- ad.getNumberOfTimesSeen();
+        double reimbursementTotals = (numberOfUsersWhoDidntSeeAd*ad.getAmountToPayPerTargetedView());
+
+        FragmentAdvertiserPayoutBottomsheet fragmentModalBottomSheet = new FragmentAdvertiserPayoutBottomsheet();
+        fragmentModalBottomSheet.setActivity(AdStats.this);
+        fragmentModalBottomSheet.setDetails(reimbursementTotals,Variables.getPassword());
+        fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
     }
 
 }

@@ -215,6 +215,7 @@ public class SelectCategory extends AppCompatActivity implements View.OnClickLis
         Variables.setCurrentAdInSubscription(0);
         Variables.setAdTotal(0,"");
         Variables.setMonthAdTotals("",0);
+        Variables.setTotalReimbursementAmount(0);
         Variables.isStartFromLogin = true;
         loadingLayout.setVisibility(View.GONE);
         Intent intent = new Intent(SelectCategory.this, MainActivity.class);

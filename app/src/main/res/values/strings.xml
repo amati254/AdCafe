@@ -187,7 +187,7 @@
         &#13;&#10; i.e   3Ksh + 2Ksh per user reached, plus 5% on the total amount paid (for transaction fees).</string>
 
     <string name="tutorialExplanationAdvertiser6.4">We charge 2Ksh on top of the amount charged by the users, for every user reached
-        <br />(thus the 3Ksh + 2Ksh). Also the transaction fee is not reimbursed. Remember that.</string>
+        <br />(thus the 3Ksh + 2Ksh). Also an extra transaction fee is charged for making the payments. Remember that.</string>
 
     <string name="adStatsPageEplanation">The Ad Stats Window can help you monitor and perform actions on your uploaded ads in real time.</string>
 

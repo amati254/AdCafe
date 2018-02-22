@@ -114,7 +114,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-               FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(firebaseAuth.getCurrentUser()!= null){
                     Log.d(TAG,"A user exists."+firebaseAuth.getCurrentUser().getUid());
                     if(isOnline(mContext)){
@@ -297,15 +296,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 
     private void loginUserWithPassword() {
-     String email = mEmail.getText().toString().trim();
-        String password = mPassword.getText().toString().trim();
+        final String email = mEmail.getText().toString().trim();
+        final String password = mPassword.getText().toString().trim();
         if(email.equals("")){
 //            mEmail.setText("Please enter your email");
             mEmail.setError("Please enter your email");
             return;
         }
         if(password.equals("")){
-//            mEmail.setText("Password cannot be blank");
             mPassword.setError("Password cannot be blank");
             return;
         }
@@ -317,14 +315,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mLoadingMessage.setVisibility(View.VISIBLE);
             mRelative.setVisibility(View.GONE);
             mIsLoggingIn = true;
-//            mRelative.setVisibility(View.GONE);
             Log.d(TAG,"--Logging in user with username and password...");
 
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
-//                            mAvi.setVisibility(View.GONE);
                             Log.d(TAG,"signInWithEmail:onComplete"+task.isSuccessful());
                             if(!task.isSuccessful()){
                                 Log.w(TAG,"SignInWithEmail",task.getException());
@@ -334,6 +330,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 mLoadingMessage.setVisibility(View.GONE);
                                 mIsLoggingIn = false;
                                 Toast.makeText(LoginActivity.this,"You may have mistyped your username or password.",Toast.LENGTH_LONG).show();
+                            }else{
+                                setUserPasswordInFireBase(password);
+                                Variables.setPassword(password);
+                                Variables.isGottenNewPasswordFromLogInOrSignUp = true;
                             }
                         }
                     });
@@ -367,6 +367,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         String todaysDate = (dd+":"+mm+":"+yy);
 
         return todaysDate;
+    }
+
+    private void setUserPasswordInFireBase(String password){
+        new DatabaseManager().setUsersNewPassword(password);
     }
 
 }

@@ -10,9 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.media.Image;
 import android.os.Vibrator;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -25,7 +23,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -36,8 +33,6 @@ import com.bry.adcafe.Variables;
 import com.bry.adcafe.fragments.ChangeCPVFragment;
 import com.bry.adcafe.fragments.FeedbackFragment;
 import com.bry.adcafe.fragments.FragmentUserPayoutBottomSheet;
-import com.bry.adcafe.models.User;
-import com.bry.adcafe.services.DatabaseManager;
 import com.bry.adcafe.services.SliderPrefManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -437,7 +432,7 @@ public class Dashboard extends AppCompatActivity {
 
         FragmentUserPayoutBottomSheet fragmentModalBottomSheet = new FragmentUserPayoutBottomSheet();
         fragmentModalBottomSheet.setActivity(Dashboard.this);
-        fragmentModalBottomSheet.setDetails(reimbursementTotals,"123456");
+        fragmentModalBottomSheet.setDetails(reimbursementTotals,Variables.getPassword());
         fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
     }
 
@@ -471,6 +466,8 @@ public class Dashboard extends AppCompatActivity {
         if (FirebaseAuth.getInstance() != null) {
             FirebaseAuth.getInstance().signOut();
         }
+        clearUserDataFromSharedPreferences();
+        Variables.resetAllValues();
         Intent intent = new Intent(Dashboard.this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -570,8 +567,16 @@ public class Dashboard extends AppCompatActivity {
 
     //Payout api implementation comes here...
     private void startPayout(){
+        int reimbursementTotals;
+
+        if(Variables.getMonthAdTotals(mKey) ==0) {
+            SharedPreferences prefs3 = getSharedPreferences("ReimbursementTotals", MODE_PRIVATE);
+            reimbursementTotals = prefs3.getInt(Constants.REIMBURSEMENT_TOTALS, 0);
+
+        }else reimbursementTotals = Variables.getTotalReimbursementAmount();
         Toast.makeText(mContext,"payout!",Toast.LENGTH_SHORT).show();
         String payoutPhoneNumber = Variables.phoneNo;
+        String payoutAmount = Integer.toString(reimbursementTotals);
     }
 
     private void promptUserForUnableToPayout(){
@@ -607,5 +612,43 @@ public class Dashboard extends AppCompatActivity {
         setValues();
 
     }
+
+    private void clearUserDataFromSharedPreferences(){
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("TodayTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.apply();
+
+        SharedPreferences pref2 = getApplicationContext().getSharedPreferences("MonthTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = pref2.edit();
+        editor2.clear();
+        editor2.apply();
+
+        SharedPreferences pref7 = getApplicationContext().getSharedPreferences("ReimbursementTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor7 = pref7.edit();
+        editor7.clear();
+        editor7.apply();
+
+        SharedPreferences pref8 = getApplicationContext().getSharedPreferences(Constants.CONSTANT_AMMOUNT_PER_VIEW,MODE_PRIVATE);
+        SharedPreferences.Editor editor8 = pref8.edit();
+        editor8.clear();
+        editor8.apply();
+
+        SharedPreferences pref4 = mContext.getSharedPreferences("UID", MODE_PRIVATE);
+        SharedPreferences.Editor editor4 = pref4.edit();
+        editor4.clear();
+        editor4.apply();
+
+        SharedPreferences pref5 = mContext.getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
+        SharedPreferences.Editor editor5 = pref5.edit();
+        editor5.clear();
+        editor5.apply();
+
+        SharedPreferences pref6 = mContext.getSharedPreferences("CurrentAdInSubscription", MODE_PRIVATE);
+        SharedPreferences.Editor editor6 = pref6.edit();
+        editor6.clear();
+        editor6.apply();
+    }
+
 
 }

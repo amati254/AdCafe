@@ -78,6 +78,9 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
     }
 
     private void loadUserStatsFirst(){
+        failedToLoadLayout.setVisibility(View.GONE);
+        mainView.setVisibility(View.GONE);
+        loadingLayout.setVisibility(View.VISIBLE);
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS)
                 .child(Constants.CLUSTERS_LIST);
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -106,10 +109,6 @@ public class SelectCategoryAdvertiser extends AppCompatActivity implements View.
     }
 
     private void loadCategoriesFromFirebase() {
-        failedToLoadLayout.setVisibility(View.GONE);
-        mainView.setVisibility(View.GONE);
-        loadingLayout.setVisibility(View.VISIBLE);
-
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(Constants.CATEGORY_LIST);
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

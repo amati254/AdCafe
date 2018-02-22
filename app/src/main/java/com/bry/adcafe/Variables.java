@@ -99,6 +99,34 @@ public class Variables {
 
     public static String phoneNo;
     private static String password;
+    public static double amountToPayForUpload;
+    public static Advert adToBeReimbursed;
+    public static boolean isGottenNewPasswordFromLogInOrSignUp = false;
+
+    public static void resetAllValues(){
+         todaysAdTotal = 0;
+         mMonthAdTotals = 0;
+         mTotalReimbursementAmount = 0;
+         lastSeenAd = null;
+         lastAdOfList = null;
+         currentAdNumberForAllAdsList = 0;
+         currentAdvert = null;
+         allAdsList.clear();
+         Subscriptions.clear();
+         currentAdNumberForAllAdsList = 0;
+         currentSubscriptionIndex = 0;
+         currentAdInSubscription = 0;
+         lastAdSeen = null;
+         VariablesHashOfAds.clear();
+         firstAd = null;
+         constantAmountPerView = 0;
+         amountToPayPerTargetedView = 0;
+         userName = null;
+         phoneNo = null;
+         password = null;
+         amountToPayForUpload = 0;
+         adToBeReimbursed = null;
+    }
 
 
 

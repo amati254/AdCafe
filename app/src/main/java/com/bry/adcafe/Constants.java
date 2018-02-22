@@ -107,4 +107,6 @@ public class Constants {
     public static double PAYOUT_TRANSFER_FEE = 0.015;
     public static double TOTAL_PAYOUT_PERCENTAGE = 0.05;
 
+    public static String USER_PASSCODE = "Password";
+
 }

@@ -63,6 +63,9 @@ public class DatabaseManager {
                 .child(uid).child(Constants.REIMBURSEMENT_TOTALS);
         adRef9.setValue(0);
 
+
+
+
         DatabaseReference adRef10 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.RESET_ALL_SUBS_BOOLEAN);
         adRef10.setValue(false);
@@ -75,6 +78,9 @@ public class DatabaseManager {
                 .child(uid).child(Constants.PREFERRED_NOTF_HOUR);
         adRef12.setValue(Variables.preferredHourOfNotf);
 
+
+
+
         DatabaseReference adRef13 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.PREFERRED_NOTF_MIN);
         adRef13.setValue(Variables.preferredMinuteOfNotf);
@@ -82,6 +88,15 @@ public class DatabaseManager {
         DatabaseReference adRef14 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.USER_NICKNAME);
         adRef14.setValue(Variables.userName);
+
+        DatabaseReference adRef15 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.USER_PASSCODE);
+        adRef15.setValue(Variables.getPassword());
+
+
+
+
+
 
         //Creates node for indicating users email.
         DatabaseReference adRef8 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
@@ -97,6 +112,10 @@ public class DatabaseManager {
         DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
                 .child(uid).child(Constants.CURRENT_SUBSCRIPTION_INDEX);
         adRef3.setValue(0);
+
+
+
+
 
         //Creates node for the current ad being seen by user in specific subscription and setting it to 0.
         DatabaseReference adRef4 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
@@ -397,6 +416,13 @@ public class DatabaseManager {
                     int amountPerView = amountPerViewSnap.getValue(int.class);
                     Variables.constantAmountPerView = amountPerView;
                     Log.d(TAG,"Setting the amount per ad to total to : "+amountPerView);
+                }
+
+                //loads users password for payouts.
+                DataSnapshot passwordSnap = dataSnapshot.child(Constants.USER_PASSCODE);
+                if(!Variables.isGottenNewPasswordFromLogInOrSignUp){
+                    Variables.setPassword(passwordSnap.getValue(String.class));
+                    Variables.isGottenNewPasswordFromLogInOrSignUp = false;
                 }
 
                 DataSnapshot notPrefSnap = dataSnapshot.child(Constants.PREFERRED_NOTIF);
@@ -1120,6 +1146,13 @@ public class DatabaseManager {
         });
     }
 
+    public void setUsersNewPassword(String password){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.USER_PASSCODE);
+        adRef.setValue(password);
+    }
 
     ////Other stuff.////////////////////////////////////////////////////////////////////////////////////////
 

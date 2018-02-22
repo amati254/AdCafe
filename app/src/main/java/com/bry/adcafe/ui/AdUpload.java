@@ -149,6 +149,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         mAmountToPayPerTargetedView = Variables.amountToPayPerTargetedView;
         mAmountPlusOurShare = Variables.amountToPayPerTargetedView+2;
         Log.d(TAG,"Amount to pay per targeted user is : "+ mAmountToPayPerTargetedView);
+        Log.d(TAG,"Amount to pay per targeted user is : "+ mAmountPlusOurShare);
 
         setUpViews();
         createProgressDialog();
@@ -194,9 +195,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
     private void resetAndRestart(){
-        if(!clustersToUpLoadTo.isEmpty())clustersToUpLoadTo.clear();
-        mHasNumberBeenChosen = false;
-        startGetNumberOfClusters();
+//        if(!clustersToUpLoadTo.isEmpty())clustersToUpLoadTo.clear();
+//        mHasNumberBeenChosen = false;
+//        startGetNumberOfClusters();
     }
 
 
@@ -348,7 +349,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 mAvi.setVisibility(View.GONE);
                 mLoadingTextView.setVisibility(View.GONE);
                 OnClicks();
-                loadListenerForRecreate();
+//                loadListenerForRecreate();
             }
 
             @Override
@@ -567,8 +568,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         String expiration = Variables.expiration;
         String cvv = Variables.cvv;
         String postalCode = Variables.postalCode;
-        double amount = mAmountPlusOurShare*(mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER) +
-                (mAmountPlusOurShare*(mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER)*Constants.TOTAL_PAYOUT_PERCENTAGE) ;
+        double amount = Variables.amountToPayForUpload;
         startProcessForUpload();
     }
 
@@ -581,9 +581,10 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private void showBottomSheetFragment(){
         String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
         FragmentModalBottomSheet fragmentModalBottomSheet = new FragmentModalBottomSheet();
+
+        fragmentModalBottomSheet.setDetails((mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER),
+                mAmountPlusOurShare, getNextDay(), mCategory,userEmail,Variables.userName);
         fragmentModalBottomSheet.setActivity(AdUpload.this);
-        fragmentModalBottomSheet.setDetails(mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER,
-                (mAmountPlusOurShare), getNextDay(), mCategory,userEmail,Variables.userName);
 
         fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
     }
@@ -773,11 +774,11 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
         Advert advert = new Advert(encodedImageToUpload);
         advert.setNumberOfTimesSeen(0);
-        advert.setNumberOfUsersToReach(mNumberOfClusters*1000);
+        advert.setNumberOfUsersToReach(mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER);
         advert.setPushRefInAdminConsole(pushId);
         advert.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
         advert.setWebsiteLink(mLink);
-        advert.setAmountToPayPerTargetedView(mAmountToPayPerTargetedView+2);
+        advert.setAmountToPayPerTargetedView(mAmountPlusOurShare);
         advert.setHasBeenReimbursed(false);
         advert.setDateInDays(getDateInDays());
 //        advert.setClustersToUpLoadTo(clustersToUpLoadTo);

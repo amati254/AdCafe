@@ -257,13 +257,19 @@
             <TextView
                 android:layout_width="match_parent"
                 android:id="@+id/amountToBePaid"
-                android:text="Amount To Be Paid: 4000KSH."
+                android:text="Amount To Be Paid: 5000KSH."
                 android:layout_height="wrap_content" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:id="@+id/cardNumber"
                 android:text="Paying card number: ****6247."
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/transationCost"
+                android:text="Transaction cost: 250Ksh"
                 android:layout_height="wrap_content" />
 
             <LinearLayout

@@ -128,7 +128,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         final String name = mNameEditText.getText().toString().trim();
         final String email = mEmailEditText.getText().toString().trim();
 
-        String password = mPasswordEditText.getText().toString().trim();
+        final String password = mPasswordEditText.getText().toString().trim();
         String confirmPassword = mConfirmPasswordEditText.getText().toString().trim();
 
         boolean validEmail = isValidEmail(email);
@@ -150,6 +150,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                         Log.d(TAG,"authentication successful");
                         createFirebaseUserProfile(task.getResult().getUser());
                         Variables.userName = name;
+                        Variables.setPassword(password);
                     }else {
                         mRelative.setVisibility(View.VISIBLE);
                         mAvi.setVisibility(View.GONE);
@@ -223,7 +224,6 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                 if(user != null){
                     setUpUserSpace();
                     user.sendEmailVerification();
-//                    sendVerificationEmail();
                 }
             }
         };
@@ -334,118 +334,6 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     }
 
 
-    //has to change
-//    private void generateClusterID(){
-//        Log.d(TAG,"---Generating Cluster ID normally.");
-//        mRef1 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST);
-//        if(mRef1!=null){
-//            mRef1.addListenerForSingleValueEvent(val);
-//        }else{
-//            mClusterID = 1 ;
-//            setUpFirebaseNodes();
-//        }
-//
-//    }
-
-//    ValueEventListener val = new ValueEventListener() {
-//        @Override
-//        public void onDataChange(DataSnapshot dataSnapshot) {
-//            long currentCluster;
-//            if (dataSnapshot.getChildrenCount() == 0) {
-//                currentCluster = dataSnapshot.getChildrenCount() + 1;
-//            } else {
-//                currentCluster = dataSnapshot.getChildrenCount();
-//            }
-//            Log.d(TAG, "--NUMBER OF CLUSTERS IN FIREBASE IS --" + currentCluster);
-//            DataSnapshot UsersInCurrentCluster = dataSnapshot.child(Integer.toString((int) currentCluster));
-//
-//            long numberOfUsersInCurrentCluster;
-//            if (UsersInCurrentCluster.getChildrenCount() == 0) {
-//                numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount();
-//                Log.d(TAG, "--NUMBER OF USERS IN CURRENT CLUSTER IN FIREBASE IS --" + numberOfUsersInCurrentCluster);
-//            } else {
-//                numberOfUsersInCurrentCluster = UsersInCurrentCluster.getChildrenCount() + 1;
-//                Log.d(TAG, "--NUMBER OF USERS IN CURRENT CLUSTER IN FIREBASE IS --" + numberOfUsersInCurrentCluster);
-//            }
-//
-//            if (numberOfUsersInCurrentCluster < 1000) {
-//                Log.d(TAG, "--NUMBER OF USERS IS LESS THAN LIMIT.SETTING mClusterID TO --" + currentCluster);
-//                mClusterID = (int) currentCluster;
-//            } else {
-//                Log.d(TAG, "--NUMBER OF USERS EXCEEDS LIMIT.SETTING mClusterID TO --" + (currentCluster + 1));
-//                mClusterID = (int) currentCluster + 1;
-//            }
-//
-//            Log.d(TAG, "---Cluster id generated for firebase is-- " + mClusterID);
-//            User.setID(mClusterID, mKey);
-//            setUpFirebaseNodes();
-//        }
-//    }
-//
-//        @Override
-//        public void onCancelled(DatabaseError databaseError) {
-//            Log.d("CREATE_ACCOUNT_ACT---","Unable to get cluster with least users due to error.");
-//            Toast.makeText(mContext,"Unable to create your account at the moment, try again in a few minutes.",Toast.LENGTH_LONG).show();
-//        }
-//    };
-
-    //has to change
-//    private void generateClusterIDFromFlagedClusters(){
-//        Variables.setMonthAdTotals(mKey,0);
-//        Variables.setAdTotal(0,mKey);
-//        Log.d(TAG,"--Generating clusterID from flagged ads.");
-//        mRef2 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.FLAGGED_CLUSTERS);
-//        if(mRef2!=null){
-//            mRef2.addListenerForSingleValueEvent(val2);
-//        }else{
-//            generateClusterID();
-//        }
-//    }
-
-//    ValueEventListener val2 = new ValueEventListener() {
-//        @Override
-//        public void onDataChange(DataSnapshot dataSnapshot) {
-//            if(dataSnapshot.hasChildren()){
-//                Log.d(TAG,"Flagged clusters has got children in it.");
-//                for(DataSnapshot snap: dataSnapshot.getChildren()){
-//                    mClusterID = snap.getValue(int.class);
-//                    Log.d(TAG,"Cluster id gotten from Flagged cluster is --"+mClusterID);
-//                    User.setID(mClusterID,mKey);
-//                    removeId(snap.getKey());
-//                    break;
-//                }
-//            }else{
-//                Log.d(TAG,"--Flagged clusters has got no children in it. Generating normally");
-//                generateClusterID();
-//            }
-//        }
-//
-//        @Override
-//        public void onCancelled(DatabaseError databaseError) {
-//            Log.d("CREATE_ACCOUNT_ACT---","Unable to generate cluster from flagged clusters."+databaseError.getMessage());
-//            Toast.makeText(mContext,"Unable to create your account at the moment, try again in a few minutes.",Toast.LENGTH_LONG).show();
-//        }
-//    };
-
-    //has to change
-//    private void removeId(String key) {
-//        DatabaseReference dbr = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.FLAGGED_CLUSTERS).child(key);
-//        dbr.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                Log.d(TAG,"---Removing cluster id from the flagged clusters list");
-//                dataSnapshot.getRef().removeValue();
-//                setUpFirebaseNodes();
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.d(TAG,"---Unable to remove cluster id from the flagged clusters list."+databaseError.getMessage());
-//                Log.d(TAG,"---generating cluster id normally instead.");
-//                generateClusterID();
-//            }
-//        });
-//    }
 
 
     private String getDate(){

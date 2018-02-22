@@ -145,21 +145,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = getApplicationContext();
+
         Variables.isMainActivityOnline = true;
         stage = "LOADING_ADS";
         registerReceivers();
+
         if (!Fabric.isInitialized()) Fabric.with(this, new Crashlytics());
         setUpAllTheViews();
         Variables.isLocked = false;
+
         if(!isOnline()){
             mAvi.smoothToHide();
             mLoadingText.setVisibility(View.GONE);
             mBottomNavButtons.setVisibility(View.GONE);
             cannotLoadLayout.setVisibility(View.VISIBLE);
             retryLoadingFromCannotLoad.setOnClickListener(this);
-        } else {
-            loadAdsFromThread();
-        }
+        } else loadAdsFromThread();
         logUser();
 
         mAviLoadingMoreAds.hide();
@@ -321,6 +322,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         editor6.apply();
 
         setSubsInSharedPrefs();
+    }
+
+    private void clearUserDataFromSharedPreferences(){
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("TodayTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.apply();
+
+        SharedPreferences pref2 = getApplicationContext().getSharedPreferences("MonthTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = pref2.edit();
+        editor2.clear();
+        editor2.apply();
+
+        SharedPreferences pref7 = getApplicationContext().getSharedPreferences("ReimbursementTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor7 = pref7.edit();
+        editor7.clear();
+        editor7.apply();
+
+        SharedPreferences pref8 = getApplicationContext().getSharedPreferences(Constants.CONSTANT_AMMOUNT_PER_VIEW,MODE_PRIVATE);
+        SharedPreferences.Editor editor8 = pref8.edit();
+        editor8.clear();
+        editor8.apply();
+
+        SharedPreferences pref4 = mContext.getSharedPreferences("UID", MODE_PRIVATE);
+        SharedPreferences.Editor editor4 = pref4.edit();
+        editor4.clear();
+        editor4.apply();
+
+        SharedPreferences pref5 = mContext.getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
+        SharedPreferences.Editor editor5 = pref5.edit();
+        editor5.clear();
+        editor5.apply();
+
+        SharedPreferences pref6 = mContext.getSharedPreferences("CurrentAdInSubscription", MODE_PRIVATE);
+        SharedPreferences.Editor editor6 = pref6.edit();
+        editor6.clear();
+        editor6.apply();
     }
 
     private void setSubsInSharedPrefs() {
@@ -1192,6 +1230,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             FirebaseAuth.getInstance().signOut();
         }
         setIsUserLoggedOnInSharedPrefs(false);
+        clearUserDataFromSharedPreferences();
+        Variables.resetAllValues();
 
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
