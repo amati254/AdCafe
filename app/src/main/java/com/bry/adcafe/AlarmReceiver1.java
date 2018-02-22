@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.bry.adcafe.ui.LoginActivity;
 import com.bry.adcafe.ui.Splash;
@@ -61,7 +62,9 @@ public class AlarmReceiver1 extends BroadcastReceiver {
     private int iterations = 0;
     private int numberOfAdsInTotal = 0;
     private LinkedHashMap<String,Integer> Subscriptions  = new LinkedHashMap<>();
+    private int constantAmountPerView = 3;
 
+    private String userName;
 
 
     @Override
@@ -70,13 +73,10 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         mContext = context;
         Intent service1 = new Intent(context, NotificationService1.class);
         service1.setData((Uri.parse("custom://"+System.currentTimeMillis())));
-        if(isUserLoggedIn()) checkIfUserWasLastOnlineToday();
-//        LocalBroadcastManager.getInstance(mContext).registerReceiver(new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(Context context, Intent intent) {
-//                cancelAlarm();
-//            }
-//        },new IntentFilter("CANCEL_ALARM"));
+
+        SharedPreferences prefs = context.getSharedPreferences(Constants.PREFERRED_NOTIF, MODE_PRIVATE);
+        Boolean doesUserWantNotf = prefs.getBoolean(Constants.PREFERRED_NOTIF, true);
+        if(isUserLoggedIn() && doesUserWantNotf) checkIfUserWasLastOnlineToday();
     }
 
     private void checkIfUserWasLastOnlineToday(){
@@ -106,19 +106,30 @@ public class AlarmReceiver1 extends BroadcastReceiver {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.d(TAG,"Starting to load users data to check if there are ads");
         DatabaseReference adRef = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
-                .child(uid).child(Constants.SUBSCRIPTION_lIST);
+                .child(uid);
         adRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot snap: dataSnapshot.getChildren()){
-                    numberOfSubsFromFirebase = (int)dataSnapshot.getChildrenCount();
+                DataSnapshot cpvSnap = dataSnapshot.child(Constants.CONSTANT_AMMOUNT_PER_VIEW);
+                constantAmountPerView = cpvSnap.getValue(int.class);
+
+                DataSnapshot usernameSnap = dataSnapshot.child(Constants.USER_NICKNAME);
+                userName = usernameSnap.getValue(String.class);
+
+                DataSnapshot subSnap = dataSnapshot.child(Constants.SUBSCRIPTION_lIST);
+                for(DataSnapshot snap: subSnap.getChildren()){
+//                    numberOfSubsFromFirebase = (int)dataSnapshot.getChildrenCount();
                     String category = snap.getKey();
                     Integer cluster = snap.getValue(Integer.class);
                     Log.d(TAG,"Key category gotten from firebase is : "+category+" Value : "+cluster);
                     Subscriptions.put(category,cluster);
 //                    checkInForEachCategory(category,cluster);
                 }
-                checkNumberForEach();
+                DataSnapshot isNeedToResetSubsSnap = dataSnapshot.child(Constants.RESET_ALL_SUBS_BOOLEAN);
+                if(!isNeedToResetSubsSnap.getValue(Boolean.class)) {
+                    numberOfSubsFromFirebase = Subscriptions.size();
+                    checkNumberForEach();
+                }
             }
 
             @Override
@@ -136,19 +147,20 @@ public class AlarmReceiver1 extends BroadcastReceiver {
 
     private void checkInForEachCategory(String category,int cluster){
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(getDate())
+                .child(Integer.toString(constantAmountPerView))
                 .child(category).child(Integer.toString(cluster));
         DatabaseReference dbRef = query.getRef();
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren()){
-                    int numberOfAds = (int)dataSnapshot.getChildrenCount();
-                    Log.d(TAG,"adding "+numberOfAds+" to number of ada list.");
-                    numberOfAdsInTotal+=numberOfAds;
-//                    if(iterations==numberOfSubsFromFirebase){
-//                        Log.d(TAG,"All the categories have been handled, total is : "+numberOfAdsInTotal);
-//                        if(numberOfAds>0) handleEverything(numberOfAdsInTotal);
-//                    }
+                    for(DataSnapshot snap: dataSnapshot.getChildren()){
+                        boolean isFlagged = snap.child("flagged").getValue(boolean.class);
+                        if(!isFlagged)numberOfAdsInTotal+=1;
+                    }
+//                    int numberOfAds = (int)dataSnapshot.getChildrenCount();
+//                    Log.d(TAG,"adding "+numberOfAds+" to number of ada list.");
+//                    numberOfAdsInTotal+=numberOfAds;
                 }
                 iterations++;
                 if(iterations<numberOfSubsFromFirebase){
@@ -193,8 +205,8 @@ public class AlarmReceiver1 extends BroadcastReceiver {
 
     private void handleEverything(int number) {
         String message;
-        if (number > 1)message = Html.fromHtml("&#128077;") + "We've got " + number + " ads for you today.";
-        else message = Html.fromHtml("&#128516;") + "We've got " + number + " ad for you today.";
+        if (number > 1)message = "Hey "+userName+", "+ "we've got " + number + " ads for you today."+Html.fromHtml("&#128076;") ;
+        else message = "Hey "+userName+", "+ "we've got " + number + " ad for you today."+Html.fromHtml("&#128516;") ;
         Context context = mContext;
         notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         Intent mIntent = new Intent(context, Splash.class);

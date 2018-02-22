@@ -239,7 +239,11 @@ public class SAContainer {
 
         Calendar cal2 = Calendar.getInstance();
         int year2 = cal2.get(Calendar.YEAR);
+        int day2 = cal2.get(Calendar.DAY_OF_MONTH);
+        int month2 = cal2.get(Calendar.MONTH);
+
         String yearName;
+        String dayWord;
 
         if(year == year2){
             Log.d(TAG,"Ad was pined this year...");
@@ -251,7 +255,20 @@ public class SAContainer {
             yearName =", "+ Integer.toString(year);
         }
 
-        return dayOfMonth+" "+monthName+yearName;
+        String ret = dayOfMonth+" "+monthName+yearName;
+
+        if((-days) == getDateInDays()-1){
+            ret = "Yesterday";
+        }
+
+        return ret;
+    }
+
+    private long getDateInDays(){
+        long currentTimeMillis = System.currentTimeMillis();
+        long currentDay = (currentTimeMillis+1000*60*60*3)/(1000*60*60*24);
+        Log.d(TAG,"The current day is : "+currentDay);
+        return currentDay;
     }
 
     private String getMonthName_Abbr(int month) {

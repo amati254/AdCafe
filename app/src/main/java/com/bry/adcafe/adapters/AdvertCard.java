@@ -100,7 +100,7 @@ public class AdvertCard{
         if(mLastOrNotLast.equals(Constants.NO_ADS)) loadAdPlaceHolderImage();
         else new LongOperationFI().execute("");
 
-       setListeners();
+        setListeners();
     }
 
     private void setListeners(){
@@ -118,6 +118,9 @@ public class AdvertCard{
 
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForTimerStarted,
                 new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
+
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiverForSetImageForSharing,
+                new IntentFilter("SET_IMAGE_FOR_SHARING"+mAdvert.getPushRefInAdminConsole()));
     }
 
     private void setUpListOfBlurrs(){
@@ -202,6 +205,7 @@ public class AdvertCard{
 
     private void loadOnlyLastAd(){
         Log.d("ADVERT_CARD--","LOADING ONLY LAST AD.");
+        lockViews();
 //        MultiTransformation multi = new MultiTransformation(new BlurTransformation(mContext, 30));
         Glide.with(mContext).load(mImageBytes).listener(new RequestListener<byte[], GlideDrawable>() {
             @Override
@@ -278,6 +282,9 @@ public class AdvertCard{
 //        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
+
+
+
     @SwipeHead
     private void onSwipeHeadCard() {
         Log.d("EVENT----------", "onSwipeHeadCard");
@@ -298,6 +305,7 @@ public class AdvertCard{
                 Toast.makeText(mContext,"That's all we have today.",Toast.LENGTH_SHORT).show();
                 lockViews();
             }
+            Variables.isNormalAdsBeingSeen = false;
             setBottomButtonsToBeTranslucent();
             Intent intent = new Intent("SWIPED");
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -315,6 +323,8 @@ public class AdvertCard{
     private boolean firstAd() {
        return mAdvert.getPushRefInAdminConsole().equals(Variables.firstAd.getPushRefInAdminConsole());
     }
+
+
 
 
     private void sendBroadcast(String message ) {
@@ -421,12 +431,22 @@ public class AdvertCard{
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnblurrImage);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverToStartTimer);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForTimerStarted);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForSetImageForSharing);
     }
 
     private BroadcastReceiver mMessageReceiverForUnblurrImage = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             profileImageView.setImageBitmap(bs);
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForSetImageForSharing = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Variables.imageToBeShared = mAdvert.getImageUrl();
+            Intent intent2  = new Intent("TRY_SHARE_IMAGE_AGAIN");
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
         }
     };
 
@@ -447,19 +467,26 @@ public class AdvertCard{
     }
 
     private void lockViews(){
-//        mSwipeView.lockViews();
-        mSwipeView.getBuilder()
-                .setWidthSwipeDistFactor(1f)
-                .setHeightSwipeDistFactor(1f);
-        Variables.isLocked = true;
+        if(!Variables.isLocked){
+            //        mSwipeView.lockViews();
+            mSwipeView.getBuilder()
+                    .setWidthSwipeDistFactor(1f)
+                    .setHeightSwipeDistFactor(1f);
+            Variables.isLocked = true;
+            Log.e("AdvertCard","Locking views");
+        }
     }
 
     private void unLockViews(){
+        if(Variables.isLocked && !Variables.hasTimerStarted){
 //        mSwipeView.unlockViews();
-        mSwipeView.getBuilder()
-                .setWidthSwipeDistFactor(10f)
-                .setHeightSwipeDistFactor(10f);
-        Variables.isLocked = false;
+            mSwipeView.getBuilder()
+                    .setWidthSwipeDistFactor(10f)
+                    .setHeightSwipeDistFactor(10f);
+            Variables.isLocked = false;
+            Log.e("AdvertCard","Unlocking views");
+        }
+
     }
 
 
@@ -763,8 +790,8 @@ public class AdvertCard{
         @Override
         protected String doInBackground(String... strings) {
             Log.d("Card","Doing in background");
-            float scale = 2f;
-            Bitmap bm = getResizedBitmap(bs,250);
+            float scale = 0.6f;
+            Bitmap bm = bs;
             for(int i = 0;i<3;i++){
                 if(i>=positionBL) blurredImageList.set(i,fastblur(bm,scale,(i+2)));
             }

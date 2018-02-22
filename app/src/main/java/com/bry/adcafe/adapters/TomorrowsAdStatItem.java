@@ -70,7 +70,7 @@ public class TomorrowsAdStatItem {
         mEmail.setText("Uploaded by : "+mAdvert.getUserEmail());
         mTargetedNumber.setText(String.format("No. of users targeted : %d", mAdvert.getNumberOfUsersToReach()));
         mCategory.setText("Category : "+mAdvert.getCategory());
-        String amount = Integer.toString((int)(mAdvert.getNumberOfUsersToReach()*Constants.CONSTANT_AMOUNT_PER_AD));
+        String amount = Integer.toString((int)(mAdvert.getNumberOfUsersToReach()*mAdvert.getAmountToPayPerTargetedView()));
         mAmountToReimburse.setText(String.format("Paid amount : %s Ksh.", amount));
         if(mAdvert.isFlagged()) {
             mTakeDown.setText("Put Up.");
@@ -147,7 +147,8 @@ public class TomorrowsAdStatItem {
                 Variables.areYouSureTakeDownText = "Are you sure you want to put back up your ad?";
             }
         }else{
-            Toast.makeText(mContext,"You can't put back up your ad, it was taken down by the admin.",Toast.LENGTH_SHORT).show();
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(new Intent("CANT_TAKE_DOWN_AD"));
+//            Toast.makeText(mContext,"You can't put back up your ad, it was taken down by the admin.",Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
 import com.bry.adcafe.models.Advert;
+import com.bry.adcafe.services.Utils;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -46,6 +48,7 @@ public class ViewImageFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_view_image_dialog, container, false);
+
         mBackButton = (ImageButton) rootView.findViewById(R.id.backBtn);
         mShareButton = (ImageButton) rootView.findViewById(R.id.shareBtn);
         mWebsiteLink = (ImageButton) rootView.findViewById(R.id.Website);
@@ -79,7 +82,7 @@ public class ViewImageFragment extends DialogFragment {
             public void onClick(View v) {
                 if(!mAdvert.getWebsiteLink().equals(igsNein)){
                     try {
-                        String url = Variables.getCurrentAdvert().getWebsiteLink();
+                        String url = mAdvert.getWebsiteLink();
                         if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
                         Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                         startActivity(webIntent);

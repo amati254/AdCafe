@@ -71,20 +71,23 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_marginLeft="30dp"
+                android:layout_marginLeft="10dp"
                 android:layout_marginTop="20dp"
                 android:layout_height="wrap_content">
                 <Button
                     android:layout_width="wrap_content"
                     android:text="submit"
-                    android:textColor="@color/primary_text"
+                    android:textColor="@color/colorPrimary"
+                    android:background="@null"
+                    android:layout_alignParentRight="true"
                     android:id="@+id/submitButton"
                     android:layout_height="wrap_content" />
                 <Button
                     android:layout_width="wrap_content"
                     android:text="Cancel"
-                    android:layout_marginLeft="100dp"
-                    android:textColor="@color/primary_text"
+                    android:layout_alignParentLeft="true"
+                    android:textColor="@color/colorPrimary"
+                    android:background="@null"
                     android:id="@+id/cancelButton"
                     android:layout_height="wrap_content" />
             </RelativeLayout>

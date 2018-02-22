@@ -44,7 +44,7 @@ public class Constants {
     public static String CLUSTERS = "clusters";
     public static String CLUSTERS_LIST = "cluster_list";
     public static String CLUSTER_LIST_PUSHREF_ID = "cluster_list_pushref_id";
-    public static String FLAGGED_CLUSTERS = "FLAGGED_CLUSTERS";
+    public static String FLAGGED_CLUSTERS = "FlaggedClusters";
     public static String CLUSTER_TO_START_FROM = "cluster_to_start_from";
     public static String ADVERTS = "Adverts";
     public static String REPORTED_ADS = "Flagged_ads";
@@ -80,13 +80,33 @@ public class Constants {
     public static String ALL_CLEAR = "AllClear";
     public static String CANCELLED = "canceled";
 
+
     public static String NO_OF_CATEGORIES_KNOWN = "NoOfCategoriesKnown";
     public static String IS_AD = "Is_ad";
     public static String IS_ANNOUNCEMENT = "Is_announcement";
     public static String PINNED_AD_POOL = "PinnedAdPool";
     public static String NO_OF_TIMES_PINNED = "NumberOfTimesPinned";
 
+
+
     public static int NO_OF_ADS_TO_LOAD = 3;
     public static int NO_OF_ADS_TO_LOAD2 = 2;
+    public static String REIMBURSEMENT_TOTALS = "ReimbursementTotals";
+    public static String CONSTANT_AMMOUNT_PER_VIEW = "AmountPerView";
+    public static String FINISHED_SETUP_FOR_RESETTING_SUBS = "FINISHED_SETUP_FOR_RESETTING_SUBS";
+    public static String RESET_ALL_SUBS_BOOLEAN = "ResetAllSubs";
+    public static String NEW_CPV = "NewCPV";
+    public static String PREFERRED_NOTIF = "NotificationsPref";
+
+    public static String PREFERRED_NOTF_HOUR = "PreferredNotfHour";
+    public static String PREFERRED_NOTF_MIN = "PreferredNotfMin";
+    public static String USER_NICKNAME = "UserName";
+    public static String LAST_SEEN_DATE_IN_DAYS = "LSDate";
+    public static int NUMBER_OF_USERS_PER_CLUSTER = 1000;
+    public static double PAYMENT_TRANSFER_PERENTAGE = 0.035;
+    public static double PAYOUT_TRANSFER_FEE = 0.015;
+    public static double TOTAL_PAYOUT_PERCENTAGE = 0.05;
+
+    public static String USER_PASSCODE = "Password";
 
 }

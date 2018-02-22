@@ -2,6 +2,7 @@ package com.bry.adcafe.ui;
 
 import android.app.AlarmManager;
 import android.app.FragmentManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -87,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = "MainActivity";
     public String NOTIFICATION_ID = "notification_id";
     public String NOTIFICATION = "notification";
+    private static int NOTIFICATION_ID2 = 1880;
     private LinearLayout mFailedToLoadLayout;
     private Button mRetryButton;
     private ImageButton mLogoutButton;
@@ -134,17 +136,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int numberOfResponsesForLoadingBlurredImages = 0;
     private boolean hasSentMessageThatBlurrsHaveFinished = false;
     private boolean hasShowedToastForNoMoreAds = false;
+    private int numberOfInitiallyLoadedAds = 0;
+    private boolean isNewDay = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = getApplicationContext();
+
         Variables.isMainActivityOnline = true;
         stage = "LOADING_ADS";
         registerReceivers();
+
         if (!Fabric.isInitialized()) Fabric.with(this, new Crashlytics());
         setUpAllTheViews();
+        Variables.isLocked = false;
 
         if(!isOnline()){
             mAvi.smoothToHide();
@@ -152,13 +160,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mBottomNavButtons.setVisibility(View.GONE);
             cannotLoadLayout.setVisibility(View.VISIBLE);
             retryLoadingFromCannotLoad.setOnClickListener(this);
-        } else {
-            loadAdsFromThread();
-        }
+        } else loadAdsFromThread();
         logUser();
 
         mAviLoadingMoreAds.hide();
-
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        try{
+            notificationManager.cancel(NOTIFICATION_ID2);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 
@@ -173,14 +184,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override protected void onResume() {
         Variables.isMainActivityOnline = true;
-        if(isTimerPausedBecauseOfOfflineActivity) setBooleanForResumingTimer();
-        try{
-            onclicks();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
         super.onResume();
+        if(isTimerPausedBecauseOfOfflineActivity) setBooleanForResumingTimer();
+//        try{
+//            onclicks();
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }finally {
+//
+//        }
         if (!getCurrentDateInSharedPreferences().equals("0") && !getCurrentDateInSharedPreferences().equals(getDate())) {
             Log.d(TAG, "---Date in shared preferences does not match current date,therefore resetting everything.");
             sendBroadcastToUnregisterAllReceivers();
@@ -238,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (dbRef != null) {
             dbRef.removeEventListener(val);
         }
-        setUserDataInSharedPrefs();
+//        setUserDataInSharedPrefs();
         setAlarmForNotifications();
         Variables.lastAdSeen = lastAdSeen;
         Log.d(TAG, "---removing callback for checking time of day.");
@@ -274,6 +286,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d("MAIN_ACTIVITY--", "Setting the month totals in shared preferences - " + Integer.toString(Variables.getMonthAdTotals(mKey)));
         editor2.apply();
 
+        SharedPreferences pref7 = getApplicationContext().getSharedPreferences("ReimbursementTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor7 = pref7.edit();
+        editor7.clear();
+        editor7.putInt(Constants.REIMBURSEMENT_TOTALS, Variables.getTotalReimbursementAmount());
+        Log.d("MAIN_ACTIVITY--", "Setting the Reimbursement totals in shared preferences - " + Integer.toString(Variables.getTotalReimbursementAmount()));
+        editor7.apply();
+
+        SharedPreferences pref8 = getApplicationContext().getSharedPreferences(Constants.CONSTANT_AMMOUNT_PER_VIEW,MODE_PRIVATE);
+        SharedPreferences.Editor editor8 = pref8.edit();
+        editor8.clear();
+        editor8.putInt(Constants.CONSTANT_AMMOUNT_PER_VIEW,Variables.constantAmountPerView);
+        Log.d(TAG,"Setting the constant amount per view in shared preferences - "+Integer.toString(Variables.constantAmountPerView));
+        editor8.apply();
+
         SharedPreferences pref4 = mContext.getSharedPreferences("UID", MODE_PRIVATE);
         SharedPreferences.Editor editor4 = pref4.edit();
         editor4.clear();
@@ -296,6 +322,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         editor6.apply();
 
         setSubsInSharedPrefs();
+    }
+
+    private void clearUserDataFromSharedPreferences(){
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("TodayTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.apply();
+
+        SharedPreferences pref2 = getApplicationContext().getSharedPreferences("MonthTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = pref2.edit();
+        editor2.clear();
+        editor2.apply();
+
+        SharedPreferences pref7 = getApplicationContext().getSharedPreferences("ReimbursementTotals", MODE_PRIVATE);
+        SharedPreferences.Editor editor7 = pref7.edit();
+        editor7.clear();
+        editor7.apply();
+
+        SharedPreferences pref8 = getApplicationContext().getSharedPreferences(Constants.CONSTANT_AMMOUNT_PER_VIEW,MODE_PRIVATE);
+        SharedPreferences.Editor editor8 = pref8.edit();
+        editor8.clear();
+        editor8.apply();
+
+        SharedPreferences pref4 = mContext.getSharedPreferences("UID", MODE_PRIVATE);
+        SharedPreferences.Editor editor4 = pref4.edit();
+        editor4.clear();
+        editor4.apply();
+
+        SharedPreferences pref5 = mContext.getSharedPreferences("CurrentSubIndex", MODE_PRIVATE);
+        SharedPreferences.Editor editor5 = pref5.edit();
+        editor5.clear();
+        editor5.apply();
+
+        SharedPreferences pref6 = mContext.getSharedPreferences("CurrentAdInSubscription", MODE_PRIVATE);
+        SharedPreferences.Editor editor6 = pref6.edit();
+        editor6.clear();
+        editor6.apply();
     }
 
     private void setSubsInSharedPrefs() {
@@ -327,12 +390,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadUserDataFromSharedPrefs() {
+        loadSubsFromSharedPrefs();
         Log.d(TAG, "Loading user data from shared preferences first...");
         SharedPreferences prefs = getSharedPreferences("TodayTotals", MODE_PRIVATE);
         int number = prefs.getInt("TodaysTotals", 0);
         Log.d(TAG, "AD TOTAL NUMBER GOTTEN FROM SHARED PREFERENCES IS - " + number);
         if (mIsBeingReset || !getCurrentDateInSharedPreferences().equals(getDate())) {
             Variables.setAdTotal(0, mKey);
+            isNewDay = true;
             Log.d(TAG, "Setting ad totals in firebase to 0 since is being reset...");
         } else {
             Variables.setAdTotal(number, mKey);
@@ -342,6 +407,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int number2 = prefs2.getInt("MonthsTotals", 0);
         Log.d(TAG, "MONTH AD TOTAL NUMBER GOTTEN FROM SHARED PREFERENCES IS - " + number2);
         Variables.setMonthAdTotals(mKey, number2);
+
+        SharedPreferences prefs7 = getSharedPreferences("ReimbursementTotals", MODE_PRIVATE);
+        int number7 = prefs7.getInt(Constants.REIMBURSEMENT_TOTALS, 0);
+        Log.d(TAG, "REIMBURSEMENT TOTAL NUMBER GOTTEN FROM SHARED PREFERENCES IS - " + number7);
+        Variables.setTotalReimbursementAmount(number7);
+
+        SharedPreferences prefs8 = getSharedPreferences(Constants.CONSTANT_AMMOUNT_PER_VIEW,MODE_PRIVATE);
+        int number8 = prefs8.getInt(Constants.CONSTANT_AMMOUNT_PER_VIEW,3);
+        Log.d(TAG,"CONSTANT AMOUNT GOTTEN PER AD FROM SHARED PREFERENCES IS -   "+number8);
+        Variables.constantAmountPerView = number8;
+
+        SharedPreferences pref9 = getSharedPreferences(Constants.PREFERRED_NOTF_HOUR,MODE_PRIVATE);
+        Variables.preferredHourOfNotf = pref9.getInt(Constants.PREFERRED_NOTF_HOUR,7);
+
+        SharedPreferences pref10 = getSharedPreferences(Constants.PREFERRED_NOTF_MIN,MODE_PRIVATE);
+        Variables.preferredMinuteOfNotf = pref10.getInt(Constants.PREFERRED_NOTF_MIN,30);
 
         SharedPreferences prefs4 = getSharedPreferences("UID", MODE_PRIVATE);
         String uid = prefs4.getString("Uid", "");
@@ -367,14 +448,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Variables.setCurrentAdInSubscription(currentAdInSubscription);
         }
 
-        loadSubsFromSharedPrefs();
         Variables.isStartFromLogin = false;
-        try {
-            Log.d(TAG, "---Starting the getAds method...");
-            startGetAds();
-        } catch (Exception e) {
-            Log.e("BACKGROUND_PROC---", e.getMessage());
+        if(isNewDay){
+            hideViews();
+            DatabaseManager dbmanager = new DatabaseManager();
+            dbmanager.setContext(mContext);
+            dbmanager.checkIfNeedToResetUsersSubscriptions(mContext);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForDoneCheckingIfNeedToReCreateClusters,
+                    new IntentFilter(Constants.LOADED_USER_DATA_SUCCESSFULLY));
+            isNewDay = false;
+        }else{
+            try {
+                Log.d(TAG, "---Starting the getAds method...");
+                startGetAds();
+            } catch (Exception e) {
+                Log.e("BACKGROUND_PROC---", e.getMessage());
+            }
         }
+
     }
 
     private void loadSubsFromSharedPrefs() {
@@ -391,25 +482,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setUpAllTheViews();
         hideViews();
         getGetAdsFromFirebase();
-//        mAvi.setVisibility(View.VISIBLE);
-//        mLoadingText.setVisibility(View.VISIBLE);
-//        mBottomNavButtons.setVisibility(View.GONE);
-//        mSwipeView.setVisibility(View.INVISIBLE);
-//        mAdCounterView.setVisibility(View.GONE);
-//        findViewById(R.id.easterText).setVisibility(View.GONE);
-//        mAviLoadingMoreAds.setVisibility(View.GONE);
-
-//        Log.d(TAG, "---Setting up mViewRunnable thread...");
-//        mViewRunnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                getAds();
-//            }
-//        };
-//        Thread thread = new Thread(null, mViewRunnable, "Background");
-//        Log.d(TAG, "---Starting thread...");
-//        thread.start();
-
     } ///////////////////////////
 
 
@@ -435,9 +507,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Variables.nextSubscriptionIndex = Variables.getCurrentSubscriptionIndex();
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
+                .child(Integer.toString(Variables.constantAmountPerView))
                 .child(getSubscriptionValue(Variables.getCurrentSubscriptionIndex()))
                 .child(Integer.toString(getClusterValue(Variables.getCurrentSubscriptionIndex())));
-        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : " + getSubscriptionValue(Variables.getCurrentSubscriptionIndex())+ " : " + getClusterValue(Variables.getCurrentSubscriptionIndex()));
+        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : "+Variables.constantAmountPerView+ " : "
+                + getSubscriptionValue(Variables.getCurrentSubscriptionIndex())+ " : " + getClusterValue(Variables.getCurrentSubscriptionIndex()));
         dbRef = query.getRef();
 
         if (Variables.getCurrentAdInSubscription() == 0) {
@@ -680,6 +754,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForOnSwiped);
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForUnhideVeiws);
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForContinueShareImage);
+
+        try{
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiverForDoneCheckingIfNeedToReCreateClusters);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         sendBroadcastToUnregisterAllReceivers();
     }
@@ -688,6 +769,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent(Constants.UNREGISTER_ALL_RECEIVERS);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
+
 
 
 
@@ -710,6 +792,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         int bottomMargin = Utils.dpToPx(90);
         Point windowSize = Utils.getDisplaySize(getWindowManager());
+        Variables.windowSize = windowSize;
         float relativeScale = density();
 
         mSwipeView.getBuilder()
@@ -862,12 +945,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Variables.setIsLastOrNotLast(Constants.NOT_LAST);
                 }
             }
+            numberOfInitiallyLoadedAds = mAdList.size();
             mAdList.clear();
             Log.d(TAG,"cleared the adlist");
         } else {
             if(Variables.didAdCafeRemoveCategory)informUserOfSubscriptionChanges();
             if(Variables.didAdCafeAddNewCategory) tellUserOfNewSubscription();
-
+            numberOfInitiallyLoadedAds = 1;
             if(lastAdSeen!=null){
                 Log.d(TAG, "---Loading only last ad from lastAdSeen that was initialised...");
                 lockViews();
@@ -901,6 +985,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Variables.firstAd = noAds;
                 Variables.adToVariablesAdList(noAds);
                 mSwipeView.addView(new AdvertCard(mContext, noAds, mSwipeView, Constants.NO_ADS));
+                lockViews();
                 Variables.setIsLastOrNotLast(Constants.NO_ADS);
                 findViewById(R.id.WebsiteIcon).setAlpha(0.4f);
                 findViewById(R.id.websiteText).setAlpha(0.4f);
@@ -925,16 +1010,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void registerReceivers() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences, new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline, new IntentFilter(Constants.CONNECTION_OFFLINE));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline, new IntentFilter(Constants.CONNECTION_ONLINE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,
+                new IntentFilter(Constants.ADD_TO_SHARED_PREFERENCES));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOffline,
+                new IntentFilter(Constants.CONNECTION_OFFLINE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForConnectionOnline,
+                new IntentFilter(Constants.CONNECTION_ONLINE));
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLastAd, new IntentFilter(Constants.LAST));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLoadMoreAds, new IntentFilter(Constants.LOAD_MORE_ADS));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForTimerHasStarted, new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForOnSwiped, new IntentFilter("SWIPED"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnhideVeiws, new IntentFilter("BLUREDIMAGESDONE"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLastAd,
+                new IntentFilter(Constants.LAST));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForLoadMoreAds,
+                new IntentFilter(Constants.LOAD_MORE_ADS));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForTimerHasStarted,
+                new IntentFilter(Constants.ADVERT_CARD_BROADCAST_TO_START_TIMER));
+
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForOnSwiped,
+                new IntentFilter("SWIPED"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForUnhideVeiws,
+                new IntentFilter("BLUREDIMAGESDONE"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForContinueShareImage,
+                new IntentFilter("TRY_SHARE_IMAGE_AGAIN"));
+
+//        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForDoneCheckingIfNeedToReCreateClusters,
+//                new IntentFilter(Constants.LOADED_USER_DATA_SUCCESSFULLY));
 
     }
 
@@ -945,14 +1045,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             findViewById(R.id.bookmark2Btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (Variables.mIsLastOrNotLast.equals(Constants.NOT_LAST) || Variables.mIsLastOrNotLast.equals(Constants.LAST) && isSeingNormalAds) {
+                    if (Variables.mIsLastOrNotLast.equals(Constants.NOT_LAST) ||
+                            Variables.mIsLastOrNotLast.equals(Constants.LAST) && Variables.isNormalAdsBeingSeen) {
                         if (!Variables.hasBeenPinned) {
-                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
-                                    Snackbar.LENGTH_SHORT).show();
+                            final Snackbar snackBar = Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
+                                    Snackbar.LENGTH_SHORT);
+                            snackBar.setAction("Dismiss", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    snackBar.dismiss();
+                                }
+                            });
+                            snackBar.show();
                             pinAd();
                         } else {
-                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
-                                    Snackbar.LENGTH_SHORT).show();
+                            final Snackbar snackBar = Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
+                                    Snackbar.LENGTH_SHORT);
+                            snackBar.setAction("Dismiss", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    snackBar.dismiss();
+                                }
+                            });
+                            snackBar.show();
                         }
                     } else {
                         Snackbar.make(findViewById(R.id.mainCoordinatorLayout), "You can't pin that..",
@@ -993,7 +1108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 s.vibrate(50);
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey, check out this cool new app called The AdCafé.");
+                sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getText(R.string.shareText2));
                 sendIntent.setType("text/plain");
                 startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.shareText)));
             }
@@ -1012,6 +1127,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         reportDialogFragment.setMenuVisibility(false);
                         reportDialogFragment.show(fm, "Report dialog fragment.");
                         reportDialogFragment.setfragcontext(mContext);
+                        setBooleanForPausingTimer();
                     }
 
                 }
@@ -1027,7 +1143,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 Snackbar.LENGTH_SHORT).show();
                     } else {
                         Variables.adToBeShared = Variables.getCurrentAdvert();
-                        isStoragePermissionGranted();
+                        try{
+                            isStoragePermissionGranted();
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                     }
                 }
             });
@@ -1064,6 +1184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (v == mLogoutButton) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("AdCafé");
             builder.setMessage("Are you sure you want to log out?")
                     .setCancelable(true)
                     .setPositiveButton("Yes.", new DialogInterface.OnClickListener() {
@@ -1127,6 +1248,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             FirebaseAuth.getInstance().signOut();
         }
         setIsUserLoggedOnInSharedPrefs(false);
+        clearUserDataFromSharedPreferences();
+        Variables.resetAllValues();
 
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -1139,12 +1262,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("COUNTER_BAR_TO_MAIN- ", "Broadcast has been received that blurred images have loaded, unhiding views.");
-            int visibleChildren = mSwipeView.getChildCount() <= 4 ? mSwipeView.getChildCount() : 4;
+            int visibleChildren =  numberOfInitiallyLoadedAds <= 4 ? numberOfInitiallyLoadedAds : 4;
             numberOfResponsesForLoadingBlurredImages ++;
-            Log.d(TAG,"Number of visible cards : "+visibleChildren+" Number of responses for loading blurred images"+ numberOfResponsesForLoadingBlurredImages);
-            if(numberOfResponsesForLoadingBlurredImages == visibleChildren & !hasSentMessageThatBlurrsHaveFinished){
+            Log.d(TAG,"Number of visible cards : "+visibleChildren+" Number of responses for loading blurred images :"+ numberOfResponsesForLoadingBlurredImages);
+            if(numberOfResponsesForLoadingBlurredImages == visibleChildren && !hasSentMessageThatBlurrsHaveFinished){
                 hasSentMessageThatBlurrsHaveFinished = true;
                 unhideViews();
+                numberOfResponsesForLoadingBlurredImages = 0;
                 Intent intent2 = new Intent("START_TIMER_NOW");
                 Variables.hasFinishedLoadingBlurredImages = true;
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent2);
@@ -1162,6 +1286,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAdCounterView.setVisibility(View.INVISIBLE);
         findViewById(R.id.easterText).setVisibility(View.GONE);
         mAviLoadingMoreAds.setVisibility(View.GONE);
+        hasSentMessageThatBlurrsHaveFinished = false;
     }
 
     private void unhideViews(){
@@ -1178,20 +1303,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
+    private BroadcastReceiver mMessageReceiverForDoneCheckingIfNeedToReCreateClusters = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Broadcast has been received that database manager is done checking if need to readd categories");
+            try {
+                Log.d(TAG, "---Starting the getAds method...");
+                startGetAds();
+            } catch (Exception e) {
+                Log.e("BACKGROUND_PROC---", e.getMessage());
+            }
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+        }
+    };
 
     private BroadcastReceiver mMessageReceiverForAddingToSharedPreferences = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("COUNTER_BAR_TO_MAIN- ", "Broadcast has been received to add to shared preferences.");
             updateData();
-
         }
     };
 
     private void updateData() {
         Variables.adAdToTotal(mKey);
         Variables.adToMonthTotals(mKey);
+        Variables.addOneToTotalReimbursementAmount(mKey);
         Variables.adOneToCurrentAdNumberForAllAdsList();
         addToSharedPreferences();
         adDayAndMonthTotalsToFirebase();
@@ -1275,23 +1412,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-//                    if(Variables.getCurrentAdNumberForAllAdsList()+1<Variables.getSizeOfAdlist()){
-//                        if(Variables.getAdFromVariablesAdList(Variables.getCurrentAdNumberForAllAdsList()+1)
-//                                .getNatureOfBanner().equals(Constants.IS_ANNOUNCEMENT)){
-//                            findViewById(R.id.WebsiteIcon).setAlpha(0.3f);
-//                            findViewById(R.id.websiteText).setAlpha(0.3f);
-//                            findViewById(R.id.smallDot).setVisibility(View.INVISIBLE);
-//
-//                            findViewById(R.id.bookmark2Btn).setAlpha(0.3f);
-//                            findViewById(R.id.reportBtn).setAlpha(0.3f);
-//                            isSeingNormalAds = false;
-//                            onclicks();
-//                        }
-//                    }
                     isSeingNormalAds = false;
                     onclicks();
-//                    Intent intent = new Intent("UNBLURR_IMAGE"+Variables.getCurrentAdvert().getPushRefInAdminConsole());
-//                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                 }
             }, 300);
 
@@ -1302,9 +1424,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!mIsBeingReset && !isLoadingMoreAds && Variables.nextSubscriptionIndex + 1 < Variables.Subscriptions.size()) {
-//                Variables.nextSubscriptionIndex += 1;
                 loadMoreAds();
             }
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForContinueShareImage = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            startShareImage2();
         }
     };
 
@@ -1318,11 +1446,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         date = isAlmostMidNight() ? getNextDay() : getDate();
 
         Query query = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
+                .child(Integer.toString(Variables.constantAmountPerView))
                 .child(getSubscriptionValue(Variables.nextSubscriptionIndex))
                 .child(Integer.toString(getClusterValue(Variables.nextSubscriptionIndex)));
 
 
-        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : "
+        Log.d(TAG, "---Query set up is : " + Constants.ADVERTS + " : " + date + " : "+Variables.constantAmountPerView+ " : "
                 + getSubscriptionValue(Variables.nextSubscriptionIndex)
                 + " : "
                 + Integer.toString(getClusterValue(Variables.nextSubscriptionIndex)));
@@ -1570,6 +1699,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         DatabaseReference adRef2 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS).child(uid).child(Constants.TOTAL_NO_OF_ADS_SEEN_All_MONTH);
         adRef2.setValue(Variables.getMonthAdTotals(mKey));
+
+        DatabaseReference adRef3 = FirebaseDatabase.getInstance().getReference(Constants.FIREBASE_CHILD_USERS)
+                .child(uid).child(Constants.REIMBURSEMENT_TOTALS);
+        adRef3.setValue(Variables.getTotalReimbursementAmount());
 
     }
 
@@ -1905,15 +2038,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }catch (Exception e){
                 e.printStackTrace();
             }
-        }
-        else{
+        }else{
             try{
+                int number = Variables.hasTimerStarted ? Variables.getCurrentAdNumberForAllAdsList()
+                        : Variables.getCurrentAdNumberForAllAdsList() - 1;
                 Bitmap image = decodeFromFirebaseBase64(Variables.getAdFromVariablesAdList
-                        (Variables.getCurrentAdNumberForAllAdsList()).getImageUrl());
+                        (number).getImageUrl());
                 shareImage(image);
             }catch (Exception e){
                 e.printStackTrace();
+                Intent intent  = new Intent("SET_IMAGE_FOR_SHARING"+Variables.getCurrentAdvert().getPushRefInAdminConsole());
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }
+        }
+    }
+
+    private void startShareImage2(){
+        try{
+            Bitmap imageBm = decodeFromFirebaseBase64(Variables.imageToBeShared);
+            shareImage(imageBm);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -1966,7 +2111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     number = dataSnapshot.getValue(long.class);
                 else number = 0;
                 Log.d(TAG, "number gotten for global ad totals is : " + number);
-                long newNumber = number + 1;
+                long newNumber = number + Variables.constantAmountPerView;
                 setNewAllAdsThatHaveBeenSeenEver(newNumber);
             }
 
@@ -2002,8 +2147,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Calendar alarmStartTime = Calendar.getInstance();
         Calendar now = Calendar.getInstance();
-        alarmStartTime.set(Calendar.HOUR_OF_DAY, 5);
-        alarmStartTime.set(Calendar.MINUTE, 30);
+        alarmStartTime.set(Calendar.HOUR_OF_DAY, Variables.preferredHourOfNotf);
+        alarmStartTime.set(Calendar.MINUTE, Variables.preferredMinuteOfNotf);
         alarmStartTime.set(Calendar.SECOND, 0);
         if (now.after(alarmStartTime)) {
             Log.d(TAG, "Setting alarm to tomorrow morning.");
@@ -2011,7 +2156,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         try {
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmStartTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-            Log.w("Alarm", "Alarms set for everyday 04:15 hrs.");
+            String message = String.format("Alarms set for everyday %s:%s hrs.",Variables.preferredHourOfNotf,Variables.preferredMinuteOfNotf);
+            Log.w("Alarm", message);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -2130,6 +2276,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+
+
     public boolean isOnline() {
         Context context = getApplicationContext();
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -2139,19 +2287,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void lockViews(){
+        if(!Variables.isLocked){
 //        mSwipeView.lockViews();
-        mSwipeView.getBuilder()
-                .setWidthSwipeDistFactor(1f)
-                .setHeightSwipeDistFactor(1f);
-        Variables.isLocked = true;
+            mSwipeView.getBuilder()
+                    .setWidthSwipeDistFactor(1f)
+                    .setHeightSwipeDistFactor(1f);
+            Variables.isLocked = true;
+            Log.e(TAG,"Locking views");
+        }
     }
 
     private void unLockViews(){
-//        mSwipeView.unlockViews();
-        mSwipeView.getBuilder()
-                .setWidthSwipeDistFactor(10f)
-                .setHeightSwipeDistFactor(10f);
-        Variables.isLocked = false;
+        if(Variables.isLocked && !Variables.hasTimerStarted){
+            //        mSwipeView.unlockViews();
+            mSwipeView.getBuilder()
+                    .setWidthSwipeDistFactor(10f)
+                    .setHeightSwipeDistFactor(10f);
+            Variables.isLocked = false;
+            Log.e(TAG,"Unlocking views");
+        }
+
     }
 
 
@@ -2167,6 +2322,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(!Variables.isAllClearToContinueCountDown)Variables.isAllClearToContinueCountDown = true;
     }
 
-//    Font; AR ESSENCE.
+//    Font: AR ESSENCE.
 
 }

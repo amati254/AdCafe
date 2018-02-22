@@ -64,10 +64,16 @@ public class ReportDialogFragment extends DialogFragment {
         DatabaseReference mRef3 = FirebaseDatabase.getInstance().getReference(Constants.REPORTED_ADS)
                 .child(getDate())
                 .child(Variables.getCurrentAdvert().getPushRefInAdminConsole());
-        mRef3.push();
-        mRef3.setValue(Message);
+        DatabaseReference dbref = mRef3.push();
+        dbref.setValue(Message);
         Toast.makeText(mContext,"Duly reported.",Toast.LENGTH_SHORT).show();
         dismiss();
+    }
+
+    @Override
+    public void dismiss(){
+        super.dismiss();
+        setBooleanForResumingTimer();
     }
 
     private String getDate(){
@@ -90,4 +96,11 @@ public class ReportDialogFragment extends DialogFragment {
 
         return todaysDate;
     }
+
+    private void setBooleanForResumingTimer(){
+        Log.d("ReportDialogFragment","Setting boolean for resuming timer.");
+        if(!Variables.isAllClearToContinueCountDown)Variables.isAllClearToContinueCountDown = true;
+    }
+
+
 }

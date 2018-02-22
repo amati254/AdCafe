@@ -36,8 +36,8 @@
             <Button
                 android:id="@+id/chooseNumberButton"
                 android:layout_width="wrap_content"
-                android:background="@color/colorAccent"
-                android:textColor="@color/white"
+                android:background="@null"
+                android:textColor="@color/colorPrimary"
                 android:layout_height="wrap_content"
                 android:text="Set" />
 
@@ -45,9 +45,9 @@
                 android:id="@+id/cancelChooseNumberButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/colorAccent"
-                android:textColor="@color/white"
-                android:layout_marginLeft="30dp"
+                android:background="@null"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginLeft="70dp"
                 android:text="Cancel" />
         </LinearLayout>
 

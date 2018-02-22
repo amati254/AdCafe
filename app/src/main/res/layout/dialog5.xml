@@ -1,35 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:gravity="center"
+    android:padding="15dp"
     android:layout_width="fill_parent"
     android:layout_height="match_parent">
 
 
     <TextView
         android:layout_width="wrap_content"
-        android:textSize="23dp"
+        android:textSize="23sp"
         android:layout_marginTop="10dp"
-        android:text="Link to your Website.(Optional)"
-        android:layout_marginBottom="30dp"
+        android:text="Website Link."
+        android:layout_marginBottom="10dp"
         android:layout_height="wrap_content" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:id="@+id/explanation"
+        android:layout_marginBottom="10dp"
+        android:text="You can add a link to your website if you wish."
+        android:layout_height="wrap_content" />
+
     <EditText
         android:id="@+id/editText"
-        android:layout_width="320dp"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Paste the link here."
-        android:inputType="textMultiLine" />
+        android:inputType="textWebEditText" />
 
-    <Button
-        android:id="@+id/buttonOk"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_marginLeft="40dp"
-        android:layout_marginBottom="50dp"
-        android:layout_marginRight="40dp"
-        android:layout_marginTop="15dp"
-        android:background="@color/colorAccent"
-        android:textColor="@color/white"
-        android:layout_height="wrap_content"
-        android:text="Done." />
+        android:orientation="horizontal"
+        android:paddingRight="20dp"
+        android:paddingLeft="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_height="40dp">
+
+        <Button
+            android:id="@+id/cancelBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="@null"
+            android:text="Cancel"
+            android:textColor="@color/colorPrimary" />
+
+        <Button
+            android:id="@+id/buttonOk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:background="@null"
+            android:text="Done"
+            android:textColor="@color/colorPrimary" />
+
+    </RelativeLayout>
 </LinearLayout>

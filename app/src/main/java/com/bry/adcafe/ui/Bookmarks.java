@@ -94,6 +94,9 @@ public class Bookmarks extends AppCompatActivity {
     private boolean isSharing = false;
     private int iterations = 0;
     private int numberOfAdsLoaded = 0;
+    private boolean isLoadingAds = false;
+
+    private int iterationsFofUnpined = 0;
 
 
     @Override
@@ -173,10 +176,12 @@ public class Bookmarks extends AppCompatActivity {
 
 
     private void showProg(){
+        isLoadingAds = true;
         mProg.show();
     }
 
     private void hideProg(){
+        isLoadingAds = false;
         mProg.dismiss();
     }
 
@@ -331,9 +336,14 @@ public class Bookmarks extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("BOOKMARKS--","Message received to show toast for unpin action");
-            Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.unpinned,
-                    Snackbar.LENGTH_SHORT).show();
-            mAuthProgressDialog.dismiss();
+//            iterationsFofUnpined++;
+//            if(iterationsFofUnpined==Variables.numberOfUnpinns){
+                Snackbar.make(findViewById(R.id.bookmarksCoordinatorLayout), R.string.unpinned,
+                        Snackbar.LENGTH_SHORT).show();
+                mAuthProgressDialog.dismiss();
+                iterationsFofUnpined = 0;
+                Variables.numberOfUnpinns = 0;
+//            }
         }
     };
 
@@ -450,7 +460,7 @@ public class Bookmarks extends AppCompatActivity {
         mProg = new ProgressDialog(this,R.style.AppCompatAlertDialogStyle);
         mProg.setMessage("Loading your Pins...");
         mProg.setTitle("AdCafe.");
-        mProg.setCancelable(false);
+        mProg.setCancelable(true);
         mProg.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -459,10 +469,15 @@ public class Bookmarks extends AppCompatActivity {
         });
     }
 
-//    @Override
-//    public void onBackPressed(){
-//        finish();
-//    }
+    @Override
+    public void onBackPressed(){
+        if(isLoadingAds){
+            hideProg();
+            finish();
+        }else{
+            super.onBackPressed();
+        }
+    }
 
 
 

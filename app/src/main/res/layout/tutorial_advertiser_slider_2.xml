@@ -34,6 +34,18 @@
             android:text="@string/Advertiserslide2text"
             android:textSize="16sp" />
 
+        <TextView
+            android:id="@+id/textView3"
+            android:textColor="@color/colorPrimary"
+            android:layout_width="wrap_content"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:layout_marginLeft="20dp"
+            android:layout_height="wrap_content"
+            android:text="@string/Advertiserslide2text2"
+            android:textSize="16sp" />
+
     </LinearLayout>
 
 </RelativeLayout>

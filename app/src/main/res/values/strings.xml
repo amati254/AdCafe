@@ -10,6 +10,9 @@
     <string name="signInText">"Login."</string>
     <string name="passwordHintText">"Password."</string>
     <string name="confirmPasswordText">"Confirm Password."</string>
+
+
+
     <string name="emailText">"Email (you@example.com)."</string>
     <string name="nameText">"Name."</string>
     <string name="title_activity_login">"Login."</string>
@@ -21,6 +24,9 @@
     <string name="connectToInternet">"You need an internet connection to continue…"</string>
     <string name="noInternetForLoadAds">You need an internet connection to load the ads.</string>
     <string name="shared">"Shared."</string>
+
+
+
     <string name="connectionBack">"Your back online, you may now continue."</string>
     <string name="Logout">"Logout"</string>
     <string name="pinning">"Pinning."</string>
@@ -33,6 +39,9 @@
     <string name="hasBeenPinned">"You already pinned that."</string>
     <string name="unpinned">"Unpinned."</string>
     <string name="failedUnpinned">"We're unable to unpin that right now."</string>
+
+
+
     <string name="cannotUploadFailedFirebase">"Your connection may be low,try again after a few moments."</string>
     <string name="UploadAdNoConnection">"You may need internet connection to Upload your Advert."</string>
     <string name="DoNotPayTwice">"Note that once you pay, you can upload your advert at any time."</string>
@@ -43,6 +52,9 @@
     <string name="unsuccessfullyUploaded">"Something went wrong,try uploading again after a few minutes."</string>
     <string name="uploadMessage">"Upload may take some time..."</string>
     <string name="settingUpMessage">"Setting a couple of things up..."</string>
+
+
+
     <string name="settingUpMessage2">"Setting a few things up..."</string>
     <string name="settingUpAccountMessage">"Setting up your account..."</string>
     <string name="loadingTodaysAdsmessage">"Loading today's ads..."</string>
@@ -50,23 +62,28 @@
     <string name="failedToLoadTodaysAds">"Failed to load today's ads."</string>
     <string name="noteForPickingMessage">"The number shown is by 1000 (*1000 users). Select having that in mind."</string>
     <string name="pickBeforePaying">"So make sure you pick before making any payments."</string>
-    <string name="shareText">"Share for awesomeness."</string>
+    <string name="shareText">"Share App for awesomeness."</string>
+
+
+
     <string name="confirmMessage">"We've just sent you a confirmation email. Head over to your inbox to verify and activate your account(Worry not, its only a one time thing)."</string>
     <string name="next">NEXT</string>
     <string name="skip">SKIP</string>
     <string name="start">GOT IT</string>
     <string name="slider1text">It\'s basically an app for advertising information, products and all
-    types of services to users from across the country. </string>
+    types of services to users in the app from across the country. </string>
     <string name="slider1title">Tap, View And Go</string>
     <string name="slider2title">AdCafé</string>
-    <string name="slider2text">Basically you\'ll be able to view ads uploaded by advertisers in the app
-    and also advertise your product to the app\'s users.</string>
+    <string name="slider2text">Basically you can charge advertisers for your time to view their ads in the app and also
+        advertise your product to the app\'s users.</string>
     <string name="slider2hello">Hello!</string>
     <string name="slider2take">Take a Tour</string>
 
 
-    <string name="slide3text2">We want to make advertising cool; We believe that the adCafe can do just that, and do it in a way that is
+    <string name="slide3text21">We want to make advertising cool; We believe that the adCafe can do just that, and do it in a way that is
         effective, interesting and maybe, just maybe, entertaining.</string>
+
+    <string name="slide3text2">Your attention has value to advertisers. Here you can charge them for it, making money in the process.</string>
 
     <string name="slide4text">Even better! Among many other benefits, the AdCafe gives you the ability to
         target many of its users in a very short period of time.</string>
@@ -98,30 +115,34 @@
 
 
     <string name="slide11text">Share! and if you have any questions comments or
-        suggestions, contact us through feedback (in the dashboard);
-        lets turn this into something big!</string>
+        suggestions, contact us through feedback (in the dashboard).</string>
 
     <string name="slide12text">No it is optional, meaning you do not have to engage in it if you don\'t want to.</string>
 
     <string name="slide13text">Its quite simple really. Essentially you will be monetised based on (and in proportion to) the
         number of ads you see.</string>
 
-    <string name="Advertiserslide1text">Advertising in the AdCafe is one of the most simple and convenient way to
-        advertise, as it offers benefits to help you promote your product.</string>
+    <string name="Advertiserslide1text">Advertising in the AdCafe is one of the simplest and most convenient way to
+        advertise, as it has many benefits that help you promote your product.</string>
 
     <string name="Advertiserslide2text">Essentially, we only advertise by views. When our user sees a banner for 7 seconds,
         we consider advertising to have taken place.</string>
 
-    <string name="reachabilityexplanation">Advertising here gives you the ability to reach users interested in your
-        type of product in a very short time.</string>
+    <string name="Advertiserslide2text2">Also, advertising here happens in 24h cycles; Meaning, when you upload an ad today, it will
+        only be showcased on the day after.</string>
 
-    <string name="affordablilityexplanation">As we only charge 4000Ksh per 1000 views, advertising here is
-        flexible as per your financial ability.</string>
+    <string name="reachabilityexplanation">Advertising here gives you the ability to reach the apps users within a very short period of time.</string>
 
-    <string name="reimbursabilityexplanation">In the event your ad doesn\'t reach the number of users you intended,
-        you will be reimbursed the remaining amount.</string>
+    <string name="targetingExplanation">Here you can target the type of users you want to reach based on
+         the general category of product you deal with.</string>
 
-    <string name="monitorableexplanation">Through the Ad Stats Window, you can find
+    <string name="affordablilityexplanation">Advertising here is affordable and flexible as per your financial ability. The price,
+        however, is dependent on the price your targeted users charge for their time.</string>
+
+    <string name="reimbursabilityexplanation">In the event your ad doesn\'t reach your targeted number of users,
+        you can take back the remaining amount through the Ad Stats Window.</string>
+
+    <string name="monitorableexplanation">Through the Ad Stats Window(Dashboard->Ad Stats), you can find
         out in real time how many users have seen your ad and the amount to be reimbursed.</string>
 
     <string name="advertisePageExplaation">The page is designed similar to the main page. This basically will give you a feel of how the
@@ -140,6 +161,54 @@
 
     <string name="contactus">Feel free to contact us if you have any questions or inquiries for us. We will try our best to reply as soon
         as possible.</string>
+
+    <string name="noteAboutChoosingAmmount">Note: The higher the amount chosen, the lower the number of banners you might see. So we recommend 3 Ksh
+        per view.</string>
+
+    <string name="changecpvexplanation">Press continue if you wish to change the amount you charge for each banner you see.</string>
+
+    <string name="noteAboutChoosingAmmount2">Remember: The higher the amount chosen, the lower the number of banners you might see. So we recommend 3 Ksh
+        per view.</string>
+
+    <string name="shareText2">Hey, check out this cool new app called The AdCafé.</string>
+
+    <string name="changeTimeExplanation">Click continue if you wish to change the time you are notified daily about new ads.</string>
+
+    <string name="needToMakePayments">Next you need to make a payment before the upload.
+        We only support credit/debit card payments as of now.</string>
+
+    <string name="needUserDetails">We also need a few more details from you before we can continue.</string>
+
+    <string name="tutorialExplanationAdvertiser6.2">The cost of advertising here depends on the amount charged by
+        the group of users you are targeting. For instance, some users charge 3Ksh per view.</string>
+
+    <string name="tutorialExplanationAdvertiser6.3">So if you were to target the 3Ksh users, you would pay 5250Ksh per 1000 users reached
+        &#13;&#10; i.e   3Ksh + 2Ksh per user reached, plus 5% on the total amount paid (for transaction fees).</string>
+
+    <string name="tutorialExplanationAdvertiser6.4">We charge 2Ksh on top of the amount charged by the users, for every user reached
+        <br />(thus the 3Ksh + 2Ksh). Also an extra transaction fee is charged for making the payments. Remember that.</string>
+
+    <string name="adStatsPageEplanation">The Ad Stats Window can help you monitor and perform actions on your uploaded ads in real time.</string>
+
+    <string name="takeDownButton">The take down button is for taking down an ad uploaded if you need to do so.</string>
+
+    <string name="reimburseButton">Only visible the day after showcasing the ad, the reimburse button gives you the option to
+        obtain the remaining amount for the targeted users not reached.</string>
+
+    <string name="payoutDetails">Click the proceed button if you wish to withdraw your money totals into your
+        mobile account. We only support MPesa payouts as of now.</string>
+
+    <string name="requiredUserDetails">We only need your phone number and your account password to make the payout.</string>
+
+    <string name="noteAboutCreditCardInfo">Note: We do not store any of your credit/debit card information for security reasons.</string>
+
+    <string name="takenDownDetails">That ad may have been taken down by the admin and cannot be put back up.We will contact you for
+        more details via your email.</string>
+
+    <string name="resetPasswordDetails">We can send you a password reset email. After resetting, the changes will take effect in a couple
+        of moments.</string>
+
+    <string name="logoutAfterReset">However we may need to log you out of your account.</string>
 
     <string name="feedbacktype">Feedback Type</string>
     <string name="feedbacktype1">Praise</string>

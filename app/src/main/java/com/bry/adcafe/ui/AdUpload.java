@@ -3,8 +3,10 @@ package com.bry.adcafe.ui;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
@@ -15,6 +17,7 @@ import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -34,6 +37,8 @@ import android.widget.Toast;
 import com.bry.adcafe.Constants;
 import com.bry.adcafe.R;
 import com.bry.adcafe.Variables;
+import com.bry.adcafe.fragments.FragmentModalBottomSheet;
+import com.bry.adcafe.fragments.FragmentSelectPaymentOptionBottomSheet;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.bumptech.glide.Glide;
@@ -124,6 +129,9 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private ProgressDialog mAuthProgressDialog;
     private int numberOfClustersBeingUploadedTo = 0;
 
+    private int mAmountToPayPerTargetedView;
+    private int mAmountPlusOurShare;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,9 +146,15 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         Log.d(TAG,"Category gotten from Variables class is : "+mCategory);
         mCategoryText.setText("Category: "+mCategory);
 
+        mAmountToPayPerTargetedView = Variables.amountToPayPerTargetedView;
+        mAmountPlusOurShare = Variables.amountToPayPerTargetedView+2;
+        Log.d(TAG,"Amount to pay per targeted user is : "+ mAmountToPayPerTargetedView);
+        Log.d(TAG,"Amount to pay per targeted user is : "+ mAmountPlusOurShare);
+
         setUpViews();
         createProgressDialog();
         startGetNumberOfClusters();
+        setUpListeners();
 
     }
 
@@ -175,14 +189,15 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void loadListenerForRecreate() {
         mRef6 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM)
+                .child(Integer.toString(mAmountToPayPerTargetedView))
                 .child(mCategory+"_cluster_to_start_from");
         mRef6.addChildEventListener(chilForRefresh);
     }
 
     private void resetAndRestart(){
-        if(!clustersToUpLoadTo.isEmpty())clustersToUpLoadTo.clear();
-        mHasNumberBeenChosen = false;
-        startGetNumberOfClusters();
+//        if(!clustersToUpLoadTo.isEmpty())clustersToUpLoadTo.clear();
+//        mHasNumberBeenChosen = false;
+//        startGetNumberOfClusters();
     }
 
 
@@ -220,7 +235,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         setAllOtherViewsToBeGone();
         Log.d(TAG,"---Getting number of clusters.");
         //When restructuring to advertising to specific type of users,add .child("%AdvertCategory%");
-        mRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST).child(mCategory);
+        mRef = FirebaseDatabase.getInstance().getReference(Constants.CLUSTERS).child(Constants.CLUSTERS_LIST)
+                .child(Integer.toString(mAmountToPayPerTargetedView)).child(mCategory);
         mRef.addListenerForSingleValueEvent(val);
 
     }
@@ -253,7 +269,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private void getClusterToStartForm() {
         Log.d(TAG,"---getting cluster to start from");
         //When changing to specific clusters, this will need to change from this to .getReference("%AdvertCategory%_cluster_to_start_from");
-        mRef2 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM).child(mCategory+"_cluster_to_start_from");
+        mRef2 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM)
+                .child(Integer.toString(mAmountToPayPerTargetedView)).child(mCategory+"_cluster_to_start_from");
         mRef2.addListenerForSingleValueEvent(val2);
     }
 
@@ -288,7 +305,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         Log.d(TAG,"---Starting query for no of ads in cluster to start from.");
         //When changing to targeted advertising,this will need to have .child("%AdvertCategory%") between getNextDay and clusterToStartFrom child;
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterToStartFrom));
+                .child(getNextDay()).child(Integer.toString(mAmountToPayPerTargetedView))
+                .child(mCategory).child(Integer.toString(mClusterToStartFrom));
         boolRef.addListenerForSingleValueEvent(val3);
     }
 
@@ -316,7 +334,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         Log.d(TAG,"---Starting query for no of ads in Latest cluster now.");
         //When changing to targeted advertising,this will need to have .child("%AdvertCategory%") between getNextDay and clusterTotal child;
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterTotal));
+                .child(getNextDay()).child(Integer.toString(mAmountToPayPerTargetedView))
+                .child(mCategory).child(Integer.toString(mClusterTotal));
         boolRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -330,7 +349,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 mAvi.setVisibility(View.GONE);
                 mLoadingTextView.setVisibility(View.GONE);
                 OnClicks();
-                loadListenerForRecreate();
+//                loadListenerForRecreate();
             }
 
             @Override
@@ -355,6 +374,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         if(mRef2!=null) mRef2.removeEventListener(val2);
         if(boolRef!=null) boolRef.removeEventListener(val3);
         if(mRef6!=null) mRef6.removeEventListener(chilForRefresh);
+        removeListeners();
     }
 
     private void OnClicks(){
@@ -417,7 +437,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                     }else{
                         if(bm!=null && !uploading){
                             //This method will begin the process for uploading ad;
-                            startProcessForUpload();
+                            showDialogForPayments();
                         }else{
                             Toast.makeText(mContext,"Please choose your image again.",Toast.LENGTH_LONG).show();
                         }
@@ -467,6 +487,19 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         }
     }
 
+    private void setUpListeners(){
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForAddingToSharedPreferences,
+                new IntentFilter("PROCEED_CARD_DETAILS_PART"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForStartPayments,
+                new IntentFilter("START_PAYMENTS_INTENT"));
+    }
+
+    private void removeListeners(){
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForAddingToSharedPreferences);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForStartPayments);
+    }
+
 
 
     //////This method will start the upload process.Call it when your done with the payments....
@@ -479,17 +512,22 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         recheckNoOfChildrenInClulsterToStartFrom();
     }
     //Remember to comment out the one being called in the onClick listener (Line 420)////////
-    ///////////////////////////////////////////////////////////////////////
 
     private void promptUserForLink() {
         final Dialog d = new Dialog(AdUpload.this);
         d.setTitle("Ad any relevant link.");
         d.setContentView(R.layout.dialog5);
-        Button b2 = (Button) d.findViewById(R.id.buttonOk);
-        final EditText e = (EditText) d.findViewById(R.id.editText);
+        Button b1 = d.findViewById(R.id.cancelBtn);
+        Button b2 =  d.findViewById(R.id.buttonOk);
+        final EditText e =  d.findViewById(R.id.editText);
         if(mLink.equals("none")) e.setText("");
         else e.setText(mLink);
-
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                d.dismiss();
+            }
+        });
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -508,15 +546,56 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     }
 
     private void showDialogForPayments() {
-        buildTransactionForPayment();
+        showMessageBeforeBottomsheet();
+    }
+
+    private BroadcastReceiver mMessageReceiverForAddingToSharedPreferences = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Broadcast has been received show bottomsheet.");
+            showBottomSheetFragment();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForStartPayments = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Broadcast has been received show bottomsheet.");
+            startPayments();
+        }
+    };
+
+
+
+
+    private void startPayments() {
+        Toast.makeText(mContext,"Payments should start",Toast.LENGTH_SHORT).show();
+        String cardNumber = Variables.cardNumber;
+        String expiration = Variables.expiration;
+        String cvv = Variables.cvv;
+        String postalCode = Variables.postalCode;
+        double amount = Variables.amountToPayForUpload;
+        startProcessForUpload();
+    }
+
+    private void showMessageBeforeBottomsheet(){
+        FragmentSelectPaymentOptionBottomSheet fragmentModalBottomSheet = new FragmentSelectPaymentOptionBottomSheet();
+        fragmentModalBottomSheet.setActivity(AdUpload.this);
+        fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
+    }
+
+    private void showBottomSheetFragment(){
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        FragmentModalBottomSheet fragmentModalBottomSheet = new FragmentModalBottomSheet();
+
+        fragmentModalBottomSheet.setDetails((mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER),
+                mAmountPlusOurShare, getNextDay(), mCategory,userEmail,Variables.userName);
+        fragmentModalBottomSheet.setActivity(AdUpload.this);
+
+        fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
     }
 
 
-
-
-    private void buildTransactionForPayment() {
-
-    }
 
     @Override
     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
@@ -538,7 +617,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tv.setText(String.valueOf(np.getValue()*1000));
+                tv.setText(String.valueOf(np.getValue()*Constants.NUMBER_OF_USERS_PER_CLUSTER));
                 mHasNumberBeenChosen = true;
                 mNumberOfClusters = np.getValue();
 //                addToClusterListToUploadTo(mNumberOfClusters);
@@ -564,6 +643,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(intent.createChooser(intent,"Select Picture"),PICK_IMAGE_REQUEST);
     }
+
 
 
     @Override
@@ -596,14 +676,14 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,75,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,80,baos);
         byte[] byteArray = baos.toByteArray();
         return byteArray;
     }
 
     private String encodeBitmapForFirebaseStorage(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,75,baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,80,baos);
         String imageEncoded = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
         return imageEncoded;
     }
@@ -644,7 +724,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void recheckNoOfChildrenInClulsterToStartFrom(){
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterToStartFrom));
+                .child(getNextDay()).child(Integer.toString(mAmountToPayPerTargetedView))
+                .child(mCategory).child(Integer.toString(mClusterToStartFrom));
         boolRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -661,7 +742,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
     private void recheckNoOfChildrenInLatestClusters(){
         DatabaseReference boolRef = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
-                .child(getNextDay()).child(mCategory).child(Integer.toString(mClusterTotal));
+                .child(getNextDay()).child(Integer.toString(mAmountToPayPerTargetedView))
+                .child(mCategory).child(Integer.toString(mClusterTotal));
         boolRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -698,10 +780,11 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
         Advert advert = new Advert(encodedImageToUpload);
         advert.setNumberOfTimesSeen(0);
-        advert.setNumberOfUsersToReach(mNumberOfClusters*1000);
+        advert.setNumberOfUsersToReach(mNumberOfClusters*Constants.NUMBER_OF_USERS_PER_CLUSTER);
         advert.setPushRefInAdminConsole(pushId);
         advert.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
         advert.setWebsiteLink(mLink);
+        advert.setAmountToPayPerTargetedView(mAmountPlusOurShare);
         advert.setHasBeenReimbursed(false);
         advert.setDateInDays(getDateInDays());
 //        advert.setClustersToUpLoadTo(clustersToUpLoadTo);
@@ -730,7 +813,11 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private void uploadImage(final Bitmap bm) {
 //        String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
         uploading = true;
-        mRef6.removeEventListener(chilForRefresh);
+        try{
+            mRef6.removeEventListener(chilForRefresh);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         if(clustersToUpLoadTo.size()>10){
             for(int i = 0; i < 10; i++){
                 String pushId;
@@ -751,6 +838,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 //When configuring for targeted advertising based on user prefs, this will change by add ing .child("%AdvertCategory%") between
                 //date and cluster number.
                 mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
+                        .child(Integer.toString(mAmountToPayPerTargetedView))
                         .child(mCategory)
                         .child(Integer.toString(clusterNumber)).child(pushId);
 //                Advert advert = new Advert(encodedImageToUpload);
@@ -823,6 +911,7 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
                 //When configuring for targeted advertising based on user prefs, this will change by add ing .child("%AdvertCategory%") between
                 //date and cluster number.
                 mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS).child(date)
+                        .child(Integer.toString(mAmountToPayPerTargetedView))
                         .child(mCategory)
                         .child(Integer.toString(number)).child(pushId);
 //                Advert advert = new Advert(encodedImageToUpload);
@@ -916,12 +1005,12 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         final Dialog d = new Dialog(AdUpload.this);
         d.setTitle("Upload complete");
         d.setContentView(R.layout.dialog4);
-        Button b2 = (Button) d.findViewById(R.id.buttonOk);
+        Button b2 =  d.findViewById(R.id.buttonOk);
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 d.dismiss();
-                onBackPressed();
+                finish();
             }
         });
         d.show();
@@ -931,7 +1020,8 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
 
 
     private void setNewValueToStartFrom() {
-        mRef4 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM).child(mCategory+"_cluster_to_start_from");
+        mRef4 = FirebaseDatabase.getInstance().getReference(Constants.CLUSTER_TO_START_FROM).child(Integer.toString(mAmountToPayPerTargetedView))
+                .child(mCategory+"_cluster_to_start_from");
         if(mClusterToStartFrom + mNumberOfClusters > mClusterTotal){
             mRef4.setValue((mClusterToStartFrom + mNumberOfClusters)-mClusterTotal);
         }else{

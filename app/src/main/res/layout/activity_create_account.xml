@@ -21,7 +21,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="30dp"
-
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
             android:id="@+id/linearLayout">
@@ -87,7 +86,8 @@
                 android:layout_height="wrap_content"
                 android:padding="10dp"
                 android:text="@string/signUpText"
-                android:background="@color/colorAccent"
+                style="?android:attr/borderlessButtonStyle"
+                android:background="@color/colorPrimary"
                 android:layout_marginTop="15dp"
                 android:textColor="@android:color/white" />
 

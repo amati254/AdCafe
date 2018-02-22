@@ -40,7 +40,6 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import okhttp3.internal.DiskLruCache;
 
 public class AdminConsole extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "AdminConsole";
@@ -304,6 +303,7 @@ public class AdminConsole extends AppCompatActivity implements View.OnClickListe
             int pushId = ad.clusters.get(cluster);
             DatabaseReference  mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
                     .child(getNextDay())
+                    .child(Integer.toString(ad.getAmountToPayPerTargetedView()-2))
                     .child(ad.getCategory())
                     .child(Integer.toString(cluster))
                     .child(Integer.toString(pushId))

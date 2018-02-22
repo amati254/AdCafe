@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/topText"
+        android:layout_marginTop="10dp"
+        android:textSize="15sp"
+        android:padding="10dp"
+        android:layout_marginLeft="10dp"
+        android:text="Also, choose the category of viewers your targeting. This is based on the amount each user charges for every banner they see. "
+        android:layout_marginStart="10dp" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:padding="20dp"
+            android:id="@+id/cpvRadioGroup"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radioButton3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:text="1 Ksh per view." />
+
+            <RadioButton
+                android:id="@+id/radioButton5"
+                android:checked="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:text="3 Ksh per view. (Recommended)" />
+
+            <RadioButton
+                android:id="@+id/radioButton8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:text="6 Ksh per view." />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/shStats3"
+                android:layout_marginLeft="10dp"
+                android:text="Number of users for 1Ksh is: 1500."
+                android:layout_marginBottom="5dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/shStats5"
+                android:layout_marginLeft="10dp"
+                android:text="Number of users for 3Ksh is: 1500."
+                android:layout_marginBottom="5dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/shStats8"
+                android:layout_marginLeft="10dp"
+                android:text="Number of users for 6Ksh is: 1500."
+                android:layout_marginBottom="5dp"
+                android:layout_height="wrap_content" />
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_marginLeft="0dp"
+                android:layout_marginTop="20dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="0dp">
+                <Button
+                    android:layout_width="wrap_content"
+                    android:text="Cancel"
+                    android:textColor="@color/colorPrimary"
+                    android:background="@null"
+                    android:layout_alignParentLeft="true"
+                    android:id="@+id/cancelButton"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:text="continue"
+                    android:layout_alignParentRight="true"
+                    android:textColor="@color/colorPrimary"
+                    android:background="@null"
+                    android:id="@+id/submitButton"
+                    android:layout_height="wrap_content"/>
+
+            </RelativeLayout>
+        </RadioGroup>
+
+    </LinearLayout>
+
+</LinearLayout>

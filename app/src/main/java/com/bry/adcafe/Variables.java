@@ -1,7 +1,10 @@
 package com.bry.adcafe;
 
+import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.util.Log;
 
+import com.braintreepayments.cardform.view.CardForm;
 import com.bry.adcafe.adapters.AdvertCard;
 import com.bry.adcafe.adapters.SavedAdsCard;
 import com.bry.adcafe.models.Advert;
@@ -22,6 +25,7 @@ public class Variables {
 
     private static Integer todaysAdTotal = 0;
     private static int mMonthAdTotals = 0;
+    private static int mTotalReimbursementAmount = 0;
     private static String lastSeenAd;
     private static String lastAdOfList;
     private static int currentAdNumberForAllAdsList = 0;
@@ -71,10 +75,59 @@ public class Variables {
 
     public static int width;
     public static LinkedHashMap<Long,List> VariablesHashOfAds = new LinkedHashMap<>();
-    public static boolean isLocked;
+    public static boolean isLocked = false;
     public static boolean isAllClearToContinueCountDown = true;
     public static boolean hasFinishedLoadingBlurredImages = false;
     public static Advert firstAd;
+    public static Point windowSize;
+
+    public static String imageToBeShared;
+    public static int numberOfUnpinns = 0;
+    public static boolean isNormalAdsBeingSeen = true;
+    public static int constantAmountPerView = 3;
+    public static int amountToPayPerTargetedView = 5;
+    public static boolean doesUserWantNotifications = true;
+
+    public static int preferredHourOfNotf = 7;
+    public static int preferredMinuteOfNotf = 30;
+    public static String userName;
+
+    public static String cardNumber;
+    public static String expiration;
+    public static String cvv;
+    public static String postalCode;
+
+    public static String phoneNo;
+    private static String password;
+    public static double amountToPayForUpload;
+    public static Advert adToBeReimbursed;
+    public static boolean isGottenNewPasswordFromLogInOrSignUp = false;
+
+    public static void resetAllValues(){
+         todaysAdTotal = 0;
+         mMonthAdTotals = 0;
+         mTotalReimbursementAmount = 0;
+         lastSeenAd = null;
+         lastAdOfList = null;
+         currentAdNumberForAllAdsList = 0;
+         currentAdvert = null;
+         allAdsList.clear();
+         Subscriptions.clear();
+         currentAdNumberForAllAdsList = 0;
+         currentSubscriptionIndex = 0;
+         currentAdInSubscription = 0;
+         lastAdSeen = null;
+         VariablesHashOfAds.clear();
+         firstAd = null;
+         constantAmountPerView = 0;
+         amountToPayPerTargetedView = 0;
+         userName = null;
+         phoneNo = null;
+         password = null;
+         amountToPayForUpload = 0;
+         adToBeReimbursed = null;
+    }
+
 
 
     public static void setNewNumberOfAds(int number){
@@ -224,5 +277,27 @@ public class Variables {
 
     public static void adOneToCurrentAdInSubscription(){
         currentAdInSubscription+=1;
+    }
+
+
+
+    public static int getTotalReimbursementAmount() {
+        return mTotalReimbursementAmount;
+    }
+
+    public static void setTotalReimbursementAmount(int mTotalReimbursementAmount) {
+        Variables.mTotalReimbursementAmount = mTotalReimbursementAmount;
+    }
+
+    public static void addOneToTotalReimbursementAmount(String k) {
+        if(k.equals(mKey)) mTotalReimbursementAmount+=(constantAmountPerView);
+    }
+
+    public static String getPassword() {
+        return password;
+    }
+
+    public static void setPassword(String password) {
+        Variables.password = password;
     }
 }

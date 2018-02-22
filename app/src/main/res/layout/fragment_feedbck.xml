@@ -48,29 +48,35 @@
             android:textColorHint="@color/colorAccent"
             android:layout_height="wrap_content" />
 
-        <Button
-            android:id="@+id/SubmitAll"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:text="submit"
-            android:background="@color/colorAccent"
-            android:layout_marginTop="15dp"
-            android:textColor="@color/icons" />
-
-        <Button
-            android:id="@+id/cancelAll"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:orientation="horizontal"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
+            android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
-            android:text="cancel"
-            android:background="@color/colorAccent"
-            android:layout_marginTop="15dp"
-            android:textColor="@color/icons" />
+            android:layout_height="50dp">
+
+            <Button
+                android:id="@+id/cancelAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:background="@null"
+                android:text="Cancel"
+                android:textColor="@color/colorPrimary" />
+
+            <Button
+                android:id="@+id/SubmitAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:background="@null"
+                android:text="submit"
+                android:textColor="@color/colorPrimary" />
+
+        </RelativeLayout>
     </LinearLayout>
 </FrameLayout>

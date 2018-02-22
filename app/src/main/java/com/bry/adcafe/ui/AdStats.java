@@ -1,5 +1,6 @@
 package com.bry.adcafe.ui;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +29,7 @@ import com.bry.adcafe.Variables;
 import com.bry.adcafe.adapters.DateForAdStats;
 import com.bry.adcafe.adapters.MyAdStatsItem;
 import com.bry.adcafe.adapters.TomorrowsAdStatItem;
+import com.bry.adcafe.fragments.FragmentAdvertiserPayoutBottomsheet;
 import com.bry.adcafe.models.Advert;
 import com.bry.adcafe.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -102,10 +105,22 @@ public class AdStats extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForTakeDownAd,
                 new IntentFilter("TAKE_DOWN"));
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForStartPayout,
+                new IntentFilter("START_PAYOUT"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowBottomSheet,
+                new IntentFilter("START_ADVERTISER_PAYOUT"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForCantTakeDown,
+                new IntentFilter("CANT_TAKE_DOWN_AD"));
     }
 
     private void unregisterReceivers(){
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForTakeDownAd);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForStartPayout);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForShowBottomSheet);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForCantTakeDown);
+
         Intent intent = new Intent("REMOVE-LISTENERS");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
@@ -477,6 +492,7 @@ public class AdStats extends AppCompatActivity {
             int pushId = ad.clusters.get(cluster);
             DatabaseReference  mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
                     .child(getNextDay())
+                    .child(Integer.toString(ad.getAmountToPayPerTargetedView()-2))
                     .child(ad.getCategory())
                     .child(Integer.toString(cluster))
                     .child(Integer.toString(pushId))
@@ -517,6 +533,7 @@ public class AdStats extends AppCompatActivity {
     private void flagSpecific(int cluster, int pushId, final Advert ad, final boolean bol){
         DatabaseReference  mRef3 = FirebaseDatabase.getInstance().getReference(Constants.ADVERTS)
                 .child(getNextDay())
+                .child(Integer.toString(ad.getAmountToPayPerTargetedView()-2))
                 .child(ad.getCategory())
                 .child(Integer.toString(cluster))
                 .child(Integer.toString(pushId))
@@ -563,6 +580,69 @@ public class AdStats extends AppCompatActivity {
         }
 
         return number;
+    }
+
+
+
+
+    private BroadcastReceiver mMessageReceiverForShowBottomSheet = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Broadcast has been received to show bottom sheet.");
+            showBottomSheetForReimbursement();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForStartPayout = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("Dashboard", "Broadcast has been received to start payout.");
+            startPayout();
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiverForCantTakeDown = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("Dashboard", "Broadcast has been received to show cant take down dialog.");
+            showPromptForTakenDown();
+        }
+    };
+
+    //Payout api implementation comes here...
+    private void startPayout(){
+        Advert ad = Variables.adToBeReimbursed;
+        int numberOfUsersWhoDidntSeeAd = ad.getNumberOfUsersToReach()- ad.getNumberOfTimesSeen();
+        double reimbursementTotals = (numberOfUsersWhoDidntSeeAd*ad.getAmountToPayPerTargetedView());
+
+        Toast.makeText(mContext,"payout!",Toast.LENGTH_SHORT).show();
+        String payoutPhoneNumber = Variables.phoneNo;
+        String totalsToReimburse = Double.toString(reimbursementTotals);
+    }
+
+    private void showBottomSheetForReimbursement(){
+        Advert ad = Variables.adToBeReimbursed;
+        int numberOfUsersWhoDidntSeeAd = ad.getNumberOfUsersToReach()- ad.getNumberOfTimesSeen();
+        double reimbursementTotals = (numberOfUsersWhoDidntSeeAd*ad.getAmountToPayPerTargetedView());
+
+        FragmentAdvertiserPayoutBottomsheet fragmentModalBottomSheet = new FragmentAdvertiserPayoutBottomsheet();
+        fragmentModalBottomSheet.setActivity(AdStats.this);
+        fragmentModalBottomSheet.setDetails(reimbursementTotals,Variables.getPassword());
+        fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
+    }
+
+    private void showPromptForTakenDown(){
+        final Dialog d = new Dialog(AdStats.this);
+        d.setTitle("Cannot Put Up.");
+        d.setContentView(R.layout.dialog91);
+        Button b2 =  d.findViewById(R.id.okBtn);
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+        d.show();
     }
 
 }

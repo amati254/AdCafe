@@ -24,7 +24,7 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:text="Choose the category of product you want to advertise to."
+            android:text="Choose the category of product you are advertising."
             android:gravity="center"
             android:layout_marginBottom="15dp"
             android:layout_height="wrap_content" />

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+
+        <!--Card details input part-->
+        <LinearLayout
+                android:orientation="vertical"
+                android:visibility="visible"
+                android:paddingBottom="0dp"
+                android:id="@+id/enterCardDetailsPart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:textSize="25sp"
+                    android:paddingLeft="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:textColor="@color/primary_text"
+                    android:layout_marginTop="20dp"
+                    android:text="Card Details."
+                    android:layout_height="wrap_content" />
+
+                <!--<LinearLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:orientation="horizontal"-->
+                    <!--android:paddingBottom="10dp"-->
+                    <!--android:paddingLeft="20dp"-->
+                    <!--android:layout_height="wrap_content">-->
+
+                    <!--<ImageView-->
+                        <!--android:layout_width="40dp"-->
+                        <!--android:background="@drawable/visa"-->
+                        <!--android:layout_height="30dp" />-->
+
+                    <!--<ImageView-->
+                        <!--android:layout_width="40dp"-->
+                        <!--android:background="@drawable/ms"-->
+                        <!--android:layout_marginLeft="10dp"-->
+                        <!--android:layout_height="30dp" />-->
+
+                <!--</LinearLayout>-->
+
+                <com.braintreepayments.cardform.view.CardForm
+                    android:id="@+id/card_form"
+                    android:padding="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingRight="20dp"
+                    android:paddingLeft="20dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="0dp"
+                    android:layout_height="40dp">
+
+                    <Button
+                        android:id="@+id/cancelBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentLeft="true"
+                        android:background="@null"
+                        android:text="Cancel"
+                        android:textColor="@color/colorPrimary" />
+
+                    <Button
+                        android:id="@+id/continueButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentRight="true"
+                        android:background="@null"
+                        android:text="Continue."
+                        android:textColor="@color/colorPrimary" />
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        <!--Card holder details-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:id="@+id/cardHolderDetailsLayout"
+            android:padding="20dp"
+            android:background="@color/grey"
+            android:visibility="gone"
+            android:translationX="500dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:textSize="25sp"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/primary_text"
+                android:text="CardHolder Details."
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:textSize="16sp"
+                android:text="@string/needUserDetails"
+                android:layout_marginBottom="20dp"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/nameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:hint="Your Name (As Printed On The Card)."
+                android:inputType="textPersonName"
+                android:nextFocusDown="@+id/emailEditText"
+                android:padding="10dp"
+                android:cursorVisible="true"
+                android:layout_marginBottom="10dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/colorAccent"
+                android:textSize="15sp" />
+
+            <EditText
+                android:id="@+id/emailEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:hint="Your Email (me@example.com)."
+                android:inputType="textEmailAddress"
+                android:nextFocusDown="@+id/stateEditText"
+                android:padding="10dp"
+                android:cursorVisible="true"
+                android:layout_marginBottom="10dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/colorAccent"
+                android:textSize="15sp" />
+
+            <EditText
+                android:id="@+id/stateEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:hint="Your State/County."
+                android:inputType="text"
+                android:nextFocusDown="@+id/passwordEditText"
+                android:padding="10dp"
+                android:cursorVisible="true"
+                android:layout_marginBottom="10dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/colorAccent"
+                android:textSize="15sp" />
+
+            <EditText
+                android:id="@+id/phoneEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:hint="Your Phone Number (0722123456)."
+                android:inputType="phone"
+                android:nextFocusDown="@+id/passwordEditText"
+                android:padding="10dp"
+                android:cursorVisible="true"
+                android:layout_marginBottom="10dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/colorAccent"
+                android:textSize="15sp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_marginBottom="10dp"
+                android:layout_height="40dp">
+
+                <Button
+                    android:id="@+id/cancelCHDBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:background="@null"
+                    android:text="Cancel"
+                    android:textColor="@color/colorPrimary" />
+
+                <Button
+                    android:id="@+id/continueCHDBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:background="@null"
+                    android:text="Continue."
+                    android:textColor="@color/colorPrimary" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <!--Confirm details part-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingBottom="10dp"
+            android:id="@+id/confirmLayout"
+            android:translationX="500dp"
+            android:visibility="visible"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:textSize="25sp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
+                android:text="Confirm Everything."
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:text="Make Sure All The Details Are Right Before Continuing."
+                android:paddingBottom="20dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/targetingNumber"
+                android:text="Targeting: 1000 users."
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/date"
+                android:text="Ad Viewing Date: 31:1:2019."
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/category"
+                android:text="Category : Food."
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/userEmail"
+                android:text="Uploader: user@email.com"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/amountToBePaid"
+                android:text="Amount To Be Paid: 5000KSH."
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/cardNumber"
+                android:text="Paying card number: ****6247."
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/transationCost"
+                android:text="Transaction cost: 250Ksh"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingRight="20dp"
+                    android:paddingLeft="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_height="40dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:textSize="17sp"
+                        android:layout_marginTop="10dp"
+                        android:text=""
+                        android:layout_height="wrap_content" />
+
+                    <Button
+                        android:id="@+id/startButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentRight="true"
+                        android:background="@null"
+                        android:text="Pay and Upload."
+                        android:textColor="@color/colorPrimary" />
+
+                </RelativeLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</RelativeLayout>

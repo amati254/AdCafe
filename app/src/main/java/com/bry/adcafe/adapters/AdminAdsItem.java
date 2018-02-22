@@ -66,7 +66,7 @@ public class AdminAdsItem {
         mCategory.setText(String.format("Category : %s", mAdvert.getCategory()));
         mFlagged.setText(String.format("Is Flagged : %s", mAdvert.isFlagged()));
 
-        String ammount = Integer.toString((int)(mAdvert.getNumberOfUsersToReach()*Constants.CONSTANT_AMOUNT_PER_AD));
+        String ammount = Integer.toString((int)(mAdvert.getNumberOfUsersToReach()*mAdvert.getAmountToPayPerTargetedView()));
         mAmountToReimburse.setText(String.format("Reimbursing amount : %s", ammount));
 
         if(mAdvert.isFlagged()) mTakeDown.setText("Put Up.");
