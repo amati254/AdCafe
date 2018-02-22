@@ -1048,12 +1048,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (Variables.mIsLastOrNotLast.equals(Constants.NOT_LAST) ||
                             Variables.mIsLastOrNotLast.equals(Constants.LAST) && Variables.isNormalAdsBeingSeen) {
                         if (!Variables.hasBeenPinned) {
-                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
-                                    Snackbar.LENGTH_SHORT).show();
+                            final Snackbar snackBar = Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.pinning,
+                                    Snackbar.LENGTH_SHORT);
+                            snackBar.setAction("Dismiss", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    snackBar.dismiss();
+                                }
+                            });
+                            snackBar.show();
                             pinAd();
                         } else {
-                            Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
-                                    Snackbar.LENGTH_SHORT).show();
+                            final Snackbar snackBar = Snackbar.make(findViewById(R.id.mainCoordinatorLayout), R.string.hasBeenPinned,
+                                    Snackbar.LENGTH_SHORT);
+                            snackBar.setAction("Dismiss", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    snackBar.dismiss();
+                                }
+                            });
+                            snackBar.show();
                         }
                     } else {
                         Snackbar.make(findViewById(R.id.mainCoordinatorLayout), "You can't pin that..",

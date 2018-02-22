@@ -517,11 +517,17 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         final Dialog d = new Dialog(AdUpload.this);
         d.setTitle("Ad any relevant link.");
         d.setContentView(R.layout.dialog5);
-        Button b2 = (Button) d.findViewById(R.id.buttonOk);
-        final EditText e = (EditText) d.findViewById(R.id.editText);
+        Button b1 = d.findViewById(R.id.cancelBtn);
+        Button b2 =  d.findViewById(R.id.buttonOk);
+        final EditText e =  d.findViewById(R.id.editText);
         if(mLink.equals("none")) e.setText("");
         else e.setText(mLink);
-
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                d.dismiss();
+            }
+        });
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -807,7 +813,11 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
     private void uploadImage(final Bitmap bm) {
 //        String encodedImageToUpload = encodeBitmapForFirebaseStorage(bm);
         uploading = true;
-        mRef6.removeEventListener(chilForRefresh);
+        try{
+            mRef6.removeEventListener(chilForRefresh);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         if(clustersToUpLoadTo.size()>10){
             for(int i = 0; i < 10; i++){
                 String pushId;
@@ -995,12 +1005,12 @@ public class AdUpload extends AppCompatActivity implements NumberPicker.OnValueC
         final Dialog d = new Dialog(AdUpload.this);
         d.setTitle("Upload complete");
         d.setContentView(R.layout.dialog4);
-        Button b2 = (Button) d.findViewById(R.id.buttonOk);
+        Button b2 =  d.findViewById(R.id.buttonOk);
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 d.dismiss();
-                onBackPressed();
+                finish();
             }
         });
         d.show();

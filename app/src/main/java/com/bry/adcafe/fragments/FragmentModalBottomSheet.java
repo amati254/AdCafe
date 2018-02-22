@@ -265,7 +265,7 @@ public class FragmentModalBottomSheet extends BottomSheetDialogFragment {
         String strLastFourDi = card.getCardNumber().length() >= 4 ? card.getCardNumber().substring(card.getCardNumber().length() - 4): "";
 
         targetingView.setText(Html.fromHtml("Targeting : <b>" + Long.toString(mTargetedUsers) + " users.</b>"));
-        dateView.setText(Html.fromHtml("Ad Viewing Date : <b>" + mAdViewingDate + "</b>"));
+        dateView.setText(Html.fromHtml("Ad Viewing Date : <b>" + mAdViewingDate + "</b> (DD/MM/YYYY)"));
         categoryView.setText(Html.fromHtml("Category : <b>" + mCategory + "</b>"));
         userEmailView.setText(Html.fromHtml("Uploader : <b>" + mUploaderEmail + "</b>"));
         amountToBePaidView.setText(Html.fromHtml("Amount To Be Paid: <b>" + mAmountToBePaid + "Ksh.</b>"));
