@@ -17,7 +17,7 @@
             android:layout_marginBottom="10dp"
             android:textColor="@color/primary_text"
             android:layout_marginTop="20dp"
-            android:text="Cant Put Up Ad."
+            android:text="You Cant Put That Up."
             android:layout_height="wrap_content" />
 
         <TextView

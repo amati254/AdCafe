@@ -83,6 +83,13 @@
                 android:padding="20dp"
                 android:text="Choose the amount you wish to charge for each banner you see." />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/cuurentCPV"
+                android:paddingLeft="20dp"
+                android:text="Current charge : 3Ksh"
+                android:layout_height="wrap_content" />
+
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"

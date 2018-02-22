@@ -17,9 +17,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bry.adcafe.R;
+import com.bry.adcafe.Variables;
 import com.bry.adcafe.services.DatabaseManager;
 import com.bry.adcafe.ui.Dashboard;
 
@@ -53,6 +55,8 @@ public class ChangeCPVFragment extends DialogFragment implements View.OnClickLis
 
         mainLayout = (LinearLayout) rootView.findViewById(R.id.mainLayout);
         chooseAmountLayout = (LinearLayout) rootView.findViewById(R.id.chooseAmountLayout);
+        TextView currentCpv = rootView.findViewById(R.id.cuurentCPV);
+        currentCpv.setText("Current charge : "+ Variables.constantAmountPerView+"Ksh.");
         onclicks();
         return rootView;
     }
