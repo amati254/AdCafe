@@ -48,10 +48,6 @@ public class ViewImageFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_view_image_dialog, container, false);
-//        int bottomMargin = Utils.dpToPx(70);
-//        int width =  (Variables.windowSize.x)-10;
-//        int height = (Variables.windowSize.y-bottomMargin);
-//        getDialog().getWindow().setLayout(width, height);
 
         mBackButton = (ImageButton) rootView.findViewById(R.id.backBtn);
         mShareButton = (ImageButton) rootView.findViewById(R.id.shareBtn);

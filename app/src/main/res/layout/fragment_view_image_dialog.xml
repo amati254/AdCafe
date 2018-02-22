@@ -21,6 +21,7 @@
         android:layout_height="70dp"
         android:gravity="center"
         android:paddingBottom="7dp"
+        android:layout_marginRight="10dp"
         android:id="@+id/bottomNavButtons"
         android:orientation="horizontal"
         android:layout_gravity="bottom">
