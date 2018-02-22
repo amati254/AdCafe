@@ -125,8 +125,11 @@ public class AlarmReceiver1 extends BroadcastReceiver {
                     Subscriptions.put(category,cluster);
 //                    checkInForEachCategory(category,cluster);
                 }
-                numberOfSubsFromFirebase = Subscriptions.size();
-                checkNumberForEach();
+                DataSnapshot isNeedToResetSubsSnap = dataSnapshot.child(Constants.RESET_ALL_SUBS_BOOLEAN);
+                if(!isNeedToResetSubsSnap.getValue(Boolean.class)) {
+                    numberOfSubsFromFirebase = Subscriptions.size();
+                    checkNumberForEach();
+                }
             }
 
             @Override

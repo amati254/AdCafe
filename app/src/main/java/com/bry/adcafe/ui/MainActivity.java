@@ -1143,7 +1143,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 Snackbar.LENGTH_SHORT).show();
                     } else {
                         Variables.adToBeShared = Variables.getCurrentAdvert();
-                        isStoragePermissionGranted();
+                        try{
+                            isStoragePermissionGranted();
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                     }
                 }
             });

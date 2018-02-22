@@ -564,6 +564,14 @@ public class Dashboard extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver mMessageReceiverForResetPasswod = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("Dashboard", "Broadcast has been received reset password.");
+//            showDialogForResetPassword();
+        }
+    };
+
 
     //Payout api implementation comes here...
     private void startPayout(){
@@ -648,6 +656,28 @@ public class Dashboard extends AppCompatActivity {
         SharedPreferences.Editor editor6 = pref6.edit();
         editor6.clear();
         editor6.apply();
+    }
+
+
+    private void showDialogForResetPassword(){
+        final Dialog d = new Dialog(Dashboard.this);
+        d.setTitle("Password reset.");
+        d.setContentView(R.layout.dialog92);
+        Button b2 =  d.findViewById(R.id.continueBtn);
+        Button b1 = d.findViewById(R.id.cancelBtn);
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        d.show();
     }
 
 

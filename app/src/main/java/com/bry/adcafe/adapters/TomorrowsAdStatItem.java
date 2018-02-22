@@ -147,7 +147,8 @@ public class TomorrowsAdStatItem {
                 Variables.areYouSureTakeDownText = "Are you sure you want to put back up your ad?";
             }
         }else{
-            Toast.makeText(mContext,"You can't put back up your ad, it was taken down by the admin.",Toast.LENGTH_SHORT).show();
+            LocalBroadcastManager.getInstance(mContext).sendBroadcast(new Intent("CANT_TAKE_DOWN_AD"));
+//            Toast.makeText(mContext,"You can't put back up your ad, it was taken down by the admin.",Toast.LENGTH_SHORT).show();
         }
     }
 

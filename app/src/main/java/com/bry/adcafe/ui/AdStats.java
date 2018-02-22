@@ -1,5 +1,6 @@
 package com.bry.adcafe.ui;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -108,12 +110,16 @@ public class AdStats extends AppCompatActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForShowBottomSheet,
                 new IntentFilter("START_ADVERTISER_PAYOUT"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverForCantTakeDown,
+                new IntentFilter("CANT_TAKE_DOWN_AD"));
     }
 
     private void unregisterReceivers(){
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForTakeDownAd);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForStartPayout);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForShowBottomSheet);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiverForCantTakeDown);
 
         Intent intent = new Intent("REMOVE-LISTENERS");
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -595,6 +601,14 @@ public class AdStats extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver mMessageReceiverForCantTakeDown = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("Dashboard", "Broadcast has been received to show cant take down dialog.");
+            showPromptForTakenDown();
+        }
+    };
+
     //Payout api implementation comes here...
     private void startPayout(){
         Advert ad = Variables.adToBeReimbursed;
@@ -615,6 +629,20 @@ public class AdStats extends AppCompatActivity {
         fragmentModalBottomSheet.setActivity(AdStats.this);
         fragmentModalBottomSheet.setDetails(reimbursementTotals,Variables.getPassword());
         fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
+    }
+
+    private void showPromptForTakenDown(){
+        final Dialog d = new Dialog(AdStats.this);
+        d.setTitle("Cannot Put Up.");
+        d.setContentView(R.layout.dialog91);
+        Button b2 =  d.findViewById(R.id.okBtn);
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        });
+        d.show();
     }
 
 }
